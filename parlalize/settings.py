@@ -87,7 +87,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'HOST': 'localhost',
-        'NAME': 'p2',
+        'NAME': 'parlalize',
         'USER': 'parladaddy',
         'PASSWORD': 'razvrat',
     }
