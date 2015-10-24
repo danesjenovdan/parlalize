@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'parlalize.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': 'localhost',
+        'HOST': '192.168.110.31',
         'NAME': 'parlalize',
         'USER': 'parladaddy',
         'PASSWORD': 'razvrat',
@@ -112,6 +112,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/home/parladaddy/parlalize/static/'
 
 
 LAST_ACTIVITY_COUNT = 10
@@ -131,7 +132,7 @@ if DEVELOPMENT:
 else:
     API_URL = "http://data.parlameter.si/v1"
 
-BASE_URL = "http://localhost:8080"
+BASE_URL = 'http://analize.parlameter.si/'
 
 
 LOGGING = {
