@@ -27,9 +27,11 @@ def getLogicVotes():
     for person_id in votes.keys():
         for vote in pl_votes:
             try:
-                votes[person_id][vote.id_parladata] = VOTE_MAP[votes[person_id][vote.id_parladata]]
+                votes[str(person_id)][str(vote.id_parladata)] = VOTE_MAP[votes[str(person_id)][str(vote.id_parladata)]]
             except:
-                votes[person_id][vote.id_parladata] = VOTE_MAP['ni_poslanec']
+                if type(votes[str(person_id)]) == list:
+                    votes[str(person_id)] = {}
+                votes[str(person_id)][str(vote.id_parladata)] = VOTE_MAP['ni_poslanec']
 
     return votes
 
