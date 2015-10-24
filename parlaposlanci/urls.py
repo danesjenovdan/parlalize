@@ -1,7 +1,6 @@
 from django.conf.urls import patterns, include, url
 from parlaposlanci.views import *
 
-
 urlpatterns = patterns(
     '',
 #   url(r'^getMPsList/', getMPsList),

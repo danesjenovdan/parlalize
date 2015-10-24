@@ -132,7 +132,7 @@ if DEVELOPMENT:
 else:
     API_URL = "http://data.parlameter.si/v1"
 
-BASE_URL = 'http://analize.parlameter.si/'
+BASE_URL = 'http://analize.parlameter.si/v1'
 
 
 LOGGING = {
