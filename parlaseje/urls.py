@@ -5,4 +5,8 @@ from parlaseje.views import *
 urlpatterns = patterns(
 	url(r'^getSpeech/(?P<speech_id>\d+)', getSpeech),
 	url(r'^setAllSessions/', setAllSessions),
+    url(r'^setMotionOfSession/(?P<id_se>\d+)', setMotionOfSession),
+    url(r'^getMotionOfSession/(?P<id_se>\d+)', getMotionOfSession),
+    url(r'^getMotionGraph/(?P<id_se>\d+)', getMotionGraph),
+
 )

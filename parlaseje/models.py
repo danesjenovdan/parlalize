@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 #from parlaposlanci.models import *
-
+from jsonfield import JSONField
 from behaviors.models import Timestampable
 
 # converting datetime to popolo
@@ -132,9 +132,31 @@ class Vote(Timestampable, models.Model):
     motion = models.TextField(blank=True, null=True,
                               help_text='The motion for which the vote took place')
 
-    organization = models.ForeignKey('parlaskupine.Organization',
-                                     blank=True, null=True,
-                                     help_text='The organization whose members are voting')
+    votes_for = models.IntegerField(blank=True, null=True,
+                                   help_text='Number of votes for')
+
+    against = models.IntegerField(blank=True, null=True,
+                                   help_text='Number votes againt')
+
+    abstain = models.IntegerField(blank=True, null=True,
+                                   help_text='Number votes abstain')
+
+    not_present = models.IntegerField(blank=True, null=True,
+                                   help_text='Number of MPs that warent on the session')
+
+    result = models.CharField(blank=True, null=True,
+                              max_length=255,
+                              help_text='The result of the vote')
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                            blank=True, null=True,help_text=_('id parladata'))
+
+
+class Vote_graph(Timestampable, models.Model):
+
+    motion = models.TextField(blank=True, null=True,
+                              help_text='The motion for which the vote took place')
+
 
     votes_for = models.IntegerField(blank=True, null=True,
                                    help_text='Number of votes for')
@@ -155,5 +177,13 @@ class Vote(Timestampable, models.Model):
     id_parladata = models.IntegerField(_('parladata id'),
                             blank=True, null=True,help_text=_('id parladata'))
 
-    start_time = PopoloDateTimeField(blank=True, null=True,
-                                 help_text='Start time')
+    pgs_yes = JSONField(blank=True, null=True)
+    pgs_no = JSONField(blank=True, null=True)
+    pgs_np = JSONField(blank=True, null=True)
+    pgs_kvor = JSONField(blank=True, null=True)
+
+    mp_yes = JSONField(blank=True, null=True)
+    mp_no = JSONField(blank=True, null=True)
+    mp_np = JSONField(blank=True, null=True)
+    mp_kvor = JSONField(blank=True, null=True)
+           
