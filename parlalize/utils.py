@@ -214,15 +214,21 @@ def updateVotes():
 
 
 def update():
+    
     updateOrganizations()
     print "org"
+    
     updatePeople()
     print "pep"
+    
     result = requests.get(BASE_URL+'/s/setAllSessions/')
     print result
+    
     updateSpeeches()
     print "speeches"
-    #updateVotes()
+    
+    #updateVotes() TODO JURIĆ'S UPDATE VOTES -> pokliči setMotionOfSession za vsako sejo
     print "votes"
+    
     updateBallots()
     print "ballots"
