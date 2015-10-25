@@ -16,7 +16,7 @@ setters = (
 #    BASE_URL+'/p/setVocabularySize/',
 #    BASE_URL+'/p/setLastActivity/',
 #     BASE_URL+'/p/setCutVotes/',
-     BASE_URL+'/p/setAverageNumberOfSpeechesPerSession/'
+     BASE_URL+'/p/setAverageNumberOfSpeechesPerSession/',
 )
 
 
@@ -36,7 +36,7 @@ def getIDs():
 def runMPs():
     IDs = getIDs()
     print IDs
-
+    
     for ID in IDs:
         for setter in setters:
             print setter + str(ID)
