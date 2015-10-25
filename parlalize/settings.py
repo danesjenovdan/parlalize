@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+import raven
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -45,6 +47,7 @@ INSTALLED_APPS = (
     'parlaskupine',
     'parlaseje',
     'django_extensions',
+    'raven.contrib.django.raven_compat',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -152,4 +155,11 @@ LOGGING = {
             'propagate': True,
         },
     },
+}
+
+RAVEN_CONFIG = {
+    'dsn': 'http://4e425a27eba144b8938f588f3a60662b:cf6ef8ba155b4d8da53ca4dea6cf074e@sentry.ilol.si/41',
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+#    'release': raven.fetch_git_sha(os.path.dirname(__file__)),
 }

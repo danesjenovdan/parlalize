@@ -115,28 +115,34 @@ def getPercentOFAttendedSession(request, person_id, date=None):
 
 #Saves to DB number of spoken word of MP and maximum and average of spoken words
 def setNumberOfSpokenWordsALL(request):
+    print '[INFO] Getting MPs'
     mps = requests.get(API_URL+'/getMPs/').json()
 
     mp_results = []
 
     for mp in mps:
+        print '[INFO] Pasting speeches for MP ' + str(mp['id'])
         speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id'])).json()
 
         text = ''.join([speech['content'] for speech in speeches])
 
         mp_results.append({'person_id': mp['id'], 'wordcount': numberOfWords(text)})
 
+    print '[INFO] Sorting MPs'
     mps_sorted = sorted(mp_results, key=lambda k: k['wordcount'])
 
+    print '[INFO] Getting all speeches'
     all_speeches = requests.get(API_URL+'/getAllSpeeches/').json()
+    print '[INFO] Joining all speeches'
     text = ''.join([speech['content'] for speech in all_speeches])
 
+    print '[INFO] Calculating total words'
     total_words = numberOfWords(text)
+    print '[INFO] Calculating average words'
     average_words = total_words/len(mps)
 
     for result in mp_results:
-        print result
-        print '##################'
+        print '[INFO] Saving or updating MP\'s results'
         print saveOrAbort(model=SpokenWords, person=Person.objects.get(id_parladata=int(result['person_id'])), score=int(result['wordcount']), maxMP=Person.objects.get(id_parladata=int(mps_sorted[-1]['person_id'])), average=average_words, maximum=mps_sorted[-1]['wordcount'])
 
     return HttpResponse('All iz well')
