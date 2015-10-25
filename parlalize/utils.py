@@ -124,17 +124,31 @@ def getPersonCardModel(model, id, date=None):
 
 def updatePeople():
     data = requests.get(API_URL+'/getAllPeople/').json()
+    mps = requests.get(API_URL+'/getMPs/').json()
+    mps_ids = [mp['id'] for mp in mps]
     for mp in data:
-        person = saveOrAbort(Person, name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if mp['active'] == "TRUE" else False)
+        if Person.objects.filter(id_parladata=mp['id']):
+            person = Person.objects.get(id_parladata=mp['id'])
+            person.name = mp['name']
+            person.pg = mp['membership']
+            person.id_parladata = int(mp['id'])
+            person.image = mp['image']
+            person.actived = True if int(mp['id']) in mps_ids else False
+            person.save()
+        else:
+            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if int(mp['id']) in mps_ids else False)
+            person.save()
 
     return 1
 
 
 def getPGCardModel(model, id, date=None):
     if date:
-        modelObject = model.objects.filter(organization__id_parladata=id, created_at__lte=datetime.strptime(date, '%d.%m.%Y'))
+        modelObject = model.objects.filter(organization__id_parladata=id,
+                                           created_at__lte=datetime.strptime(date, '%d.%m.%Y'))
     else:
-        modelObject = model.objects.filter(organization__id_parladata=id, created_at__lte=datetime.now())
+        modelObject = model.objects.filter(organization__id_parladata=id,
+                                           created_at__lte=datetime.now())
     if not modelObject:
         raise Http404("Nismo našli kartice")
     else:
@@ -145,37 +159,58 @@ def getPGCardModel(model, id, date=None):
 def updateOrganizations():
     data = requests.get(API_URL+'/getAllOrganizations').json()
     for pg in data:
-        organization = saveOrAbort(Organization, name=data[pg]['name'], classification=data[pg]['classification'], id_parladata=pg)
+        if Organization.objects.filter(id_parladata=pg['id']):
+            org = Organization.objects.get(id_parladata=pg['id'])
+            org.name = data[pg]['name']
+            org.classification = data[pg]['classification']
+        else:
+            org = Organization(name=data[pg]['name'],
+                               classification=data[pg]['classification'],
+                               id_parladata=pg)
+            org.save()
     return 1
 
 
 def updateSpeeches():
     data = requests.get(API_URL+'/getAllSpeeches').json()
+    existingISs = Speech.objects.all().values_list("id_parladata", flat=True)
     for dic in data:
-        peeches = saveOrAbort(Speech, person=Person.objects.get(id_parladata=int(dic['speaker'])), organization=Organization.objects.get(id_parladata=int(dic['party'])), content=dic['content'], order=dic['order'], session=Session.objects.get(id_parladata=int(dic['session'])), start_time=dic['start_time'], end_time=dic['end_time'], id_parladata = dic['id'])
+        if int(dic["id"]) not in existingISs:
+            print "adding speech"
+            speech = Speech(person=Person.objects.get(id_parladata=int(dic['speaker'])),
+                            organization=Organization.objects.get(id_parladata=int(dic['party'])),
+                            content=dic['content'], order=dic['order'],
+                            session=Session.objects.get(id_parladata=int(dic['session'])),
+                            start_time=dic['start_time'],
+                            end_time=dic['end_time'],
+                            id_parladata=dic['id'])
+            speech.save()
     return 1
 
 
 def updateBallots():
     data = requests.get(API_URL+'/getAllBallots').json()
+    existingISs = Ballot.objects.all().values_list("id_parladata", flat=True)
     for dic in data:
-        vote = Vote.objects.get(id_parladata=dic['vote'])
-        ballots = saveOrAbort(Ballot,
-                              person=Person.objects.get(id_parladata=int(dic['voter'])),
-                              option=dic['option'],
-                              vote=vote,
-                              start_time=vote.start_time,
-                              end_time=None,
-                              id_parladata=dic['id'])
+        if int(dic["id"]) not in existingISs:#Ballot.objects.filter(id_parladata=dic['id']):
+            print "adding ballot"
+            vote = Vote.objects.get(id_parladata=dic['vote'])
+            ballots = Ballot(person=Person.objects.get(id_parladata=int(dic['voter'])),
+                             option=dic['option'],
+                             vote=vote,
+                             start_time=vote.start_time,
+                             end_time=None,
+                             id_parladata=dic['id'])
+            ballots.save()
     return 1
 
-
+"""
 def updateVotes():
     data = requests.get(API_URL+'/getAllVotes').json()
     for dic in data:
         print dic['session'], dic['motion']
         speeches = saveOrAbort(Vote, session=Session.objects.get(id_parladata=int(dic['session'])), motion=dic['motion'], organization=Organization.objects.get(id_parladata=int(dic['party'])), id_parladata=dic['id'], result=dic['result'], start_time=dic['start_time'])
-    return 1
+    return 1"""
 
 
 def update():
@@ -187,7 +222,7 @@ def update():
     print result
     updateSpeeches()
     print "speeches"
-    updateVotes()
+    #updateVotes()
     print "votes"
     updateBallots()
     print "ballots"
