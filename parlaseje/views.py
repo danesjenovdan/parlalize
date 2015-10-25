@@ -14,14 +14,14 @@ from parlalize.settings import API_URL
 def setAllSessions(request):
     data  = requests.get(API_URL+'/getSessions/').json()
     for sessions in data:
-        result = saveOrAbort(model=Session,
-                             name=sessions['name'],
-                            gov_id=sessions['gov_id'],
-                            start_time=sessions['start_time'],
-                            end_time=sessions['end_time'],
-                            classification=sessions['classification'],
-                            id_parladata=sessions['id']
-                            )
+        if not Session.objects.filter(id_parladata=sessions['id']):
+            result = Session(name=sessions['name'],
+                             gov_id=sessions['gov_id'],
+                             start_time=sessions['start_time'],
+                             end_time=sessions['end_time'],
+                             classification=sessions['classification'],
+                             id_parladata=sessions['id'])
+            result.save()
 
     return JsonResponse({'alliswell': True})
 
