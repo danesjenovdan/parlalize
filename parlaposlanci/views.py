@@ -476,7 +476,6 @@ def setCutVotes(request, person_id):
 	members = {str(mp['id']):mp for mp in json.loads(memList.content)}
 
 	votes_count = len(Vote.objects.all())
-	votes_count=len(votes[person_id])
 
 	out = dict()
 	out["for"] = dict()
