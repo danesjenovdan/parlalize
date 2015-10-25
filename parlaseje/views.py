@@ -148,7 +148,7 @@ def getMotionOfSession(request, id_se):
         'session': {
 
             'name': Session.objects.get(id_parladata=int(id_se)).name,
-            'date': Session.objects.get(id_parladata=int(id_se)).date,
+            'date': Session.objects.get(id_parladata=int(id_se)).start_time.date(),
             'id': int(id_se)
         },
         'results': {
