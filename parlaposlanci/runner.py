@@ -8,14 +8,14 @@ logger = logging.getLogger(__name__)
 setters = (
 #    BASE_URL+'/p/setMPStatic/',
 #    BASE_URL+'/p/setMostEqualVoters/',
-     BASE_URL+'/p/setLeastEqualVoters/',
+#     BASE_URL+'/p/setLeastEqualVoters/',
 #    BASE_URL+'/p/setTFIDF/',
 #    BASE_URL+'/p/setPresence/',
 #    BASE_URL+'/p/setStyleScores/',
 #    BASE_URL+'/p/setAverageNumberOfSpeechesPerSession/',
 #    BASE_URL+'/p/setVocabularySize/',
 #    BASE_URL+'/p/setLastActivity/',
-#    BASE_URL+'/p/setCutVotes/',
+     BASE_URL+'/p/setCutVotes/',
 )
 
 
@@ -46,7 +46,7 @@ def runMPs():
             #else:
             #    logger.error(setter + str(ID) + ' ERROR: ' + str(result))
 
-    result = requests.get(BASE_URL+'/p/setNumberOfSpokenWordsALL/',).status_code
+#    result = requests.get(BASE_URL+'/p/setNumberOfSpokenWordsALL/',).status_code
 
     #if result == 200:
     #    logger.info(setter + str(ID) + ' ALL OK')
