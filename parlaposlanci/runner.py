@@ -6,15 +6,15 @@ from parlalize.utils import update
 logger = logging.getLogger(__name__)
 
 setters = (
-    BASE_URL+'/p/setMPStatic/',
-    #BASE_URL+'/p/setMostEqualVoters/',
-    #BASE_URL+'/p/setTFIDF/',
-    BASE_URL+'/p/setPresence/',
-    #BASE_URL+'/p/setStyleScores/',
-    #BASE_URL+'/p/setAverageNumberOfSpeechesPerSession/',
-    #BASE_URL+'/p/setVocabularySize/',
-    BASE_URL+'/p/setLastActivity/',
-    BASE_URL+'/p/setCutVotes/',
+#    BASE_URL+'/p/setMPStatic/',
+#    BASE_URL+'/p/setMostEqualVoters/',
+#    BASE_URL+'/p/setTFIDF/',
+#    BASE_URL+'/p/setPresence/',
+#    BASE_URL+'/p/setStyleScores/',
+#    BASE_URL+'/p/setAverageNumberOfSpeechesPerSession/',
+#    BASE_URL+'/p/setVocabularySize/',
+#    BASE_URL+'/p/setLastActivity/',
+#    BASE_URL+'/p/setCutVotes/',
 )
 
 
