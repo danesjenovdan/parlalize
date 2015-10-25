@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 setters = (
 #    BASE_URL+'/p/setMPStatic/',
 #    BASE_URL+'/p/setMostEqualVoters/',
+     BASE_URL+'/p/setLeastEqualVoters/',
 #    BASE_URL+'/p/setTFIDF/',
 #    BASE_URL+'/p/setPresence/',
 #    BASE_URL+'/p/setStyleScores/',
