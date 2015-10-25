@@ -72,7 +72,10 @@ def voteAbstain(vote):
 
 
 def normalize(val, max):
-    return round((val*100)/float(max))
+    try:
+        return round((val*100)/float(max))
+    except:
+        return val
 
 
 #checks if cards with the data exists or not
