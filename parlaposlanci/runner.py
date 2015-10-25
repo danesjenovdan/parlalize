@@ -15,7 +15,8 @@ setters = (
 #    BASE_URL+'/p/setAverageNumberOfSpeechesPerSession/',
 #    BASE_URL+'/p/setVocabularySize/',
 #    BASE_URL+'/p/setLastActivity/',
-     BASE_URL+'/p/setCutVotes/',
+#     BASE_URL+'/p/setCutVotes/',
+     BASE_URL+'/p/setAverageNumberOfSpeechesPerSession/'
 )
 
 
