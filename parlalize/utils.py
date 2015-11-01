@@ -204,13 +204,13 @@ def updateBallots():
             ballots.save()
     return 1
 
-"""
-def updateVotes():
-    data = requests.get(API_URL+'/getAllVotes').json()
-    for dic in data:
-        print dic['session'], dic['motion']
-        speeches = saveOrAbort(Vote, session=Session.objects.get(id_parladata=int(dic['session'])), motion=dic['motion'], organization=Organization.objects.get(id_parladata=int(dic['party'])), id_parladata=dic['id'], result=dic['result'], start_time=dic['start_time'])
-    return 1"""
+
+#def updateVotes():
+#    data = requests.get(API_URL+'/getAllVotes').json()
+#    for dic in data:
+#        print dic['session'], dic['motion']
+#        speeches = saveOrAbort(Vote, session=Session.objects.get(id_parladata=int(dic['session'])), motion=dic['motion'], organization=Organization.objects.get(id_parladata=int(dic['party'])), id_parladata=dic['id'], result=dic['result'], start_time=dic['start_time'])
+#    return 1
 
 
 def update():
