@@ -847,7 +847,7 @@ def setAverageNumberOfSpeechesPerSession(request, person_id):
     speeches = requests.get(API_URL+'/getSpeechesOfMP/' + person_id).json()
     no_of_speeches = len(speeches)
 
-    no_of_sessions = len(requests.get(API_URL+'/getSessions/').json()) # TODO
+    no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + person_id).json()['sessions_with_speech']
 
     score = no_of_speeches/no_of_sessions
 
@@ -857,7 +857,7 @@ def setAverageNumberOfSpeechesPerSession(request, person_id):
     for mp in mps:
         mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
         
-        mp_no_of_sessions = no_of_sessions # TODO
+        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
 
         mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
 
