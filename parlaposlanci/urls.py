@@ -13,6 +13,7 @@ urlpatterns = patterns(
     url(r'^setPresence/(?P<person_id>\d+)', setPercentOFAttendedSession),
     url(r'^setStyleScores/(?P<person_id>\d+)', setStyleScores),
     url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
+    url(r'^setAverageNumberOfSpeechesPerSessionAll/', setAverageNumberOfSpeechesPerSessionAll),
     url(r'^setVocabularySize/(?P<person_id>\d+)', setVocabularySize),
     url(r'^setLastActivity/(?P<person_id>\d+)', setLastActivity),
     url(r'^setNumberOfSpokenWordsALL/', setNumberOfSpokenWordsALL),
