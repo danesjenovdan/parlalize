@@ -870,6 +870,41 @@ def setAverageNumberOfSpeechesPerSession(request, person_id):
 
     return HttpResponse('All iz well')
 
+def setAverageNumberOfSpeechesPerSessionAll(request):
+
+    mps = requests.get(API_URL+'/getMPs/').json()
+    mp_scores = []
+
+    for mp in mps:
+        mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
+        
+        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
+
+        if mp_no_of_sessions > 0:
+            mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
+        else:
+            mp_scores.append({'id': mp['id'], 'score': 0})
+
+
+    mp_scores_sorted = sorted(mp_scores, key=lambda k: k['score'])
+
+    average = sum([mp['score'] for mp in mp_scores])/len(mp_scores)
+    
+    for mp in mp_scores_sorted:
+        person = Person.objects.get(id_parladata=int(mp['id']))
+        score = mp['score']
+            
+
+        saveOrAbort(
+            model=AverageNumberOfSpeechesPerSession,
+            person=person,
+            score=score,
+            average=average,
+            maximum=mp_scores_sorted[-1]['score'],
+            maxMP=Person.objects.get(id_parladata=int(mp_scores_sorted[-1]['id'])))
+
+    return HttpResponse('All iz well')
+
 def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
     card = getPersonCardModel(AverageNumberOfSpeechesPerSession, person_id, date)
