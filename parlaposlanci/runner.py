@@ -15,9 +15,12 @@ setters = (
 #    BASE_URL+'/p/setAverageNumberOfSpeechesPerSession/',
 #    BASE_URL+'/p/setVocabularySize/',
 #    BASE_URL+'/p/setLastActivity/',
-     BASE_URL+'/p/setCutVotes/',
+#     BASE_URL+'/p/setCutVotes/',
 )
 
+allsetters = (
+    BASE_URL + '/p/setAverageNumberOfWordsPerSessionAll',
+)
 
 # get all parliament member ID's
 def getIDs():
@@ -33,9 +36,13 @@ def getIDs():
 
 
 def runMPs():
+    for setter in allsetters:
+        print setter
+#        result = requests.get(setter).status_code
+    
     IDs = getIDs()
     print IDs
-
+    
     for ID in IDs:
         for setter in setters:
             print setter + str(ID)

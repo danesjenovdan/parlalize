@@ -881,41 +881,11 @@ def getVocabularySize(request, person_id, date=None):
 
 def setAverageNumberOfSpeechesPerSession(request, person_id):
 
-    mps = requests.get(API_URL+'/getMPs/').json()
-
-    numbers_of_speeches = []
-    result = []
-
-    number_of_sessions = len(requests.get(API_URL+'/getSessions/').json())
-
-    for mp in mps:
-
-        mp_speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id'])).json()
-
-        if str(mp['id']) == person_id:
-            result.append({'person_id': mp['id'], 'avg_speeches_per_session': len(mp_speeches)/number_of_sessions})
-
-        numbers_of_speeches.append({'person_id': mp['id'], 'avg_speeches_per_session': float(len(mp_speeches))/float(number_of_sessions)})
-
-    numbers_sorted = sorted(numbers_of_speeches, key=lambda k: k['avg_speeches_per_session'])
-
-    result.append({'person_id': numbers_sorted[-1]['person_id'], 'avg_speeches_per_session': numbers_sorted[-1]['person_id']})
-
-    scores = [person['avg_speeches_per_session'] for person in numbers_sorted]
-
-    result.append({'person_id': 'average', 'avg_speeches_per_session': float(sum(scores))/float(len(scores))})
-
-    result_ = saveOrAbort(model=NumberOfSpeechesPerSession, person=Person.objects.get(id_parladata=int(person_id)), person_value=result[0]['avg_speeches_per_session'], maxMP=Person.objects.get(id_parladata=int(result[1]['person_id'])), average=result[2]['avg_speeches_per_session'], maximum=result[1]['avg_speeches_per_session'])
-
-    return JsonResponse(result, safe=False)
-
-def setAverageNumberOfSpeechesPerSession(request, person_id):
-
     person = Person.objects.get(id_parladata=int(person_id))
     speeches = requests.get(API_URL+'/getSpeechesOfMP/' + person_id).json()
     no_of_speeches = len(speeches)
 
-    no_of_sessions = 12 # TODO
+    no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + person_id).json()['sessions_with_speech']
 
     score = no_of_speeches/no_of_sessions
 
@@ -924,8 +894,8 @@ def setAverageNumberOfSpeechesPerSession(request, person_id):
 
     for mp in mps:
         mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
-
-        mp_no_of_sessions = 12 # TODO
+        
+        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
 
         mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
 
@@ -935,6 +905,41 @@ def setAverageNumberOfSpeechesPerSession(request, person_id):
     average = sum([mp['score'] for mp in mp_scores])/len(mp_scores)
 
     saveOrAbort(model=AverageNumberOfSpeechesPerSession, person=person, score=score, average=average, maximum=mp_scores_sorted[-1]['score'], maxMP=Person.objects.get(id_parladata=int(mp['id'])))
+
+    return HttpResponse('All iz well')
+
+def setAverageNumberOfSpeechesPerSessionAll(request):
+
+    mps = requests.get(API_URL+'/getMPs/').json()
+    mp_scores = []
+
+    for mp in mps:
+        mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
+        
+        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
+
+        if mp_no_of_sessions > 0:
+            mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
+        else:
+            mp_scores.append({'id': mp['id'], 'score': 0})
+
+
+    mp_scores_sorted = sorted(mp_scores, key=lambda k: k['score'])
+
+    average = sum([mp['score'] for mp in mp_scores])/len(mp_scores)
+    
+    for mp in mp_scores_sorted:
+        person = Person.objects.get(id_parladata=int(mp['id']))
+        score = mp['score']
+            
+
+        saveOrAbort(
+            model=AverageNumberOfSpeechesPerSession,
+            person=person,
+            score=score,
+            average=average,
+            maximum=mp_scores_sorted[-1]['score'],
+            maxMP=Person.objects.get(id_parladata=int(mp_scores_sorted[-1]['id'])))
 
     return HttpResponse('All iz well')
 
