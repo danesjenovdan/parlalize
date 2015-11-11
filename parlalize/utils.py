@@ -36,6 +36,22 @@ def getLogicVotes():
     return votes
 
 
+def getVotes():
+    r = requests.get(API_URL+'/getVotes/')
+    pl_votes = Vote.objects.all()
+    votes = r.json()
+    for person_id in votes.keys():
+        for vote in pl_votes:
+            try:
+                if not votes[str(person_id)][str(vote.id_parladata)]:
+                    print "bu"
+            except:
+                if type(votes[str(person_id)]) == list:
+                    votes[str(person_id)] = {}
+                votes[str(person_id)][str(vote.id_parladata)] = 'ni_poslanec'
+    return votes
+
+
 def votesToLogical(votes, length):
     maxVotes = length
     for key in votes.keys():
@@ -65,6 +81,13 @@ def voteAgainst(vote):
 
 
 def voteAbstain(vote):
+    if vote == "kvorum":
+        return 1
+    else:
+        return 0
+
+
+def voteAbsent(vote):
     if vote == "ni":
         return 1
     else:
