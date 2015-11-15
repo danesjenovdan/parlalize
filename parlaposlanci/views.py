@@ -818,6 +818,57 @@ def getTFIDF(request, person_id, date=None):
 
     return JsonResponse(out)
 
+def setVocabularySizeALL(request):
+
+#    thisperson = Person.objects.get(id_parladata=int(person_id))
+
+    mps = requests.get(API_URL+'/getMPs/').json()
+
+    vocabulary_sizes = []
+    result = {}
+
+    for mp in mps:
+
+        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id'])).json()
+
+        text = ''.join([speech['content'] for speech in speeches])
+
+        vocabulary_sizes.append({'person_id': mp['id'], 'vocabulary_size': len(countWords(text, Counter()))})
+
+#        if int(mp['id']) == int(person_id):
+#            result['person'] = len(countWords(text, Counter()))
+
+    vocabularies_sorted = sorted(vocabulary_sizes, key=lambda k: k['vocabulary_size'])
+
+    scores = [person['vocabulary_size'] for person in vocabulary_sizes]
+
+    result['average'] = float(sum(scores))/float(len(scores))
+
+    result['max'] = vocabularies_sorted[-1]['vocabulary_size']
+    maxMP = Person.objects.get(id_parladata=vocabularies_sorted[-1]['person_id'])
+
+#    result.append({'person_id': vocabularies_sorted[-1]['person_id'], 'vocabulary_size': vocabularies_sorted[-1]['vocabulary_size']})
+
+    for p in vocabularies_sorted:
+        saveOrAbort(
+            VocabularySize,
+            person=Person.objects.get(id_parladata=int(p['person_id'])),
+            score=[v['vocabulary_size'] for v in vocabularies_sorted if v['person_id'] == p['person_id']][0],
+            maxMP=maxMP,
+            average=result['average'],
+            maximum=result['max'])
+    
+    return HttpResponse('All MPs updated.')
+
+#    if saveOrAbort(VocabularySize, person=thisperson, score=result['person'], maxMP=maxMP, average=result['average'], maximum=result['max']):
+#        return HttpResponse('All iz well')
+#    else:
+#        return HttpResponse('All was well')
+#
+#    result_ = saveOrAbort(model=VocabularySize, person=Person.objects.get(id_parladata=int(person_id)), this_person=result[0]['vocabulary_size'], maxMP=Person.objects.get(id_parladata=int(vocabularies_sorted[-1]['person_id'])), average=float(sum(scores))/float(len(scores)), maximum=vocabularies_sorted[-1]['vocabulary_size'])
+#
+#    return JsonResponse(result, safe=False)
+
 def setVocabularySize(request, person_id):
 
     thisperson = Person.objects.get(id_parladata=int(person_id))
@@ -849,6 +900,17 @@ def setVocabularySize(request, person_id):
 
 #    result.append({'person_id': vocabularies_sorted[-1]['person_id'], 'vocabulary_size': vocabularies_sorted[-1]['vocabulary_size']})
 
+#    for p in vocabularies_sorted:
+#        saveOrAbort(
+#            VocabularySize,
+#            person=Person.objects.get(id_parladata=int(p['person_id'])),
+#            score=[v['vocabulary_size'] for v in vocabularies_sorted if v['person_id'] == p['person_id']][0],
+#            maxMP=maxMP,
+#            average=result['average'],
+#            maximum=result['max'])
+#    
+#    return HttpResponse('All MPs updated.')
+
     if saveOrAbort(VocabularySize, person=thisperson, score=result['person'], maxMP=maxMP, average=result['average'], maximum=result['max']):
         return HttpResponse('All iz well')
     else:
@@ -857,6 +919,7 @@ def setVocabularySize(request, person_id):
     result_ = saveOrAbort(model=VocabularySize, person=Person.objects.get(id_parladata=int(person_id)), this_person=result[0]['vocabulary_size'], maxMP=Person.objects.get(id_parladata=int(vocabularies_sorted[-1]['person_id'])), average=float(sum(scores))/float(len(scores)), maximum=vocabularies_sorted[-1]['vocabulary_size'])
 
     return JsonResponse(result, safe=False)
+
 
 def getVocabularySize(request, person_id, date=None):
 
