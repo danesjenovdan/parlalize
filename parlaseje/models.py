@@ -186,4 +186,3 @@ class Vote_graph(Timestampable, models.Model):
     mp_no = JSONField(blank=True, null=True)
     mp_np = JSONField(blank=True, null=True)
     mp_kvor = JSONField(blank=True, null=True)
-           
