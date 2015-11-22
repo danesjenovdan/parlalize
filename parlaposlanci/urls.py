@@ -16,6 +16,7 @@ urlpatterns = patterns(
     url(r'^setPresence/(?P<person_id>\d+)', setPercentOFAttendedSession),
     
     url(r'^setStyleScores/(?P<person_id>\d+)', setStyleScores),
+    url(r'^setStyleScoresALL/', setStyleScoresALL),
     
     url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
     url(r'^setAverageNumberOfSpeechesPerSessionAll/', setAverageNumberOfSpeechesPerSessionAll),

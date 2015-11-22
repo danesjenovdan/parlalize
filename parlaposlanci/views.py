@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 from django.http import HttpResponse
 import string
-from kvalifikatorji.scripts import numberOfWords, countWords, getScore, problematicno, privzdignjeno, preprosto, TFIDF
+from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from collections import Counter
 from parlalize.settings import LAST_ACTIVITY_COUNT
 from .models import *
@@ -695,6 +695,103 @@ def getCutVotes(request, person_id, date=None):
 #
 #	return JsonResponse(allMPs)
 
+def setStyleScoresALLShell():
+    
+    mps = requests.get(API_URL+'/getMPs/').json()
+    print 'Starting average scores'
+    average_scores = makeAverageStyleScores()
+    
+    print 'Ending average scores'
+    
+    print 'Starting MPs'
+    for mp in mps:
+        
+        person_id = mp['id']
+        
+        print 'MP id: ' + str(person_id)
+    
+#        # get speeches of MP
+#        speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
+#        speeches_content = [speech['content'] for speech in speeches]
+#        speeches_megastring = string.join(speeches_content)
+#
+#        # count total words
+#        counter = Counter()
+#        counter = countWords(speeches_megastring, counter)
+#        total = sum(counter.values())
+
+        # get word counts with solr
+        counter = Counter(getCountList(int(person_id)))
+        total = sum(counter.values())
+        
+        scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
+
+        average = average_scores
+
+        print scores_local, average
+
+        saveOrAbort(
+            model=StyleScores,
+            person=Person.objects.get(id_parladata=int(person_id)),
+            problematicno=scores_local['problematicno'],
+            privzdignjeno=scores_local['privzdignjeno'],
+            preprosto=scores_local['preprosto'],
+            problematicno_average=average['problematicno'],
+            privzdignjeno_average=average['privzdignjeno'],
+            preprosto_average=average['preprosto']
+        )
+    
+    return HttpResponse('All MPs updated');
+
+
+def setStyleScoresALL(request):
+    
+    mps = requests.get(API_URL+'/getMPs/').json()
+    print 'Starting average scores'
+    average_scores = makeAverageStyleScores()
+    
+    print 'Ending average scores'
+    
+    print 'Starting MPs'
+    for mp in mps:
+        
+        person_id = mp['id']
+        
+        print 'MP id: ' + str(person_id)
+    
+#        # get speeches of MP
+#        speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
+#        speeches_content = [speech['content'] for speech in speeches]
+#        speeches_megastring = string.join(speeches_content)
+#
+#        # count total words
+#        counter = Counter()
+#        counter = countWords(speeches_megastring, counter)
+#        total = sum(counter.values())
+
+        # get word counts with solr
+        counter = Counter(getCountList(int(person_id)))
+        total = sum(counter.values())
+        
+        scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
+
+        average = average_scores
+
+        print scores_local, average
+
+        saveOrAbort(
+            model=StyleScores,
+            person=Person.objects.get(id_parladata=int(person_id)),
+            problematicno=scores_local['problematicno'],
+            privzdignjeno=scores_local['privzdignjeno'],
+            preprosto=scores_local['preprosto'],
+            problematicno_average=average['problematicno'],
+            privzdignjeno_average=average['privzdignjeno'],
+            preprosto_average=average['preprosto']
+        )
+    
+    return HttpResponse('All MPs updated');
+
 def setStyleScores(request, person_id):
     speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
     speeches_content = [speech['content'] for speech in speeches]
@@ -748,33 +845,76 @@ def getStyleScores(request, person_id, date=None):
     return JsonResponse(out, safe=False)
 
 def getTotalStyleScores(request):
-    speeches = requests.get(API_URL+'/getAllSpeeches/').json()
-    speeches_content = [speech['content'] for speech in speeches]
-    speeches_megastring = string.join(speeches_content)
+#    speeches = requests.get(API_URL+'/getAllSpeeches/').json()
+#    speeches_content = [speech['content'] for speech in speeches]
+#    speeches_megastring = string.join(speeches_content)
+#
+#    counter = Counter()
+#    counter = countWords(speeches_megastring, counter)
+#    total = sum(counter.values())
 
-    counter = Counter()
-    counter = countWords(speeches_megastring, counter)
+    data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
+    
+    wordlist = data['fields']['content_t']['topTerms']
+    
+    wordlist_new = {}
+    i = 0
+    limit = len(wordlist)/2
+    
+    while i < limit:
+        
+        if wordlist[i + 1] > 0:
+            wordlist_new[wordlist[i]] = wordlist[i + 1]
+        else:
+            break
+        
+        i = i + 2
+
+    counter = Counter(wordlist_new)
     total = sum(counter.values())
-    output = {'problematicno': getScore(problematicno, counter, total),
-              'privzdignjeno': getScore(privzdignjeno, counter, total),
-              'preprosto': getScore(preprosto, counter, total),
-#              'total': total
-             }
+
+    output = getScores([problematicno, privzdignjeno, preprosto], counter, total)
+#    output = {'problematicno': getScore(problematicno, counter, total),
+#              'privzdignjeno': getScore(privzdignjeno, counter, total),
+#              'preprosto': getScore(preprosto, counter, total),
+##              'total': total
+#             }
 
     return JsonResponse(output, safe=False)
 
 def makeAverageStyleScores():
-    speeches = requests.get(API_URL+'/getAllSpeeches/').json()
-    speeches_content = [speech['content'] for speech in speeches]
-    speeches_megastring = string.join(speeches_content)
+#    speeches = requests.get(API_URL+'/getAllSpeeches/').json()
+#    speeches_content = [speech['content'] for speech in speeches]
+#    speeches_megastring = string.join(speeches_content)
 
-    counter = Counter()
-    counter = countWords(speeches_megastring, counter)
+    data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
+    
+    wordlist = data['fields']['content_t']['topTerms']
+    
+    wordlist_new = {}
+    i = 0
+    limit = len(wordlist)/2
+    
+    while i < limit:
+        
+        if wordlist[i + 1] > 0:
+            wordlist_new[wordlist[i]] = wordlist[i + 1]
+        else:
+            break
+        
+        i = i + 2
+
+    counter = Counter(wordlist_new)
+#    counter = countWords(speeches_megastring, counter)
     total = sum(counter.values())
-    output = {'problematicno': getScore(problematicno, counter, total),
-              'privzdignjeno': getScore(privzdignjeno, counter, total),
-              'preprosto': getScore(preprosto, counter, total),
-             }
+    print total
+    
+    output = getScores([problematicno, privzdignjeno, preprosto], counter, total)
+    
+#    output = {'problematicno': getScore(problematicno, counter, total),
+#              'privzdignjeno': getScore(privzdignjeno, counter, total),
+#              'preprosto': getScore(preprosto, counter, total),
+#             }
 
     return output
 
