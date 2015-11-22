@@ -19,7 +19,7 @@ setters = (
 )
 
 allsetters = (
-#    BASE_URL + '/p/setAverageNumberOfWordsPerSessionAll',
+#    BASE_URL + '/p/setAverageNumberOfWordsPerSessionALL',
     # BASE_URL + '/p/setVocabularySizeALL/',
     BASE_URL + '/p/setStyleScoresALL/',
 )

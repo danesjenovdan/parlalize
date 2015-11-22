@@ -696,20 +696,20 @@ def getCutVotes(request, person_id, date=None):
 #	return JsonResponse(allMPs)
 
 def setStyleScoresALLShell():
-    
+
     mps = requests.get(API_URL+'/getMPs/').json()
     print 'Starting average scores'
     average_scores = makeAverageStyleScores()
-    
+
     print 'Ending average scores'
-    
+
     print 'Starting MPs'
     for mp in mps:
-        
+
         person_id = mp['id']
-        
+
         print 'MP id: ' + str(person_id)
-    
+
 #        # get speeches of MP
 #        speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
 #        speeches_content = [speech['content'] for speech in speeches]
@@ -723,7 +723,7 @@ def setStyleScoresALLShell():
         # get word counts with solr
         counter = Counter(getCountList(int(person_id)))
         total = sum(counter.values())
-        
+
         scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
 
         average = average_scores
@@ -740,25 +740,25 @@ def setStyleScoresALLShell():
             privzdignjeno_average=average['privzdignjeno'],
             preprosto_average=average['preprosto']
         )
-    
+
     return HttpResponse('All MPs updated');
 
 
 def setStyleScoresALL(request):
-    
+
     mps = requests.get(API_URL+'/getMPs/').json()
     print 'Starting average scores'
     average_scores = makeAverageStyleScores()
-    
+
     print 'Ending average scores'
-    
+
     print 'Starting MPs'
     for mp in mps:
-        
+
         person_id = mp['id']
-        
+
         print 'MP id: ' + str(person_id)
-    
+
 #        # get speeches of MP
 #        speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
 #        speeches_content = [speech['content'] for speech in speeches]
@@ -772,7 +772,7 @@ def setStyleScoresALL(request):
         # get word counts with solr
         counter = Counter(getCountList(int(person_id)))
         total = sum(counter.values())
-        
+
         scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
 
         average = average_scores
@@ -789,7 +789,7 @@ def setStyleScoresALL(request):
             privzdignjeno_average=average['privzdignjeno'],
             preprosto_average=average['preprosto']
         )
-    
+
     return HttpResponse('All MPs updated');
 
 def setStyleScores(request, person_id):
@@ -854,20 +854,20 @@ def getTotalStyleScores(request):
 #    total = sum(counter.values())
 
     data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
-    
+
     wordlist = data['fields']['content_t']['topTerms']
-    
+
     wordlist_new = {}
     i = 0
     limit = len(wordlist)/2
-    
+
     while i < limit:
-        
+
         if wordlist[i + 1] > 0:
             wordlist_new[wordlist[i]] = wordlist[i + 1]
         else:
             break
-        
+
         i = i + 2
 
     counter = Counter(wordlist_new)
@@ -888,29 +888,29 @@ def makeAverageStyleScores():
 #    speeches_megastring = string.join(speeches_content)
 
     data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
-    
+
     wordlist = data['fields']['content_t']['topTerms']
-    
+
     wordlist_new = {}
     i = 0
     limit = len(wordlist)/2
-    
+
     while i < limit:
-        
+
         if wordlist[i + 1] > 0:
             wordlist_new[wordlist[i]] = wordlist[i + 1]
         else:
             break
-        
+
         i = i + 2
 
     counter = Counter(wordlist_new)
 #    counter = countWords(speeches_megastring, counter)
     total = sum(counter.values())
     print total
-    
+
     output = getScores([problematicno, privzdignjeno, preprosto], counter, total)
-    
+
 #    output = {'problematicno': getScore(problematicno, counter, total),
 #              'privzdignjeno': getScore(privzdignjeno, counter, total),
 #              'preprosto': getScore(preprosto, counter, total),
@@ -943,7 +943,7 @@ def setTFIDF(request, person_id):
 
     else:
         return HttpResponse('All waz well');
-    
+
 def getTFIDF(request, person_id, date=None):
 
     card = getPersonCardModel(Tfidf, int(person_id), date)
@@ -997,7 +997,7 @@ def setVocabularySizeALL(request):
             maxMP=maxMP,
             average=result['average'],
             maximum=result['max'])
-    
+
     return HttpResponse('All MPs updated.')
 
 #    if saveOrAbort(VocabularySize, person=thisperson, score=result['person'], maxMP=maxMP, average=result['average'], maximum=result['max']):
@@ -1048,7 +1048,7 @@ def setVocabularySize(request, person_id):
 #            maxMP=maxMP,
 #            average=result['average'],
 #            maximum=result['max'])
-#    
+#
 #    return HttpResponse('All MPs updated.')
 
     if saveOrAbort(VocabularySize, person=thisperson, score=result['person'], maxMP=maxMP, average=result['average'], maximum=result['max']):
@@ -1082,11 +1082,15 @@ def getVocabularySize(request, person_id, date=None):
 
     return JsonResponse(out, safe=False)
 
+
 def setAverageNumberOfSpeechesPerSession(request, person_id):
 
     person = Person.objects.get(id_parladata=int(person_id))
     speeches = requests.get(API_URL+'/getSpeechesOfMP/' + person_id).json()
     no_of_speeches = len(speeches)
+
+    # fix for "Dajem besedo"
+    no_of_speeches = no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + person_id))
 
     no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + person_id).json()['sessions_with_speech']
 
@@ -1097,7 +1101,7 @@ def setAverageNumberOfSpeechesPerSession(request, person_id):
 
     for mp in mps:
         mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
-        
+
         mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
 
         mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
@@ -1118,7 +1122,10 @@ def setAverageNumberOfSpeechesPerSessionAll(request):
 
     for mp in mps:
         mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
-        
+
+        # fix for "Dajem besedo"
+        mp_no_of_speeches = mp_no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id'])).text)
+
         mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
 
         if mp_no_of_sessions > 0:
@@ -1130,11 +1137,11 @@ def setAverageNumberOfSpeechesPerSessionAll(request):
     mp_scores_sorted = sorted(mp_scores, key=lambda k: k['score'])
 
     average = sum([mp['score'] for mp in mp_scores])/len(mp_scores)
-    
+
     for mp in mp_scores_sorted:
         person = Person.objects.get(id_parladata=int(mp['id']))
         score = mp['score']
-            
+
 
         saveOrAbort(
             model=AverageNumberOfSpeechesPerSession,
