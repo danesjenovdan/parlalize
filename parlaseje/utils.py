@@ -47,10 +47,9 @@ def saveOrAbortMotion(model, **kwargs):
 		ids = Vote.objects.values('id_parladata')
 		for i in ids:
 			tab.append(i['id_parladata'])
-		print "fsdafsdf",tab
 		for a in savedModel:
 			if a.id_parladata in tab:
-				print 'Not saved'
+				print "Not saved"
 			else:
 				newModel = model(**kwargs)
 				newModel.save()
