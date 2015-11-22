@@ -7,31 +7,31 @@ urlpatterns = patterns(
 
     # setters
     url(r'^setMPStatic/(?P<person_id>\d+)/', setMPStaticPL),
-    
+
     url(r'^setMostEqualVoters/(?P<person_id>\d+)/', setMostEqualVoters),
     url(r'^setLeastEqualVoters/(?P<person_id>\d+)/', setLessEqualVoters),
-    
+
     url(r'^setTFIDF/(?P<person_id>\d+)', setTFIDF),
-    
+
     url(r'^setPresence/(?P<person_id>\d+)', setPercentOFAttendedSession),
-    
+
     url(r'^setStyleScores/(?P<person_id>\d+)', setStyleScores),
     url(r'^setStyleScoresALL/', setStyleScoresALL),
-    
+
     url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
-    url(r'^setAverageNumberOfSpeechesPerSessionAll/', setAverageNumberOfSpeechesPerSessionAll),
-    
+    url(r'^setAverageNumberOfSpeechesPerSessionALL/', setAverageNumberOfSpeechesPerSessionAll),
+
     url(r'^setVocabularySize/(?P<person_id>\d+)', setVocabularySize),
     url(r'^setVocabularySizeALL/', setVocabularySizeALL),
-    
+
     url(r'^setLastActivity/(?P<person_id>\d+)', setLastActivity),
-    
+
     url(r'^setNumberOfSpokenWordsALL/', setNumberOfSpokenWordsALL),
-    
+
     url(r'^setCutVotes/(?P<person_id>\d+)', setCutVotes),
 
     ####################################################################################
-    
+
     # getters
     url(r'^getMPStatic/(?P<person_id>\d+)/(?P<date>[\w].+)', getMPStaticPL),
     url(r'^getMPStatic/(?P<person_id>\d+)/', getMPStaticPL),
