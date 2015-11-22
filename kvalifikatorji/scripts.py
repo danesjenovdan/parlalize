@@ -11,13 +11,21 @@ from math import log
 import tfidf
 from itertools import repeat
 
+import requests
+
 def getWords(filename):
     f = open(filename, 'r')
     return f.read().splitlines()
 
-problematicno = getWords('kvalifikatorji/problematicno.txt')
-privzdignjeno = getWords('kvalifikatorji/privzdignjeno.txt')
-preprosto = getWords('kvalifikatorji/preprosto.txt')
+def getWordsDict(filename):
+    wordslist = getWords(filename)
+    wordsdict = {word: 1 for word in wordslist}
+
+    return wordsdict
+
+problematicno = getWordsDict('kvalifikatorji/problematicno.txt')
+privzdignjeno = getWordsDict('kvalifikatorji/privzdignjeno.txt')
+preprosto = getWordsDict('kvalifikatorji/preprosto.txt')
 
 text = 'Tudi v Poslanski skupini Socialnih demokratov ne bomo podprli proračunov za leti 2013 in 2014. Že v uvodnem nagovoru v imenu poslanske skupine smo opozorili, da ta dva proračuna nista odgovor na dogajanje v Sloveniji. Ljudje pričakujejo, da bosta ta dva proračuna omogočala gospodarski razvoj, da bosta omogočala zagotavljanje novih delovnih mest, da bosta omogočala nadaljnji obstoj in razvoj javnega šolstva, tako osnovnega kot tudi do nivoja univerz, in predvsem da bomo imeli vsi tudi temu primerno socialno varnost. Vseh teh problemov ta dva proračuna ne odpravljata, nasprotno. Kaže se, da vladajoča koalicija razume in sledi samo cilju čimprejšnje razprodaje državnega premoženja in želi pri tem omogočiti vsem tistim, ki imajo te informacije, da se vključijo v ta proces na način, da dajo prioriteto osebnim interesom, ne pa interesom države, ne interesom ljudi, ki pričakujejo, da bomo ravnali po našem mnenju, tudi v Državnem zboru, povsem drugače kot je zapisano v teh dveh proračunih.'
 
@@ -49,17 +57,59 @@ def countWords(text, counter):
 
     return counter
 
+def getCountList(speaker_id):
+    data = requests.get('http://parlameter.si:8983/solr/knedl/select?q=speaker_i:' + str(speaker_id) + '&facet=true&facet.field=content_t&facet.limit=10000&wt=json&facet.method=enum').json()
+
+    wordlist = data['facet_counts']['facet_fields']['content_t']
+
+    wordlist_new = {}
+    i = 0
+    limit = len(wordlist)/2
+
+    while i < limit:
+
+        if wordlist[i + 1] > 0:
+            wordlist_new[wordlist[i]] = wordlist[i + 1]
+        else:
+            return wordlist_new
+
+        i = i + 2
+
+    return wordlist_new
 
 def getScore(words, counter, total):
 
+    print 'Getting style scores'
+
     score = 0.0
-    lemmatized_words = lemmatizeTokens(words)
+#    lemmatized_words = lemmatizeTokens(words)
+    lemmatized_words = words
 
     for word in counter:
         if word in lemmatized_words:
             score = (score + counter[word])
 
     return score/total
+
+def getScores(words_list, counter, total):
+
+    print 'Getting style scores'
+
+    scores = {'problematicno': 0, 'privzdignjeno': 0, 'preprosto': 0}
+
+    for word in counter:
+        scores['problematicno'] = scores['problematicno'] + words_list[0].setdefault(word, 0)
+        scores['privzdignjeno'] = scores['privzdignjeno'] + + words_list[1].setdefault(word, 0)
+        scores['preprosto'] = scores['preprosto'] + + words_list[2].setdefault(word, 0)
+
+    if float(total) == 0.0:
+        total = 1
+
+    scores['problematicno'] = scores['problematicno']/float(total)
+    scores['privzdignjeno'] = scores['privzdignjeno']/float(total)
+    scores['preprosto'] = scores['preprosto']/float(total)
+
+    return scores
 
 def TFIDF(speeches_grouped, person_id):
 
