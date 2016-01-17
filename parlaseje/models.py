@@ -186,3 +186,9 @@ class Vote_graph(Timestampable, models.Model):
     mp_no = JSONField(blank=True, null=True)
     mp_np = JSONField(blank=True, null=True)
     mp_kvor = JSONField(blank=True, null=True)
+
+class AbsentMPs(Timestampable, models.Model):
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                            blank=True, null=True,help_text=_('id parladata'))
+    absentMPs = JSONField(blank=True, null=True)
