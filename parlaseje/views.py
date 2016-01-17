@@ -13,10 +13,12 @@ from math import fabs
 # Create your views here.
 
 def setAllSessions(request):
-    data  = requests.get(API_URL+'/getSessions/').json()
+    data  = requests.get('http://data.parlameter.si/v1/getSessions/').json()
     for sessions in data:
         if not Session.objects.filter(id_parladata=sessions['id']):
-            result = Session(name=sessions['name'],
+
+            result = saveOrAbort(model=Session,
+                            name=sessions['name'],
                              gov_id=sessions['gov_id'],
                              start_time=sessions['start_time'],
                              end_time=sessions['end_time'],
@@ -60,8 +62,7 @@ def getSessionSpeeches(request, session_id,):
 def setMotionOfSession(request, id_se):
     motion  = requests.get('http://data.parlameter.si/v1/motionOfSession/'+str(id_se)+'/').json()
     votes  = requests.get('http://data.parlameter.si/v1/getVotesOfSession/'+str(id_se)+'/').json()
-    #napisi se za un graf: za:{kolk:40,poslanci:[32,4,3,4],pg{ZL:23,SDS:23}}
-    
+
     tab = []
     yes = 0
     no = 0
@@ -99,8 +100,7 @@ def setMotionOfSession(request, id_se):
                     npdic[vote['pg_id']] += 1
                     tabnp.append(vote['mp_id'])
 
-
-        result = saveOrAbort(model=Vote,
+        result = saveOrAbortMotion(model=Vote,
                             session=Session.objects.get(id_parladata=int(id_se)),
                             motion=mot['text'],
                             votes_for=yes,
@@ -188,3 +188,41 @@ def getMotionGraph(request, id_se):
 
 
     return JsonResponse(out, safe=False)
+
+def setAbsentMPs(request, id_se):
+    votes = requests.get('http://data.parlameter.si/v1/getVotesOfSession/'+str(id_se)+'/').json()
+    mps = requests.get(API_URL+'/getMPs/').json()
+    onSession = []
+    mpsID = []
+    if len(votes) != 0:
+        for vote in votes:
+            onSession.append(vote['mp_id'])
+
+        onSession = list(set(onSession))
+        [mpsID.append(mpID['id'])for mpID in mps]
+
+        for mp in onSession:
+            if mp in mpsID:
+                mpsID.remove(mp)
+
+        result = saveOrAbortAbsent(model=AbsentMPs,
+                                id_parladata=id_se,
+                                absentMPs=mpsID
+                                )
+
+        return JsonResponse({'alliswell': True})
+    else:
+        return JsonResponse({'No session with this id':id_se})
+
+def getAbsentMPs(request, id_se):
+
+    mps = requests.get(API_URL+'/getMPs/').json()
+    result ={}
+    results = {}
+    ids = AbsentMPs.objects.get(id_parladata=int(id_se)).absentMPs
+    for abMP in ids:
+        for mp in mps:
+            if str(mp['id']) == str(abMP):
+                result = {'name':mp['name'], 'acronym':mp['acronym'], 'image':mp['image']}
+                results[mp['id']]= result
+    return JsonResponse(results, safe=False)
