@@ -5,7 +5,7 @@ from django.http import Http404
 import requests
 from parlaposlanci.models import Person, LastActivity
 from parlaskupine.models import Organization
-from parlaseje.models import Session, Vote, Speech, Session, Ballot, Vote_graph, Vote
+from parlaseje.models import Session, Vote, Speech, Session, Ballot, Vote_graph, Vote, AbsentMPs
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL
 import requests
 
@@ -58,4 +58,23 @@ def saveOrAbortMotion(model, **kwargs):
 		newModel = model(**kwargs)
 		newModel.save()
 		print "Saved"
-	
+
+def saveOrAbortAbsent(model, **kwargs):
+	tab = []
+	value = kwargs['id_parladata']
+	if model:
+		ids = AbsentMPs.objects.values('id_parladata')
+		for i in ids:
+			tab.append(i['id_parladata'])
+		if int(value) in tab:
+			print "Not saved"
+			return False
+		else:
+			newModel = model(**kwargs)
+			newModel.save()
+			print "Saved"
+			return True
+	else:
+		newModel = model(**kwargs)
+		newModel.save()
+		print "Saved"
