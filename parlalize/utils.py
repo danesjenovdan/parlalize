@@ -121,6 +121,54 @@ def saveOrAbort(model, **kwargs):
     return False
 
 
+# checks if cards with the data exists or not NEW
+def saveOrAbortNew(model, **kwargs):
+    created_for = kwargs.pop('created_for')
+    print kwargs
+    savedModel = model.objects.filter(**kwargs)
+    if savedModel:
+        print model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for
+        print len(savedModel)
+        print model.objects.latest('created_for')
+        if savedModel.latest('created_for').created_for != model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for:
+            kwargs.update({'created_for': created_for})
+            newModel = model(**kwargs)
+            newModel.save()
+            return True
+    else:
+        kwargs.update({'created_for': created_for})
+        newModel = model(**kwargs)
+        newModel.save()
+        return True
+    return False
+
+
+def findDatesFromLastCard(model, id, lastParsedDate):
+    toDate = datetime.strptime(lastParsedDate, '%d.%m.%Y')
+    try:
+        lastCardDate = model.objects.filter(person__id_parladata=id).order_by("-created_for")[0].created_for
+    except:
+        lastCardDate = datetime.strptime("01.09.2015", '%d.%m.%Y')
+    lastCardDate = lastCardDate.replace(tzinfo=None)
+
+    return [(lastCardDate+timedelta(days=days)).date() for days in range((toDate-lastCardDate).days)]
+
+def getPersonCardModelNew(model, id, date=None):
+    if date:
+        modelObject = model.objects.filter(person__id_parladata=id, created_for__lte=datetime.strptime(date, '%d.%m.%Y'))
+    else:
+        modelObject = model.objects.filter(person__id_parladata=id, created_for__lte=datetime.now())
+
+    if not modelObject:
+        #if model == LastActivity:
+            #return None
+        raise Http404("Nismo našli kartice")
+    else:
+        modelObject = modelObject.latest('created_for')
+        print "get object BUBU", modelObject.created_for
+    return modelObject
+
+
 def getPersonCardModel(model, id, date=None):
     if date:
         if model == LastActivity:
@@ -255,3 +303,16 @@ def update():
     
     updateBallots()
     print "ballots"
+
+
+# get all parliament member ID's
+def getIDs():
+    # create persons
+    result = []
+
+    data = requests.get(API_URL+'/getMPs/').json()
+
+    for mp in data:
+        result.append(mp['id'])
+
+    return result

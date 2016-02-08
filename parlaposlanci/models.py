@@ -114,6 +114,10 @@ class SpeakingStyle(Timestampable, models.Model): #card for privzdignjeno besedj
     preprosto_avg = models.IntegerField(help_text=_('Preprosto besedje average score.'))
 
 class CutVotes(Timestampable, models.Model):
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of activity'))
     person = models.ForeignKey("Person")
     this_for = models.IntegerField()
     this_against = models.IntegerField()
