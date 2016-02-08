@@ -451,7 +451,7 @@ def getMPsWhichFitsToPG(request, id):
 	return JsonResponse(outs[-5:], safe=False)
 
 
-def setCutVotes(request, person_id):
+def setCutVotes(request, person_id, date=None):
 
 	#Add data of person to dictionary
 	"""
@@ -469,9 +469,14 @@ def setCutVotes(request, person_id):
 			ObjectOut[rootKey+"Name"].append(objectIn[str(id)]['name'])
 			ObjectOut[rootKey+"Image"].append(objectIn[str(id)]['image'])
 
-	r=requests.get(API_URL+'/getVotes/')
+	print "cut"
+	if date:
+		r = requests.get(API_URL+'/getVotes/' + date)
+		date_of = datetime.strptime(date, '%d.%m.%Y')
+	else:
+		r = requests.get(API_URL+'/getVotes/')
+		date_of = datetime.now().date()
 	votes = r.json()
-
 	r=requests.get(API_URL+'/getMembersOfPGs/')
 	membersInPGs = r.json()
 
@@ -571,8 +576,9 @@ def setCutVotes(request, person_id):
 	idsMaxAbsentOppo = numpy.array(idsOppAbsent)[numpy.where(numpy.array(oppAbsent) == oppMaxPercentAbsent)[0]]
 	getIdImageName(out["absent"], "maxOpp", idsMaxAbsentOppo, members)
 
-	final_response = saveOrAbort(
+	final_response = saveOrAbortNew(
         CutVotes,
+        created_for=date_of,
         person = Person.objects.get(id_parladata=person_id),
         this_for = out["for"]["this"],
         this_against = out["against"]["this"],
@@ -608,7 +614,7 @@ def setCutVotes(request, person_id):
 
 
 def getCutVotes(request, person_id, date=None):
-	cutVotes = getPersonCardModel(CutVotes, person_id, date)
+	cutVotes = getPersonCardModelNew(CutVotes, person_id, date)
 
 	out = {
         'person': {
@@ -1173,3 +1179,28 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
     }
 
     return JsonResponse(out, safe=False)
+
+def runSetters(request, date_to):
+    setters_models = {
+        #LastActivity: BASE_URL+'/p/setLastActivity/',
+        CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
+    }
+    IDs = getIDs()
+    #print IDs
+    allIds = len(IDs)
+    curentId = 0
+    for ID in IDs:
+
+        print ID
+        print "".join(["*" for i in range(curentId)] + ["_" for i in range(allIds-curentId)])
+        for model, setter in setters_models.items():
+            print setter
+            dates = findDatesFromLastCard(model, ID, date_to)
+            print dates
+            for date in dates:
+            	print date.strftime('%d.%m.%Y')
+                #print setter + str(ID) + "/" + date.strftime('%d.%m.%Y')
+                setter(request, str(ID), date.strftime('%d.%m.%Y'))
+        curentId += 1
+                #result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
+    return JsonResponse({"status": "all is fine :D"}, safe=False)
