@@ -20,8 +20,11 @@ def voteToLogical(vote):
         return -1
 
 
-def getLogicVotes():
-    r = requests.get(API_URL+'/getVotes/')
+def getLogicVotes(date=None):
+    if date:
+        r = requests.get(API_URL+'/getVotes/'+date)
+    else:
+        r = requests.get(API_URL+'/getVotes/')
     pl_votes = Vote.objects.all()
     votes = r.json()
     for person_id in votes.keys():
