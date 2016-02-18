@@ -20,6 +20,7 @@ def voteToLogical(vote):
         return -1
 
 
+# Return dictionary of votes results by user ids. 
 def getLogicVotes(date=None):
     if date:
         r = requests.get(API_URL+'/getVotes/'+date)
@@ -126,18 +127,21 @@ def saveOrAbort(model, **kwargs):
 
 # checks if cards with the data exists or not NEW
 def saveOrAbortNew(model, **kwargs):
+    def save_it(model, created_for, **kwargs):
+        kwargs.update({'created_for': created_for})
+        newModel = model(**kwargs)
+        newModel.save()
+        return True
     created_for = kwargs.pop('created_for')
     print kwargs
     savedModel = model.objects.filter(**kwargs)
     if savedModel:
-        print model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for
-        print len(savedModel)
-        print model.objects.latest('created_for')
-        if savedModel.latest('created_for').created_for != model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for:
-            kwargs.update({'created_for': created_for})
-            newModel = model(**kwargs)
-            newModel.save()
-            return True
+        if 'person' in kwargs:
+            if savedModel.latest('created_for').created_for != model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for:
+                save_it(model, created_for, **kwargs)
+        elif "organization" in kwargs:
+            if savedModel.latest('created_for').created_for != model.objects.filter(organization__id_parladata=kwargs["pg"].id_parladata).latest("created_at").created_for:
+                save_it(model, created_for, **kwargs)
     else:
         kwargs.update({'created_for': created_for})
         newModel = model(**kwargs)
@@ -147,14 +151,15 @@ def saveOrAbortNew(model, **kwargs):
 
 
 def findDatesFromLastCard(model, id, lastParsedDate):
-    toDate = datetime.strptime(lastParsedDate, '%d.%m.%Y')
+    toDate = datetime.strptime(lastParsedDate, '%d.%m.%Y').date()
     try:
         lastCardDate = model.objects.filter(person__id_parladata=id).order_by("-created_for")[0].created_for
     except:
-        lastCardDate = datetime.strptime("01.09.2015", '%d.%m.%Y')
-    lastCardDate = lastCardDate.replace(tzinfo=None)
+        lastCardDate = datetime.strptime("01.09.2015", '%d.%m.%Y').date()
+    #lastCardDate = lastCardDate.replace(tzinfo=None)
 
-    return [(lastCardDate+timedelta(days=days)).date() for days in range((toDate-lastCardDate).days)]
+    return [(lastCardDate+timedelta(days=days)) for days in range((toDate-lastCardDate).days)]
+
 
 def getPersonCardModelNew(model, id, date=None):
     if date:
@@ -227,6 +232,24 @@ def getPGCardModel(model, id, date=None):
         raise Http404("Nismo našli kartice")
     else:
         modelObject = modelObject.latest('created_at')
+    return modelObject
+
+
+def getPGCardModelNew(model, id, date=None):
+    if date:
+        modelObject = model.objects.filter(organization__id_parladata=id,
+                                           created_for__lte=datetime.strptime(date, '%d.%m.%Y'))
+    else:
+        modelObject = model.objects.filter(organization__id_parladata=id, 
+                                           created_for__lte=datetime.now())
+
+    if not modelObject:
+        #if model == LastActivity:
+            #return None
+        raise Http404("Nismo našli kartice")
+    else:
+        modelObject = modelObject.latest('created_for')
+        print "get object BUBU", modelObject.created_for
     return modelObject
 
 
