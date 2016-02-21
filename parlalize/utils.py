@@ -140,7 +140,7 @@ def saveOrAbortNew(model, **kwargs):
             if savedModel.latest('created_for').created_for != model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for:
                 save_it(model, created_for, **kwargs)
         elif "organization" in kwargs:
-            if savedModel.latest('created_for').created_for != model.objects.filter(organization__id_parladata=kwargs["pg"].id_parladata).latest("created_at").created_for:
+            if savedModel.latest('created_for').created_for != model.objects.filter(organization__id_parladata=kwargs["organization"].id_parladata).latest("created_at").created_for:
                 save_it(model, created_for, **kwargs)
     else:
         kwargs.update({'created_for': created_for})
