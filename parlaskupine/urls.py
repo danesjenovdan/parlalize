@@ -12,8 +12,11 @@ urlpatterns = patterns('',
     url(r'^setMostMatchingThem/(?P<pg_id>\d+)/(?P<date>[\w].+)', setMostMatchingThem),
     url(r'^setMostMatchingThem/(?P<pg_id>\d+)', setMostMatchingThem),
 
-    url(r'^setAtLeastMatchingThem/(?P<pg_id>\d+)/(?P<date>[\w].+)', setAtLeastMatchingThem),
-    url(r'^setAtLeastMatchingThem/(?P<pg_id>\d+)', setAtLeastMatchingThem),
+    url(r'^setLessMatchingThem/(?P<pg_id>\d+)/(?P<date>[\w].+)', setLessMatchingThem),
+    url(r'^setLessMatchingThem/(?P<pg_id>\d+)', setLessMatchingThem),
+
+    url(r'^setDeviationInOrg/(?P<pg_id>\d+)/(?P<date>[\w].+)', setDeviationInOrg),
+    url(r'^setDeviationInOrg/(?P<pg_id>\d+)', setDeviationInOrg),
 
 
     # getters
@@ -28,4 +31,7 @@ urlpatterns = patterns('',
 
     url(r'^getLessMatchingThem/(?P<pg_id>\d+)/(?P<date>[\w].+)', getLessMatchingThem),
     url(r'^getLessMatchingThem/(?P<pg_id>\d+)/', getLessMatchingThem),
+
+    url(r'^getDeviationInOrg/(?P<pg_id>\d+)/(?P<date>[\w].+)', getDeviationInOrg),
+    url(r'^getDeviationInOrg/(?P<pg_id>\d+)/', getDeviationInOrg),
 )

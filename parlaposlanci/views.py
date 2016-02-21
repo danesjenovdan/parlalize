@@ -279,7 +279,7 @@ def getAllSpeeches(request, person_id, date=None):
 
 
 #method returns percent, how similar does the members vote
-def getEqualVoters(request, id, date):
+def getEqualVoters(request, id, date=None):
     if date:
         votes = getLogicVotes(date)
         date_of = datetime.strptime(date, '%d.%m.%Y')
@@ -1221,15 +1221,16 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
     return JsonResponse(out, safe=False)
 
+
 def runSetters(request, date_to):
     setters_models = {
-        #not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
-        #CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
+        # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
+        # CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
         LessEqualVoters: setLessEqualVoters,
-        #EqualVoters: setMostEqualVoters,
+        # EqualVoters: setMostEqualVoters,
     }
     IDs = getIDs()
-    #print IDs
+    # print IDs
     allIds = len(IDs)
     curentId = 0
     for ID in IDs:
@@ -1242,8 +1243,8 @@ def runSetters(request, date_to):
             print dates
             for date in dates:
                 print date.strftime('%d.%m.%Y')
-                #print setter + str(ID) + "/" + date.strftime('%d.%m.%Y')
+                # print setter + str(ID) + "/" + date.strftime('%d.%m.%Y')
                 setter(request, str(ID), date.strftime('%d.%m.%Y'))
         curentId += 1
-                #result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
+                # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
     return JsonResponse({"status": "all is fine :D"}, safe=False)
