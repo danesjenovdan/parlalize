@@ -3,7 +3,7 @@ import numpy
 from datetime import datetime, timedelta
 from django.http import Http404
 import requests
-from parlalize.utils import SaveOrAbortNew
+from parlalize.utils import saveOrAbortNew
 from parlaposlanci.models import Person, LastActivity
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Vote, Speech, Session, Ballot, Vote_graph, Vote, AbsentMPs
