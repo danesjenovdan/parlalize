@@ -98,6 +98,11 @@ def updateVotes():
         abstain = counts['abstained']
         not_present = counts['missing']
 
-        saveOrAbortNew(Vote, session=vote.session, motion=vote.motion, votes_for=votes_for, against=against, abstain=abstain, not_present=not_present, result=vote.result, id_parladata=vote.id_parladata, created_for=vote.created_for)
+        # saveOrAbortNew(Vote, session=vote.session, motion=vote.motion, votes_for=votes_for, against=against, abstain=abstain, not_present=not_present, result=vote.result, id_parladata=vote.id_parladata, created_for=vote.created_for)
+        vote.votes_for = votes_for
+        vote.against = against
+        vote.abstain = abstain
+        vote.not_present = not_present
+        vote.save()
 
     return 1
