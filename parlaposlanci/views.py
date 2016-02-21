@@ -70,13 +70,7 @@ def getMPStaticPL(request, person_id, date=None):
         }
     }
 
-    response = JsonResponse(data)
-    response["Access-Control-Allow-Origin"] = "*"
-    response["Access-Control-Allow-Methods"] = "GET"
-    response["Access-Control-Max-Age"] = "1000"
-    response["Access-Control-Allow-Headers"] = "*"
-
-    return response
+    return JsonResponse(data)
 
 
 #Saves to DB percent of attended sessions of MP and maximum and average of attended sessions
