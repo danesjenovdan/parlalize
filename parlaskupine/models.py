@@ -72,3 +72,150 @@ class PercentOFAttendedSession(Timestampable, models.Model): #Model for presence
     maximum = models.IntegerField(_('max'),
                                    blank=True, null=True,
                                    help_text=_('Max of PG attended sessions'))
+
+
+class MostMatchingThem(Timestampable, models.Model):
+
+    organization = models.ForeignKey('Organization',
+                           blank=True, null=True,
+                           related_name='childrenMMT',
+                           help_text=_('PG'))
+
+    created_for = models.DateField(_('date of analize'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    person1 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenMMT1',
+                                help_text=_('MP1'))
+
+    votes1 = models.FloatField(_('MatchingThem1'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person2 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenMMT2',
+                                help_text=_('MP2'))
+
+    votes2 = models.FloatField(_('MatchingThem2'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person3 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenMMT3',
+                                help_text=_('MP3'))
+
+    votes3 = models.FloatField(_('MatchingThem3'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person4 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenMMT4',
+                                help_text=_('MP4'))
+
+    votes4 = models.FloatField(_('MatchingThem4'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person5 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenMMT5',
+                                help_text=_('MP5'))
+
+    votes5 = models.FloatField(_('MatchingThem5'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+
+class LessMatchingThem(Timestampable, models.Model):
+
+    organization = models.ForeignKey('Organization',
+                                     blank=True, null=True,
+                                     related_name='childrenLMT',
+                                     help_text=_('PG'))
+
+    created_for = models.DateField(_('date of analize'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of activity'))
+
+    person1 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenLMT1',
+                                help_text=_('MP1'))
+
+    votes1 = models.FloatField(_('MatchingThem1'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person2 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenLMT2',
+                                help_text=_('MP2'))
+
+    votes2 = models.FloatField(_('MatchingThem2'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person3 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenLMT3',
+                                help_text=_('MP3'))
+
+    votes3 = models.FloatField(_('MatchingThem3'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person4 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenLMT4',
+                                help_text=_('MP4'))
+
+    votes4 = models.FloatField(_('MatchingThem4'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person5 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenLMT5',
+                                help_text=_('MP5'))
+
+    votes5 = models.FloatField(_('MatchingThem5'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+
+class DeviationInOrganization(Timestampable, models.Model):
+
+    organization = models.ForeignKey('Organization',
+                                     blank=True, null=True,
+                                     related_name='childrenD',
+                                     help_text=_('PG'))
+
+    created_for = models.DateField(_('date of analize'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of activity'))
+
+    person1 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenD1',
+                                help_text=_('D1'))
+
+    votes1 = models.FloatField(_('daviation1'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person2 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenD2',
+                                help_text=_('D2'))
+
+    votes2 = models.FloatField(_('daviation2'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))

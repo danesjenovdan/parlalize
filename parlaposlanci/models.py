@@ -114,6 +114,10 @@ class SpeakingStyle(Timestampable, models.Model): #card for privzdignjeno besedj
     preprosto_avg = models.IntegerField(help_text=_('Preprosto besedje average score.'))
 
 class CutVotes(Timestampable, models.Model):
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
     person = models.ForeignKey("Person")
     this_for = models.IntegerField()
     this_against = models.IntegerField()
@@ -195,14 +199,19 @@ class EqualVoters(Timestampable, models.Model):
                                related_name='childrenEWT',
                                help_text=_('MP'))
 
+    created_for = models.DateField(_('date of actanalizeivity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of activity'))
+
     person1 = models.ForeignKey('Person',
-                               blank=True, null=True,
-                               related_name='childrenEW1',
-                               help_text=_('MP1'))
+                                blank=True, null=True,
+                                related_name='childrenEW1',
+                                help_text=_('MP1'))
 
     votes1 = models.FloatField(_('EqualVoters1'),
-                                 blank=True, null=True,
-                                 help_text=_('EqualVoters'))
+                               blank=True, null=True,
+                               help_text=_('EqualVoters'))
 
     person2 = models.ForeignKey('Person',
                                blank=True, null=True,
@@ -246,6 +255,11 @@ class LessEqualVoters(Timestampable, models.Model):
                                blank=True, null=True,
                                related_name='childrenLEWT',
                                help_text=_('MP'))
+
+    created_for = models.DateField(_('date of analize'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of activity'))
 
     person1 = models.ForeignKey('Person',
                                blank=True, null=True,
