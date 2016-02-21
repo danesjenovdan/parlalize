@@ -86,7 +86,7 @@ def countBallots(vote):
     votesabstained = len([ballot for ballot in vote.vote.all() if ballot.option == 'kvorum'])
     votesmissing = len([ballot for ballot in vote.vote.all() if ballot.option == 'ni'])
 
-    return {'for': votesfor, 'against': votesagainst, 'abstained': votesabstain, 'missing': votesmissing}
+    return {'for': votesfor, 'against': votesagainst, 'abstained': votesabstained, 'missing': votesmissing}
 
 def updateVotes():
     for vote in Vote.objects.all():
