@@ -78,3 +78,25 @@ def saveOrAbortAbsent(model, **kwargs):
 		newModel = model(**kwargs)
 		newModel.save()
 		print "Saved"
+
+def countBallots(vote):
+    # count votes for, against, abstentions, misses
+    votesfor = len([ballot for ballot in vote.vote.all() if ballot.option == 'za'])
+    votesagainst = len([ballot for ballot in vote.vote.all() if ballot.option == 'proti'])
+    votesabstained = len([ballot for ballot in vote.vote.all() if ballot.option == 'kvorum'])
+    votesmissing = len([ballot for ballot in vote.vote.all() if ballot.option == 'ni'])
+
+    return {'for': votesfor, 'against': votesagainst, 'abstained': votesabstain, 'missing': votesmissing}
+
+def updateVotes():
+    for vote in Vote.objects.all():
+        counts = countBallots(vote)
+
+        votes_for = counts['for']
+        against = counts['against']
+        abstain = counts['abstained']
+        not_present = counts['missing']
+
+        saveOrAbortNew(Vote, session=vote.session, motion=vote.motion, votes_for=votes_for, against=against, abstain=abstain, not_present=not_present, result=vote.result, id_parladata=vote.id_parladata)
+
+    return 1
