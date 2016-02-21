@@ -188,3 +188,34 @@ class LessMatchingThem(Timestampable, models.Model):
     votes5 = models.FloatField(_('MatchingThem5'),
                                blank=True, null=True,
                                help_text=_('MatchingThem'))
+
+
+class DeviationInOrganization(Timestampable, models.Model):
+
+    organization = models.ForeignKey('Organization',
+                                     blank=True, null=True,
+                                     related_name='childrenD',
+                                     help_text=_('PG'))
+
+    created_for = models.DateField(_('date of analize'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of activity'))
+
+    person1 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenD1',
+                                help_text=_('D1'))
+
+    votes1 = models.FloatField(_('daviation1'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person2 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenD2',
+                                help_text=_('D2'))
+
+    votes2 = models.FloatField(_('daviation2'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
