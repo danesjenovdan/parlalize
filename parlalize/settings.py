@@ -135,9 +135,9 @@ VOTE_MAP = {
 if DEVELOPMENT:
     API_URL = "http://localhost:8000/v1"
 else:
-    API_URL = "http://data.parlameter.si/v1"
+    API_URL = "https://data.parlameter.si/v1"
 
-BASE_URL = 'http://analize.parlameter.si/v1'
+BASE_URL = 'https://analize.parlameter.si/v1'
 
 
 LOGGING = {
