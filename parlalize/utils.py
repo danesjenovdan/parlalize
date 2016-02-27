@@ -3,7 +3,7 @@ import numpy
 from datetime import datetime, timedelta
 from django.http import Http404
 import requests
-from parlaposlanci.models import Person, LastActivity
+from parlaposlanci.models import Person, LastActivity, MPStaticPL
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Vote, Speech, Session, Ballot
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL
@@ -317,22 +317,22 @@ def updateBallots():
 
 
 def update():
-    
+
     updateOrganizations()
     print "org"
-    
+
     updatePeople()
     print "pep"
-    
+
     result = requests.get(BASE_URL+'/s/setAllSessions/')
     print result
-    
+
     updateSpeeches()
     print "speeches"
-    
+
     #updateVotes() TODO JURIĆ'S UPDATE VOTES -> pokliči setMotionOfSession za vsako sejo
     print "votes"
-    
+
     updateBallots()
     print "ballots"
 
