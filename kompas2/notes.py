@@ -28,6 +28,14 @@ def assignValueToOption(option):
     if option == 'ni obstajal':
         return 5
 
+def getPeoplesNames(ids):
+    names_list = []
+    for person_id in ids:
+        data = requests.get('https://analize.parlameter.si/v1/p/getMPStatic/' + str(person_id)).json()
+        name = data.person.name
+
+        names_list.append(data.person.name)
+
 def getData():
     allballots = requests.get('https://data.parlameter.si/v1/getAllBallots/').json()
     people = requests.get('https://data.parlameter.si/v1/getMPs/').json()
@@ -76,7 +84,7 @@ def getData():
 
     fig2, ax2 = plt.subplots()
     ax2.scatter(mda_result[0:90, 0], mda_result[0:90, 1])
-    for i, txt in enumerate(people_ids):
+    for i, txt in enumerate(getPeoplesNames(people_ids)):
         ax2.annotate(str(txt), (mda_result[0:90, 0][i], mda_result[0:90, 1][i]))
     plt.savefig('MDA.png')
 
