@@ -18,6 +18,9 @@ urlpatterns = patterns('',
     url(r'^setDeviationInOrg/(?P<pg_id>\d+)/(?P<date>[\w].+)', setDeviationInOrg),
     url(r'^setDeviationInOrg/(?P<pg_id>\d+)', setDeviationInOrg),
 
+    url(r'^setCutVotes/(?P<pg_id>\d+)/(?P<date>[\w].+)', setCutVotes),
+    url(r'^setCutVotes/(?P<pg_id>\d+)', setCutVotes),
+
 
     # getters
     # TJ
@@ -34,4 +37,7 @@ urlpatterns = patterns('',
 
     url(r'^getDeviationInOrg/(?P<pg_id>\d+)/(?P<date>[\w].+)', getDeviationInOrg),
     url(r'^getDeviationInOrg/(?P<pg_id>\d+)/', getDeviationInOrg),
+
+    url(r'^getCutVotes/(?P<pg_id>\d+)/(?P<date>[\w].+)', getCutVotes),
+    url(r'^getCutVotes/(?P<pg_id>\d+)', getCutVotes),
 )
