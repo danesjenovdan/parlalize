@@ -5,7 +5,7 @@ import json
 from django.http import JsonResponse
 from parlaskupine.models import *
 from collections import Counter
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 import numpy as np
 from scipy.stats.stats import pearsonr
 from parlaposlanci.models import Person
@@ -546,3 +546,33 @@ def runSetters(request, date_to):
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
     return JsonResponse({"status": "all is fine :D"}, safe=False)
+
+
+def runSetters(date_to):
+    setters_models = {
+        # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
+        CutVotes: "/setCutVotes/",#BASE_URL+'/p/setCutVotes/',
+        DeviationInOrganization: "/setDeviationInOrg/",
+        LessMatchingThem: "/setLessMatchingThem/",
+        MostMatchingThem: "/setMostMatchingThem/"
+    }
+
+    IDs = getPGIDs()
+    IDs = [1, 2]
+    # print IDs
+    allIds = len(IDs)
+    curentId = 0
+    
+    for model, setter in setters_models.items():
+        for ID in IDs:
+            print setter
+            dates = findDatesFromLastCard(model, ID, date_to)
+            print dates
+            for date in dates:
+                url = BASE_URL+"/pg"+setter+str(ID)+'/'+date.strftime(API_DATE_FORMAT)
+                print url
+                # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
+                a = requests.get(url).json()
+        curentId += 1
+                # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
+    return {"status": "all is fine :D"}
