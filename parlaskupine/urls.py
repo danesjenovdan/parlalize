@@ -40,4 +40,9 @@ urlpatterns = patterns('',
 
     url(r'^getCutVotes/(?P<pg_id>\d+)/(?P<date>[\w].+)', getCutVotes),
     url(r'^getCutVotes/(?P<pg_id>\d+)', getCutVotes),
+
+    ####################################################################################
+
+    # runenr
+    url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
 )
