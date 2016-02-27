@@ -1,6 +1,7 @@
 import requests
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA as sklearnPCA
 
 # kako prikazati kompas
 
@@ -55,5 +56,18 @@ def getData():
     for i, person in enumerate(people_ballots_sorted_list):
         for j, ballot in enumerate(person):
             people_ballots_sorted_list[i][j] = assignValueToOption(ballot['option'])
+
+    thearray = np.array(people_ballots_sorted_list)
+
+    sklearn_pca = sklearnPCA(n_components=2)
+    sklearn_transf = sklearn_pca.fit_transform(thearray)
+
+    fig, ax = plt.subplots()
+    ax.scatter(sklearn_transf[0:90,0],sklearn_transf[0:90,1], 'o', markersize=7, color='blue', alpha=0.5)
+    for i, txt in enumerate(people_ids):
+        ax.annotate(str(txt), (sklearn_transf[0:90,0][i], sklearn_transf[0:90,0][i]))
+
+    # plt.plot(sklearn_transf[0:90,0],sklearn_transf[0:90,1], 'o', markersize=7, color='blue', alpha=0.5)
+    plt.savefig('testis.png')
 
     return people_ids, people_ballots_sorted, people_ballots_sorted_list
