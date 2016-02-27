@@ -98,9 +98,9 @@ def voteAbsent(vote):
         return 0
 
 
-def normalize(val, max):
+def normalize(val, max_):
     try:
-        return round((val*100)/float(max))
+        return round((float(val)*100)/float(max_))
     except:
         return val
 
