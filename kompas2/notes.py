@@ -31,10 +31,13 @@ def assignValueToOption(option):
 def getPeoplesNames(ids):
     names_list = []
     for person_id in ids:
-        data = requests.get('https://analize.parlameter.si/v1/p/getMPStatic/' + str(person_id)).json()
-        name = data.person.name
+        print person_id
+        data = requests.get('https://analize.parlameter.si/v1/p/getMPStatic/' + str(person_id) + '/').json()
+        name = data['person']['name']
 
-        names_list.append(data.person.name)
+        names_list.append(data['person']['name'])
+
+    return names_list
 
 def getData():
     allballots = requests.get('https://data.parlameter.si/v1/getAllBallots/').json()
