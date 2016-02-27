@@ -78,7 +78,6 @@ def getData():
     ax2.scatter(mda_result[0:90, 0], mda_result[0:90, 1])
     for i, txt in enumerate(people_ids):
         ax2.annotate(str(txt), (mda_result[0:90, 0][i], mda_result[0:90, 1][i]))
-
     plt.savefig('MDA.png')
 
     return people_ids, people_ballots_sorted, people_ballots_sorted_list, sklearn_mda
