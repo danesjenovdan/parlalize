@@ -219,3 +219,39 @@ class DeviationInOrganization(Timestampable, models.Model):
     votes2 = models.FloatField(_('daviation2'),
                                blank=True, null=True,
                                help_text=_('MatchingThem'))
+
+
+class CutVotes(Timestampable, models.Model):
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+    organization = models.ForeignKey("Organization")
+    this_for = models.IntegerField()
+    this_against = models.IntegerField()
+    this_abstain = models.IntegerField()
+    this_absent = models.IntegerField()
+    coalition_for = models.IntegerField()
+    coalition_against = models.IntegerField()
+    coalition_abstain = models.IntegerField()
+    coalition_absent = models.IntegerField()
+    coalition_for_max = models.IntegerField()
+    coalition_against_max = models.IntegerField()
+    coalition_abstain_max = models.IntegerField()
+    coalition_absent_max = models.IntegerField()
+    coalition_for_max_org = models.CharField(max_length=500)
+    coalition_against_max_org = models.CharField(max_length=500)
+    coalition_abstain_max_org = models.CharField(max_length=500)
+    coalition_absent_max_org = models.CharField(max_length=500)
+    opposition_for = models.IntegerField()
+    opposition_against = models.IntegerField()
+    opposition_abstain = models.IntegerField()
+    opposition_absent = models.IntegerField()
+    opposition_for_max =models.IntegerField()
+    opposition_against_max = models.IntegerField()
+    opposition_abstain_max = models.IntegerField()
+    opposition_absent_max = models.IntegerField()
+    opposition_for_max_org = models.CharField(max_length=500)
+    opposition_against_max_org = models.CharField(max_length=500)
+    opposition_abstain_max_org = models.CharField(max_length=500)
+    opposition_absent_max_org = models.CharField(max_length=500)
