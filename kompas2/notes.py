@@ -78,7 +78,7 @@ def getData():
     fig, ax = plt.subplots()
     ax.scatter(sklearn_transf[0:90,0],sklearn_transf[0:90,1])#, 'o', markersize=7, color='blue', alpha=0.5)
     for i, txt in enumerate(people_ids):
-        ax.annotate(str(txt), (sklearn_transf[0:90,0][i], sklearn_transf[0:90,1][i]))
+        ax.annotate(str(txt).encode('ascii', errors='xmlcharrefreplace'), (sklearn_transf[0:90,0][i], sklearn_transf[0:90,1][i]))
 
     # plt.plot(sklearn_transf[0:90,0],sklearn_transf[0:90,1], 'o', markersize=7, color='blue', alpha=0.5)
     plt.savefig('PCA.png')
