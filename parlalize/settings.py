@@ -48,10 +48,12 @@ INSTALLED_APPS = (
     'parlaseje',
     'django_extensions',
     'raven.contrib.django.raven_compat',
+    'corsheaders',
 )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -165,3 +167,6 @@ RAVEN_CONFIG = {
 }
 
 API_DATE_FORMAT = '%d.%m.%Y'
+
+# CORS config
+CORS_ORIGIN_ALLOW_ALL = True

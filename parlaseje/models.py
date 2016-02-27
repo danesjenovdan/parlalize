@@ -124,6 +124,10 @@ class Ballot(Activity):
         super(Activity, self).__init__(*args, **kwargs)
 
 class Vote(Timestampable, models.Model):
+    # created_for = models.DateField(_('date of vote'),
+    #                                blank=True,
+    #                                null=True,
+    #                                help_text=_('date of vote'))
     session = models.ForeignKey('Session',
                                blank=True, null=True,
                                related_name='in_session',

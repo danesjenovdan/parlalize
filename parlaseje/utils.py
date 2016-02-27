@@ -3,6 +3,7 @@ import numpy
 from datetime import datetime, timedelta
 from django.http import Http404
 import requests
+from parlalize.utils import saveOrAbortNew
 from parlaposlanci.models import Person, LastActivity
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Vote, Speech, Session, Ballot, Vote_graph, Vote, AbsentMPs
@@ -78,3 +79,30 @@ def saveOrAbortAbsent(model, **kwargs):
 		newModel = model(**kwargs)
 		newModel.save()
 		print "Saved"
+
+def countBallots(vote):
+    # count votes for, against, abstentions, misses
+    votesfor = len([ballot for ballot in vote.vote.all() if ballot.option == 'za'])
+    votesagainst = len([ballot for ballot in vote.vote.all() if ballot.option == 'proti'])
+    votesabstained = len([ballot for ballot in vote.vote.all() if ballot.option == 'kvorum'])
+    votesmissing = len([ballot for ballot in vote.vote.all() if ballot.option == 'ni'])
+
+    return {'for': votesfor, 'against': votesagainst, 'abstained': votesabstained, 'missing': votesmissing}
+
+def updateVotes():
+    for vote in Vote.objects.all():
+        counts = countBallots(vote)
+
+        votes_for = counts['for']
+        against = counts['against']
+        abstain = counts['abstained']
+        not_present = counts['missing']
+
+        # saveOrAbortNew(Vote, session=vote.session, motion=vote.motion, votes_for=votes_for, against=against, abstain=abstain, not_present=not_present, result=vote.result, id_parladata=vote.id_parladata, created_for=vote.created_for)
+        vote.votes_for = votes_for
+        vote.against = against
+        vote.abstain = abstain
+        vote.not_present = not_present
+        vote.save()
+
+    return 1
