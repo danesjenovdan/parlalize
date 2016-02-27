@@ -1,10 +1,11 @@
 import requests
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
 
-# kako prikazati kompas
+matplotlib.rc('font', family='Arial')
 
 def showCompass():
 
