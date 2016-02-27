@@ -152,10 +152,16 @@ def saveOrAbortNew(model, **kwargs):
 
 def findDatesFromLastCard(model, id, lastParsedDate):
     toDate = datetime.strptime(lastParsedDate, '%d.%m.%Y').date()
+    print model._meta.app_label
     try:
-        lastCardDate = model.objects.filter(person__id_parladata=id).order_by("-created_for")[0].created_for
+        if model._meta.app_label == "parlaposlanci":
+            lastCardDate = model.objects.filter(person__id_parladata=id).order_by("-created_for")[0].created_for
+        elif model._meta.app_label == "parlaskupine":
+            lastCardDate = model.objects.filter(organization__id_parladata=id).order_by("-created_for")[0].created_for
+        elif model._meta.app_label == "parlaseje":
+            lastCardDate = model.objects.filter(session__id_parladata=id).order_by("-created_for")[0].created_for
     except:
-        lastCardDate = datetime.strptime("01.09.2015", '%d.%m.%Y').date()
+        lastCardDate = datetime.strptime("01.08.2014", '%d.%m.%Y').date()
     #lastCardDate = lastCardDate.replace(tzinfo=None)
 
     return [(lastCardDate+timedelta(days=days)) for days in range((toDate-lastCardDate).days)]
@@ -342,3 +348,10 @@ def getIDs():
         result.append(mp['id'])
 
     return result
+
+
+# get all PG ID's
+def getPGIDs():
+    data = requests.get(API_URL+'/getMembersOfPGs/').json()
+
+    return [pg for pg in data]
