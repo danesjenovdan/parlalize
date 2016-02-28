@@ -93,14 +93,14 @@ def setPercentOFAttendedSession(request, person_id):
     return JsonResponse({'alliswell': result})
 
 def getPercentOFAttendedSession(request, person_id, date=None):
-	equalVoters = getPersonCardModel(Presence, person_id, date)
+    equalVoters = getPersonCardModel(Presence, person_id, date)
 
-	out  = {
+    out  = {
         'person': {
             "name": equalVoters.person.name,
             "id": equalVoters.person.id_parladata,
         },
-		'results': {
+        'results': {
             "value": equalVoters.person_value,
             "average": equalVoters.average,
             "max": {
@@ -110,7 +110,7 @@ def getPercentOFAttendedSession(request, person_id, date=None):
             }
         }
     }
-	return JsonResponse(out)
+    return JsonResponse(out)
 
 
 #Saves to DB number of spoken word of MP and maximum and average of spoken words
@@ -279,30 +279,54 @@ def getAllSpeeches(request, person_id, date=None):
 
 
 #method returns percent, how similar does the members vote
-def getEqualVoters(request, id):
-	votes = getLogicVotes()
+def getEqualVoters(request, id, date=None):
+    if date:
+        votes = getLogicVotes(date)
+        date_of = datetime.strptime(date, '%d.%m.%Y')
+    else:
+        votes = getLogicVotes()
+        date_of = datetime.now().date()
+    #votes = getLogicVotes()
 
-	members = getMPsList(request)
-	membersDict = {str(mp['id']):mp for mp in json.loads(members.content)}
+    members = getMPsList(request)
+    membersDict = {str(mp['id']):mp for mp in json.loads(members.content)}
 
-	out = {vote:pearsonr(votes[str(id)].values(), votes[str(vote)].values())[0] for vote in sorted(votes.keys())}
-	keys = sorted(out, key=out.get)
+    out = {vote:pearsonr(votes[str(id)].values(), votes[str(vote)].values())[0] for vote in sorted(votes.keys())}
+    keys = sorted(out, key=out.get)
 
-	for key in keys:
-		membersDict[key].update({'ratio':out[str(key)]})
-		membersDict[key].update({'id':key})
-	return membersDict, keys
+    for key in keys:
+        membersDict[key].update({'ratio':out[str(key)]})
+        membersDict[key].update({'id':key})
+    return membersDict, keys, date_of
 
-#Method return json with most similar voters to this voter
-def setMostEqualVoters(request, person_id):
-	members, keys = getEqualVoters(request, person_id)
-	out = {index:members[key] for key, index in zip(keys[-6:-1], [5,4,3,2,1])}
 
-	result = saveOrAbort(model=EqualVoters, person=Person.objects.get(id_parladata=int(person_id)), person1=Person.objects.get(id_parladata=int(out[1]['id'])), votes1=out[1]['ratio'], person2=Person.objects.get(id_parladata=int(out[2]['id'])), votes2=out[2]['ratio'], person3=Person.objects.get(id_parladata=int(out[3]['id'])), votes3=out[3]['ratio'], person4=Person.objects.get(id_parladata=int(out[4]['id'])), votes4=out[4]['ratio'], person5=Person.objects.get(id_parladata=int(out[5]['id'])), votes5=out[5]['ratio'])
-	return HttpResponse('All iz well')
+# Method return json with most similar voters to this voter
+def setMostEqualVoters(request, person_id, date=None):
+    if date:
+        members, keys, date_of = getEqualVoters(request, person_id, date)
+    else:
+        members, keys, date_of = getEqualVoters(request, person_id)
+
+    out = {index: members[key] for key, index in zip(keys[-6:-1], [5, 4, 3, 2, 1])}
+
+    result = saveOrAbortNew(model=EqualVoters,
+                            created_for=date_of,
+                            person=Person.objects.get(id_parladata=int(person_id)),
+                            person1=Person.objects.get(id_parladata=int(out[1]['id'])),
+                            votes1=out[1]['ratio'],
+                            person2=Person.objects.get(id_parladata=int(out[2]['id'])),
+                            votes2=out[2]['ratio'],
+                            person3=Person.objects.get(id_parladata=int(out[3]['id'])),
+                            votes3=out[3]['ratio'],
+                            person4=Person.objects.get(id_parladata=int(out[4]['id'])),
+                            votes4=out[4]['ratio'],
+                            person5=Person.objects.get(id_parladata=int(out[5]['id'])),
+                            votes5=out[5]['ratio'])
+    return HttpResponse('All iz well')
+
 
 def getMostEqualVoters(request, person_id, date=None):
-    equalVoters = getPersonCardModel(EqualVoters, person_id, date)
+    equalVoters = getPersonCardModelNew(EqualVoters, person_id, date)
 
     print equalVoters.person1.id_parladata
 
@@ -345,20 +369,37 @@ def getMostEqualVoters(request, person_id, date=None):
         ]
     }
 
-	#data = getPersonCardModel(EqualVoters, person_id)
+    #data = getPersonCardModel(EqualVoters, person_id)
     return JsonResponse(out, safe=False)
 
-#Method return json with less similar voters to this voter
-def setLessEqualVoters(request, person_id):
-    members, keys = getEqualVoters(request, person_id)
-    out = {index:members[key] for key, index in zip(keys[:5], [1,2,3,4,5])}
 
-    result = saveOrAbort(model=LessEqualVoters, person=Person.objects.get(id_parladata=int(person_id)), person1=Person.objects.get(id_parladata=int(out[1]['id'])), votes1=out[1]['ratio'], person2=Person.objects.get(id_parladata=int(out[2]['id'])), votes2=out[2]['ratio'], person3=Person.objects.get(id_parladata=int(out[3]['id'])), votes3=out[3]['ratio'], person4=Person.objects.get(id_parladata=int(out[4]['id'])), votes4=out[4]['ratio'], person5=Person.objects.get(id_parladata=int(out[5]['id'])), votes5=out[5]['ratio'])
+# Method return json with less similar voters to this voter
+def setLessEqualVoters(request, person_id, date=None):
+    if date:
+        members, keys, date_of = getEqualVoters(request, person_id, date)
+    else:
+        members, keys, date_of = getEqualVoters(request, person_id)
+    out = {index: members[key] for key, index in zip(keys[:5], [1, 2, 3, 4, 5])}
+
+    result = saveOrAbortNew(model=LessEqualVoters,
+                            created_for=date_of,
+                            person=Person.objects.get(id_parladata=int(person_id)),
+                            person1=Person.objects.get(id_parladata=int(out[1]['id'])),
+                            votes1=out[1]['ratio'],
+                            person2=Person.objects.get(id_parladata=int(out[2]['id'])),
+                            votes2=out[2]['ratio'],
+                            person3=Person.objects.get(id_parladata=int(out[3]['id'])),
+                            votes3=out[3]['ratio'],
+                            person4=Person.objects.get(id_parladata=int(out[4]['id'])),
+                            votes4=out[4]['ratio'],
+                            person5=Person.objects.get(id_parladata=int(out[5]['id'])),
+                            votes5=out[5]['ratio'])
     return HttpResponse('All iz well')
 
+
 def getLessEqualVoters(request, person_id, date=None):
-	equalVoters = getPersonCardModel(LessEqualVoters, person_id)
-	out = {
+    equalVoters = getPersonCardModelNew(LessEqualVoters, person_id, date)
+    out = {
         'person': {
             'name': Person.objects.get(id_parladata=int(person_id)).name,
             'id': int(person_id)
@@ -397,182 +438,188 @@ def getLessEqualVoters(request, person_id, date=None):
         ]
     }
 
-	#data = getPersonCardModel(EqualVoters, person_id)
-	return JsonResponse(out, safe=False)
+    #data = getPersonCardModel(EqualVoters, person_id)
+    return JsonResponse(out, safe=False)
 
 #get speech and data of speaker
 def getSpeech(request, id):
-	speech=requests.get(API_URL+'/getSpeech/'+id+'/')
-	speech = speech.json()
-	memList = getMPsList(request)
-	members = json.loads(memList.content)
-	speech['name'] = members[str(speech['speeker'])]['Name']
-	speech['image'] = members[str(speech['speeker'])]['Image']
-	return JsonResponse(speech)
+    speech=requests.get(API_URL+'/getSpeech/'+id+'/')
+    speech = speech.json()
+    memList = getMPsList(request)
+    members = json.loads(memList.content)
+    speech['name'] = members[str(speech['speeker'])]['Name']
+    speech['image'] = members[str(speech['speeker'])]['Image']
+    return JsonResponse(speech)
 
 #TODO
 #/id/percent/prisotniAliVsi
 #/34/66/1
 def getMPsWhichFitsToPG(request, id):
-	r=requests.get(API_URL+'/getVotes/')
-	votes = r.json()
-	r=requests.get(API_URL+'/getMembersOfPGs/')
-	membersInPGs = r.json()
+    r=requests.get(API_URL+'/getVotes/')
+    votes = r.json()
+    r=requests.get(API_URL+'/getMembersOfPGs/')
+    membersInPGs = r.json()
 
-	votesToLogical(votes, len(Vote.objects.all()))
-	#calculate mean
-	votesLists = [votes[str(pgMember)] for pgMember in membersInPGs[id]]
-	votesArray = numpy.array(votesLists)
-	mean = numpy.mean(votesArray, axis=0)
+    votesToLogical(votes, len(Vote.objects.all()))
+    #calculate mean
+    votesLists = [votes[str(pgMember)] for pgMember in membersInPGs[id]]
+    votesArray = numpy.array(votesLists)
+    mean = numpy.mean(votesArray, axis=0)
 
-	#TODO discretization for
-	#mean = [for m in mean]
+    #TODO discretization for
+    #mean = [for m in mean]
 
-	#delete members of PR from votes list
-	map(votes.__delitem__, [str(member) for member in membersInPGs[id]])
+    #delete members of PR from votes list
+    map(votes.__delitem__, [str(member) for member in membersInPGs[id]])
 
-	out = {vote:pearsonr(votes[vote], mean)[0] for vote in votes.keys()}
-	keys = sorted(out, key=out.get)
-	print out
-	members = getMPsList(request)
-	members= json.loads(members.content)
-	print members
-	for member in members:
-		#TODO: check members group
-		try:
-			member.update({'ratio': out[str(member["id"])]})
-		except:
-			member.update({'ratio': 0})
-	#for key in keys:
-	#	members[key].update({'ratio':out[key]})
-	outs = sorted(members, key=lambda k: k['ratio'])
+    out = {vote:pearsonr(votes[vote], mean)[0] for vote in votes.keys()}
+    keys = sorted(out, key=out.get)
+    print out
+    members = getMPsList(request)
+    members= json.loads(members.content)
+    print members
+    for member in members:
+        #TODO: check members group
+        try:
+            member.update({'ratio': out[str(member["id"])]})
+        except:
+            member.update({'ratio': 0})
+    #for key in keys:
+    #   members[key].update({'ratio':out[key]})
+    outs = sorted(members, key=lambda k: k['ratio'])
 
-	#outs = {key:members[key] for key in keys[-5:]}
-	return JsonResponse(outs[-5:], safe=False)
+    #outs = {key:members[key] for key in keys[-5:]}
+    return JsonResponse(outs[-5:], safe=False)
 
 
-def setCutVotes(request, person_id):
+def setCutVotes(request, person_id, date=None):
 
-	#Add data of person to dictionary
-	"""
-		ObjectOut: output dictionary
-		rootKey: root key
-		id: id of person
-		objectIn: dictionary with persons
-	"""
-	def getIdImageName(ObjectOut, rootKey, ids, objectIn):
-		ObjectOut[rootKey+"ID"] = []
-		ObjectOut[rootKey+"Name"] = []
-		ObjectOut[rootKey+"Image"] = []
-		for id in ids:
-			ObjectOut[rootKey+"ID"].append(str(id))
-			ObjectOut[rootKey+"Name"].append(objectIn[str(id)]['name'])
-			ObjectOut[rootKey+"Image"].append(objectIn[str(id)]['image'])
+    #Add data of person to dictionary
+    """
+        ObjectOut: output dictionary
+        rootKey: root key
+        id: id of person
+        objectIn: dictionary with persons
+    """
+    def getIdImageName(ObjectOut, rootKey, ids, objectIn):
+        ObjectOut[rootKey+"ID"] = []
+        ObjectOut[rootKey+"Name"] = []
+        ObjectOut[rootKey+"Image"] = []
+        for id in ids:
+            ObjectOut[rootKey+"ID"].append(str(id))
+            ObjectOut[rootKey+"Name"].append(objectIn[str(id)]['name'])
+            ObjectOut[rootKey+"Image"].append(objectIn[str(id)]['image'])
 
-	r=requests.get(API_URL+'/getVotes/')
-	votes = r.json()
+    print "cut"
+    if date:
+        r = requests.get(API_URL+'/getVotes/' + date)
+        date_of = datetime.strptime(date, '%d.%m.%Y')
+    else:
+        r = requests.get(API_URL+'/getVotes/')
+        date_of = datetime.now().date()
+    votes = r.json()
+    r=requests.get(API_URL+'/getMembersOfPGs/')
+    membersInPGs = r.json()
 
-	r=requests.get(API_URL+'/getMembersOfPGs/')
-	membersInPGs = r.json()
+    r=requests.get(API_URL+'/getCoalitionPGs/')
+    coalition = r.json()
 
-	r=requests.get(API_URL+'/getCoalitionPGs/')
-	coalition = r.json()
+    memList = getMPsList(request)
+    members = {str(mp['id']):mp for mp in json.loads(memList.content)}
 
-	memList = getMPsList(request)
-	members = {str(mp['id']):mp for mp in json.loads(memList.content)}
+    votes_count = len(Vote.objects.all())
 
-	votes_count = len(Vote.objects.all())
+    out = dict()
+    out["for"] = dict()
+    out["against"] = dict()
+    out["abstain"] = dict()
+    out["absent"] = dict()
+    #Calculations for this member
+    out["for"]["this"]=normalize(sum(map(voteFor, votes[person_id].values())),votes_count)
+    out["against"]["this"]=normalize(sum(map(voteAgainst, votes[person_id].values())),votes_count)
+    out["abstain"]["this"]=normalize(sum(map(voteAbstain, votes[person_id].values())),votes_count)
+    out["absent"]["this"]=normalize(sum(map(voteAbsent, votes[person_id].values())),votes_count)
+    memReq = getMPStaticPL(request, person_id)
+    memberData = json.loads(memReq.content)
+    out["thisName"]=memberData['person']['name']
 
-	out = dict()
-	out["for"] = dict()
-	out["against"] = dict()
-	out["abstain"] = dict()
-	out["absent"] = dict()
-	#Calculations for this member
-	out["for"]["this"]=normalize(sum(map(voteFor, votes[person_id].values())),votes_count)
-	out["against"]["this"]=normalize(sum(map(voteAgainst, votes[person_id].values())),votes_count)
-	out["abstain"]["this"]=normalize(sum(map(voteAbstain, votes[person_id].values())),votes_count)
-	out["absent"]["this"]=normalize(sum(map(voteAbsent, votes[person_id].values())),votes_count)
-	memReq = getMPStaticPL(request, person_id)
-	memberData = json.loads(memReq.content)
-	out["thisName"]=memberData['person']['name']
+    #Calculations for coalition
+    idsForCoal, coalFor = zip(*[(member,sum(map(voteFor,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
+    idsCoalAgainst, coalAgainst = zip(*[(member,sum(map(voteAgainst,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
+    idsCoalAbstain, coalAbstain = zip(*[(member,sum(map(voteAbstain,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
+    idsCoalAbsent, coalAbsent = zip(*[(member,sum(map(voteAbsent,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
 
-	#Calculations for coalition
-	idsForCoal, coalFor = zip(*[(member,sum(map(voteFor,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
-	idsCoalAgainst, coalAgainst = zip(*[(member,sum(map(voteAgainst,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
-	idsCoalAbstain, coalAbstain = zip(*[(member,sum(map(voteAbstain,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
-	idsCoalAbsent, coalAbsent = zip(*[(member,sum(map(voteAbsent,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
+    coalMaxPercentFor = max(coalFor)
+    coalMaxPercentAgainst = max(coalAgainst)
+    coalMaxPercentAbstain = max(coalAbstain)
+    coalMaxPercentAbsent = max(coalAbsent)
 
-	coalMaxPercentFor = max(coalFor)
-	coalMaxPercentAgainst = max(coalAgainst)
-	coalMaxPercentAbstain = max(coalAbstain)
-	coalMaxPercentAbsent = max(coalAbsent)
+    out["for"]["coalition"]=normalize(sum(coalFor)/len(coalFor),votes_count)
+    out["for"]["maxCoal"]=normalize(coalMaxPercentFor,votes_count)
+    idsMaxForCoal = numpy.array(idsForCoal)[numpy.where(numpy.array(coalFor) == coalMaxPercentFor)[0]]
+    getIdImageName(out["for"], "maxCoal", idsMaxForCoal, members)
 
-	out["for"]["coalition"]=normalize(sum(coalFor)/len(coalFor),votes_count)
-	out["for"]["maxCoal"]=normalize(coalMaxPercentFor,votes_count)
-	idsMaxForCoal = numpy.array(idsForCoal)[numpy.where(numpy.array(coalFor) == coalMaxPercentFor)[0]]
-	getIdImageName(out["for"], "maxCoal", idsMaxForCoal, members)
+    out["against"]["coalition"]=normalize(sum(coalAgainst)/len(coalAgainst),votes_count)
+    out["against"]["maxCoal"]=normalize(coalMaxPercentAgainst,votes_count)
+    idsMaxAgainstCoal = numpy.array(idsCoalAgainst)[numpy.where(numpy.array(coalAgainst) == coalMaxPercentAgainst)[0]]
+    getIdImageName(out["against"], "maxCoal", idsMaxAgainstCoal, members)
 
-	out["against"]["coalition"]=normalize(sum(coalAgainst)/len(coalAgainst),votes_count)
-	out["against"]["maxCoal"]=normalize(coalMaxPercentAgainst,votes_count)
-	idsMaxAgainstCoal = numpy.array(idsCoalAgainst)[numpy.where(numpy.array(coalAgainst) == coalMaxPercentAgainst)[0]]
-	getIdImageName(out["against"], "maxCoal", idsMaxAgainstCoal, members)
+    out["abstain"]["coalition"]=normalize(sum(coalAbstain)/len(coalAbstain),votes_count)
+    out["abstain"]["maxCoal"]=normalize(coalMaxPercentAbstain,votes_count)
+    idsMaxAbstainCoal = numpy.array(idsCoalAbstain)[numpy.where(numpy.array(coalAbstain) == coalMaxPercentAbstain)[0]]
+    getIdImageName(out["abstain"], "maxCoal", idsMaxAbstainCoal, members)
 
-	out["abstain"]["coalition"]=normalize(sum(coalAbstain)/len(coalAbstain),votes_count)
-	out["abstain"]["maxCoal"]=normalize(coalMaxPercentAbstain,votes_count)
-	idsMaxAbstainCoal = numpy.array(idsCoalAbstain)[numpy.where(numpy.array(coalAbstain) == coalMaxPercentAbstain)[0]]
-	getIdImageName(out["abstain"], "maxCoal", idsMaxAbstainCoal, members)
+    out["absent"]["coalition"]=normalize(sum(coalAbsent)/len(coalAbsent),votes_count)
+    out["absent"]["maxCoal"]=normalize(coalMaxPercentAbsent,votes_count)
+    idsMaxAbsentCoal = numpy.array(idsCoalAbsent)[numpy.where(numpy.array(coalAbsent) == coalMaxPercentAbsent)[0]]
+    getIdImageName(out["absent"], "maxCoal", idsMaxAbsentCoal, members)
 
-	out["absent"]["coalition"]=normalize(sum(coalAbsent)/len(coalAbsent),votes_count)
-	out["absent"]["maxCoal"]=normalize(coalMaxPercentAbsent,votes_count)
-	idsMaxAbsentCoal = numpy.array(idsCoalAbsent)[numpy.where(numpy.array(coalAbsent) == coalMaxPercentAbsent)[0]]
-	getIdImageName(out["absent"], "maxCoal", idsMaxAbsentCoal, members)
+    #Calculations for opozition
+    #delete coalition groups from members in PGs
+    map(membersInPGs.__delitem__, [str(coalitionIds) for coalitionIds in coalition['coalition']])
+    idsForOpp, oppFor = zip(*[(member,sum(map(voteFor,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
+    idsOppAgainst ,oppAgainst = zip(*[(member,sum(map(voteAgainst,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
+    idsOppAbstain, oppAbstain = zip(*[(member,sum(map(voteAbstain,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
+    idsOppAbsent, oppAbsent = zip(*[(member,sum(map(voteAbsent,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
+    oppMaxPercentFor = max(oppFor)
+    oppMaxPercentAgainst = max(oppAgainst)
+    oppMaxPercentAbstain = max(oppAbstain)
+    oppMaxPercentAbsent = max(oppAbsent)
 
-	#Calculations for opozition
-	#delete coalition groups from members in PGs
-	map(membersInPGs.__delitem__, [str(coalitionIds) for coalitionIds in coalition['coalition']])
-	idsForOpp, oppFor = zip(*[(member,sum(map(voteFor,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-	idsOppAgainst ,oppAgainst = zip(*[(member,sum(map(voteAgainst,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-	idsOppAbstain, oppAbstain = zip(*[(member,sum(map(voteAbstain,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-	idsOppAbsent, oppAbsent = zip(*[(member,sum(map(voteAbsent,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-	oppMaxPercentFor = max(oppFor)
-	oppMaxPercentAgainst = max(oppAgainst)
-	oppMaxPercentAbstain = max(oppAbstain)
-	oppMaxPercentAbsent = max(oppAbsent)
+    out["for"]["opozition"]=normalize(sum(oppFor)/len(oppFor),votes_count)
+    out["for"]["maxOpp"]=normalize(oppMaxPercentFor,votes_count)
 
-	out["for"]["opozition"]=normalize(sum(oppFor)/len(oppFor),votes_count)
-	out["for"]["maxOpp"]=normalize(oppMaxPercentFor,votes_count)
+    memReq = getMPStaticPL(request, idsForOpp[oppFor.index(oppMaxPercentFor)])
+    memberData = json.loads(memReq.content)
+    idsMaxForOppo = numpy.array(idsForOpp)[numpy.where(numpy.array(oppFor) == oppMaxPercentFor)[0]]
+    getIdImageName(out["for"], "maxOpp", idsMaxForOppo, members)
 
-	memReq = getMPStaticPL(request, idsForOpp[oppFor.index(oppMaxPercentFor)])
-	memberData = json.loads(memReq.content)
-	idsMaxForOppo = numpy.array(idsForOpp)[numpy.where(numpy.array(oppFor) == oppMaxPercentFor)[0]]
-	getIdImageName(out["for"], "maxOpp", idsMaxForOppo, members)
+    out["against"]["opozition"]=normalize(sum(oppAgainst)/len(oppAgainst),votes_count)
+    out["against"]["maxOpp"]=normalize(oppMaxPercentAgainst,votes_count)
+    memReq = getMPStaticPL(request, idsOppAgainst[oppAgainst.index(oppMaxPercentAgainst)])
+    memberData = json.loads(memReq.content)
+    idsMaxAgainstOppo = numpy.array(idsOppAgainst)[numpy.where(numpy.array(oppAgainst) == oppMaxPercentAgainst)[0]]
+    getIdImageName(out["against"], "maxOpp", idsMaxAgainstOppo, members)
 
-	out["against"]["opozition"]=normalize(sum(oppAgainst)/len(oppAgainst),votes_count)
-	out["against"]["maxOpp"]=normalize(oppMaxPercentAgainst,votes_count)
-	memReq = getMPStaticPL(request, idsOppAgainst[oppAgainst.index(oppMaxPercentAgainst)])
-	memberData = json.loads(memReq.content)
-	idsMaxAgainstOppo = numpy.array(idsOppAgainst)[numpy.where(numpy.array(oppAgainst) == oppMaxPercentAgainst)[0]]
-	getIdImageName(out["against"], "maxOpp", idsMaxAgainstOppo, members)
+    out["abstain"]["opozition"]=normalize(sum(oppAbstain)/len(oppAbstain),votes_count)
+    out["abstain"]["maxOpp"]=normalize(oppMaxPercentAbstain,votes_count)
 
-	out["abstain"]["opozition"]=normalize(sum(oppAbstain)/len(oppAbstain),votes_count)
-	out["abstain"]["maxOpp"]=normalize(oppMaxPercentAbstain,votes_count)
+    memReq = getMPStaticPL(request, idsOppAbstain[oppAbstain.index(oppMaxPercentAbstain)])
+    memberData = json.loads(memReq.content)
+    idsMaxAbstainOppo = numpy.array(idsOppAbstain)[numpy.where(numpy.array(oppAbstain) == oppMaxPercentAbstain)[0]]
+    getIdImageName(out["abstain"], "maxOpp", idsMaxAbstainOppo, members)
 
-	memReq = getMPStaticPL(request, idsOppAbstain[oppAbstain.index(oppMaxPercentAbstain)])
-	memberData = json.loads(memReq.content)
-	idsMaxAbstainOppo = numpy.array(idsOppAbstain)[numpy.where(numpy.array(oppAbstain) == oppMaxPercentAbstain)[0]]
-	getIdImageName(out["abstain"], "maxOpp", idsMaxAbstainOppo, members)
+    out["absent"]["opozition"]=normalize(sum(oppAbsent)/len(oppAbsent),votes_count)
+    out["absent"]["maxOpp"]=normalize(oppMaxPercentAbsent,votes_count)
 
-	out["absent"]["opozition"]=normalize(sum(oppAbsent)/len(oppAbsent),votes_count)
-	out["absent"]["maxOpp"]=normalize(oppMaxPercentAbsent,votes_count)
+    memReq = getMPStaticPL(request, idsOppAbsent[oppAbsent.index(oppMaxPercentAbsent)])
+    memberData = json.loads(memReq.content)
+    idsMaxAbsentOppo = numpy.array(idsOppAbsent)[numpy.where(numpy.array(oppAbsent) == oppMaxPercentAbsent)[0]]
+    getIdImageName(out["absent"], "maxOpp", idsMaxAbsentOppo, members)
 
-	memReq = getMPStaticPL(request, idsOppAbsent[oppAbsent.index(oppMaxPercentAbsent)])
-	memberData = json.loads(memReq.content)
-	idsMaxAbsentOppo = numpy.array(idsOppAbsent)[numpy.where(numpy.array(oppAbsent) == oppMaxPercentAbsent)[0]]
-	getIdImageName(out["absent"], "maxOpp", idsMaxAbsentOppo, members)
-
-	final_response = saveOrAbort(
+    final_response = saveOrAbortNew(
         CutVotes,
+        created_for=date_of,
         person = Person.objects.get(id_parladata=person_id),
         this_for = out["for"]["this"],
         this_against = out["against"]["this"],
@@ -604,13 +651,13 @@ def setCutVotes(request, person_id):
         opposition_absent_max_person = ','.join(map(str, out["absent"]["maxOppID"]))
     )
 
-	return JsonResponse(out)
+    return JsonResponse(out)
 
 
 def getCutVotes(request, person_id, date=None):
-	cutVotes = getPersonCardModel(CutVotes, person_id, date)
+    cutVotes = getPersonCardModelNew(CutVotes, person_id, date)
 
-	out = {
+    out = {
         'person': {
             'id': int(person_id),
             'name': Person.objects.get(id_parladata=int(person_id)).name
@@ -670,30 +717,30 @@ def getCutVotes(request, person_id, date=None):
             },
         }
     }
-	return JsonResponse(out)
+    return JsonResponse(out)
 
 
 #   conflicting change, in here for backup, remove after 14th of July 2015
 #
-#	for i in content.keys():
-#		data[i] = [len(speech.split()) for speech in content[i]]
+#   for i in content.keys():
+#       data[i] = [len(speech.split()) for speech in content[i]]
 #
-#	for i in data.keys():
-#		allMPs[i] = sum(data[i])
+#   for i in data.keys():
+#       allMPs[i] = sum(data[i])
 #
-#	thisMP = allMPs[id]
-#	average = sum(allMPs.values()) / 90
-#	maximumMP = max(allMPs.iterkeys(), key=(lambda key: allMPs[key]))
-#	maximum = allMPs[maximumMP]
+#   thisMP = allMPs[id]
+#   average = sum(allMPs.values()) / 90
+#   maximumMP = max(allMPs.iterkeys(), key=(lambda key: allMPs[key]))
+#   maximum = allMPs[maximumMP]
 #
-#	toDB = SpokenWords(person = Person.objects.get(id_parladata=id),
-#					maxMP = Person.objects.get(id_parladata=maximumMP),
-#					average = average,
-#					maximum = maximum
-#					)
-#	#toDB.save()
+#   toDB = SpokenWords(person = Person.objects.get(id_parladata=id),
+#                   maxMP = Person.objects.get(id_parladata=maximumMP),
+#                   average = average,
+#                   maximum = maximum
+#                   )
+#   #toDB.save()
 #
-#	return JsonResponse(allMPs)
+#   return JsonResponse(allMPs)
 
 def setStyleScoresALLShell():
 
@@ -1173,3 +1220,31 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
     }
 
     return JsonResponse(out, safe=False)
+
+
+def runSetters(request, date_to):
+    setters_models = {
+        # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
+        # CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
+        LessEqualVoters: setLessEqualVoters,
+        # EqualVoters: setMostEqualVoters,
+    }
+    IDs = getIDs()
+    # print IDs
+    allIds = len(IDs)
+    curentId = 0
+    for ID in IDs:
+
+        print ID
+        print "".join(["*" for i in range(curentId)] + ["_" for i in range(allIds-curentId)])
+        for model, setter in setters_models.items():
+            print setter
+            dates = findDatesFromLastCard(model, ID, date_to)
+            print dates
+            for date in dates:
+                print date.strftime('%d.%m.%Y')
+                # print setter + str(ID) + "/" + date.strftime('%d.%m.%Y')
+                setter(request, str(ID), date.strftime('%d.%m.%Y'))
+        curentId += 1
+                # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
+    return JsonResponse({"status": "all is fine :D"}, safe=False)

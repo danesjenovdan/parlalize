@@ -3,7 +3,7 @@ import numpy
 from datetime import datetime, timedelta
 from django.http import Http404
 import requests
-from parlaposlanci.models import Person, LastActivity
+from parlaposlanci.models import Person, LastActivity, MPStaticPL
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Vote, Speech, Session, Ballot
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL
@@ -20,8 +20,12 @@ def voteToLogical(vote):
         return -1
 
 
-def getLogicVotes():
-    r = requests.get(API_URL+'/getVotes/')
+# Return dictionary of votes results by user ids. 
+def getLogicVotes(date=None):
+    if date:
+        r = requests.get(API_URL+'/getVotes/'+date)
+    else:
+        r = requests.get(API_URL+'/getVotes/')
     pl_votes = Vote.objects.all()
     votes = r.json()
     for person_id in votes.keys():
@@ -94,9 +98,9 @@ def voteAbsent(vote):
         return 0
 
 
-def normalize(val, max):
+def normalize(val, max_):
     try:
-        return round((val*100)/float(max))
+        return round((float(val)*100)/float(max_))
     except:
         return val
 
@@ -119,6 +123,64 @@ def saveOrAbort(model, **kwargs):
         newModel.save()
         return True
     return False
+
+
+# checks if cards with the data exists or not NEW
+def saveOrAbortNew(model, **kwargs):
+    def save_it(model, created_for, **kwargs):
+        kwargs.update({'created_for': created_for})
+        newModel = model(**kwargs)
+        newModel.save()
+        return True
+    created_for = kwargs.pop('created_for')
+    print kwargs
+    savedModel = model.objects.filter(**kwargs)
+    if savedModel:
+        if 'person' in kwargs:
+            if savedModel.latest('created_for').created_for != model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for:
+                save_it(model, created_for, **kwargs)
+        elif "organization" in kwargs:
+            if savedModel.latest('created_for').created_for != model.objects.filter(organization__id_parladata=kwargs["organization"].id_parladata).latest("created_at").created_for:
+                save_it(model, created_for, **kwargs)
+    else:
+        kwargs.update({'created_for': created_for})
+        newModel = model(**kwargs)
+        newModel.save()
+        return True
+    return False
+
+
+def findDatesFromLastCard(model, id, lastParsedDate):
+    toDate = datetime.strptime(lastParsedDate, '%d.%m.%Y').date()
+    print model._meta.app_label
+    try:
+        if model._meta.app_label == "parlaposlanci":
+            lastCardDate = model.objects.filter(person__id_parladata=id).order_by("-created_for")[0].created_for
+        elif model._meta.app_label == "parlaskupine":
+            lastCardDate = model.objects.filter(organization__id_parladata=id).order_by("-created_for")[0].created_for
+        elif model._meta.app_label == "parlaseje":
+            lastCardDate = model.objects.filter(session__id_parladata=id).order_by("-created_for")[0].created_for
+    except:
+        lastCardDate = datetime.strptime("01.08.2014", '%d.%m.%Y').date()
+    #lastCardDate = lastCardDate.replace(tzinfo=None)
+
+    return [(lastCardDate+timedelta(days=days)) for days in range((toDate-lastCardDate).days)]
+
+
+def getPersonCardModelNew(model, id, date=None):
+    if date:
+        modelObject = model.objects.filter(person__id_parladata=id, created_for__lte=datetime.strptime(date, '%d.%m.%Y'))
+    else:
+        modelObject = model.objects.filter(person__id_parladata=id, created_for__lte=datetime.now())
+
+    if not modelObject:
+        #if model == LastActivity:
+            #return None
+        raise Http404("Nismo našli kartice")
+    else:
+        modelObject = modelObject.latest('created_for')
+        print "get object BUBU", modelObject.created_for
+    return modelObject
 
 
 def getPersonCardModel(model, id, date=None):
@@ -176,6 +238,24 @@ def getPGCardModel(model, id, date=None):
         raise Http404("Nismo našli kartice")
     else:
         modelObject = modelObject.latest('created_at')
+    return modelObject
+
+
+def getPGCardModelNew(model, id, date=None):
+    if date:
+        modelObject = model.objects.filter(organization__id_parladata=id,
+                                           created_for__lte=datetime.strptime(date, '%d.%m.%Y'))
+    else:
+        modelObject = model.objects.filter(organization__id_parladata=id, 
+                                           created_for__lte=datetime.now())
+
+    if not modelObject:
+        #if model == LastActivity:
+            #return None
+        raise Http404("Nismo našli kartice")
+    else:
+        modelObject = modelObject.latest('created_for')
+        print "get object BUBU", modelObject.created_for
     return modelObject
 
 
@@ -237,21 +317,41 @@ def updateBallots():
 
 
 def update():
-    
+
     updateOrganizations()
     print "org"
-    
+
     updatePeople()
     print "pep"
-    
+
     result = requests.get(BASE_URL+'/s/setAllSessions/')
     print result
-    
+
     updateSpeeches()
     print "speeches"
-    
+
     #updateVotes() TODO JURIĆ'S UPDATE VOTES -> pokliči setMotionOfSession za vsako sejo
     print "votes"
-    
+
     updateBallots()
     print "ballots"
+
+
+# get all parliament member ID's
+def getIDs():
+    # create persons
+    result = []
+
+    data = requests.get(API_URL+'/getMPs/').json()
+
+    for mp in data:
+        result.append(mp['id'])
+
+    return result
+
+
+# get all PG ID's
+def getPGIDs():
+    data = requests.get(API_URL+'/getMembersOfPGs/').json()
+
+    return [pg for pg in data]
