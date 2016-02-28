@@ -17,6 +17,8 @@ from .models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT
 from parlaseje.models import Session
 
+from parlaposlanci import compass
+
 # Create your views here.
 
 #get List of MPs
@@ -1260,3 +1262,8 @@ def runSetters(request, date_to):
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
     return JsonResponse({"status": "all is fine :D"}, safe=False)
+
+def getCompass(request): # TODO make propper setters and getters
+    data = compass.getData()
+
+    return JsonResponse(data, safe=False)
