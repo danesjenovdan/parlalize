@@ -41,6 +41,8 @@ urlpatterns = patterns('',
     url(r'^getCutVotes/(?P<pg_id>\d+)/(?P<date>[\w].+)', getCutVotes),
     url(r'^getCutVotes/(?P<pg_id>\d+)', getCutVotes),
 
+    url(r'^getPGsIDs', getPGsIDs),
+
     ####################################################################################
 
     # runenr
