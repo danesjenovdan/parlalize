@@ -48,10 +48,12 @@ INSTALLED_APPS = (
     'parlaseje',
     'django_extensions',
     'raven.contrib.django.raven_compat',
+    'corsheaders',
 )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -133,9 +135,9 @@ VOTE_MAP = {
 if DEVELOPMENT:
     API_URL = "http://localhost:8000/v1"
 else:
-    API_URL = "http://data.parlameter.si/v1"
+    API_URL = "https://data.parlameter.si/v1"
 
-BASE_URL = 'http://analize.parlameter.si/v1'
+BASE_URL = 'https://analize.parlameter.si/v1'
 
 
 LOGGING = {
@@ -163,3 +165,8 @@ RAVEN_CONFIG = {
     # release based on the git info.
 #    'release': raven.fetch_git_sha(os.path.dirname(__file__)),
 }
+
+API_DATE_FORMAT = '%d.%m.%Y'
+
+# CORS config
+CORS_ORIGIN_ALLOW_ALL = True

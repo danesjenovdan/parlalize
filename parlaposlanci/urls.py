@@ -28,7 +28,9 @@ urlpatterns = patterns(
 
     url(r'^setNumberOfSpokenWordsALL/', setNumberOfSpokenWordsALL),
 
+    url(r'^setCutVotes/(?P<person_id>\d+)/(?P<date>[\w].+)', setCutVotes),
     url(r'^setCutVotes/(?P<person_id>\d+)', setCutVotes),
+
 
     ####################################################################################
 
@@ -68,4 +70,9 @@ urlpatterns = patterns(
 
     url(r'^getAllSpeeches/(?P<person_id>\d+)/(?P<date>[\w].+)', getAllSpeeches),
     url(r'^getAllSpeeches/(?P<person_id>\d+)', getAllSpeeches),
+
+    ####################################################################################
+
+    #runenr
+    url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
 )
