@@ -63,8 +63,8 @@ def createCompassDict(vT, people, people_ids):
     for i, person_id in enumerate(people_ids):
         jsondata.append({
             'id': person_id,
-            'name': (person['name'] for person in people if person['name'] == person_id).next(),
-            'acronym': (person['acronym'] for person in people if person['acronym'] == person_id).next(),
+            'name': (person['name'] for person in people if person['id'] == person_id).next(),
+            'acronym': (person['acronym'] for person in people if person['id'] == person_id).next(),
             'ideology': vT[1,i],
             'attendance': vT[0,i]
         })
