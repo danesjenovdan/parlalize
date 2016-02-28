@@ -86,8 +86,13 @@ def getAttendanceData(people_ids):
     attendance_list = []
     for person_id in people_ids:
         print person_id
-        data = requests.get('https://analize.parlameter.si/v1/p/getPresence/' + str(person_id)).json()
-        attendance_list.append(data['results']['value'])
+        try:
+            data = requests.get('https://analize.parlameter.si/v1/p/getPresence/' + str(person_id)).json()
+            attendance_list.append(data['results']['value'])
+        except requests.exceptions.RequestException as e:
+            print e
+            attendance_list.append(666)
+
 
     return attendance_list
 
@@ -95,8 +100,12 @@ def getVocabularySizeData(people_ids):
     vocabularysize_list = []
     for person_id in people_ids:
         print person_id
-        data = requests.get('https://analize.parlameter.si/v1/p/getVocabularySize/' + str(person_id)).json()
-        vocabularysize_list.append(data['results']['score'])
+        try:
+            data = requests.get('https://analize.parlameter.si/v1/p/getVocabularySize/' + str(person_id)).json()
+            vocabularysize_list.append(data['results']['score'])
+        except requests.exceptions.RequestException as e:
+            print e
+            vocabularysize_list.append(666)
 
     return vocabularysize_list
 
@@ -104,8 +113,12 @@ def getNumberOfSpokenWordsData(people_ids):
     numberofspokenwords_list = []
     for person_id in people_ids:
         print person_id
-        data = requests.get('https://analize.parlameter.si/v1/p/getNumberOfSpokenWords/' + str(person_id)).json()
-        numberofspokenwords_list.append(data['results']['score'])
+        try:
+            data = requests.get('https://analize.parlameter.si/v1/p/getNumberOfSpokenWords/' + str(person_id)).json()
+            numberofspokenwords_list.append(data['results']['score'])
+        except requests.exceptions.RequestException as e:
+            print e
+            numberofspokenwords_list.append(666)
 
     return numberofspokenwords_list
 
@@ -115,10 +128,16 @@ def getStyleScoresData(people_ids):
     preprosto_list = []
     for person_id in people_ids:
         print person_id
-        data = requests.get('https://analize.parlameter.si/v1/p/getStyleScores/' + str(person_id)).json()
-        problematicno_list.append(data['results']['problematicno'])
-        privzdignjeno_list.append(data['results']['privzdignjeno'])
-        preprosto_list.append(data['results']['preprosto'])
+        try:
+            data = requests.get('https://analize.parlameter.si/v1/p/getStyleScores/' + str(person_id)).json()
+            problematicno_list.append(data['results']['problematicno'])
+            privzdignjeno_list.append(data['results']['privzdignjeno'])
+            preprosto_list.append(data['results']['preprosto'])
+        except requests.exceptions.RequestException as e:
+            print e
+            problematicno_list.append(666)
+            privzdignjeno_list.append(666)
+            preprosto_list.append(666)
 
     return problematicno_list, privzdignjeno_list, preprosto_list
 
