@@ -525,7 +525,7 @@ def getPGsIDs(request):
     data = requests.get(API_URL+'/getAllPGs/')
     data = data.json()
 
-    output = {"members": [i for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
+    output = {"list": [i for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
 
     return JsonResponse(output, safe=False)
 
