@@ -72,3 +72,10 @@ class PercentOFAttendedSession(Timestampable, models.Model): #Model for presence
     maximum = models.IntegerField(_('max'),
                                    blank=True, null=True,
                                    help_text=_('Max of PG attended sessions'))
+
+class MPOfPg(Timestampable, models.Model):
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                            blank=True, null=True,help_text=_('id parladata'))
+
+    MPs = JSONField(blank=True, null=True)
