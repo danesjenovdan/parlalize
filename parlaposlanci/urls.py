@@ -71,6 +71,8 @@ urlpatterns = patterns(
     url(r'^getAllSpeeches/(?P<person_id>\d+)/(?P<date>[\w].+)', getAllSpeeches),
     url(r'^getAllSpeeches/(?P<person_id>\d+)', getAllSpeeches),
 
+    url(r'^getMPsIDs', getMPsIDs),
+
     ####################################################################################
 
     #runenr

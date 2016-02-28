@@ -14,7 +14,8 @@ from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScore
 from collections import Counter
 from parlalize.settings import LAST_ACTIVITY_COUNT
 from .models import *
-from parlalize.settings import API_URL
+from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlaseje.models import Session
 
 # Create your views here.
 
@@ -1220,6 +1221,17 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
     }
 
     return JsonResponse(out, safe=False)
+
+
+# get MPs IDs
+def getMPsIDs(request):
+    output = []
+    data = requests.get(API_URL+'/getMPs/')
+    data = data.json()
+
+    output = {"members": [i['id'] for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
+
+    return JsonResponse(output, safe=False)
 
 
 def runSetters(request, date_to):
