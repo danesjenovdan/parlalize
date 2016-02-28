@@ -60,18 +60,67 @@ def makeSimilarities(people_ballots_sorted_list):
 
 def createCompassDict(vT, people, people_ids):
     jsondata = []
+    attendance_list = getAttendanceData(people_ids)
+    vocabularysize_list = getVocabularySizeData(people_ids)
+    numberofspokenwords_list = getNumberOfSpokenWordsData(people_ids)
+    problematicno_list, privzdignjeno_list, preprosto_list = getStyleScoresData(people_ids)
+
     for i, person_id in enumerate(people_ids):
         jsondata.append({
             'id': person_id,
             'name': (person['name'] for person in people if person['id'] == person_id).next(),
             'acronym': (person['acronym'] for person in people if person['id'] == person_id).next(),
             'ideology': vT[1,i],
-            'attendance': vT[0,i]
+            'ideology*': vT[0,i],
+            'attendance': attendance_list[i],
+            'vocabularysize': vocabularysize_list[i],
+            'numberofspokenwords': numberofspokenwords_list[i],
+            'problematicno': problematicno_list[i],
+            'privzdignjeno': privzdignjeno_list[i],
+            'preprosto': preprosto_list[i]
         })
 
     return jsondata
 
+def getAttendanceData(people_ids):
+    attendance_list = []
+    for person_id in people_ids:
+        print person_id
+        data = requests.get('https://analize.parlameter.si/v1/p/getPresence/' + str(people_id)).json()
+        attendance_list.append(data.results.value)
 
+    return attendance_list
+
+def getVocabularySizeData(people_ids):
+    vocabularysize_list = []
+    for person_id in people_ids:
+        print person_id
+        data = requests.get('https://analize.parlameter.si/v1/p/getVocabularySize/' + str(people_id)).json()
+        vocabularysize_list.append(data.results.value)
+
+    return vocabularysize_list
+
+def getNumberOfSpokenWordsData(people_ids):
+    numberofspokenwords_list = []
+    for person_id in people_ids:
+        print person_id
+        data = requests.get('https://analize.parlameter.si/v1/p/getNumberOfSpokenWords/' + str(people_id)).json()
+        numberofspokenwords_list.append(data.results.value)
+
+    return numberofspokenwords_list
+
+def getStyleScoresData(people_ids):
+    problematicno_list = []
+    privzdignjeno_list = []
+    preprosto_list = []
+    for person_id in people_ids:
+        print person_id
+        data = requests.get('https://analize.parlameter.si/v1/p/getStyleScores/' + str(people_id)).json()
+        problematicno_list.append(data.results.problematicno)
+        privzdignjeno_list.append(data.results.privzdignjeno)
+        preprosto_list.append(data.results.preprosto)
+
+    return problematicno_list, privzdignjeno_list, preprosto_list
 
 def getData():
     allballots = requests.get('https://data.parlameter.si/v1/getAllBallots/').json()
