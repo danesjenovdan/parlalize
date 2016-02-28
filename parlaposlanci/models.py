@@ -453,7 +453,7 @@ class Compass(Timestampable, models.Model):
     calculated_from = models.DateField(
                                 _('date of first ballot entered'),
                                 blank=True,
-                                null=True
+                                null=True,
                                 help_text=_('date of first ballot entered'))
 
     created_for = models.DateField(_('date of analize'),
@@ -462,7 +462,8 @@ class Compass(Timestampable, models.Model):
                                help_text=_('date of activity'))
 
     person = models.ForeignKey('Person',
-                               blank=True, null=True,
+                               blank=True,
+                               null=True,
                                help_text=_('MP'))
 
     data = JSONField(blank=True, null=True)
