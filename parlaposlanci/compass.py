@@ -61,7 +61,7 @@ def makeSimilarities(people_ballots_sorted_list):
 def createCompassDict(vT, people, people_ids):
     jsondata = []
     attendance_list = getAttendanceData(people_ids)
-    vocabularysize_list = getVocabularySizeData(people_ids)
+    # vocabularysize_list = getVocabularySizeData(people_ids)
     numberofspokenwords_list = getNumberOfSpokenWordsData(people_ids)
     problematicno_list, privzdignjeno_list, preprosto_list = getStyleScoresData(people_ids)
 
@@ -73,7 +73,7 @@ def createCompassDict(vT, people, people_ids):
             'ideology': vT[1,i],
             'ideology*': vT[0,i],
             'attendance': attendance_list[i],
-            'vocabularysize': vocabularysize_list[i],
+            # 'vocabularysize': vocabularysize_list[i],
             'numberofspokenwords': numberofspokenwords_list[i],
             'problematicno': problematicno_list[i],
             'privzdignjeno': privzdignjeno_list[i],
