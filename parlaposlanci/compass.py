@@ -86,7 +86,7 @@ def getAttendanceData(people_ids):
     attendance_list = []
     for person_id in people_ids:
         print person_id
-        data = requests.get('https://analize.parlameter.si/v1/p/getPresence/' + str(people_id)).json()
+        data = requests.get('https://analize.parlameter.si/v1/p/getPresence/' + str(person_id)).json()
         attendance_list.append(data.results.value)
 
     return attendance_list
@@ -95,7 +95,7 @@ def getVocabularySizeData(people_ids):
     vocabularysize_list = []
     for person_id in people_ids:
         print person_id
-        data = requests.get('https://analize.parlameter.si/v1/p/getVocabularySize/' + str(people_id)).json()
+        data = requests.get('https://analize.parlameter.si/v1/p/getVocabularySize/' + str(person_id)).json()
         vocabularysize_list.append(data.results.value)
 
     return vocabularysize_list
@@ -104,7 +104,7 @@ def getNumberOfSpokenWordsData(people_ids):
     numberofspokenwords_list = []
     for person_id in people_ids:
         print person_id
-        data = requests.get('https://analize.parlameter.si/v1/p/getNumberOfSpokenWords/' + str(people_id)).json()
+        data = requests.get('https://analize.parlameter.si/v1/p/getNumberOfSpokenWords/' + str(person_id)).json()
         numberofspokenwords_list.append(data.results.value)
 
     return numberofspokenwords_list
@@ -115,7 +115,7 @@ def getStyleScoresData(people_ids):
     preprosto_list = []
     for person_id in people_ids:
         print person_id
-        data = requests.get('https://analize.parlameter.si/v1/p/getStyleScores/' + str(people_id)).json()
+        data = requests.get('https://analize.parlameter.si/v1/p/getStyleScores/' + str(person_id)).json()
         problematicno_list.append(data.results.problematicno)
         privzdignjeno_list.append(data.results.privzdignjeno)
         preprosto_list.append(data.results.preprosto)
