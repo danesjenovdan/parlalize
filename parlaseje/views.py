@@ -13,7 +13,7 @@ from math import fabs
 # Create your views here.
 
 def setAllSessions(request):
-    data  = requests.get('http://data.parlameter.si/v1/getSessions/').json()
+    data  = requests.get(API_URL + '/getSessions/').json()
     for sessions in data:
         if not Session.objects.filter(id_parladata=sessions['id']):
 
@@ -24,15 +24,9 @@ def setAllSessions(request):
                              end_time=sessions['end_time'],
                              classification=sessions['classification'],
                              id_parladata=sessions['id'])
-            result.save()
 
     return JsonResponse({'alliswell': True})
 
-#def getDZSessions(request):
-#
-#    return JsonResponse(out, safe=False)
-
-    #Session
 def getSpeech(request, speech_id):
     speech = Speech.objects.get(id_parladata=speech_id)
     out={"speech_id":speech.id_parladata, "content":speech.content}
@@ -60,8 +54,8 @@ def getSessionSpeeches(request, session_id,):
     return JsonResponse(result, safe=False)
 
 def setMotionOfSession(request, id_se):
-    motion  = requests.get('http://data.parlameter.si/v1/motionOfSession/'+str(id_se)+'/').json()
-    votes  = requests.get('http://data.parlameter.si/v1/getVotesOfSession/'+str(id_se)+'/').json()
+    motion  = requests.get(API_URL +  '/motionOfSession/'+str(id_se)+'/').json()
+    votes  = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
 
     tab = []
     yes = 0
@@ -190,7 +184,7 @@ def getMotionGraph(request, id_se):
     return JsonResponse(out, safe=False)
 
 def setAbsentMPs(request, id_se):
-    votes = requests.get('http://data.parlameter.si/v1/getVotesOfSession/'+str(id_se)+'/').json()
+    votes = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
     mps = requests.get(API_URL+'/getMPs/').json()
     onSession = []
     mpsID = []
@@ -225,4 +219,52 @@ def getAbsentMPs(request, id_se):
             if str(mp['id']) == str(abMP):
                 result = {'name':mp['name'], 'acronym':mp['acronym'], 'image':mp['image']}
                 results[mp['id']]= result
+    return JsonResponse(results, safe=False)
+
+def setPresenceOfPG(request, id_se):
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGs/').json()
+    votes = requests.get(API_URL+'/getVotesOfSession/'+str(id_se)+'/').json()
+    motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
+    onSession = {}
+    yesdic = defaultdict(int)
+    numOfMPs = {}
+    results = {}
+    allPgs = {}
+    if len(votes) != 0:
+        for vote in votes:
+            if vote['option'] != 'ni':
+                if vote['mo_id'] in onSession.keys():
+                    onSession[vote['mo_id']].append(vote['pg_id'])
+                else:
+                    onSession.update({vote['mo_id'] : [vote['pg_id']]})
+    
+    for i in membersOfPG:
+        allPgs[i] = len(membersOfPG[i]) * len(motions)
+
+    for b in onSession.keys():
+        for i in onSession[b]:
+            yesdic[i] += 1
+        results[b] = yesdic
+    
+    for b in results:
+        print results[b]
+
+
+            
+    
+
+    
+
+    '''
+    for i in set(onSession):
+        for a in membersOfPG:
+            if i in membersOfPG[a]:
+                yesdic[a] += 1
+
+
+    for a in yesdic:
+        results[a] = float(yesdic[a]) / float(len(motions) *len(membersOfPG[a]))
+    
+
+    '''
     return JsonResponse(results, safe=False)

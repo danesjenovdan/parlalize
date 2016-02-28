@@ -4,6 +4,7 @@ import requests
 import json
 from django.http import JsonResponse
 from parlaskupine.models import *
+from parlaseje.models import Activity,Session
 from collections import Counter
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 import numpy as np
@@ -69,7 +70,7 @@ def setPercentOFAttendedSessionPG(request, pg_id):
 
     return JsonResponse({'alliswell': True})
 
-def getPercentOFAttendedSessionPG(requests, pg_id, date=None):
+def getPercentOFAttendedSessionPG(request, pg_id, date=None):
 
     card = getPGCardModel(PercentOFAttendedSession, pg_id, date)
 
@@ -83,6 +84,60 @@ def getPercentOFAttendedSessionPG(requests, pg_id, date=None):
            }
 
     return JsonResponse(data)
+
+
+def setMPsOfPG(request, pg_id):
+    result ={}
+    results = []
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGs/').json()
+    for mOfPg in membersOfPG[pg_id]:
+      results.append(mOfPg)
+
+    result = saveOrAbort(model=MPOfPg,
+                        id_parladata=pg_id,
+                        MPs =  results
+                        )
+ 
+    return JsonResponse({'alliswell': True})
+
+#shranjevaje se naredi
+def getMPsOfPG(request, pg_id):
+    mps = requests.get(API_URL+'/getMPs/').json()
+    result ={}
+    results = {}
+    ids = MPOfPg.objects.get(id_parladata=int(pg_id)).MPs
+    print ids
+    for MP in ids:
+        for mp in mps:
+            if str(mp['id']) == str(MP):
+                result = {'name':mp['name'], 'image':mp['image']}
+                results[mp['id']] = result
+    return JsonResponse(results, safe=False)
+
+
+def getSpeechesOfPG(request, pg_id, date=False):
+  if date:
+    allSessions = Session.objects.filter(start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
+  else:
+    allSessions = Session.objects.all()
+  results = list()
+  mp = dict()
+  speec = list()
+
+  for session in allSessions:
+    if Activity.objects.filter(session_id=session.id):
+      allSpeeches = Speech.objects.filter(session_id=session.id, organization = pg_id)
+      for speech in allSpeeches:
+        if speech.person_id in mp:
+          mp[speech.person_id]['speech'].append(speech.id)
+        else:
+          mp.update({speech.person_id:{'name':Person.objects.get(id=speech.person_id).name,'image':Person.objects.get(id=speech.person_id).image, 'speech':list([speech.id])}})
+      results.append({'session':session.name,'time':session.start_time, 'mps':mp})
+      mp={}
+      speec = []
+  return JsonResponse(results, safe=False)
+ #cutVotes
+ #getSpeechesOfMP
 
 
 def howMatchingThem(request, pg_id, type_of, date=None):
