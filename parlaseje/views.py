@@ -54,7 +54,7 @@ def getSessionSpeeches(request, session_id,):
     return JsonResponse(result, safe=False)
 
 def setMotionOfSession(request, id_se):
-    motion  = requests.get(API_URL +  '/motionOfSession/'+str(id_se)+'/').json()
+    motion  = requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
     votes  = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
 
     tab = []
@@ -95,34 +95,33 @@ def setMotionOfSession(request, id_se):
                     tabnp.append(vote['mp_id'])
 
         result = saveOrAbortMotion(model=Vote,
-                            session=Session.objects.get(id_parladata=int(id_se)),
-                            motion=mot['text'],
-                            votes_for=yes,
-                            against=no,
-                            abstain=kvorum,
-                            not_present=not_present,
-                            result=mot['result'],
-                            id_parladata=mot['id']
-                            )
-
+                                   session=Session.objects.get(id_parladata=int(id_se)),
+                                   motion=mot['text'],
+                                   votes_for=yes,
+                                   against=no,
+                                   abstain=kvorum,
+                                   not_present=not_present,
+                                   result=mot['result'],
+                                   id_parladata=mot['vote_id']
+                                   )
 
         vg = saveOrAbort(model=Vote_graph,
-                            motion=mot['text'],
-                            votes_for=yes,
-                            against=no,
-                            abstain=kvorum,
-                            not_present=not_present,
-                            result=mot['result'],
-                            id_parladata=mot['id'],
-                            pgs_yes=yesdic,
-                            pgs_no=nodic,
-                            pgs_np=npdic,
-                            pgs_kvor=kvordic,
-                            mp_yes = tabyes,
-                            mp_no = tabno,
-                            mp_np = tabnp,
-                            mp_kvor = tabkvo
-                            )
+                         motion=mot['text'],
+                         votes_for=yes,
+                         against=no,
+                         abstain=kvorum,
+                         not_present=not_present,
+                         result=mot['result'],
+                         id_parladata=mot['vote_id'],
+                         pgs_yes=yesdic,
+                         pgs_no=nodic,
+                         pgs_np=npdic,
+                         pgs_kvor=kvordic,
+                         mp_yes=tabyes,
+                         mp_no=tabno,
+                         mp_np=tabnp,
+                         mp_kvor=tabkvo
+                         )
         yes = 0
         no = 0
         kvorum = 0
