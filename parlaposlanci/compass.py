@@ -96,7 +96,7 @@ def getVocabularySizeData(people_ids):
     for person_id in people_ids:
         print person_id
         data = requests.get('https://analize.parlameter.si/v1/p/getVocabularySize/' + str(person_id)).json()
-        vocabularysize_list.append(data['results']['value'])
+        vocabularysize_list.append(data['results']['score'])
 
     return vocabularysize_list
 
@@ -105,7 +105,7 @@ def getNumberOfSpokenWordsData(people_ids):
     for person_id in people_ids:
         print person_id
         data = requests.get('https://analize.parlameter.si/v1/p/getNumberOfSpokenWords/' + str(person_id)).json()
-        numberofspokenwords_list.append(data['results']['value'])
+        numberofspokenwords_list.append(data['results']['score'])
 
     return numberofspokenwords_list
 
