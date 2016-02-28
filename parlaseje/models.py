@@ -70,6 +70,8 @@ class Session(Timestampable, models.Model): # poslanec, minister, predsednik dz 
 
     gov_id = models.TextField(blank=True, null=True, help_text='Gov website ID.')
 
+    in_review = models.BooleanField(default=False, help_text='Is session in review?')
+
 
     def __str__(self):
         return self.name
