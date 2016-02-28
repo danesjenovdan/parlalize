@@ -73,6 +73,8 @@ urlpatterns = patterns(
 
     url(r'^getMPsIDs', getMPsIDs),
 
+    url(r'^getCompass', getCompass),
+
     ####################################################################################
 
     #runenr
