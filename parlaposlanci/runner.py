@@ -21,7 +21,8 @@ setters = (
 allsetters = (
 #    BASE_URL + '/p/setAverageNumberOfWordsPerSessionALL',
     # BASE_URL + '/p/setVocabularySizeALL/',
-    BASE_URL + '/p/setStyleScoresALL/',
+    # BASE_URL + '/p/setStyleScoresALL/',
+    BASE_URL + '/p/setMPStaticPL/',
 )
 
 # get all parliament member ID's
