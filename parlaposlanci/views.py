@@ -1313,3 +1313,33 @@ def getCompass(request): # TODO make propper setters and getters
     data = Compass.objects.all().order_by('created_for')[0].data
 
     return JsonResponse(data, safe=False)
+
+def setTaggedBallots(request, person_id):
+
+    person = Person.objects.get(id_parladata=int(person_id))
+    data = requests.get(API_URL + '/getTaggedBallots/' + str(person_id)).json()
+
+    tagged_ballots = TaggedBallots(person=person, data=data)
+    tagged_ballots.save()
+
+    return HttpResponse('All iz well')
+
+def getTaggedBallots(request, person_id, date=None):
+
+    card = getPersonCardModel(TaggedBallots, person_id, date)
+    static = getPersonCardModel(MPStaticPL, person_id, date)
+
+    out = {
+        'person': {
+            'name': static.person.name,
+            'id': int(person_id),
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
+        },
+        'ballots': card.data
+    }
+
+    return JsonResponse(out, safe=False)
