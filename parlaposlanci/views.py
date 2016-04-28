@@ -206,6 +206,7 @@ def setLastActivity(request, person_id):
 
 def getLastActivity(request, person_id, date=None):
     print date
+
     def parseDayActivites(day_activites):
         data = []
         types = day_activites.typee.split(";")
@@ -234,6 +235,7 @@ def getLastActivity(request, person_id, date=None):
         return {"date": str(day_activites.date.date()), "events": data}
 
     out = []
+
     equalVoters = getPersonCardModel(LastActivity, person_id, date)
     out.append(parseDayActivites(equalVoters))
     for i in range(LAST_ACTIVITY_COUNT - 1):
@@ -242,10 +244,18 @@ def getLastActivity(request, person_id, date=None):
         if equalVoters == None:
             break;
         out.append(parseDayActivites(equalVoters))
-    result  = {
+
+    static = getPersonCardModel(MPStaticPL, person_id, date)
+
+    result = {
         'person': {
-            "name": equalVoters.person.name,
-            "id": equalVoters.person.id_parladata,
+            'name': static.person.name,
+            'id': int(person_id),
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
         },
         'results': out
         }
