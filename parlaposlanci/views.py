@@ -257,6 +257,7 @@ def getLastActivity(request, person_id, date=None):
         'person': {
             'name': static.person.name,
             'id': int(person_id),
+            'gov_id': static.gov_id,
             'party': {
                 'id': static.party_id,
                 'acronym': static.acronym,
@@ -681,6 +682,7 @@ def getCutVotes(request, person_id, date=None):
         'person': {
             'name': static.person.name,
             'id': int(person_id),
+            'gov_id': static.gov_id,
             'party': {
                 'id': static.party_id,
                 'acronym': static.acronym,
@@ -902,6 +904,7 @@ def getStyleScores(request, person_id, date=None):
         'person': {
             'name': static.person.name,
             'id': int(person_id),
+            'gov_id': static.gov_id,
             'party': {
                 'id': static.party_id,
                 'acronym': static.acronym,
@@ -1240,6 +1243,7 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
         'person': {
             'name': static.person.name,
             'id': int(person_id),
+            'gov_id': static.gov_id,
             'party': {
                 'id': static.party_id,
                 'acronym': static.acronym,
