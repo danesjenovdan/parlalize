@@ -1317,7 +1317,7 @@ def getCompass(request): # TODO make propper setters and getters
 def setTaggedBallots(request, person_id):
 
     person = Person.objects.get(id_parladata=int(person_id))
-    data = requests.get(API_URL + '/getTaggedBallots/' + str(person_id)).json()
+    data = requests.get(API_URL + '/getTaggedVotes/' + str(person_id)).json()
 
     tagged_ballots = TaggedBallots(person=person, data=data)
     tagged_ballots.save()
