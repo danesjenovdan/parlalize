@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
 
+from parlaseje.models import Vote
+
 def showCompass():
 
     fig, ax = plt.subplots()
