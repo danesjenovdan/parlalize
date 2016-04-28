@@ -43,6 +43,12 @@ class Person(Timestampable, models.Model): # poslanec, minister, predsednik dz e
                             max_length=128,
                             help_text=_('Yes if MP is actived or no if it is not'))
 
+    gov_id = models.CharField(_('gov id'),
+                            null=True,
+                            max_length=128,
+                            help_text('The ID of the official on the government website.')
+                            )
+
 
 
     def __str__(self):
