@@ -46,7 +46,7 @@ class Person(Timestampable, models.Model): # poslanec, minister, predsednik dz e
     gov_id = models.CharField(_('gov id'),
                             null=True,
                             max_length=128,
-                            help_text('The ID of the official on the government website.')
+                            help_text=_('The ID of the official on the government website.')
                             )
 
 
