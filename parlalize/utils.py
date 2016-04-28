@@ -20,7 +20,7 @@ def voteToLogical(vote):
         return -1
 
 
-# Return dictionary of votes results by user ids. 
+# Return dictionary of votes results by user ids.
 def getLogicVotes(date=None):
     if date:
         r = requests.get(API_URL+'/getVotes/'+date)
@@ -246,7 +246,7 @@ def getPGCardModelNew(model, id, date=None):
         modelObject = model.objects.filter(organization__id_parladata=id,
                                            created_for__lte=datetime.strptime(date, '%d.%m.%Y'))
     else:
-        modelObject = model.objects.filter(organization__id_parladata=id, 
+        modelObject = model.objects.filter(organization__id_parladata=id,
                                            created_for__lte=datetime.now())
 
     if not modelObject:
