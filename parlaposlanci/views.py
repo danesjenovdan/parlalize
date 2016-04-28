@@ -1294,12 +1294,12 @@ def runSetters(request, date_to):
 def setCompass(request):
     data = compass.getData()
 
-    compass = Compass(
+    newcompass = Compass(
         calculated_from=strptime(data.calculated_from),
         calculated_for=datetime.now().date(),
         data=data
     )
-    compass.save()
+    newcompass.save()
 
     return HttpResponse('All iz well')
 
