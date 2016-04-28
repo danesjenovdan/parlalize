@@ -1310,6 +1310,6 @@ def setCompass(request):
     return HttpResponse('All iz well')
 
 def getCompass(request): # TODO make propper setters and getters
-    data = compass.getData()
+    data = Compass.objects.all().order_by('created_for')[0]
 
     return JsonResponse(data, safe=False)
