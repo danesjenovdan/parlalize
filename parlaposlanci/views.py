@@ -880,8 +880,18 @@ def setStyleScores(request, person_id):
 
 def getStyleScores(request, person_id, date=None):
     card = getPersonCardModel(StyleScores, int(person_id), date)
+    static = getPersonCardModel(MPStaticPL, person_id, date)
 
     out = {
+        'person': {
+            'name': static.person.name,
+            'id': int(person_id),
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
+        },
         'results': {
             'privzdignjeno': card.privzdignjeno,
             'problematicno': card.problematicno,
@@ -891,10 +901,6 @@ def getStyleScores(request, person_id, date=None):
                 'problematicno_average': card.problematicno_average,
                 'preprosto_average': card.preprosto_average
             }
-        },
-        'person': {
-            'id': int(person_id),
-            'name': Person.objects.get(id_parladata=int(person_id)).name
         }
     }
 
