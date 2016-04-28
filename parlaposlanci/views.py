@@ -659,11 +659,17 @@ def setCutVotes(request, person_id, date=None):
 
 def getCutVotes(request, person_id, date=None):
     cutVotes = getPersonCardModelNew(CutVotes, person_id, date)
+    static = getPersonCardModel(MPStaticPL, person_id, date)
 
     out = {
         'person': {
+            'name': static.person.name,
             'id': int(person_id),
-            'name': Person.objects.get(id_parladata=int(person_id)).name
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
         },
         'results': {
             'abstain': {
