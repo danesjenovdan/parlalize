@@ -1206,11 +1206,17 @@ def setAverageNumberOfSpeechesPerSessionAll(request):
 def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
     card = getPersonCardModel(AverageNumberOfSpeechesPerSession, person_id, date)
+    static = getPersonCardModel(MPStaticPL, person_id, date)
 
     out = {
         'person': {
-            'name': Person.objects.get(id_parladata=int(person_id)).name,
-            'id': int(person_id)
+            'name': static.person.name,
+            'id': int(person_id),
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
         },
         'results': {
             'max': {
