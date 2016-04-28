@@ -1291,6 +1291,18 @@ def runSetters(request, date_to):
                 # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 
+def setCompass(request):
+    data = compass.getData()
+
+    compass = Compass(
+        calculated_from=strptime(data.calculated_from),
+        calculated_for=datetime.now().date(),
+        data=data
+    )
+    compass.save()
+
+    return HttpResponse('All iz well')
+
 def getCompass(request): # TODO make propper setters and getters
     data = compass.getData()
 
