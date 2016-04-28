@@ -20,7 +20,7 @@ def voteToLogical(vote):
         return -1
 
 
-# Return dictionary of votes results by user ids. 
+# Return dictionary of votes results by user ids.
 def getLogicVotes(date=None):
     if date:
         r = requests.get(API_URL+'/getVotes/'+date)
@@ -219,9 +219,10 @@ def updatePeople():
             person.id_parladata = int(mp['id'])
             person.image = mp['image']
             person.actived = True if int(mp['id']) in mps_ids else False
+            person.gov_id = mp['gov_id']
             person.save()
         else:
-            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if int(mp['id']) in mps_ids else False)
+            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if int(mp['id']) in mps_ids else False, gov_id=mp['gov_id'])
             person.save()
 
     return 1
@@ -246,7 +247,7 @@ def getPGCardModelNew(model, id, date=None):
         modelObject = model.objects.filter(organization__id_parladata=id,
                                            created_for__lte=datetime.strptime(date, '%d.%m.%Y'))
     else:
-        modelObject = model.objects.filter(organization__id_parladata=id, 
+        modelObject = model.objects.filter(organization__id_parladata=id,
                                            created_for__lte=datetime.now())
 
     if not modelObject:
