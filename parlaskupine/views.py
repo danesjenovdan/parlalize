@@ -624,7 +624,7 @@ def runSetters(date_to):
     }
 
     IDs = getPGIDs()
-    IDs = [1, 2]
+    #IDs = [1, 2]
     # print IDs
     allIds = len(IDs)
     curentId = 0
