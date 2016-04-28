@@ -346,6 +346,12 @@ class MPStaticPL(Timestampable, models.Model):
 
     party_name = models.TextField(blank=True, null=True, help_text=_('Party name'))
 
+    gov_id = models.CharField(_('gov id'),
+                            null=True,
+                            max_length=128,
+                            help_text=_('The ID of the official on the government website.')
+                            )
+
 class MPStaticGroup(Timestampable, models.Model):
 
     person = models.ForeignKey('MPStaticPL', help_text=_('Person foreign key to MPStaticPL'))
