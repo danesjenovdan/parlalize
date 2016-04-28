@@ -47,7 +47,7 @@ def runMPs():
     print IDs
 
     for ID in IDs:
-        for setter in setters:
+        for setter in allsetters:
             print setter + str(ID)
             result = requests.get(setter + str(ID)).status_code
 
