@@ -54,8 +54,14 @@ def getMPStaticPL(request, person_id, date=None):
 
     data = {
         'person': {
-            'name': Person.objects.get(id_parladata=int(person_id)).name,
-            'id': int(person_id)
+            'name': card.person.name,
+            'id': int(person_id),
+            'party': {
+                'id': card.party_id,
+                'acronym': card.acronym,
+                'name': card.party_name,
+                'gov_id': card.gov_id
+            }
         },
         'results': {
             'voters': card.voters,
