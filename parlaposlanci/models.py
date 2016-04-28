@@ -469,4 +469,4 @@ class TaggedBallots(Timestampable, models.Model):
                                blank=True, null=True,
                                help_text=_('MP'))
 
-    data = JsonField(blank=True, null=True)
+    data = JSONField(blank=True, null=True)
