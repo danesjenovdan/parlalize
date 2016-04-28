@@ -61,14 +61,17 @@ def makeSimilarities(people_ballots_sorted_list):
     return np.array(similarities)
 
 def createCompassDict(vT, people, people_ids, calculated_from):
-    jsondata = []
+    jsondata = {
+        'calculated_from': calculated_from,
+        'people': []
+    }
     attendance_list = getAttendanceData(people_ids)
     # vocabularysize_list = getVocabularySizeData(people_ids)
     numberofspokenwords_list = getNumberOfSpokenWordsData(people_ids)
     problematicno_list, privzdignjeno_list, preprosto_list = getStyleScoresData(people_ids)
 
     for i, person_id in enumerate(people_ids):
-        jsondata.append({
+        jsondata['people'].append({
             'id': person_id,
             'name': (person['name'] for person in people if person['id'] == person_id).next(),
             'acronym': (person['acronym'] for person in people if person['id'] == person_id).next(),
@@ -79,8 +82,7 @@ def createCompassDict(vT, people, people_ids, calculated_from):
             'numberofspokenwords': numberofspokenwords_list[i],
             'problematicno': problematicno_list[i],
             'privzdignjeno': privzdignjeno_list[i],
-            'preprosto': preprosto_list[i],
-            'calculated_from': calculated_from
+            'preprosto': preprosto_list[i]
         })
 
     return jsondata
