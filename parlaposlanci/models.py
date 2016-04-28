@@ -461,9 +461,4 @@ class Compass(Timestampable, models.Model):
                                null=True,
                                help_text=_('date of activity'))
 
-    person = models.ForeignKey('Person',
-                               blank=True,
-                               null=True,
-                               help_text=_('MP'))
-
     data = JSONField(blank=True, null=True)
