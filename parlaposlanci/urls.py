@@ -80,6 +80,7 @@ urlpatterns = patterns(
     url(r'^getCompass', getCompass),
 
     url(r'^getTaggedBallots/(?P<person_id>\d+)/(?P<date>[\w].+)', getTaggedBallots),
+    url(r'^getTaggedBallots/(?P<person_id>\d+)', getTaggedBallots),
 
     ####################################################################################
 
