@@ -1295,7 +1295,7 @@ def setCompass(request):
     data = compass.getData()
 
     newcompass = Compass(
-        calculated_from=strptime(data.calculated_from),
+        calculated_from=datetime.strptime(data.calculated_from),
         calculated_for=datetime.now().date(),
         data=data
     )
