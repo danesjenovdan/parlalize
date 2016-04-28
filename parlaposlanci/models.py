@@ -462,3 +462,11 @@ class Compass(Timestampable, models.Model):
                                help_text=_('date of activity'))
 
     data = JSONField(blank=True, null=True)
+
+class TaggedBallots(Timestampable, models.Model):
+
+    person = models.ForeignKey('Person',
+                               blank=True, null=True,
+                               help_text=_('MP'))
+
+    data = JsonField(blank=True, null=True)
