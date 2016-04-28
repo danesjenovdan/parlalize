@@ -56,11 +56,11 @@ def getMPStaticPL(request, person_id, date=None):
         'person': {
             'name': card.person.name,
             'id': int(person_id),
+            'gov_id': card.gov_id,
             'party': {
                 'id': card.party_id,
                 'acronym': card.acronym,
-                'name': card.party_name,
-                'gov_id': card.gov_id
+                'name': card.party_name
             }
         },
         'results': {
