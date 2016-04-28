@@ -37,7 +37,7 @@ def setMPStaticPL(request, person_id):
     dic = dict()
     data = requests.get(API_URL+'/getMPStatic/'+str(person_id)+'/').json()
 
-    result = saveOrAbort(model=MPStaticPL, person=Person.objects.get(id_parladata=int(person_id)), voters=data['voters'], age=data['age'], mandates=data['mandates'], party_id=data['party_id'], education=data['education'], previous_occupation=data['previous_occupation'], name=data['name'], district=data['district'], facebook=data['social']['facebook'], twitter=data['social']['twitter'], linkedin=data['social']['linkedin'], party_name=data['party'], acronym=data['acronym'])
+    result = saveOrAbort(model=MPStaticPL, person=Person.objects.get(id_parladata=int(person_id)), voters=data['voters'], age=data['age'], mandates=data['mandates'], party_id=data['party_id'], education=data['education'], previous_occupation=data['previous_occupation'], name=data['name'], district=data['district'], facebook=data['social']['facebook'], twitter=data['social']['twitter'], linkedin=data['social']['linkedin'], party_name=data['party'], acronym=data['acronym'], gov_id=data['gov_id'])
 
     if result:
         for group in data['groups']:
