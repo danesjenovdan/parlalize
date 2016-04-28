@@ -219,9 +219,10 @@ def updatePeople():
             person.id_parladata = int(mp['id'])
             person.image = mp['image']
             person.actived = True if int(mp['id']) in mps_ids else False
+            person.gov_id = mp['gov_id']
             person.save()
         else:
-            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if int(mp['id']) in mps_ids else False)
+            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if int(mp['id']) in mps_ids else False, gov_id=mp['gov_id'])
             person.save()
 
     return 1
