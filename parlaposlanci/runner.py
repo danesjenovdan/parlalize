@@ -49,12 +49,12 @@ def runMPs():
     for ID in IDs:
         for setter in allsetters:
             print setter + str(ID)
-            result = requests.get(setter + str(ID)).status_code
+            result = requests.get(setter + str(ID))
 
-            #if result == 200:
-            #    logger.info(setter + str(ID) + ' ALL OK')
-            #else:
-            #    logger.error(setter + str(ID) + ' ERROR: ' + str(result))
+            if result.status_code == 200:
+               logger.info(setter + str(ID) + ' ALL OK')
+            else:
+               logger.error(setter + str(ID) + ' ERROR: ' + str(result))
 
 #    result = requests.get(BASE_URL+'/p/setNumberOfSpokenWordsALL/',).status_code
 
