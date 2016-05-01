@@ -186,7 +186,7 @@ def getMotionGraph(request, id_se):
 
     parties = requests.get(API_URL + '/getAllPGsExt/').json()
 
-    for party in card.pgs_yes:
+    for i, party in enumerate(card.pgs_yes):
         option_for['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': party,
@@ -196,18 +196,19 @@ def getMotionGraph(request, id_se):
 
         for person_id in card.mp_yes:
             mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
-            option_for['breakdown']['mps'].append({
-                'name': mp.name,
-                'id': person_id,
-                'gov_id': mp.gov_id,
-                'party': {
-                    'acronym': parties[party]['acronym'],
-                    'id': party,
-                    'name': parties[party]['name']
-                }
-            })
+            if mp.party_id == party:
+                option_for['breakdown'][i]['mps'].append({
+                    'name': mp.name,
+                    'id': person_id,
+                    'gov_id': mp.gov_id,
+                    'party': {
+                        'acronym': parties[party]['acronym'],
+                        'id': party,
+                        'name': parties[party]['name']
+                    }
+                })
 
-    for party in card.pgs_no:
+    for i, party in enumerate(card.pgs_no):
         option_against['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': party,
@@ -217,18 +218,19 @@ def getMotionGraph(request, id_se):
 
         for person_id in card.mp_no:
             mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
-            option_against['breakdown']['mps'].append({
-                'name': mp.name,
-                'id': person_id,
-                'gov_id': mp.gov_id,
-                'party': {
-                    'acronym': parties[party]['acronym'],
-                    'id': party,
-                    'name': parties[party]['name']
-                }
-            })
+            if mp.party_id == party:
+                option_against['breakdown'][i]['mps'].append({
+                    'name': mp.name,
+                    'id': person_id,
+                    'gov_id': mp.gov_id,
+                    'party': {
+                        'acronym': parties[party]['acronym'],
+                        'id': party,
+                        'name': parties[party]['name']
+                    }
+                })
 
-    for party in card.pgs_kvor:
+    for i, party in enumerate(card.pgs_kvor):
         option_kvor['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': party,
@@ -238,18 +240,19 @@ def getMotionGraph(request, id_se):
 
         for person_id in card.mp_kvor:
             mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
-            option_kvor['breakdown']['mps'].append({
-                'name': mp.name,
-                'id': person_id,
-                'gov_id': mp.gov_id,
-                'party': {
-                    'acronym': parties[party]['acronym'],
-                    'id': party,
-                    'name': parties[party]['name']
-                }
-            })
+            if mp.party_id == party:
+                option_kvor['breakdown'][i]['mps'].append({
+                    'name': mp.name,
+                    'id': person_id,
+                    'gov_id': mp.gov_id,
+                    'party': {
+                        'acronym': parties[party]['acronym'],
+                        'id': party,
+                        'name': parties[party]['name']
+                    }
+                })
 
-    for party in card.pgs_np:
+    for i, party in enumerate(card.pgs_np):
         option_np['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': party,
@@ -259,16 +262,17 @@ def getMotionGraph(request, id_se):
 
         for person_id in card.mp_np:
             mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
-            option_np['breakdown']['mps'].append({
-                'name': mp.name,
-                'id': person_id,
-                'gov_id': mp.gov_id,
-                'party': {
-                    'acronym': parties[party]['acronym'],
-                    'id': party,
-                    'name': parties[party]['name']
-                }
-            })
+            if mp.party_id == party:
+                option_np['breakdown'][i]['mps'].append({
+                    'name': mp.name,
+                    'id': person_id,
+                    'gov_id': mp.gov_id,
+                    'party': {
+                        'acronym': parties[party]['acronym'],
+                        'id': party,
+                        'name': parties[party]['name']
+                    }
+                })
 
     out = {
         'results': {
