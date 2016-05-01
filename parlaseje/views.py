@@ -199,14 +199,14 @@ def getMotionGraph(request, id_se):
             mp = filter(lambda person: person['id'] == int(person_id), mps)
             if len(mp) > 0:
                 mp = mp[0]
-                if mp['party_id'] == party:
+                if mp['party_id'] == int(party):
                     option_for['breakdown'][i]['mps'].append({
                         'name': mp.name,
                         'id': person_id,
                         'gov_id': mp.gov_id,
                         'party': {
                             'acronym': parties[party]['acronym'],
-                            'id': party,
+                            'id': int(party),
                             'name': parties[party]['name']
                         }
                     })
@@ -223,14 +223,14 @@ def getMotionGraph(request, id_se):
             mp = filter(lambda person: person['id'] == int(person_id), mps)
             if len(mp) > 0:
                 mp = mp[0]
-                if mp['party_id'] == party:
+                if mp['party_id'] == int(party):
                     option_against['breakdown'][i]['mps'].append({
                         'name': mp.name,
                         'id': person_id,
                         'gov_id': mp.gov_id,
                         'party': {
                             'acronym': parties[party]['acronym'],
-                            'id': party,
+                            'id': int(party),
                             'name': parties[party]['name']
                         }
                     })
@@ -247,14 +247,14 @@ def getMotionGraph(request, id_se):
             mp = filter(lambda person: person['id'] == int(person_id), mps)
             if len(mp) > 0:
                 mp = mp[0]
-                if mp['party_id'] == party:
+                if mp['party_id'] == int(party):
                     option_kvor['breakdown'][i]['mps'].append({
                         'name': mp.name,
                         'id': person_id,
                         'gov_id': mp.gov_id,
                         'party': {
                             'acronym': parties[party]['acronym'],
-                            'id': party,
+                            'id': int(party),
                             'name': parties[party]['name']
                         }
                     })
@@ -271,14 +271,14 @@ def getMotionGraph(request, id_se):
             mp = filter(lambda person: person['id'] == int(person_id), mps)
             if len(mp) > 0:
                 mp = mp[0]
-                if mp['party_id'] == party:
+                if mp['party_id'] == int(party):
                     option_np['breakdown'][i]['mps'].append({
                         'name': mp.name,
                         'id': person_id,
                         'gov_id': mp.gov_id,
                         'party': {
                             'acronym': parties[party]['acronym'],
-                            'id': party,
+                            'id': int(party),
                             'name': parties[party]['name']
                         }
                     })
