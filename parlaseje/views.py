@@ -169,17 +169,17 @@ def getMotionGraph(request, id_se):
         'breakdown': []
     }
     option_against = {
-        'option': 'za',
+        'option': 'proti',
         'total_votes': card.against,
         'breakdown': []
     }
     option_kvor = {
-        'option': 'za',
+        'option': 'kvorum',
         'total_votes': card.abstain,
         'breakdown': []
     }
     option_np = {
-        'option': 'za',
+        'option': 'ni',
         'total_votes': card.not_present,
         'breakdown': []
     }
