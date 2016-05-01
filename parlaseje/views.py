@@ -201,9 +201,9 @@ def getMotionGraph(request, id_se):
                 mp = mp[0]
                 if mp['party_id'] == int(party):
                     option_for['breakdown'][i]['mps'].append({
-                        'name': mp.name,
+                        'name': mp['name'],
                         'id': person_id,
-                        'gov_id': mp.gov_id,
+                        'gov_id': mp['gov_id'],
                         'party': {
                             'acronym': parties[party]['acronym'],
                             'id': int(party),
@@ -225,9 +225,9 @@ def getMotionGraph(request, id_se):
                 mp = mp[0]
                 if mp['party_id'] == int(party):
                     option_against['breakdown'][i]['mps'].append({
-                        'name': mp.name,
+                        'name': mp['name'],
                         'id': person_id,
-                        'gov_id': mp.gov_id,
+                        'gov_id': mp['gov_id'],
                         'party': {
                             'acronym': parties[party]['acronym'],
                             'id': int(party),
@@ -249,9 +249,9 @@ def getMotionGraph(request, id_se):
                 mp = mp[0]
                 if mp['party_id'] == int(party):
                     option_kvor['breakdown'][i]['mps'].append({
-                        'name': mp.name,
+                        'name': mp['name'],
                         'id': person_id,
-                        'gov_id': mp.gov_id,
+                        'gov_id': mp['gov_id'],
                         'party': {
                             'acronym': parties[party]['acronym'],
                             'id': int(party),
@@ -273,9 +273,9 @@ def getMotionGraph(request, id_se):
                 mp = mp[0]
                 if mp['party_id'] == int(party):
                     option_np['breakdown'][i]['mps'].append({
-                        'name': mp.name,
+                        'name': mp['name'],
                         'id': person_id,
-                        'gov_id': mp.gov_id,
+                        'gov_id': mp['gov_id'],
                         'party': {
                             'acronym': parties[party]['acronym'],
                             'id': int(party),
