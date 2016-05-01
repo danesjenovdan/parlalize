@@ -162,12 +162,120 @@ def getMotionOfSession(request, id_se):
 def getMotionGraph(request, id_se):
     card = getGraphCardModel(Vote_graph, id_se)
 
+
+    option_for = {
+        'option': 'za',
+        'total_votes': card.votes_for,
+        'breakdown': []
+    }
+    option_against = {
+        'option': 'za',
+        'total_votes': card.votes_for,
+        'breakdown': []
+    }
+    option_kvor = {
+        'option': 'za',
+        'total_votes': card.votes_for,
+        'breakdown': []
+    }
+    option_np = {
+        'option': 'za',
+        'total_votes': card.votes_for,
+        'breakdown': []
+    }
+
+    parties = requests.get(API_URL + '/getAllPGsExt/').json()
+
+    for party in pgs_yes:
+        option_for['breakdown'].append({
+            'acronym': parties[party]['acronym'],
+            'party_id': party,
+            'total_votes': card.pgs_yes[party],
+            'mps': []
+        })
+
+        for person_id in mp_yes:
+            mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
+            option_for['breakdown']['mps'].append({
+                'name': mp.name,
+                'id': person_id,
+                'gov_id': mp.gov_id,
+                'party': {
+                    'acronym': parties[party]['acronym'],
+                    'id': party,
+                    'name': parties[party]['name']
+                }
+            })
+
+    for party in pgs_no:
+        option_against['breakdown'].append({
+            'acronym': parties[party]['acronym'],
+            'party_id': party,
+            'total_votes': card.pgs_yes[party],
+            'mps': []
+        })
+
+        for person_id in mp_yes:
+            mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
+            option_against['breakdown']['mps'].append({
+                'name': mp.name,
+                'id': person_id,
+                'gov_id': mp.gov_id,
+                'party': {
+                    'acronym': parties[party]['acronym'],
+                    'id': party,
+                    'name': parties[party]['name']
+                }
+            })
+
+    for party in pgs_kvor:
+        option_kvor['breakdown'].append({
+            'acronym': parties[party]['acronym'],
+            'party_id': party,
+            'total_votes': card.pgs_yes[party],
+            'mps': []
+        })
+
+        for person_id in mp_yes:
+            mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
+            option_kvor['breakdown']['mps'].append({
+                'name': mp.name,
+                'id': person_id,
+                'gov_id': mp.gov_id,
+                'party': {
+                    'acronym': parties[party]['acronym'],
+                    'id': party,
+                    'name': parties[party]['name']
+                }
+            })
+
+    for party in pgs_np:
+        option_np['breakdown'].append({
+            'acronym': parties[party]['acronym'],
+            'party_id': party,
+            'total_votes': card.pgs_yes[party],
+            'mps': []
+        })
+
+        for person_id in mp_yes:
+            mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
+            option_np['breakdown']['mps'].append({
+                'name': mp.name,
+                'id': person_id,
+                'gov_id': mp.gov_id,
+                'party': {
+                    'acronym': parties[party]['acronym'],
+                    'id': party,
+                    'name': parties[party]['name']
+                }
+            })
+
     out = {
         'results': {
 
                 'motion_id': card.id_parladata,
                 'text': card.motion,
-                'votes for': card.votes_for,
+                'votes_for': card.votes_for,
                 'againt': card.against,
                 'abstain': card.abstain,
                 'not_present':card.not_present,
@@ -175,7 +283,12 @@ def getMotionGraph(request, id_se):
                 'pgs_yes':card.pgs_yes,
                 'pgs_no':card.pgs_no,
                 'pgs_kvor':card.pgs_kvor,
-                'pgs_np':card.pgs_np
+                'pgs_np':card.pgs_np,
+                'mp_yes':card.mp_yes,
+                'mp_no':card.mp_no,
+                'mp_kvor':card.mp_kvor,
+                'mp_np':card.mp_np,
+                'layered_data': [option_for, option_against, option_kvor, option_np]
         }
     }
 
@@ -236,7 +349,7 @@ def setPresenceOfPG(request, id_se):
                     onSession[vote['mo_id']].append(vote['pg_id'])
                 else:
                     onSession.update({vote['mo_id'] : [vote['pg_id']]})
-    
+
     for i in membersOfPG:
         allPgs[i] = len(membersOfPG[i]) * len(motions)
 
@@ -244,15 +357,15 @@ def setPresenceOfPG(request, id_se):
         for i in onSession[b]:
             yesdic[i] += 1
         results[b] = yesdic
-    
+
     for b in results:
         print results[b]
 
 
-            
-    
 
-    
+
+
+
 
     '''
     for i in set(onSession):
@@ -263,7 +376,7 @@ def setPresenceOfPG(request, id_se):
 
     for a in yesdic:
         results[a] = float(yesdic[a]) / float(len(motions) *len(membersOfPG[a]))
-    
+
 
     '''
     return JsonResponse(results, safe=False)
