@@ -186,7 +186,7 @@ def getMotionGraph(request, id_se):
 
     parties = requests.get(API_URL + '/getAllPGsExt/').json()
 
-    for party in pgs_yes:
+    for party in card.pgs_yes:
         option_for['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': party,
@@ -194,7 +194,7 @@ def getMotionGraph(request, id_se):
             'mps': []
         })
 
-        for person_id in mp_yes:
+        for person_id in card.mp_yes:
             mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
             option_for['breakdown']['mps'].append({
                 'name': mp.name,
@@ -207,7 +207,7 @@ def getMotionGraph(request, id_se):
                 }
             })
 
-    for party in pgs_no:
+    for party in card.pgs_no:
         option_against['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': party,
@@ -215,7 +215,7 @@ def getMotionGraph(request, id_se):
             'mps': []
         })
 
-        for person_id in mp_yes:
+        for person_id in card.mp_no:
             mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
             option_against['breakdown']['mps'].append({
                 'name': mp.name,
@@ -228,7 +228,7 @@ def getMotionGraph(request, id_se):
                 }
             })
 
-    for party in pgs_kvor:
+    for party in card.pgs_kvor:
         option_kvor['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': party,
@@ -236,7 +236,7 @@ def getMotionGraph(request, id_se):
             'mps': []
         })
 
-        for person_id in mp_yes:
+        for person_id in card.mp_kvor:
             mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
             option_kvor['breakdown']['mps'].append({
                 'name': mp.name,
@@ -249,7 +249,7 @@ def getMotionGraph(request, id_se):
                 }
             })
 
-    for party in pgs_np:
+    for party in card.pgs_np:
         option_np['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': party,
@@ -257,7 +257,7 @@ def getMotionGraph(request, id_se):
             'mps': []
         })
 
-        for person_id in mp_yes:
+        for person_id in card.mp_np:
             mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
             option_np['breakdown']['mps'].append({
                 'name': mp.name,
