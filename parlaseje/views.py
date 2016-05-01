@@ -196,7 +196,7 @@ def getMotionGraph(request, id_se):
 
         for person_id in card.mp_yes:
             mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
-            if mp.party_id == party:
+            if mp['party_id'] == party:
                 option_for['breakdown'][i]['mps'].append({
                     'name': mp.name,
                     'id': person_id,
@@ -218,7 +218,7 @@ def getMotionGraph(request, id_se):
 
         for person_id in card.mp_no:
             mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
-            if mp.party_id == party:
+            if mp['party_id'] == party:
                 option_against['breakdown'][i]['mps'].append({
                     'name': mp.name,
                     'id': person_id,
@@ -240,7 +240,7 @@ def getMotionGraph(request, id_se):
 
         for person_id in card.mp_kvor:
             mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
-            if mp.party_id == party:
+            if mp['party_id'] == party:
                 option_kvor['breakdown'][i]['mps'].append({
                     'name': mp.name,
                     'id': person_id,
@@ -262,7 +262,7 @@ def getMotionGraph(request, id_se):
 
         for person_id in card.mp_np:
             mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
-            if mp.party_id == party:
+            if mp['party_id'] == party:
                 option_np['breakdown'][i]['mps'].append({
                     'name': mp.name,
                     'id': person_id,
