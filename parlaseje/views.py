@@ -185,17 +185,18 @@ def getMotionGraph(request, id_se):
     }
 
     parties = requests.get(API_URL + '/getAllPGsExt/').json()
+    mps = requests.get(API_URL + '/getMPs/').json()
 
     for i, party in enumerate(card.pgs_yes):
         option_for['breakdown'].append({
-            'acronym': parties[party]['acronym'],
-            'party_id': party,
+            'acronym': parties[int(party)]['acronym'],
+            'party_id': int(party),
             'total_votes': card.pgs_yes[party],
             'mps': []
         })
 
         for person_id in card.mp_yes:
-            mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
+            mp = (item for item in mps if item['id'] == person_id).next()
             if mp['party_id'] == party:
                 option_for['breakdown'][i]['mps'].append({
                     'name': mp.name,
@@ -210,14 +211,14 @@ def getMotionGraph(request, id_se):
 
     for i, party in enumerate(card.pgs_no):
         option_against['breakdown'].append({
-            'acronym': parties[party]['acronym'],
-            'party_id': party,
+            'acronym': parties[int(party)]['acronym'],
+            'party_id': int(party),
             'total_votes': card.pgs_yes[party],
             'mps': []
         })
 
         for person_id in card.mp_no:
-            mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
+            mp = (item for item in mps if item['id'] == person_id).next()
             if mp['party_id'] == party:
                 option_against['breakdown'][i]['mps'].append({
                     'name': mp.name,
@@ -232,14 +233,14 @@ def getMotionGraph(request, id_se):
 
     for i, party in enumerate(card.pgs_kvor):
         option_kvor['breakdown'].append({
-            'acronym': parties[party]['acronym'],
-            'party_id': party,
+            'acronym': parties[int(party)]['acronym'],
+            'party_id': int(party),
             'total_votes': card.pgs_yes[party],
             'mps': []
         })
 
         for person_id in card.mp_kvor:
-            mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
+            mp = (item for item in mps if item['id'] == person_id).next()
             if mp['party_id'] == party:
                 option_kvor['breakdown'][i]['mps'].append({
                     'name': mp.name,
@@ -254,14 +255,14 @@ def getMotionGraph(request, id_se):
 
     for i, party in enumerate(card.pgs_np):
         option_np['breakdown'].append({
-            'acronym': parties[party]['acronym'],
-            'party_id': party,
+            'acronym': parties[int(party)]['acronym'],
+            'party_id': int(party),
             'total_votes': card.pgs_yes[party],
             'mps': []
         })
 
         for person_id in card.mp_np:
-            mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
+            mp = (item for item in mps if item['id'] == person_id).next()
             if mp['party_id'] == party:
                 option_np['breakdown'][i]['mps'].append({
                     'name': mp.name,
