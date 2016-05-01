@@ -215,7 +215,7 @@ def getMotionGraph(request, id_se):
         option_against['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': int(party),
-            'total_votes': card.pgs_yes[party],
+            'total_votes': card.pgs_no[party],
             'mps': []
         })
 
@@ -239,7 +239,7 @@ def getMotionGraph(request, id_se):
         option_kvor['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': int(party),
-            'total_votes': card.pgs_yes[party],
+            'total_votes': card.pgs_kvor[party],
             'mps': []
         })
 
@@ -263,7 +263,7 @@ def getMotionGraph(request, id_se):
         option_np['breakdown'].append({
             'acronym': parties[party]['acronym'],
             'party_id': int(party),
-            'total_votes': card.pgs_yes[party],
+            'total_votes': card.pgs_np[party],
             'mps': []
         })
 
