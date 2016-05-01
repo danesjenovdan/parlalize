@@ -196,18 +196,20 @@ def getMotionGraph(request, id_se):
         })
 
         for person_id in card.mp_yes:
-            mp = filter(lambda person: person['id'] == int(person_id), mps)[0]
-            if mp['party_id'] == party:
-                option_for['breakdown'][i]['mps'].append({
-                    'name': mp.name,
-                    'id': person_id,
-                    'gov_id': mp.gov_id,
-                    'party': {
-                        'acronym': parties[party]['acronym'],
-                        'id': party,
-                        'name': parties[party]['name']
-                    }
-                })
+            mp = filter(lambda person: person['id'] == int(person_id), mps)
+            if len(mp) > 0:
+                mp = mp[0]
+                if mp['party_id'] == party:
+                    option_for['breakdown'][i]['mps'].append({
+                        'name': mp.name,
+                        'id': person_id,
+                        'gov_id': mp.gov_id,
+                        'party': {
+                            'acronym': parties[party]['acronym'],
+                            'id': party,
+                            'name': parties[party]['name']
+                        }
+                    })
 
     for i, party in enumerate(card.pgs_no):
         option_against['breakdown'].append({
@@ -218,18 +220,20 @@ def getMotionGraph(request, id_se):
         })
 
         for person_id in card.mp_no:
-            mp = filter(lambda person: person['id'] == int(person_id), mps)[0]
-            if mp['party_id'] == party:
-                option_against['breakdown'][i]['mps'].append({
-                    'name': mp.name,
-                    'id': person_id,
-                    'gov_id': mp.gov_id,
-                    'party': {
-                        'acronym': parties[party]['acronym'],
-                        'id': party,
-                        'name': parties[party]['name']
-                    }
-                })
+            mp = filter(lambda person: person['id'] == int(person_id), mps)
+            if len(mp) > 0:
+                mp = mp[0]
+                if mp['party_id'] == party:
+                    option_against['breakdown'][i]['mps'].append({
+                        'name': mp.name,
+                        'id': person_id,
+                        'gov_id': mp.gov_id,
+                        'party': {
+                            'acronym': parties[party]['acronym'],
+                            'id': party,
+                            'name': parties[party]['name']
+                        }
+                    })
 
     for i, party in enumerate(card.pgs_kvor):
         option_kvor['breakdown'].append({
@@ -240,18 +244,20 @@ def getMotionGraph(request, id_se):
         })
 
         for person_id in card.mp_kvor:
-            mp = filter(lambda person: person['id'] == int(person_id), mps)[0]
-            if mp['party_id'] == party:
-                option_kvor['breakdown'][i]['mps'].append({
-                    'name': mp.name,
-                    'id': person_id,
-                    'gov_id': mp.gov_id,
-                    'party': {
-                        'acronym': parties[party]['acronym'],
-                        'id': party,
-                        'name': parties[party]['name']
-                    }
-                })
+            mp = filter(lambda person: person['id'] == int(person_id), mps)
+            if len(mp) > 0:
+                mp = mp[0]
+                if mp['party_id'] == party:
+                    option_kvor['breakdown'][i]['mps'].append({
+                        'name': mp.name,
+                        'id': person_id,
+                        'gov_id': mp.gov_id,
+                        'party': {
+                            'acronym': parties[party]['acronym'],
+                            'id': party,
+                            'name': parties[party]['name']
+                        }
+                    })
 
     for i, party in enumerate(card.pgs_np):
         option_np['breakdown'].append({
@@ -262,18 +268,20 @@ def getMotionGraph(request, id_se):
         })
 
         for person_id in card.mp_np:
-            mp = filter(lambda person: person['id'] == int(person_id), mps)[0]
-            if mp['party_id'] == party:
-                option_np['breakdown'][i]['mps'].append({
-                    'name': mp.name,
-                    'id': person_id,
-                    'gov_id': mp.gov_id,
-                    'party': {
-                        'acronym': parties[party]['acronym'],
-                        'id': party,
-                        'name': parties[party]['name']
-                    }
-                })
+            mp = filter(lambda person: person['id'] == int(person_id), mps)
+            if len(mp) > 0:
+                mp = mp[0]
+                if mp['party_id'] == party:
+                    option_np['breakdown'][i]['mps'].append({
+                        'name': mp.name,
+                        'id': person_id,
+                        'gov_id': mp.gov_id,
+                        'party': {
+                            'acronym': parties[party]['acronym'],
+                            'id': party,
+                            'name': parties[party]['name']
+                        }
+                    })
 
     out = {
         'results': {
