@@ -195,7 +195,7 @@ def getMotionGraph(request, id_se):
         })
 
         for person_id in card.mp_yes:
-            mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
+            mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
             option_for['breakdown']['mps'].append({
                 'name': mp.name,
                 'id': person_id,
@@ -216,7 +216,7 @@ def getMotionGraph(request, id_se):
         })
 
         for person_id in card.mp_no:
-            mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
+            mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
             option_against['breakdown']['mps'].append({
                 'name': mp.name,
                 'id': person_id,
@@ -237,7 +237,7 @@ def getMotionGraph(request, id_se):
         })
 
         for person_id in card.mp_kvor:
-            mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
+            mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
             option_kvor['breakdown']['mps'].append({
                 'name': mp.name,
                 'id': person_id,
@@ -258,7 +258,7 @@ def getMotionGraph(request, id_se):
         })
 
         for person_id in card.mp_np:
-            mp = requests.get(API_URL + '/getMPStatic/' + person_id).json()
+            mp = requests.get(API_URL + '/getMPStatic/' + str(person_id)).json()
             option_np['breakdown']['mps'].append({
                 'name': mp.name,
                 'id': person_id,
