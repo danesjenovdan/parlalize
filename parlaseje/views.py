@@ -170,17 +170,17 @@ def getMotionGraph(request, id_se):
     }
     option_against = {
         'option': 'za',
-        'total_votes': card.votes_for,
+        'total_votes': card.against,
         'breakdown': []
     }
     option_kvor = {
         'option': 'za',
-        'total_votes': card.votes_for,
+        'total_votes': card.abstain,
         'breakdown': []
     }
     option_np = {
         'option': 'za',
-        'total_votes': card.votes_for,
+        'total_votes': card.not_present,
         'breakdown': []
     }
 
@@ -289,7 +289,7 @@ def getMotionGraph(request, id_se):
                 'motion_id': card.id_parladata,
                 'text': card.motion,
                 'votes_for': card.votes_for,
-                'againt': card.against,
+                'against': card.against,
                 'abstain': card.abstain,
                 'not_present':card.not_present,
                 'result':card.result,
