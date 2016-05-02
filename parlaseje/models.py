@@ -110,8 +110,6 @@ class Speech(Activity):
     def __init__(self, *args, **kwargs):
         super(Activity, self).__init__(*args, **kwargs)
 
-
-
 class Ballot(Activity):
     vote = models.ForeignKey('Vote',
                                blank=True, null=True,
@@ -198,3 +196,16 @@ class AbsentMPs(Timestampable, models.Model):
     id_parladata = models.IntegerField(_('parladata id'),
                             blank=True, null=True,help_text=_('id parladata'))
     absentMPs = JSONField(blank=True, null=True)
+
+class Quote(models.Model):
+
+    quoted_text = models.TextField(_('quoted text'),
+                                    blank=True,
+                                    null=True,
+                                    help_text=_('text quoted in a speech'))
+
+    speech = models.ForeignKey('Speech', help_text=_('the speech that is being quoted'))
+
+    first_char = models.IntegerField(blank=True, null=True, help_text=_('index of first character of quote string'))
+
+    last_char = models.IntegerField(blank=True, null=True, help_text=_('index of last character of quote string'))

@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
 
+from parlaseje.models import Vote
+
 def showCompass():
 
     fig, ax = plt.subplots()
@@ -58,15 +60,18 @@ def makeSimilarities(people_ballots_sorted_list):
 
     return np.array(similarities)
 
-def createCompassDict(vT, people, people_ids):
-    jsondata = []
+def createCompassDict(vT, people, people_ids, calculated_from):
+    jsondata = {
+        'calculated_from': calculated_from,
+        'people': []
+    }
     attendance_list = getAttendanceData(people_ids)
     # vocabularysize_list = getVocabularySizeData(people_ids)
     numberofspokenwords_list = getNumberOfSpokenWordsData(people_ids)
     problematicno_list, privzdignjeno_list, preprosto_list = getStyleScoresData(people_ids)
 
     for i, person_id in enumerate(people_ids):
-        jsondata.append({
+        jsondata['people'].append({
             'id': person_id,
             'name': (person['name'] for person in people if person['id'] == person_id).next(),
             'acronym': (person['acronym'] for person in people if person['id'] == person_id).next(),
@@ -203,4 +208,6 @@ def getData():
     #     ax3.annotate(str(txt), (vT[1,:][i], vT[0,:][i]))
     # plt.savefig('SVD.png')
 
-    return createCompassDict(vT, people, people_ids)
+    calculated_from = Vote.objects.all().order_by('session__date')[0].session.date
+
+    return createCompassDict(vT, people, people_ids, calculated_from)
