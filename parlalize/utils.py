@@ -263,8 +263,8 @@ def getPGCardModelNew(model, id, date=None):
 def updateOrganizations():
     data = requests.get(API_URL+'/getAllOrganizations').json()
     for pg in data:
-        if Organization.objects.filter(id_parladata=pg['id']):
-            org = Organization.objects.get(id_parladata=pg['id'])
+        if Organization.objects.filter(id_parladata=pg):
+            org = Organization.objects.get(id_parladata=pg)
             org.name = data[pg]['name']
             org.classification = data[pg]['classification']
         else:
@@ -290,6 +290,13 @@ def updateSpeeches():
                             id_parladata=dic['id'])
             speech.save()
     return 1
+
+
+def updateMotionOfSession():
+    ses = Session.objects.all()
+    for s in ses:
+        print s.id_parladata
+        requests.get(BASE_URL+'/s/setMotionOfSession/'+str(s.id_parladata))
 
 
 def updateBallots():
@@ -331,7 +338,7 @@ def update():
     updateSpeeches()
     print "speeches"
 
-    #updateVotes() TODO JURIĆ'S UPDATE VOTES -> pokliči setMotionOfSession za vsako sejo
+    updateMotionOfSession()
     print "votes"
 
     updateBallots()
