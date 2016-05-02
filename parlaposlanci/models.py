@@ -43,6 +43,12 @@ class Person(Timestampable, models.Model): # poslanec, minister, predsednik dz e
                             max_length=128,
                             help_text=_('Yes if MP is actived or no if it is not'))
 
+    gov_id = models.CharField(_('gov id'),
+                            null=True,
+                            max_length=128,
+                            help_text=_('The ID of the official on the government website.')
+                            )
+
 
 
     def __str__(self):
@@ -340,6 +346,12 @@ class MPStaticPL(Timestampable, models.Model):
 
     party_name = models.TextField(blank=True, null=True, help_text=_('Party name'))
 
+    gov_id = models.CharField(_('gov id'),
+                            null=True,
+                            max_length=128,
+                            help_text=_('The ID of the official on the government website.')
+                            )
+
 class MPStaticGroup(Timestampable, models.Model):
 
     person = models.ForeignKey('MPStaticPL', help_text=_('Person foreign key to MPStaticPL'))
@@ -461,9 +473,12 @@ class Compass(Timestampable, models.Model):
                                null=True,
                                help_text=_('date of activity'))
 
+    data = JSONField(blank=True, null=True)
+
+class TaggedBallots(Timestampable, models.Model):
+
     person = models.ForeignKey('Person',
-                               blank=True,
-                               null=True,
+                               blank=True, null=True,
                                help_text=_('MP'))
 
     data = JSONField(blank=True, null=True)

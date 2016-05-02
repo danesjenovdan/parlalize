@@ -37,7 +37,7 @@ def setMPStaticPL(request, person_id):
     dic = dict()
     data = requests.get(API_URL+'/getMPStatic/'+str(person_id)+'/').json()
 
-    result = saveOrAbort(model=MPStaticPL, person=Person.objects.get(id_parladata=int(person_id)), voters=data['voters'], age=data['age'], mandates=data['mandates'], party_id=data['party_id'], education=data['education'], previous_occupation=data['previous_occupation'], name=data['name'], district=data['district'], facebook=data['social']['facebook'], twitter=data['social']['twitter'], linkedin=data['social']['linkedin'], party_name=data['party'], acronym=data['acronym'])
+    result = saveOrAbort(model=MPStaticPL, person=Person.objects.get(id_parladata=int(person_id)), voters=data['voters'], age=data['age'], mandates=data['mandates'], party_id=data['party_id'], education=data['education'], previous_occupation=data['previous_occupation'], name=data['name'], district=data['district'], facebook=data['social']['facebook'], twitter=data['social']['twitter'], linkedin=data['social']['linkedin'], party_name=data['party'], acronym=data['acronym'], gov_id=data['gov_id'])
 
     if result:
         for group in data['groups']:
@@ -54,8 +54,14 @@ def getMPStaticPL(request, person_id, date=None):
 
     data = {
         'person': {
-            'name': Person.objects.get(id_parladata=int(person_id)).name,
-            'id': int(person_id)
+            'name': card.person.name,
+            'id': int(person_id),
+            'gov_id': card.gov_id,
+            'party': {
+                'id': card.party_id,
+                'acronym': card.acronym,
+                'name': card.party_name
+            }
         },
         'results': {
             'voters': card.voters,
@@ -206,6 +212,7 @@ def setLastActivity(request, person_id):
 
 def getLastActivity(request, person_id, date=None):
     print date
+
     def parseDayActivites(day_activites):
         data = []
         types = day_activites.typee.split(";")
@@ -234,6 +241,7 @@ def getLastActivity(request, person_id, date=None):
         return {"date": str(day_activites.date.date()), "events": data}
 
     out = []
+
     equalVoters = getPersonCardModel(LastActivity, person_id, date)
     out.append(parseDayActivites(equalVoters))
     for i in range(LAST_ACTIVITY_COUNT - 1):
@@ -242,10 +250,19 @@ def getLastActivity(request, person_id, date=None):
         if equalVoters == None:
             break;
         out.append(parseDayActivites(equalVoters))
-    result  = {
+
+    static = getPersonCardModel(MPStaticPL, person_id, date)
+
+    result = {
         'person': {
-            "name": equalVoters.person.name,
-            "id": equalVoters.person.id_parladata,
+            'name': static.person.name,
+            'id': int(person_id),
+            'gov_id': static.gov_id,
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
         },
         'results': out
         }
@@ -659,11 +676,18 @@ def setCutVotes(request, person_id, date=None):
 
 def getCutVotes(request, person_id, date=None):
     cutVotes = getPersonCardModelNew(CutVotes, person_id, date)
+    static = getPersonCardModel(MPStaticPL, person_id, date)
 
     out = {
         'person': {
+            'name': static.person.name,
             'id': int(person_id),
-            'name': Person.objects.get(id_parladata=int(person_id)).name
+            'gov_id': static.gov_id,
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
         },
         'results': {
             'abstain': {
@@ -874,8 +898,19 @@ def setStyleScores(request, person_id):
 
 def getStyleScores(request, person_id, date=None):
     card = getPersonCardModel(StyleScores, int(person_id), date)
+    static = getPersonCardModel(MPStaticPL, person_id, date)
 
     out = {
+        'person': {
+            'name': static.person.name,
+            'id': int(person_id),
+            'gov_id': static.gov_id,
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
+        },
         'results': {
             'privzdignjeno': card.privzdignjeno,
             'problematicno': card.problematicno,
@@ -885,10 +920,6 @@ def getStyleScores(request, person_id, date=None):
                 'problematicno_average': card.problematicno_average,
                 'preprosto_average': card.preprosto_average
             }
-        },
-        'person': {
-            'id': int(person_id),
-            'name': Person.objects.get(id_parladata=int(person_id)).name
         }
     }
 
@@ -1206,11 +1237,18 @@ def setAverageNumberOfSpeechesPerSessionAll(request):
 def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
     card = getPersonCardModel(AverageNumberOfSpeechesPerSession, person_id, date)
+    static = getPersonCardModel(MPStaticPL, person_id, date)
 
     out = {
         'person': {
-            'name': Person.objects.get(id_parladata=int(person_id)).name,
-            'id': int(person_id)
+            'name': static.person.name,
+            'id': int(person_id),
+            'gov_id': static.gov_id,
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
         },
         'results': {
             'max': {
@@ -1263,7 +1301,55 @@ def runSetters(request, date_to):
                 # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 
-def getCompass(request): # TODO make propper setters and getters
+def setCompass(request):
     data = compass.getData()
 
+    if data['calculated_from'] != None:
+        newcompass = Compass(
+            # calculated_from=datetime.strptime(data['calculated_from']), # TODO fix date parsing
+            created_for=datetime.now().date(),
+            data=data['people']
+        )
+    else:
+        newcompass = Compass(
+            created_for=datetime.now().date(),
+            data=data['people']
+        )
+    newcompass.save()
+
+    return HttpResponse('All iz well')
+
+def getCompass(request): # TODO make propper setters and getters
+    data = Compass.objects.all().order_by('created_for')[0].data
+
     return JsonResponse(data, safe=False)
+
+def setTaggedBallots(request, person_id):
+
+    person = Person.objects.get(id_parladata=int(person_id))
+    data = requests.get(API_URL + '/getTaggedVotes/' + str(person_id)).json()
+
+    tagged_ballots = TaggedBallots(person=person, data=data)
+    tagged_ballots.save()
+
+    return HttpResponse('All iz well')
+
+def getTaggedBallots(request, person_id, date=None):
+
+    card = getPersonCardModel(TaggedBallots, person_id, date)
+    static = getPersonCardModel(MPStaticPL, person_id, date)
+
+    out = {
+        'person': {
+            'name': static.person.name,
+            'id': int(person_id),
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
+        },
+        'ballots': card.data
+    }
+
+    return JsonResponse(out, safe=False)

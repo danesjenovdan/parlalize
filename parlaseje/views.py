@@ -162,20 +162,146 @@ def getMotionOfSession(request, id_se):
 def getMotionGraph(request, id_se):
     card = getGraphCardModel(Vote_graph, id_se)
 
+
+    option_for = {
+        'option': 'za',
+        'total_votes': card.votes_for,
+        'breakdown': []
+    }
+    option_against = {
+        'option': 'proti',
+        'total_votes': card.against,
+        'breakdown': []
+    }
+    option_kvor = {
+        'option': 'kvorum',
+        'total_votes': card.abstain,
+        'breakdown': []
+    }
+    option_np = {
+        'option': 'ni',
+        'total_votes': card.not_present,
+        'breakdown': []
+    }
+
+    parties = requests.get(API_URL + '/getAllPGsExt/').json()
+    mps = requests.get(API_URL + '/getMPs/').json()
+
+    for i, party in enumerate(card.pgs_yes):
+        option_for['breakdown'].append({
+            'acronym': parties[party]['acronym'],
+            'party_id': int(party),
+            'total_votes': card.pgs_yes[party],
+            'mps': []
+        })
+
+        for person_id in card.mp_yes:
+            mp = filter(lambda person: person['id'] == int(person_id), mps)
+            if len(mp) > 0:
+                mp = mp[0]
+                if mp['party_id'] == int(party):
+                    option_for['breakdown'][i]['mps'].append({
+                        'name': mp['name'],
+                        'id': person_id,
+                        'gov_id': mp['gov_id'],
+                        'party': {
+                            'acronym': parties[party]['acronym'],
+                            'id': int(party),
+                            'name': parties[party]['name']
+                        }
+                    })
+
+    for i, party in enumerate(card.pgs_no):
+        option_against['breakdown'].append({
+            'acronym': parties[party]['acronym'],
+            'party_id': int(party),
+            'total_votes': card.pgs_no[party],
+            'mps': []
+        })
+
+        for person_id in card.mp_no:
+            mp = filter(lambda person: person['id'] == int(person_id), mps)
+            if len(mp) > 0:
+                mp = mp[0]
+                if mp['party_id'] == int(party):
+                    option_against['breakdown'][i]['mps'].append({
+                        'name': mp['name'],
+                        'id': person_id,
+                        'gov_id': mp['gov_id'],
+                        'party': {
+                            'acronym': parties[party]['acronym'],
+                            'id': int(party),
+                            'name': parties[party]['name']
+                        }
+                    })
+
+    for i, party in enumerate(card.pgs_kvor):
+        option_kvor['breakdown'].append({
+            'acronym': parties[party]['acronym'],
+            'party_id': int(party),
+            'total_votes': card.pgs_kvor[party],
+            'mps': []
+        })
+
+        for person_id in card.mp_kvor:
+            mp = filter(lambda person: person['id'] == int(person_id), mps)
+            if len(mp) > 0:
+                mp = mp[0]
+                if mp['party_id'] == int(party):
+                    option_kvor['breakdown'][i]['mps'].append({
+                        'name': mp['name'],
+                        'id': person_id,
+                        'gov_id': mp['gov_id'],
+                        'party': {
+                            'acronym': parties[party]['acronym'],
+                            'id': int(party),
+                            'name': parties[party]['name']
+                        }
+                    })
+
+    for i, party in enumerate(card.pgs_np):
+        option_np['breakdown'].append({
+            'acronym': parties[party]['acronym'],
+            'party_id': int(party),
+            'total_votes': card.pgs_np[party],
+            'mps': []
+        })
+
+        for person_id in card.mp_np:
+            mp = filter(lambda person: person['id'] == int(person_id), mps)
+            if len(mp) > 0:
+                mp = mp[0]
+                if mp['party_id'] == int(party):
+                    option_np['breakdown'][i]['mps'].append({
+                        'name': mp['name'],
+                        'id': person_id,
+                        'gov_id': mp['gov_id'],
+                        'party': {
+                            'acronym': parties[party]['acronym'],
+                            'id': int(party),
+                            'name': parties[party]['name']
+                        }
+                    })
+
     out = {
         'results': {
 
                 'motion_id': card.id_parladata,
                 'text': card.motion,
-                'votes for': card.votes_for,
-                'againt': card.against,
+                'votes_for': card.votes_for,
+                'against': card.against,
                 'abstain': card.abstain,
                 'not_present':card.not_present,
                 'result':card.result,
                 'pgs_yes':card.pgs_yes,
                 'pgs_no':card.pgs_no,
                 'pgs_kvor':card.pgs_kvor,
-                'pgs_np':card.pgs_np
+                'pgs_np':card.pgs_np,
+                'mp_yes':card.mp_yes,
+                'mp_no':card.mp_no,
+                'mp_kvor':card.mp_kvor,
+                'mp_np':card.mp_np,
+                'layered_data': [option_for, option_against, option_kvor, option_np]
         }
     }
 
@@ -236,7 +362,7 @@ def setPresenceOfPG(request, id_se):
                     onSession[vote['mo_id']].append(vote['pg_id'])
                 else:
                     onSession.update({vote['mo_id'] : [vote['pg_id']]})
-    
+
     for i in membersOfPG:
         allPgs[i] = len(membersOfPG[i]) * len(motions)
 
@@ -244,15 +370,15 @@ def setPresenceOfPG(request, id_se):
         for i in onSession[b]:
             yesdic[i] += 1
         results[b] = yesdic
-    
+
     for b in results:
         print results[b]
 
 
-            
-    
 
-    
+
+
+
 
     '''
     for i in set(onSession):
@@ -263,7 +389,7 @@ def setPresenceOfPG(request, id_se):
 
     for a in yesdic:
         results[a] = float(yesdic[a]) / float(len(motions) *len(membersOfPG[a]))
-    
+
 
     '''
     return JsonResponse(results, safe=False)
