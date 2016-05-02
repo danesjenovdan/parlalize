@@ -55,7 +55,6 @@ def getSessionSpeeches(request, session_id,):
 
 def setMotionOfSession(request, id_se):
     motion  = requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
-    votes  = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
 
     tab = []
     yes = 0
@@ -73,26 +72,26 @@ def setMotionOfSession(request, id_se):
     npdic = defaultdict(int)
     tyes = []
     for mot in motion:
+        votes  = requests.get(API_URL + '/getVotesOfMotion/'+str(mot['id'])+'/').json()
         for vote in votes:
-            if str(vote['mo_id']) == str(mot['id']):
-                if vote['option'] == str('za'):
-                    yes = yes + 1
-                    yesdic[vote['pg_id']] += 1
-                    #TODO da ti seteje po acronymu
-                    tabyes.append(vote['mp_id'])
-                if vote['option'] == str('proti'):
-                    no = no + 1
-                    nodic[vote['pg_id']] += 1
-                    tabno.append(vote['mp_id'])
+            if vote['option'] == str('za'):
+                yes = yes + 1
+                yesdic[vote['pg_id']] += 1
+                #TODO da ti seteje po acronymu
+                tabyes.append(vote['mp_id'])
+            if vote['option'] == str('proti'):
+                no = no + 1
+                nodic[vote['pg_id']] += 1
+                tabno.append(vote['mp_id'])
 
-                if vote['option'] == str('kvorum'):
-                    kvorum = kvorum + 1
-                    kvordic[vote['pg_id']] += 1
-                    tabkvo.append(vote['mp_id'])
-                if vote['option'] == str('ni'):
-                    not_present = not_present + 1
-                    npdic[vote['pg_id']] += 1
-                    tabnp.append(vote['mp_id'])
+            if vote['option'] == str('kvorum'):
+                kvorum = kvorum + 1
+                kvordic[vote['pg_id']] += 1
+                tabkvo.append(vote['mp_id'])
+            if vote['option'] == str('ni'):
+                not_present = not_present + 1
+                npdic[vote['pg_id']] += 1
+                tabnp.append(vote['mp_id'])
 
         result = saveOrAbortMotion(model=Vote,
                                    session=Session.objects.get(id_parladata=int(id_se)),
@@ -130,6 +129,10 @@ def setMotionOfSession(request, id_se):
         tabno = []
         tabkvo = []
         tabnp = []
+        yesdic = defaultdict(int)
+        nodic = defaultdict(int)
+        kvordic = defaultdict(int)
+        npdic = defaultdict(int)
     return JsonResponse({'alliswell': True})
 
 
