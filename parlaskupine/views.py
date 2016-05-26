@@ -574,6 +574,17 @@ def getCutVotes(request, pg_id, date=None):
     return JsonResponse(out)
 
 
+# get PGs IDs
+def getPGsIDs(request):
+    output = []
+    data = requests.get(API_URL+'/getAllPGs/')
+    data = data.json()
+
+    output = {"list": [i for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
+
+    return JsonResponse(output, safe=False)
+
+
 def runSetters(request, date_to):
     setters_models = {
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
@@ -613,7 +624,7 @@ def runSetters(date_to):
     }
 
     IDs = getPGIDs()
-    IDs = [1, 2]
+    #IDs = [1, 2]
     # print IDs
     allIds = len(IDs)
     curentId = 0
@@ -627,7 +638,7 @@ def runSetters(date_to):
                 url = BASE_URL+"/pg"+setter+str(ID)+'/'+date.strftime(API_DATE_FORMAT)
                 print url
                 # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
-                a = requests.get(url).json()
+                a = requests.get(url)
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
     return {"status": "all is fine :D"}
