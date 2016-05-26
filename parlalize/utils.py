@@ -20,7 +20,7 @@ def voteToLogical(vote):
         return -1
 
 
-# Return dictionary of votes results by user ids. 
+# Return dictionary of votes results by user ids.
 def getLogicVotes(date=None):
     if date:
         r = requests.get(API_URL+'/getVotes/'+date)
@@ -219,9 +219,10 @@ def updatePeople():
             person.id_parladata = int(mp['id'])
             person.image = mp['image']
             person.actived = True if int(mp['id']) in mps_ids else False
+            person.gov_id = mp['gov_id']
             person.save()
         else:
-            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if int(mp['id']) in mps_ids else False)
+            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if int(mp['id']) in mps_ids else False, gov_id=mp['gov_id'])
             person.save()
 
     return 1
@@ -246,7 +247,7 @@ def getPGCardModelNew(model, id, date=None):
         modelObject = model.objects.filter(organization__id_parladata=id,
                                            created_for__lte=datetime.strptime(date, '%d.%m.%Y'))
     else:
-        modelObject = model.objects.filter(organization__id_parladata=id, 
+        modelObject = model.objects.filter(organization__id_parladata=id,
                                            created_for__lte=datetime.now())
 
     if not modelObject:
@@ -262,8 +263,8 @@ def getPGCardModelNew(model, id, date=None):
 def updateOrganizations():
     data = requests.get(API_URL+'/getAllOrganizations').json()
     for pg in data:
-        if Organization.objects.filter(id_parladata=pg['id']):
-            org = Organization.objects.get(id_parladata=pg['id'])
+        if Organization.objects.filter(id_parladata=pg):
+            org = Organization.objects.get(id_parladata=pg)
             org.name = data[pg]['name']
             org.classification = data[pg]['classification']
         else:
@@ -291,6 +292,13 @@ def updateSpeeches():
     return 1
 
 
+def updateMotionOfSession():
+    ses = Session.objects.all()
+    for s in ses:
+        print s.id_parladata
+        requests.get(BASE_URL+'/s/setMotionOfSession/'+str(s.id_parladata))
+
+
 def updateBallots():
     data = requests.get(API_URL+'/getAllBallots').json()
     existingISs = Ballot.objects.all().values_list("id_parladata", flat=True)
@@ -301,7 +309,7 @@ def updateBallots():
             ballots = Ballot(person=Person.objects.get(id_parladata=int(dic['voter'])),
                              option=dic['option'],
                              vote=vote,
-                             start_time=vote.start_time,
+                             start_time=vote.session.start_time,
                              end_time=None,
                              id_parladata=dic['id'])
             ballots.save()
@@ -330,7 +338,7 @@ def update():
     updateSpeeches()
     print "speeches"
 
-    #updateVotes() TODO JURIĆ'S UPDATE VOTES -> pokliči setMotionOfSession za vsako sejo
+    updateMotionOfSession()
     print "votes"
 
     updateBallots()

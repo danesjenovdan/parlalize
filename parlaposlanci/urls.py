@@ -31,6 +31,10 @@ urlpatterns = patterns(
     url(r'^setCutVotes/(?P<person_id>\d+)/(?P<date>[\w].+)', setCutVotes),
     url(r'^setCutVotes/(?P<person_id>\d+)', setCutVotes),
 
+    url(r'^setCompass', setCompass),
+
+    url(r'^setTaggedBallots/(?P<person_id>\d+)', setTaggedBallots),
+
 
     ####################################################################################
 
@@ -70,6 +74,13 @@ urlpatterns = patterns(
 
     url(r'^getAllSpeeches/(?P<person_id>\d+)/(?P<date>[\w].+)', getAllSpeeches),
     url(r'^getAllSpeeches/(?P<person_id>\d+)', getAllSpeeches),
+
+    url(r'^getMPsIDs', getMPsIDs),
+
+    url(r'^getCompass', getCompass),
+
+    url(r'^getTaggedBallots/(?P<person_id>\d+)/(?P<date>[\w].+)', getTaggedBallots),
+    url(r'^getTaggedBallots/(?P<person_id>\d+)', getTaggedBallots),
 
     ####################################################################################
 
