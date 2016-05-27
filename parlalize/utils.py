@@ -28,14 +28,15 @@ def getLogicVotes(date=None):
         r = requests.get(API_URL+'/getVotes/')
     pl_votes = Vote.objects.all()
     votes = r.json()
+    d = [vote for voter in votes for vote in votes[voter].keys()]
     for person_id in votes.keys():
-        for vote in pl_votes:
+        for vote in set(d):
             try:
-                votes[str(person_id)][str(vote.id_parladata)] = VOTE_MAP[votes[str(person_id)][str(vote.id_parladata)]]
+                votes[str(person_id)][str(vote)] = VOTE_MAP[votes[str(person_id)][str(vote)]]
             except:
                 if type(votes[str(person_id)]) == list:
                     votes[str(person_id)] = {}
-                votes[str(person_id)][str(vote.id_parladata)] = VOTE_MAP['ni_poslanec']
+                votes[str(person_id)][str(vote)] = VOTE_MAP['ni_poslanec']
 
     return votes
 
