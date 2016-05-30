@@ -35,6 +35,9 @@ urlpatterns = patterns(
 
     url(r'^setTaggedBallots/(?P<person_id>\d+)', setTaggedBallots),
 
+    url(r'^setMembershipsOfMember/(?P<person_id>\d+)/(?P<date>[\w].+)', setMembershipsOfMember),
+    url(r'^setMembershipsOfMember/(?P<person_id>\d+)', setMembershipsOfMember),
+
 
     ####################################################################################
 
@@ -81,6 +84,9 @@ urlpatterns = patterns(
 
     url(r'^getTaggedBallots/(?P<person_id>\d+)/(?P<date>[\w].+)', getTaggedBallots),
     url(r'^getTaggedBallots/(?P<person_id>\d+)', getTaggedBallots),
+
+    url(r'^getMembershipsOfMember/(?P<person_id>\d+)/(?P<date>[\w].+)', getMembershipsOfMember),
+    url(r'^getMembershipsOfMember/(?P<person_id>\d+)', getMembershipsOfMember),
 
     ####################################################################################
 
