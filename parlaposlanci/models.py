@@ -482,3 +482,15 @@ class TaggedBallots(Timestampable, models.Model):
                                help_text=_('MP'))
 
     data = JSONField(blank=True, null=True)
+
+class MembershipsOfMember(Timestampable, models.Model):
+    person = models.ForeignKey('Person',
+                               blank=True, null=True,
+                               help_text=_('MP'))
+
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    data = JSONField(blank=True, null=True)
