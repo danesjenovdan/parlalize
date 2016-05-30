@@ -1353,3 +1353,39 @@ def getTaggedBallots(request, person_id, date=None):
     }
 
     return JsonResponse(out, safe=False)
+
+
+def setMembershipsOfMember(request, person_id, date=None):
+    if date:
+        print API_URL+'/getMembershipsOfMember/'+ person_id + "/" + date
+        data = requests.get(API_URL+'/getMembershipsOfMember/' + person_id + "/" + date).json()
+        date_of = datetime.strptime(date, API_DATE_FORMAT)
+    else:
+        data = requests.get(API_URL+'/getMembershipsOfMember/'+ person_id).json()
+        date_of = datetime.now().date()
+
+    person = Person.objects.get(id_parladata=int(person_id))
+
+    memberships = saveOrAbortNew(MembershipsOfMember, created_for=date_of, person=person, data=data)
+
+    return HttpResponse(memberships)
+
+
+def getMembershipsOfMember(request, person_id, date=None):
+    card = getPersonCardModelNew(MembershipsOfMember, person_id, date)
+    static = getPersonCardModel(MPStaticPL, person_id, date)
+
+    out = {
+        'person': {
+            'name': static.person.name,
+            'id': int(person_id),
+            'party': {
+                'id': static.party_id,
+                'acronym': static.acronym,
+                'name': static.party_name
+            }
+        },
+        'memberships': card.data
+    }
+
+    return JsonResponse(out, safe=False)
