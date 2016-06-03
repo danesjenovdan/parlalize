@@ -80,6 +80,24 @@ def saveOrAbortAbsent(model, **kwargs):
 		newModel.save()
 		print "Saved"
 
+def saveOrAbortPres(model, **kwargs):
+	savedModel = kwargs['id_parladata']
+	tab = []
+	if savedModel:
+		ids = model.objects.values('id_parladata')
+		for i in ids:
+			tab.append(i['id_parladata'])
+		if savedModel in tab:
+			print "Not saved"
+		else:
+			newModel = model(**kwargs)
+			newModel.save()
+			print "Saved"
+	else:
+		newModel = model(**kwargs)
+		newModel.save()
+		print "Saved"
+		
 def countBallots(vote):
     # count votes for, against, abstentions, misses
     votesfor = len([ballot for ballot in vote.vote.all() if ballot.option == 'za'])
