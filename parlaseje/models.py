@@ -209,3 +209,16 @@ class Quote(models.Model):
     first_char = models.IntegerField(blank=True, null=True, help_text=_('index of first character of quote string'))
 
     last_char = models.IntegerField(blank=True, null=True, help_text=_('index of last character of quote string'))
+
+
+class PresenceOfPG(Timestampable, models.Model):
+
+    presence = JSONField(blank=True, null=True)
+
+    #created_for = models.DateField(_('date of activity'),
+    #                               blank=True,
+    #                               null=True,
+    #                               help_text=_('date of analize'))
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                            blank=True, null=True,help_text=_('id parladata'))
