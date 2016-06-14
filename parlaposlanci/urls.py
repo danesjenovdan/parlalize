@@ -6,6 +6,7 @@ urlpatterns = patterns(
 #   url(r'^getMPsList/', getMPsList),
 
     # setters
+    url(r'^setMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMPStaticPL),
     url(r'^setMPStatic/(?P<person_id>\d+)/', setMPStaticPL),
 
     url(r'^setMostEqualVoters/(?P<person_id>\d+)/', setMostEqualVoters),
@@ -42,7 +43,7 @@ urlpatterns = patterns(
     ####################################################################################
 
     # getters
-    url(r'^getMPStatic/(?P<person_id>\d+)/(?P<date>[\w].+)', getMPStaticPL),
+    url(r'^getMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', getMPStaticPL),
     url(r'^getMPStatic/(?P<person_id>\d+)/', getMPStaticPL),
 
     url(r'^getMostEqualVoters/(?P<person_id>\d+)/(?P<date>[\w].+)', getMostEqualVoters),
