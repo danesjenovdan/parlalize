@@ -322,6 +322,11 @@ class MPsWhichFitsToPG(Timestampable, models.Model):
 class MPStaticPL(Timestampable, models.Model):
     person = models.ForeignKey('Person', help_text=_('Person foreign key relationship'))
 
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
     voters = models.IntegerField(blank=True, null=True, help_text=_('Number of voters'))
 
     age = models.IntegerField(blank=True, null=True, help_text=_('Person\'s age.'))
