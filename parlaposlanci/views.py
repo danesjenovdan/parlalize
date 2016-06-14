@@ -33,22 +33,41 @@ def getMPsList(request):
 
 
 ##returns MP static data like PoliticalParty, age, ....
-def setMPStaticPL(request, person_id):
+def setMPStaticPL(request, person_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date()
+    data = requests.get(API_URL+'/getMPStatic/'+ person_id).json()
     dic = dict()
-    data = requests.get(API_URL+'/getMPStatic/'+str(person_id)+'/').json()
 
-    result = saveOrAbort(model=MPStaticPL, person=Person.objects.get(id_parladata=int(person_id)), voters=data['voters'], age=data['age'], mandates=data['mandates'], party_id=data['party_id'], education=data['education'], previous_occupation=data['previous_occupation'], name=data['name'], district=data['district'], facebook=data['social']['facebook'], twitter=data['social']['twitter'], linkedin=data['social']['linkedin'], party_name=data['party'], acronym=data['acronym'], gov_id=data['gov_id'])
+    result = saveOrAbortNew(model=MPStaticPL,
+                            created_for=date_of,
+                            person=Person.objects.get(id_parladata=int(person_id)), 
+                            voters=data['voters'], age=data['age'], 
+                            mandates=data['mandates'], 
+                            party_id=data['party_id'], 
+                            education=data['education'], 
+                            previous_occupation=data['previous_occupation'], 
+                            name=data['name'], 
+                            district=data['district'], 
+                            facebook=data['social']['facebook'], 
+                            twitter=data['social']['twitter'], 
+                            linkedin=data['social']['linkedin'], 
+                            party_name=data['party'], 
+                            acronym=data['acronym'], 
+                            gov_id=data['gov_id'])
 
     if result:
         for group in data['groups']:
             new_group = MPStaticGroup(person=MPStaticPL.objects.filter(person__id_parladata=int(person_id)).latest('created_at'), groupid=int(group['id']), groupname=group['name'])
             new_group.save()
 
-    return HttpResponse('All iz well')
+    return JsonResponse({"status":'All iz well', "saved":result})
 
 
-def getMPStaticPL(request, person_id, date=None):
-    card = getPersonCardModel(MPStaticPL, person_id, date)
+def getMPStaticPL(request, person_id, date_=None):
+    card = getPersonCardModelNew(MPStaticPL, person_id, date_)
 
     if card.twitter == 'False': print card.twitter
 
@@ -251,7 +270,7 @@ def getLastActivity(request, person_id, date=None):
             break;
         out.append(parseDayActivites(equalVoters))
 
-    static = getPersonCardModel(MPStaticPL, person_id, date)
+    static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     result = {
         'person': {
@@ -676,7 +695,7 @@ def setCutVotes(request, person_id, date=None):
 
 def getCutVotes(request, person_id, date=None):
     cutVotes = getPersonCardModelNew(CutVotes, person_id, date)
-    static = getPersonCardModel(MPStaticPL, person_id, date)
+    static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
         'person': {
@@ -898,7 +917,7 @@ def setStyleScores(request, person_id):
 
 def getStyleScores(request, person_id, date=None):
     card = getPersonCardModel(StyleScores, int(person_id), date)
-    static = getPersonCardModel(MPStaticPL, person_id, date)
+    static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
         'person': {
@@ -1237,7 +1256,7 @@ def setAverageNumberOfSpeechesPerSessionAll(request):
 def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
     card = getPersonCardModel(AverageNumberOfSpeechesPerSession, person_id, date)
-    static = getPersonCardModel(MPStaticPL, person_id, date)
+    static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
         'person': {
@@ -1276,9 +1295,12 @@ def getMPsIDs(request):
 
 def runSetters(request, date_to):
     setters_models = {
+        #model: setter,
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
         # CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
-        LessEqualVoters: setLessEqualVoters,
+        MPStaticPL: setMPStaticPL,
+        MembershipsOfMember: setMembershipsOfMember,
+        #LessEqualVoters: setLessEqualVoters,
         # EqualVoters: setMostEqualVoters,
     }
     IDs = getIDs()
@@ -1297,6 +1319,9 @@ def runSetters(request, date_to):
                 print date.strftime('%d.%m.%Y')
                 # print setter + str(ID) + "/" + date.strftime('%d.%m.%Y')
                 setter(request, str(ID), date.strftime('%d.%m.%Y'))
+
+                if setter == setMPStaticPL: # Prevent that runner doesn't waste time with ... Which doesn't change often
+                    break;
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
     return JsonResponse({"status": "all is fine :D"}, safe=False)
@@ -1337,7 +1362,7 @@ def setTaggedBallots(request, person_id):
 def getTaggedBallots(request, person_id, date=None):
 
     card = getPersonCardModel(TaggedBallots, person_id, date)
-    static = getPersonCardModel(MPStaticPL, person_id, date)
+    static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
         'person': {
@@ -1373,7 +1398,7 @@ def setMembershipsOfMember(request, person_id, date=None):
 
 def getMembershipsOfMember(request, person_id, date=None):
     card = getPersonCardModelNew(MembershipsOfMember, person_id, date)
-    static = getPersonCardModel(MPStaticPL, person_id, date)
+    static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
         'person': {
