@@ -333,8 +333,8 @@ def update():
     updatePeople()
     print "pep"
 
-    result = requests.get(BASE_URL+'/s/setAllSessions/')
-    print result
+    setAllSessions()
+    print "Sessions"
 
     updateSpeeches()
     print "speeches"
@@ -364,3 +364,18 @@ def getPGIDs():
     data = requests.get(API_URL+'/getMembersOfPGs/').json()
 
     return [pg for pg in data]
+
+def setAllSessions():
+    data  = requests.get(API_URL + '/getSessions/').json()
+    for sessions in data:
+        if not Session.objects.filter(id_parladata=sessions['id']):
+
+            result = saveOrAbort(model=Session,
+                            name=sessions['name'],
+                             gov_id=sessions['gov_id'],
+                             start_time=sessions['start_time'],
+                             end_time=sessions['end_time'],
+                             classification=sessions['classification'],
+                             id_parladata=sessions['id'])
+
+    return 1
