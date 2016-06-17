@@ -6,6 +6,7 @@ urlpatterns = patterns(
 #   url(r'^getMPsList/', getMPsList),
 
     # setters
+    url(r'^setMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMPStaticPL),
     url(r'^setMPStatic/(?P<person_id>\d+)/', setMPStaticPL),
 
     url(r'^setMostEqualVoters/(?P<person_id>\d+)/', setMostEqualVoters),
@@ -35,11 +36,14 @@ urlpatterns = patterns(
 
     url(r'^setTaggedBallots/(?P<person_id>\d+)', setTaggedBallots),
 
+    url(r'^setMembershipsOfMember/(?P<person_id>\d+)/(?P<date>[\w].+)', setMembershipsOfMember),
+    url(r'^setMembershipsOfMember/(?P<person_id>\d+)', setMembershipsOfMember),
+
 
     ####################################################################################
 
     # getters
-    url(r'^getMPStatic/(?P<person_id>\d+)/(?P<date>[\w].+)', getMPStaticPL),
+    url(r'^getMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', getMPStaticPL),
     url(r'^getMPStatic/(?P<person_id>\d+)/', getMPStaticPL),
 
     url(r'^getMostEqualVoters/(?P<person_id>\d+)/(?P<date>[\w].+)', getMostEqualVoters),
@@ -81,6 +85,9 @@ urlpatterns = patterns(
 
     url(r'^getTaggedBallots/(?P<person_id>\d+)/(?P<date>[\w].+)', getTaggedBallots),
     url(r'^getTaggedBallots/(?P<person_id>\d+)', getTaggedBallots),
+
+    url(r'^getMembershipsOfMember/(?P<person_id>\d+)/(?P<date>[\w].+)', getMembershipsOfMember),
+    url(r'^getMembershipsOfMember/(?P<person_id>\d+)', getMembershipsOfMember),
 
     ####################################################################################
 
