@@ -237,7 +237,7 @@ def setLastActivity(request, person_id):
 
     return JsonResponse(out, safe=False)
 
-def getLastActivity(request, person_id, date=None):
+def getLastActivity(request, person_id, date_=None):
     print date
 
     def parseDayActivites(day_activites):
@@ -269,16 +269,16 @@ def getLastActivity(request, person_id, date=None):
 
     out = []
 
-    equalVoters = getPersonCardModelNew(LastActivity, person_id, date)
-    out.append(parseDayActivites(equalVoters))
+    lastActivites = getPersonCardModelNew(LastActivity, person_id, date_)
+    out.append(parseDayActivites(lastActivites))
     for i in range(LAST_ACTIVITY_COUNT - 1):
-        startDate = equalVoters.created_for - timedelta(days=1)
-        equalVoters = getPersonCardModelNew(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
-        if equalVoters == None:
+        startDate = lastActivites.created_for - timedelta(days=1)
+        lastActivites = getPersonCardModelNew(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
+        if lastActivites == None:
             break;
-        out.append(parseDayActivites(equalVoters))
+        out.append(parseDayActivites(lastActivites))
 
-    static = getPersonCardModelNew(MPStaticPL, person_id, date)
+    static = getPersonCardModelNew(MPStaticPL, person_id, date_)
 
     result = {
         'person': {
