@@ -162,10 +162,10 @@ class LastActivity(Timestampable, models.Model): #TODO
                                related_name='childrenLA',
                                help_text=_('MP'))
 
-    date = PopoloDateTimeField(_('date of activity'),
-                                     blank=True,
-                                     null=True,
-                                     help_text=_('date of activity'))
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
 
     """session_id = models.ForeignKey('Session',
                                blank=True, null=True,

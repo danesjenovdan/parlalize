@@ -127,24 +127,32 @@ def saveOrAbort(model, **kwargs):
 
 
 # checks if cards with the data exists or not NEW
+"""
+usage:
+    watch parlaposlanci/views.py:setMembershipsOfMember
+
+    if you use saveOrAbortNew in setter you need to use getPersonCardModelNew in getter
+"""
 def saveOrAbortNew(model, **kwargs):
     def save_it(model, created_for, **kwargs):
         kwargs.update({'created_for': created_for})
         newModel = model(**kwargs)
         newModel.save()
         return True
-    created_for = kwargs.pop('created_for')
+    if model != LastActivity:
+        created_for = kwargs.pop('created_for')
     print kwargs
     savedModel = model.objects.filter(**kwargs)
     if savedModel:
         if 'person' in kwargs:
-            if savedModel.latest('created_for').created_for != model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for:
+            if savedModel.latest('created_for').created_for != model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for and model != LastActivity:
                 save_it(model, created_for, **kwargs)
         elif "organization" in kwargs:
             if savedModel.latest('created_for').created_for != model.objects.filter(organization__id_parladata=kwargs["organization"].id_parladata).latest("created_at").created_for:
                 save_it(model, created_for, **kwargs)
     else:
-        kwargs.update({'created_for': created_for})
+        if model != LastActivity:
+            kwargs.update({'created_for': created_for})
         newModel = model(**kwargs)
         newModel.save()
         return True
@@ -179,8 +187,16 @@ def getPersonCardModelNew(model, id, date=None):
             #return None
         raise Http404("Nismo našli kartice")
     else:
-        modelObject = modelObject.latest('created_for')
-        print "get object BUBU", modelObject.created_for
+        if model == LastActivity:
+            latest_day = modelObject.latest('created_for').created_for
+            print latest_day
+            if len(modelObject.filter(created_for=latest_day))>1:
+                modelObject = modelObject.filter(created_for=latest_day).latest("created_at")
+            else:
+                modelObject = modelObject.latest('created_for')
+        else:
+            modelObject = modelObject.latest('created_for')
+            print "get object BUBU", modelObject.created_for
     return modelObject
 
 
