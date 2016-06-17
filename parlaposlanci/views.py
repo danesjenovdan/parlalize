@@ -237,7 +237,7 @@ def setLastActivity(request, person_id):
 
     return JsonResponse(out, safe=False)
 
-def getLastActivity(request, person_id, date=None):
+def getLastActivity(request, person_id, date_=None):
     print date
 
     def parseDayActivites(day_activites):
@@ -269,16 +269,16 @@ def getLastActivity(request, person_id, date=None):
 
     out = []
 
-    equalVoters = getPersonCardModelNew(LastActivity, person_id, date)
-    out.append(parseDayActivites(equalVoters))
+    lastActivites = getPersonCardModelNew(LastActivity, person_id, date_)
+    out.append(parseDayActivites(lastActivites))
     for i in range(LAST_ACTIVITY_COUNT - 1):
-        startDate = equalVoters.created_for - timedelta(days=1)
-        equalVoters = getPersonCardModelNew(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
-        if equalVoters == None:
+        startDate = lastActivites.created_for - timedelta(days=1)
+        lastActivites = getPersonCardModelNew(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
+        if lastActivites == None:
             break;
-        out.append(parseDayActivites(equalVoters))
+        out.append(parseDayActivites(lastActivites))
 
-    static = getPersonCardModelNew(MPStaticPL, person_id, date)
+    static = getPersonCardModelNew(MPStaticPL, person_id, date_)
 
     result = {
         'person': {
@@ -296,13 +296,13 @@ def getLastActivity(request, person_id, date=None):
     return JsonResponse(result, safe=False)
 
 #TODO date
-def getAllSpeeches(request, person_id, date=None):
+def getAllSpeeches(request, person_id, date_=None):
     speeches = Speech.objects.filter(person__id_parladata=person_id)
-    if date:
-        print date
-        speeches = [[speech for speech in speeches.filter(start_time__range=[date, date+timedelta(days=1)])] for date in speeches.filter(start_time__lte=datetime.strptime(date, '%d.%m.%Y')).order_by("start_time").datetimes('start_time', 'day')]
+    if date_:
+        print date_
+        speeches = [[speech for speech in speeches.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in speeches.filter(start_time__lte=datetime.strptime(date_, '%d.%m.%Y')).order_by("start_time").datetimes('start_time', 'day')]
     else:
-        speeches = [[speech for speech in speeches.filter(start_time__range=[date, date+timedelta(days=1)])] for date in speeches.order_by("start_time").datetimes('start_time', 'day')]
+        speeches = [[speech for speech in speeches.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in speeches.order_by("start_time").datetimes('start_time', 'day')]
     out = []
     for day in speeches:
         dayData = {"date": str(day[0].start_time.date()), "speeches":[]}
