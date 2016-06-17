@@ -67,7 +67,7 @@ urlpatterns = patterns(
     url(r'^getNumberOfSpokenWords/(?P<person_id>\d+)/(?P<date>[\w].+)', getNumberOfSpokenWords),
     url(r'^getNumberOfSpokenWords/(?P<person_id>\d+)', getNumberOfSpokenWords),
 
-    url(r'^getLastActivity/(?P<person_id>\d+)/(?P<date>[\w].+)', getLastActivity),
+    url(r'^getLastActivity/(?P<person_id>\d+)/(?P<date_>[\w].+)', getLastActivity),
     url(r'^getLastActivity/(?P<person_id>\d+)', getLastActivity),
 
     url(r'^getVocabularySize/(?P<person_id>\d+)/(?P<date>[\w].+)', getVocabularySize),
@@ -76,7 +76,7 @@ urlpatterns = patterns(
     url(r'^getCutVotes/(?P<person_id>\d+)/(?P<date>[\w].+)', getCutVotes),
     url(r'^getCutVotes/(?P<person_id>\d+)', getCutVotes),
 
-    url(r'^getAllSpeeches/(?P<person_id>\d+)/(?P<date>[\w].+)', getAllSpeeches),
+    url(r'^getAllSpeeches/(?P<person_id>\d+)/(?P<date_>[\w].+)', getAllSpeeches),
     url(r'^getAllSpeeches/(?P<person_id>\d+)', getAllSpeeches),
 
     url(r'^getMPsIDs', getMPsIDs),
