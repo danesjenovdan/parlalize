@@ -124,3 +124,37 @@ def updateVotes():
         vote.save()
 
     return 1
+
+def getPGIDs():
+	result = []
+	data = requests.get(API_URL + '/getSessions/').json()
+
+	for ids in data:
+		result.append(ids['id'])
+	return result
+
+def saveOrAbortNew1(model, **kwargs):
+    def save_it(model, created_for, **kwargs):
+        kwargs.update({'created_for': created_for})
+        newModel = model(**kwargs)
+        newModel.save()
+        return True
+    created_for = kwargs.pop('created_for')
+    print kwargs
+    savedModel = model.objects.filter(**kwargs)
+    if savedModel:
+        if 'person' in kwargs:
+            if savedModel.latest('created_for').created_for != model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for:
+                save_it(model, created_for, **kwargs)
+        elif "organization" in kwargs:
+            if savedModel.latest('created_for').created_for != model.objects.filter(organization__id_parladata=kwargs["organization"].id_parladata).latest("created_at").created_for:
+                save_it(model, created_for, **kwargs)
+        elif "session" in kwargs:
+        	if savedModel.latest('created_for').created_for != model.objects.filter(session__id_parladata=kwargs["session"].id_parladata).latest("created_at").created_for:
+                save_it(model, created_for, **kwargs)
+    else:
+        kwargs.update({'created_for': created_for})
+        newModel = model(**kwargs)
+        newModel.save()
+        return True
+    return False
