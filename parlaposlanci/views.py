@@ -1395,7 +1395,7 @@ def setMembershipsOfMember(request, person_id, date=None):
     if date:
         #call parladata api with date, maybe you will need to fix parladata api call
         data = requests.get(API_URL+'/getMembershipsOfMember/' + person_id + "/" + date).json()
-        #date_of is date for created_for atribute of model
+        #date_of is date for created_for which is atribute of model (you also need to add created_for in model)
         date_of = datetime.strptime(date, API_DATE_FORMAT)
     else:
         data = requests.get(API_URL+'/getMembershipsOfMember/'+ person_id).json()
