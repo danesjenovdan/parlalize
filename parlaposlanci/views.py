@@ -225,7 +225,15 @@ def setLastActivity(request, person_id):
                 options.append(acti.option)
                 sessions.append("None")
 
-        out.append(saveOrAbort(model=LastActivity, person=Person.objects.get(id_parladata=int(person_id)), date=date, activity_id=";".join(map(str, avtivity_ids)), option=";".join(map(str, options)), result=";".join(map(str, result)), vote_name=";".join(vote_name), typee=";".join(types), session_id=";".join(sessions)))
+        out.append(saveOrAbortNew(model=LastActivity, 
+                                  person=Person.objects.get(id_parladata=int(person_id)), 
+                                  created_for=date, 
+                                  activity_id=";".join(map(str, avtivity_ids)), 
+                                  option=";".join(map(str, options)), 
+                                  result=";".join(map(str, result)), 
+                                  vote_name=";".join(vote_name), 
+                                  typee=";".join(types), 
+                                  session_id=";".join(sessions)))
 
     return JsonResponse(out, safe=False)
 
@@ -257,15 +265,15 @@ def getLastActivity(request, person_id, date=None):
                     "session_name": vote_names[i],
                     "session_id": sessions_ids[i]
                     })
-        return {"date": str(day_activites.date.date()), "events": data}
+        return {"date": str(day_activites.created_for), "events": data}
 
     out = []
 
-    equalVoters = getPersonCardModel(LastActivity, person_id, date)
+    equalVoters = getPersonCardModelNew(LastActivity, person_id, date)
     out.append(parseDayActivites(equalVoters))
     for i in range(LAST_ACTIVITY_COUNT - 1):
-        startDate = equalVoters.date - timedelta(days=1)
-        equalVoters = getPersonCardModel(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
+        startDate = equalVoters.created_for - timedelta(days=1)
+        equalVoters = getPersonCardModelNew(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
         if equalVoters == None:
             break;
         out.append(parseDayActivites(equalVoters))
@@ -1322,8 +1330,11 @@ def runSetters(request, date_to):
 
                 if setter == setMPStaticPL: # Prevent that runner doesn't waste time with ... Which doesn't change often
                     break;
+        #setLastActivity allways runs without date
+        setLastActivity(request, str(ID))
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
+
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 
 def setCompass(request):
@@ -1382,8 +1393,9 @@ def getTaggedBallots(request, person_id, date=None):
 
 def setMembershipsOfMember(request, person_id, date=None):
     if date:
-        print API_URL+'/getMembershipsOfMember/'+ person_id + "/" + date
+        #call parladata api with date, maybe you will need to fix parladata api call
         data = requests.get(API_URL+'/getMembershipsOfMember/' + person_id + "/" + date).json()
+        #date_of is date for created_for atribute of model
         date_of = datetime.strptime(date, API_DATE_FORMAT)
     else:
         data = requests.get(API_URL+'/getMembershipsOfMember/'+ person_id).json()
