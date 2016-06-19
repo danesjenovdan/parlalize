@@ -72,6 +72,7 @@ def getMPStaticPL(request, person_id, date_=None):
     if card.twitter == 'False': print card.twitter
 
     data = {
+        'date_of_card':card.created_for.strftime(API_DATE_FORMAT),
         'person': {
             'name': card.person.name,
             'id': int(person_id),
@@ -270,6 +271,7 @@ def getLastActivity(request, person_id, date_=None):
     out = []
 
     lastActivites = getPersonCardModelNew(LastActivity, person_id, date_)
+    lastDay = lastActivites.created_for.strftime(API_DATE_FORMAT)
     out.append(parseDayActivites(lastActivites))
     for i in range(LAST_ACTIVITY_COUNT - 1):
         startDate = lastActivites.created_for - timedelta(days=1)
@@ -281,6 +283,7 @@ def getLastActivity(request, person_id, date_=None):
     static = getPersonCardModelNew(MPStaticPL, person_id, date_)
 
     result = {
+        'date_of_card':lastDay,
         'person': {
             'name': static.person.name,
             'id': int(person_id),
@@ -326,10 +329,11 @@ def getAllSpeeches(request, person_id, date_=None):
 
 
 #method returns percent, how similar does the members vote
-def getEqualVoters(request, id, date=None):
-    if date:
-        votes = getLogicVotes(date)
-        date_of = datetime.strptime(date, '%d.%m.%Y')
+def getEqualVoters(request, id, date_=None):
+    print id
+    if date_:
+        votes = getLogicVotes(date_)
+        date_of = datetime.strptime(date_, '%d.%m.%Y')
     else:
         votes = getLogicVotes()
         date_of = datetime.now().date()
@@ -348,9 +352,9 @@ def getEqualVoters(request, id, date=None):
 
 
 # Method return json with most similar voters to this voter
-def setMostEqualVoters(request, person_id, date=None):
-    if date:
-        members, keys, date_of = getEqualVoters(request, person_id, date)
+def setMostEqualVoters(request, person_id, date_=None):
+    if date_:
+        members, keys, date_of = getEqualVoters(request, person_id, date_)
     else:
         members, keys, date_of = getEqualVoters(request, person_id)
 
@@ -372,12 +376,13 @@ def setMostEqualVoters(request, person_id, date=None):
     return HttpResponse('All iz well')
 
 
-def getMostEqualVoters(request, person_id, date=None):
-    equalVoters = getPersonCardModelNew(EqualVoters, person_id, date)
+def getMostEqualVoters(request, person_id, date_=None):
+    equalVoters = getPersonCardModelNew(EqualVoters, person_id, date_)
 
     print equalVoters.person1.id_parladata
 
     out = {
+        'date_of_card':equalVoters.created_for.strftime(API_DATE_FORMAT),
         'person': {
             'name': Person.objects.get(id_parladata=int(person_id)).name,
             'id': int(person_id)
@@ -421,9 +426,9 @@ def getMostEqualVoters(request, person_id, date=None):
 
 
 # Method return json with less similar voters to this voter
-def setLessEqualVoters(request, person_id, date=None):
-    if date:
-        members, keys, date_of = getEqualVoters(request, person_id, date)
+def setLessEqualVoters(request, person_id, date_=None):
+    if date_:
+        members, keys, date_of = getEqualVoters(request, person_id, date_)
     else:
         members, keys, date_of = getEqualVoters(request, person_id)
     out = {index: members[key] for key, index in zip(keys[:5], [1, 2, 3, 4, 5])}
@@ -444,9 +449,10 @@ def setLessEqualVoters(request, person_id, date=None):
     return HttpResponse('All iz well')
 
 
-def getLessEqualVoters(request, person_id, date=None):
-    equalVoters = getPersonCardModelNew(LessEqualVoters, person_id, date)
+def getLessEqualVoters(request, person_id, date_=None):
+    equalVoters = getPersonCardModelNew(LessEqualVoters, person_id, date_)
     out = {
+        'date_of_card':equalVoters.created_for.strftime(API_DATE_FORMAT),
         'person': {
             'name': Person.objects.get(id_parladata=int(person_id)).name,
             'id': int(person_id)
@@ -1306,10 +1312,11 @@ def runSetters(request, date_to):
         #model: setter,
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
         # CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
+        
         MPStaticPL: setMPStaticPL,
         MembershipsOfMember: setMembershipsOfMember,
-        #LessEqualVoters: setLessEqualVoters,
-        # EqualVoters: setMostEqualVoters,
+        LessEqualVoters: setLessEqualVoters,
+        EqualVoters: setMostEqualVoters,
     }
     IDs = getIDs()
     # print IDs
