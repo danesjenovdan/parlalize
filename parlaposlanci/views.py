@@ -43,19 +43,19 @@ def setMPStaticPL(request, person_id, date_=None):
 
     result = saveOrAbortNew(model=MPStaticPL,
                             created_for=date_of,
-                            person=Person.objects.get(id_parladata=int(person_id)), 
-                            voters=data['voters'], age=data['age'], 
-                            mandates=data['mandates'], 
-                            party_id=data['party_id'], 
-                            education=data['education'], 
-                            previous_occupation=data['previous_occupation'], 
-                            name=data['name'], 
-                            district=data['district'], 
-                            facebook=data['social']['facebook'], 
-                            twitter=data['social']['twitter'], 
-                            linkedin=data['social']['linkedin'], 
-                            party_name=data['party'], 
-                            acronym=data['acronym'], 
+                            person=Person.objects.get(id_parladata=int(person_id)),
+                            voters=data['voters'], age=data['age'],
+                            mandates=data['mandates'],
+                            party_id=data['party_id'],
+                            education=data['education'],
+                            previous_occupation=data['previous_occupation'],
+                            name=data['name'],
+                            district=data['district'],
+                            facebook=data['social']['facebook'],
+                            twitter=data['social']['twitter'],
+                            linkedin=data['social']['linkedin'],
+                            party_name=data['party'],
+                            acronym=data['acronym'],
                             gov_id=data['gov_id'])
 
     if result:
@@ -226,14 +226,14 @@ def setLastActivity(request, person_id):
                 options.append(acti.option)
                 sessions.append("None")
 
-        out.append(saveOrAbortNew(model=LastActivity, 
-                                  person=Person.objects.get(id_parladata=int(person_id)), 
-                                  created_for=date, 
-                                  activity_id=";".join(map(str, avtivity_ids)), 
-                                  option=";".join(map(str, options)), 
-                                  result=";".join(map(str, result)), 
-                                  vote_name=";".join(vote_name), 
-                                  typee=";".join(types), 
+        out.append(saveOrAbortNew(model=LastActivity,
+                                  person=Person.objects.get(id_parladata=int(person_id)),
+                                  created_for=date,
+                                  activity_id=";".join(map(str, avtivity_ids)),
+                                  option=";".join(map(str, options)),
+                                  result=";".join(map(str, result)),
+                                  vote_name=";".join(vote_name),
+                                  typee=";".join(types),
                                   session_id=";".join(sessions)))
 
     return JsonResponse(out, safe=False)
@@ -393,30 +393,35 @@ def getMostEqualVoters(request, person_id, date_=None):
                 "id": equalVoters.person1.id_parladata,
                 "name": equalVoters.person1.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person1.id_parladata)).json(),
+                "gov_id": equalVoters.person1.gov_id
             },
             {
                 "ratio": equalVoters.votes2,
                 "id": equalVoters.person2.id_parladata,
                 "name": equalVoters.person2.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person2.id_parladata) + '/').json(),
+                "gov_id": equalVoters.person2.gov_id
             },
             {
                 "ratio": equalVoters.votes3,
                 "id": equalVoters.person3.id_parladata,
                 "name": equalVoters.person3.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person3.id_parladata) + '/').json(),
+                "gov_id": equalVoters.person3.gov_id
             },
             {
                 "ratio": equalVoters.votes4,
                 "id": equalVoters.person4.id_parladata,
                 "name": equalVoters.person4.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person4.id_parladata) + '/').json(),
+                "gov_id": equalVoters.person4.gov_id
             },
             {
                 "ratio": equalVoters.votes5,
                 "id": equalVoters.person5.id_parladata,
                 "name": equalVoters.person5.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person5.id_parladata) + '/').json(),
+                "gov_id": equalVoters.person5.gov_id
             }
         ]
     }
@@ -463,30 +468,35 @@ def getLessEqualVoters(request, person_id, date_=None):
                 "id": equalVoters.person1.id_parladata,
                 "name": equalVoters.person1.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person1.id_parladata)).json(),
+                "gov_id": equalVoters.person1.gov_id
             },
             {
                 "ratio": equalVoters.votes2,
                 "id": equalVoters.person2.id_parladata,
                 "name": equalVoters.person2.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person2.id_parladata) + '/').json(),
+                "gov_id": equalVoters.person2.gov_id
             },
             {
                 "ratio": equalVoters.votes3,
                 "id": equalVoters.person3.id_parladata,
                 "name": equalVoters.person3.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person3.id_parladata) + '/').json(),
+                "gov_id": equalVoters.person3.gov_id
             },
             {
                 "ratio": equalVoters.votes4,
                 "id": equalVoters.person4.id_parladata,
                 "name": equalVoters.person4.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person4.id_parladata) + '/').json(),
+                "gov_id": equalVoters.person4.gov_id
             },
             {
                 "ratio": equalVoters.votes5,
                 "id": equalVoters.person5.id_parladata,
                 "name": equalVoters.person5.name,
                 "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person5.id_parladata) + '/').json(),
+                "gov_id": equalVoters.person5.gov_id
             }
         ]
     }
@@ -1312,7 +1322,7 @@ def runSetters(request, date_to):
         #model: setter,
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
         # CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
-        
+
         MPStaticPL: setMPStaticPL,
         MembershipsOfMember: setMembershipsOfMember,
         LessEqualVoters: setLessEqualVoters,
