@@ -9,7 +9,10 @@ urlpatterns = patterns(
     url(r'^setMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMPStaticPL),
     url(r'^setMPStatic/(?P<person_id>\d+)/', setMPStaticPL),
 
+    url(r'^setMostEqualVoters/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMostEqualVoters),
     url(r'^setMostEqualVoters/(?P<person_id>\d+)/', setMostEqualVoters),
+
+    url(r'^setLeastEqualVoters/(?P<person_id>\d+)/(?P<date_>[\w].+)', setLessEqualVoters),
     url(r'^setLeastEqualVoters/(?P<person_id>\d+)/', setLessEqualVoters),
 
     url(r'^setTFIDF/(?P<person_id>\d+)', setTFIDF),
@@ -46,10 +49,10 @@ urlpatterns = patterns(
     url(r'^getMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', getMPStaticPL),
     url(r'^getMPStatic/(?P<person_id>\d+)/', getMPStaticPL),
 
-    url(r'^getMostEqualVoters/(?P<person_id>\d+)/(?P<date>[\w].+)', getMostEqualVoters),
+    url(r'^getMostEqualVoters/(?P<person_id>\d+)/(?P<date_>[\w].+)', getMostEqualVoters),
     url(r'^getMostEqualVoters/(?P<person_id>\d+)/', getMostEqualVoters),
 
-    url(r'^getLeastEqualVoters/(?P<person_id>\d+)/(?P<date>[\w].+)', getLessEqualVoters),
+    url(r'^getLeastEqualVoters/(?P<person_id>\d+)/(?P<date_>[\w].+)', getLessEqualVoters),
     url(r'^getLeastEqualVoters/(?P<person_id>\d+)/', getLessEqualVoters),
 
     url(r'^getTFIDF/(?P<person_id>\d+)/(?P<date>[\w].+)', getTFIDF),
