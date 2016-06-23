@@ -355,9 +355,12 @@ def setPresenceOfPG(request, id_se):
     motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
     onSession = {}
     yesdic = defaultdict(int)
+    allsessionsinone = defaultdict(list)
+    final = {}
     numOfMPs = {}
     results = {}
     allPgs = {}
+
     if len(votes) != 0:
         for vote in votes:
             if vote['option'] != 'ni':
@@ -365,34 +368,35 @@ def setPresenceOfPG(request, id_se):
                     onSession[vote['mo_id']].append(vote['pg_id'])
                 else:
                     onSession.update({vote['mo_id'] : [vote['pg_id']]})
-
+    
     for i in membersOfPG:
         allPgs[i] = len(membersOfPG[i]) * len(motions)
-
-    for b in onSession.keys():
+        
+    for b in onSession:
         for i in onSession[b]:
             yesdic[i] += 1
         results[b] = yesdic
+    
+    if len(results)>0:
+        temp = dict(results[results.keys()[0]])
+        for i in temp:
+            final[i] = int((float(temp[i]) / float(allPgs[str(i)])) * 100)
 
-    for b in results:
-        print results[b]
+        result = saveOrAbortPres(model=PresenceOfPG,
+                                presence=[final],
+                                id_parladata = int(id_se)
+                                )
 
+    return JsonResponse({'alliswell': True})
 
-
-
-
-
-
-    '''
-    for i in set(onSession):
-        for a in membersOfPG:
-            if i in membersOfPG[a]:
-                yesdic[a] += 1
-
-
-    for a in yesdic:
-        results[a] = float(yesdic[a]) / float(len(motions) *len(membersOfPG[a]))
-
-
-    '''
+def getPresenceOfPG(request, id_se, date=False):
+    results = []
+    if date:
+        allSessions = PresenceOfPG.objects.get(id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
+    else:
+        presence = PresenceOfPG.objects.get(id_parladata=id_se)
+    
+    for p in presence.presence[0]:
+        results.append({"name":Organization.objects.get(id_parladata=p).name, "percent":presence.presence[0][p]})
+    
     return JsonResponse(results, safe=False)
