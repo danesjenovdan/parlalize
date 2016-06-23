@@ -31,7 +31,6 @@ def getLogicVotes(date_=None):
     pl_votes = v.json()
     votes = r.json()
 
-    #d=[vote for voter in votes for vote in votes[voter]]
     for person_id in votes.keys():
         for vote in pl_votes:
             try:
