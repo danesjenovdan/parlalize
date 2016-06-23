@@ -38,10 +38,11 @@ def getMPsList(request, date_=None):
 ##returns MP static data like PoliticalParty, age, ....
 def setMPStaticPL(request, person_id, date_=None):
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        data = requests.get(API_URL+'/getMPStatic/' + person_id + "/" + date_).json()
     else:
         date_of = datetime.now().date()
-    data = requests.get(API_URL+'/getMPStatic/'+ person_id).json()
+        data = requests.get(API_URL+'/getMPStatic/'+ person_id).json()
     dic = dict()
 
     result = saveOrAbortNew(model=MPStaticPL,
@@ -1348,8 +1349,8 @@ def runSetters(request, date_to):
                 # print setter + str(ID) + "/" + date.strftime('%d.%m.%Y')
                 setter(request, str(ID), date.strftime('%d.%m.%Y'))
 
-                if setter == setMPStaticPL: # Prevent that runner doesn't waste time with ... Which doesn't change often
-                    break;
+                #if setter == setMPStaticPL: # Prevent that runner doesn't waste time with ... Which doesn't change often
+                #    break;
         #setLastActivity allways runs without date
         setLastActivity(request, str(ID))
         curentId += 1
