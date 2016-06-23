@@ -332,6 +332,8 @@ def setDeviationInOrg(request, pg_id, date_=None):
 
 def getMostMatchingThem(request, pg_id, date_=None):
     mostMatching = getPGCardModelNew(MostMatchingThem, pg_id, date_)
+    if not date_:
+        date_=""
     out = {
         'organization': {
             'name': Organization.objects.get(id_parladata=int(pg_id)).name,
@@ -340,33 +342,23 @@ def getMostMatchingThem(request, pg_id, date_=None):
         'results': [
             {
                 "ratio": mostMatching.votes1,
-                "id": mostMatching.person1.id_parladata,
-                "name": mostMatching.person1.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person1.id_parladata)).json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person1.id_parladata)+"/"+date_).json()["person"]
             },
             {
                 "ratio": mostMatching.votes2,
-                "id": mostMatching.person2.id_parladata,
-                "name": mostMatching.person2.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person2.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person2.id_parladata)+"/"+date_).json()["person"]
             },
             {
                 "ratio": mostMatching.votes3,
-                "id": mostMatching.person3.id_parladata,
-                "name": mostMatching.person3.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person3.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person3.id_parladata)+"/"+date_).json()["person"]
             },
             {
                 "ratio": mostMatching.votes4,
-                "id": mostMatching.person4.id_parladata,
-                "name": mostMatching.person4.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person4.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person4.id_parladata)+"/"+date_).json()["person"]
             },
             {
                 "ratio": mostMatching.votes5,
-                "id": mostMatching.person5.id_parladata,
-                "name": mostMatching.person5.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person5.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person5.id_parladata)+"/"+date_).json()["person"]
             }
         ]
     }
@@ -376,6 +368,8 @@ def getMostMatchingThem(request, pg_id, date_=None):
 
 def getLessMatchingThem(request, pg_id, date_=None):
     mostMatching = getPGCardModelNew(LessMatchingThem, pg_id, date_)
+    if not date_:
+        date_=""
     out = {
         'organization': {
             'name': Organization.objects.get(id_parladata=int(pg_id)).name,
@@ -384,33 +378,23 @@ def getLessMatchingThem(request, pg_id, date_=None):
         'results': [
             {
                 "ratio": mostMatching.votes1,
-                "id": mostMatching.person1.id_parladata,
-                "name": mostMatching.person1.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person1.id_parladata)).json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person1.id_parladata)+"/"+date_).json()["person"]
             },
             {
                 "ratio": mostMatching.votes2,
-                "id": mostMatching.person2.id_parladata,
-                "name": mostMatching.person2.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person2.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person2.id_parladata)+"/"+date_).json()["person"]
             },
             {
                 "ratio": mostMatching.votes3,
-                "id": mostMatching.person3.id_parladata,
-                "name": mostMatching.person3.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person3.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person3.id_parladata)+"/"+date_).json()["person"]
             },
             {
                 "ratio": mostMatching.votes4,
-                "id": mostMatching.person4.id_parladata,
-                "name": mostMatching.person4.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person4.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person4.id_parladata)+"/"+date_).json()["person"]
             },
             {
                 "ratio": mostMatching.votes5,
-                "id": mostMatching.person5.id_parladata,
-                "name": mostMatching.person5.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person5.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person5.id_parladata)+"/"+date_).json()["person"]
             }
         ]
     }
@@ -419,6 +403,8 @@ def getLessMatchingThem(request, pg_id, date_=None):
 
 def getDeviationInOrg(request, pg_id, date_=None):
     mostMatching = getPGCardModelNew(DeviationInOrganization, pg_id, date_)
+    if not date_:
+        date_=""
     out = {
         'organization': {
             'name': Organization.objects.get(id_parladata=int(pg_id)).name,
@@ -427,39 +413,27 @@ def getDeviationInOrg(request, pg_id, date_=None):
         'results': [
             {
                 "ratio": mostMatching.votes1,
-                "id": mostMatching.person1.id_parladata,
-                "name": mostMatching.person1.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person1.id_parladata)).json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person1.id_parladata)+"/"+date_).json()["person"]
             },
             {
                 "ratio": mostMatching.votes2,
-                "id": mostMatching.person2.id_parladata,
-                "name": mostMatching.person2.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person2.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person2.id_parladata)+"/"+date_).json()["person"]
             } if mostMatching.votes2 else None,
             {
                 "ratio": mostMatching.votes3,
-                "id": mostMatching.person3.id_parladata,
-                "name": mostMatching.person3.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person3.id_parladata)).json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person3.id_parladata)+"/"+date_).json()["person"]
             } if mostMatching.votes3 else None,
             {
                 "ratio": mostMatching.votes4,
-                "id": mostMatching.person4.id_parladata,
-                "name": mostMatching.person4.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person4.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person4.id_parladata)+"/"+date_).json()["person"]
             } if mostMatching.votes4 else None,
             {
                 "ratio": mostMatching.votes5,
-                "id": mostMatching.person5.id_parladata,
-                "name": mostMatching.person5.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person5.id_parladata)).json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person5.id_parladata)+"/"+date_).json()["person"]
             } if mostMatching.votes5 else None,
             {
                 "ratio": mostMatching.votes6,
-                "id": mostMatching.person6.id_parladata,
-                "name": mostMatching.person6.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(mostMatching.person6.id_parladata) + '/').json(),
+                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person6.id_parladata)+"/"+date_).json()["person"]
             } if mostMatching.votes6 else None,
         ]
     }
