@@ -43,6 +43,9 @@ def setMPStaticPL(request, person_id, date_=None):
     else:
         date_of = datetime.now().date()
         data = requests.get(API_URL+'/getMPStatic/'+ person_id).json()
+
+    if not data:
+        return JsonResponse({"status":'Nothing iz well', "saved": False})
     dic = dict()
 
     result = saveOrAbortNew(model=MPStaticPL,
