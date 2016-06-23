@@ -369,7 +369,7 @@ def getIDs():
     # create persons
     result = []
 
-    data = requests.get(API_URL+'/getMPs/').json()
+    data = requests.get(API_URL+'/getMPs').json()
 
     for mp in data:
         result.append(mp['id'])
