@@ -33,19 +33,42 @@ class Organization(Timestampable, models.Model):
         return self.name
 
 class PGStatic(Timestampable, models.Model):
-    organization = models.ForeignKey('Organization', help_text=_('Organization foreign key relationship'))
+    organization = models.ForeignKey('Organization', 
+                                     help_text=_('Organization foreign key relationship'))
 
-    headOfPG = models.ForeignKey('parlaposlanci.Person' , related_name='PGStaticH', help_text=_('Head of MP'))
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
 
-    viceOfPG = models.ForeignKey('parlaposlanci.Person' , related_name='PGStaticV', help_text=_('Vice of MP'))
+    headOfPG = models.ForeignKey('parlaposlanci.Person', 
+                                 related_name='PGStaticH', help_text=_('Head of MP'))
 
-    numberOfSeats = models.IntegerField(blank = True, null = True, help_text = _('Number of seats in parlament of PG'))
+    viceOfPG = models.ForeignKey('parlaposlanci.Person' , 
+                                 related_name='PGStaticV', help_text=_('Vice of MP'))
 
-    allVoters = models.IntegerField(blank=True, null=True, help_text=_('Number of voters'))
+    numberOfSeats = models.IntegerField(blank = True, 
+                                        null = True, 
+                                        help_text = _('Number of seats in parlament of PG'))
 
-    facebook = models.TextField(blank=True, null=True, default=None, help_text=_('Facebook profile URL'))
-    twitter = models.TextField(blank=True, null=True, default=None, help_text=_('Twitter profile URL'))
-    email = models.TextField(blank=True, null=True, default=None, help_text=_('email profile URL'))
+    allVoters = models.IntegerField(blank=True, 
+                                    null=True, 
+                                    help_text=_('Number of voters'))
+
+    facebook = models.TextField(blank=True, 
+                                null=True, 
+                                default=None, 
+                                help_text=_('Facebook profile URL'))
+
+    twitter = models.TextField(blank=True, 
+                               null=True, 
+                               default=None, 
+                               help_text=_('Twitter profile URL'))
+
+    email = models.TextField(blank=True, 
+                             null=True, 
+                             default=None, 
+                             help_text=_('email profile URL'))
 
 class PercentOFAttendedSession(Timestampable, models.Model): #Model for presence of PG on sessions
 
@@ -227,6 +250,46 @@ class DeviationInOrganization(Timestampable, models.Model):
     votes2 = models.FloatField(_('daviation2'),
                                blank=True, null=True,
                                help_text=_('MatchingThem'))
+
+    person3 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenD3',
+                                help_text=_('D3'))
+
+    votes3 = models.FloatField(_('daviation3'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+    person4 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenD4',
+                                help_text=_('D4'))
+
+    votes4 = models.FloatField(_('daviation4'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+
+    person5 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenD5',
+                                help_text=_('D5'))
+
+    votes5 = models.FloatField(_('daviation5'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+
+    person6 = models.ForeignKey('parlaposlanci.Person',
+                                blank=True, null=True,
+                                related_name='childrenD6',
+                                help_text=_('D6'))
+
+    votes6 = models.FloatField(_('daviation6'),
+                               blank=True, null=True,
+                               help_text=_('MatchingThem'))
+
+
 
 
 class CutVotes(Timestampable, models.Model):
