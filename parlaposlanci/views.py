@@ -22,9 +22,12 @@ from parlaposlanci import compass
 # Create your views here.
 
 #get List of MPs
-def getMPsList(request):
+def getMPsList(request, date_=None):
     output = []
-    data = requests.get(API_URL+'/getMPs/')
+    if date_:
+        data = requests.get(API_URL+'/getMPs/'+date_)
+    else:
+        data = requests.get(API_URL+'/getMPs/')
     data = data.json()
 
     output = [{'id': i['id'], 'image': i['image'], 'name': i['name'], 'membership': i['membership'], 'acronym': i['acronym'], 'district': i['district']} for i in data]
