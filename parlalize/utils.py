@@ -21,21 +21,25 @@ def voteToLogical(vote):
 
 
 # Return dictionary of votes results by user ids.
-def getLogicVotes(date=None):
-    if date:
-        r = requests.get(API_URL+'/getVotes/'+date)
+def getLogicVotes(date_=None):
+    if date_:
+        r = requests.get(API_URL+'/getVotes/'+date_)
+        v = requests.get(API_URL+'/getAllVotes/'+date_)
     else:
         r = requests.get(API_URL+'/getVotes/')
-    pl_votes = Vote.objects.all()
+        v = requests.get(API_URL+'/getAllVotes/')
+    pl_votes = v.json()
     votes = r.json()
+
+    #d=[vote for voter in votes for vote in votes[voter]]
     for person_id in votes.keys():
         for vote in pl_votes:
             try:
-                votes[str(person_id)][str(vote.id_parladata)] = VOTE_MAP[votes[str(person_id)][str(vote.id_parladata)]]
+                votes[str(person_id)][str(vote["id"])] = VOTE_MAP[str(votes[str(person_id)][str(vote["id"])])]
             except:
                 if type(votes[str(person_id)]) == list:
                     votes[str(person_id)] = {}
-                votes[str(person_id)][str(vote.id_parladata)] = VOTE_MAP['ni_poslanec']
+                votes[str(person_id)][str(vote["id"])] = VOTE_MAP['ni_poslanec']
 
     return votes
 
