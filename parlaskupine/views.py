@@ -330,6 +330,13 @@ def setDeviationInOrg(request, pg_id, date_=None):
         return JsonResponse({'alliswell': False})
 
 
+def getMPStaticPersonData(id_, date_):
+    try:
+        return requests.get(BASE_URL+'/p/getMPStatic/'+str(id_)+"/"+date_).json()["person"]
+    except:
+        return {}
+
+
 def getMostMatchingThem(request, pg_id, date_=None):
     mostMatching = getPGCardModelNew(MostMatchingThem, pg_id, date_)
     if not date_:
@@ -342,23 +349,23 @@ def getMostMatchingThem(request, pg_id, date_=None):
         'results': [
             {
                 "ratio": mostMatching.votes1,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person1.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person1.id_parladata, date_)
             },
             {
                 "ratio": mostMatching.votes2,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person2.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person2.id_parladata, date_)
             },
             {
                 "ratio": mostMatching.votes3,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person3.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person3.id_parladata, date_)
             },
             {
                 "ratio": mostMatching.votes4,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person4.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person4.id_parladata, date_)
             },
             {
                 "ratio": mostMatching.votes5,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person5.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person5.id_parladata, date_)
             }
         ]
     }
@@ -378,23 +385,23 @@ def getLessMatchingThem(request, pg_id, date_=None):
         'results': [
             {
                 "ratio": mostMatching.votes1,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person1.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person1.id_parladata, date_)
             },
             {
                 "ratio": mostMatching.votes2,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person2.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person2.id_parladata, date_)
             },
             {
                 "ratio": mostMatching.votes3,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person3.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person3.id_parladata, date_)
             },
             {
                 "ratio": mostMatching.votes4,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person4.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person4.id_parladata, date_)
             },
             {
                 "ratio": mostMatching.votes5,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person5.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person5.id_parladata, date_)
             }
         ]
     }
@@ -413,27 +420,27 @@ def getDeviationInOrg(request, pg_id, date_=None):
         'results': [
             {
                 "ratio": mostMatching.votes1,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person1.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person1.id_parladata, date_)
             },
             {
                 "ratio": mostMatching.votes2,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person2.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person2.id_parladata, date_)
             } if mostMatching.votes2 else None,
             {
                 "ratio": mostMatching.votes3,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person3.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person3.id_parladata, date_)
             } if mostMatching.votes3 else None,
             {
                 "ratio": mostMatching.votes4,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person4.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person4.id_parladata, date_)
             } if mostMatching.votes4 else None,
             {
                 "ratio": mostMatching.votes5,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person5.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person5.id_parladata, date_)
             } if mostMatching.votes5 else None,
             {
                 "ratio": mostMatching.votes6,
-                "person": requests.get(BASE_URL+'/p/getMPStatic/'+str(mostMatching.person6.id_parladata)+"/"+date_).json()["person"]
+                "person": getMPStaticPersonData(mostMatching.person6.id_parladata, date_)
             } if mostMatching.votes6 else None,
         ]
     }
