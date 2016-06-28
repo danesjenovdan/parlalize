@@ -152,6 +152,9 @@ def saveOrAbortNew(model, **kwargs):
         elif "organization" in kwargs:
             if savedModel.latest('created_for').created_for != model.objects.filter(organization__id_parladata=kwargs["organization"].id_parladata).latest("created_at").created_for:
                 save_it(model, created_for, **kwargs)
+        elif "session" in kwargs:
+            if savedModel.latest('created_for').created_for != model.objects.filter(session__id_parladata=kwargs["session"].id_parladata).latest("created_at").created_for:
+                save_it(model, created_for, **kwargs)
     else:
         if model != LastActivity:
             kwargs.update({'created_for': created_for})
@@ -170,7 +173,7 @@ def findDatesFromLastCard(model, id, lastParsedDate):
         elif model._meta.app_label == "parlaskupine":
             lastCardDate = model.objects.filter(organization__id_parladata=id).order_by("-created_for")[0].created_for
         elif model._meta.app_label == "parlaseje":
-            lastCardDate = model.objects.filter(session__id_parladata=id).order_by("-created_for")[0].created_for
+            lastCardDate = model.objects.all().order_by("-created_for")[0].created_for
     except:
         lastCardDate = datetime.strptime("01.08.2014", '%d.%m.%Y').date()
     #lastCardDate = lastCardDate.replace(tzinfo=None)
@@ -311,14 +314,14 @@ def updateSpeeches():
             speech.save()
     return 1
 
-
+#treba pofixsat
 def updateMotionOfSession():
     ses = Session.objects.all()
     for s in ses:
         print s.id_parladata
         requests.get(BASE_URL+'/s/setMotionOfSession/'+str(s.id_parladata))
 
-
+#treba pofixsat
 def updateBallots():
     data = requests.get(API_URL+'/getAllBallots').json()
     existingISs = Ballot.objects.all().values_list("id_parladata", flat=True)
@@ -352,8 +355,8 @@ def update():
     updatePeople()
     print "pep"
 
-    result = requests.get(BASE_URL+'/s/setAllSessions/')
-    print result
+    setAllSessions()
+    print "Sessions"
 
     updateSpeeches()
     print "speeches"
@@ -384,3 +387,18 @@ def getPGIDs():
     data = requests.get(API_URL+'/getMembersOfPGs/').json()
 
     return [pg for pg in data]
+
+def setAllSessions():
+    data  = requests.get(API_URL + '/getSessions/').json()
+    for sessions in data:
+        if not Session.objects.filter(id_parladata=sessions['id']):
+
+            result = saveOrAbort(model=Session,
+                            name=sessions['name'],
+                             gov_id=sessions['gov_id'],
+                             start_time=sessions['start_time'],
+                             end_time=sessions['end_time'],
+                             classification=sessions['classification'],
+                             id_parladata=sessions['id'])
+
+    return 1

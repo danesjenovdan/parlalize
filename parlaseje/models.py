@@ -124,10 +124,10 @@ class Ballot(Activity):
         super(Activity, self).__init__(*args, **kwargs)
 
 class Vote(Timestampable, models.Model):
-    # created_for = models.DateField(_('date of vote'),
-    #                                blank=True,
-    #                                null=True,
-    #                                help_text=_('date of vote'))
+    created_for = models.DateField(_('date of vote'),
+                                    blank=True,
+                                    null=True,
+                                    help_text=_('date of vote'))
     session = models.ForeignKey('Session',
                                blank=True, null=True,
                                related_name='in_session',
@@ -154,6 +154,8 @@ class Vote(Timestampable, models.Model):
 
     id_parladata = models.IntegerField(_('parladata id'),
                             blank=True, null=True,help_text=_('id parladata'))
+
+    id_parladata_session = models.IntegerField(blank=True, null=True)
 
 
 class Vote_graph(Timestampable, models.Model):
@@ -215,10 +217,10 @@ class PresenceOfPG(Timestampable, models.Model):
 
     presence = JSONField(blank=True, null=True)
 
-    #created_for = models.DateField(_('date of activity'),
-    #                               blank=True,
-    #                               null=True,
-    #                               help_text=_('date of analize'))
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
 
     id_parladata = models.IntegerField(_('parladata id'),
                             blank=True, null=True,help_text=_('id parladata'))
