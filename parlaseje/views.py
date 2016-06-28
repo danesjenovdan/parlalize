@@ -6,26 +6,12 @@ import requests
 import json
 from django.http import JsonResponse
 from parlaseje.models import *
-from parlalize.settings import API_URL
+from parlalize.settings import API_URL, API_DATE_FORMAT
 from parlaseje.utils import *
 from collections import defaultdict
 from math import fabs
+
 # Create your views here.
-
-def setAllSessions(request):
-    data  = requests.get(API_URL + '/getSessions/').json()
-    for sessions in data:
-        if not Session.objects.filter(id_parladata=sessions['id']):
-
-            result = saveOrAbort(model=Session,
-                            name=sessions['name'],
-                             gov_id=sessions['gov_id'],
-                             start_time=sessions['start_time'],
-                             end_time=sessions['end_time'],
-                             classification=sessions['classification'],
-                             id_parladata=sessions['id'])
-
-    return JsonResponse({'alliswell': True})
 
 def getSpeech(request, speech_id):
     speech = Speech.objects.get(id_parladata=speech_id)
@@ -39,7 +25,7 @@ def getSpeech(request, speech_id):
     }
     return JsonResponse(result)
 
-def getSessionSpeeches(request, session_id,):
+def getSessionSpeeches(request, session_id):
     out = []
     session = Session.objects.get(id_parladata=session_id)
     for speech in Speech.objects.filter(session=session).order_by("-start_time"):
@@ -55,7 +41,7 @@ def getSessionSpeeches(request, session_id,):
 
 def setMotionOfSession(request, id_se):
     motion  = requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
-
+    session = Session.objects.get(id_parladata=id_se)
     tab = []
     yes = 0
     no = 0
@@ -92,8 +78,8 @@ def setMotionOfSession(request, id_se):
                 not_present = not_present + 1
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])
-
-        result = saveOrAbortMotion(model=Vote,
+        result = saveOrAbortNew(model=Vote,
+                                   created_for=session.start_time,
                                    session=Session.objects.get(id_parladata=int(id_se)),
                                    motion=mot['text'],
                                    votes_for=yes,
@@ -101,7 +87,8 @@ def setMotionOfSession(request, id_se):
                                    abstain=kvorum,
                                    not_present=not_present,
                                    result=mot['result'],
-                                   id_parladata=mot['vote_id']
+                                   id_parladata=mot['vote_id'],
+                                   id_parladata_session=int(id_se)
                                    )
 
         vg = saveOrAbort(model=Vote_graph,
@@ -136,9 +123,13 @@ def setMotionOfSession(request, id_se):
     return JsonResponse({'alliswell': True})
 
 
-def getMotionOfSession(request, id_se):
+def getMotionOfSession(request, id_se, date=False):
     out = []
-    model  = Vote.objects.filter(session__id_parladata=id_se)
+    if date:
+        model = Vote.objects.filter(session__id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
+    else:
+        model = Vote.objects.filter(session__id_parladata=id_se)
+
     for card in model:
         out.append({
         'session': {
@@ -353,6 +344,8 @@ def setPresenceOfPG(request, id_se):
     membersOfPG = requests.get(API_URL+'/getMembersOfPGs/').json()
     votes = requests.get(API_URL+'/getVotesOfSession/'+str(id_se)+'/').json()
     motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
+    session = Session.objects.get(id_parladata=id_se)
+
     onSession = {}
     yesdic = defaultdict(int)
     allsessionsinone = defaultdict(list)
@@ -382,7 +375,8 @@ def setPresenceOfPG(request, id_se):
         for i in temp:
             final[i] = int((float(temp[i]) / float(allPgs[str(i)])) * 100)
 
-        result = saveOrAbortPres(model=PresenceOfPG,
+        result = saveOrAbortNew(model=PresenceOfPG,
+                                created_for=session.start_time,
                                 presence=[final],
                                 id_parladata = int(id_se)
                                 )
@@ -390,9 +384,11 @@ def setPresenceOfPG(request, id_se):
     return JsonResponse({'alliswell': True})
 
 def getPresenceOfPG(request, id_se, date=False):
+
     results = []
+
     if date:
-        allSessions = PresenceOfPG.objects.get(id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
+        presence = PresenceOfPG.objects.get(id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
     else:
         presence = PresenceOfPG.objects.get(id_parladata=id_se)
     
@@ -400,3 +396,22 @@ def getPresenceOfPG(request, id_se, date=False):
         results.append({"name":Organization.objects.get(id_parladata=p).name, "percent":presence.presence[0][p]})
     
     return JsonResponse(results, safe=False)
+
+def runSetters(request, date_to):
+   
+    
+    setters_models = {
+
+        Vote: setMotionOfSession
+        #PresenceOfPG: setPresenceOfPG
+    }
+    for model, setter in setters_models.items():
+        dates = findDatesFromLastCard(model, None, date_to)
+        if dates==[]:
+            continue
+        IDs = getSesIDs(dates[1],dates[-1])
+
+        for ID in IDs:
+            print ID
+            setter(request, str(ID))       
+    return JsonResponse({"status": "all is fine :D"}, safe=False)

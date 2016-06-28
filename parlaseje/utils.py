@@ -7,7 +7,7 @@ from parlalize.utils import saveOrAbortNew
 from parlaposlanci.models import Person, LastActivity
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Vote, Speech, Session, Ballot, Vote_graph, Vote, AbsentMPs
-from parlalize.settings import VOTE_MAP, API_URL, BASE_URL
+from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT
 import requests
 
 
@@ -124,3 +124,29 @@ def updateVotes():
         vote.save()
 
     return 1
+
+def getSesIDs(start_date, end_date):
+	result = []
+	data = requests.get(API_URL + '/getSessions/').json()
+	session = Session.objects.filter(start_time__gte=start_date, start_time__lte=end_date)
+	for ids in session:
+		result.append(ids.id_parladata)
+	return result
+
+
+def getSesCardModelNew(model, id, date=None):
+    if date:
+        modelObject = model.objects.filter(session__id_parladata=id,
+                                           created_for__lte=datetime.strptime(date, '%d.%m.%Y'))
+    else:
+        modelObject = model.objects.filter(session__id_parladata=id,
+                                           created_for__lte=datetime.now())
+
+    if not modelObject:
+        #if model == LastActivity:
+            #return None
+        raise Http404("Nismo našli kartice")
+    else:
+        modelObject = modelObject.latest('created_for')
+        print "get object BUBU", modelObject.created_for
+    return modelObject
