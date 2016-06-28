@@ -16,6 +16,8 @@ urlpatterns = patterns(
     url(r'^getMotionGraph/(?P<id_se>\d+)', getMotionGraph),
     url(r'^setAbsentMPs/(?P<id_se>\d+)', setAbsentMPs),
     url(r'^getAbsentMPs/(?P<id_se>\d+)', getAbsentMPs),
+
+    url(r'^setPresenceOfPG/(?P<id_se>\d+)/(?P<date_>[\w].+)', setPresenceOfPG),
     url(r'^setPresenceOfPG/(?P<id_se>\d+)', setPresenceOfPG),
     
     url(r'^getPresenceOfPG/(?P<id_se>\d+)', getPresenceOfPG),

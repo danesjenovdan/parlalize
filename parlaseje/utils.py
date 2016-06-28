@@ -7,7 +7,7 @@ from parlalize.utils import saveOrAbortNew
 from parlaposlanci.models import Person, LastActivity
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Vote, Speech, Session, Ballot, Vote_graph, Vote, AbsentMPs
-from parlalize.settings import VOTE_MAP, API_URL, BASE_URL
+from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT
 import requests
 
 
@@ -125,36 +125,28 @@ def updateVotes():
 
     return 1
 
-def getPGIDs():
+def getSesIDs(start_date, end_date):
 	result = []
 	data = requests.get(API_URL + '/getSessions/').json()
-
-	for ids in data:
-		result.append(ids['id'])
+	session = Session.objects.filter(start_time__gte=start_date, start_time__lte=end_date)
+	for ids in session:
+		result.append(ids.id_parladata)
 	return result
 
-def saveOrAbortNew1(model, **kwargs):
-    def save_it(model, created_for, **kwargs):
-        kwargs.update({'created_for': created_for})
-        newModel = model(**kwargs)
-        newModel.save()
-        return True
-    created_for = kwargs.pop('created_for')
-    print kwargs
-    savedModel = model.objects.filter(**kwargs)
-    if savedModel:
-        if 'person' in kwargs:
-            if savedModel.latest('created_for').created_for != model.objects.filter(person__id_parladata=kwargs["person"].id_parladata).latest("created_at").created_for:
-                save_it(model, created_for, **kwargs)
-        elif "organization" in kwargs:
-            if savedModel.latest('created_for').created_for != model.objects.filter(organization__id_parladata=kwargs["organization"].id_parladata).latest("created_at").created_for:
-                save_it(model, created_for, **kwargs)
-        elif "session" in kwargs:
-        	if savedModel.latest('created_for').created_for != model.objects.filter(session__id_parladata=kwargs["session"].id_parladata).latest("created_at").created_for:
-                save_it(model, created_for, **kwargs)
+
+def getSesCardModelNew(model, id, date=None):
+    if date:
+        modelObject = model.objects.filter(session__id_parladata=id,
+                                           created_for__lte=datetime.strptime(date, '%d.%m.%Y'))
     else:
-        kwargs.update({'created_for': created_for})
-        newModel = model(**kwargs)
-        newModel.save()
-        return True
-    return False
+        modelObject = model.objects.filter(session__id_parladata=id,
+                                           created_for__lte=datetime.now())
+
+    if not modelObject:
+        #if model == LastActivity:
+            #return None
+        raise Http404("Nismo našli kartice")
+    else:
+        modelObject = modelObject.latest('created_for')
+        print "get object BUBU", modelObject.created_for
+    return modelObject
