@@ -174,7 +174,8 @@ def findDatesFromLastCard(model, id, lastParsedDate):
     except:
         lastCardDate = datetime.strptime("01.08.2014", '%d.%m.%Y').date()
     #lastCardDate = lastCardDate.replace(tzinfo=None)
-
+    if not lastCardDate:
+	lastCardDate = datetime.strptime("01.08.2014", '%d.%m.%Y').date()
     return [(lastCardDate+timedelta(days=days)) for days in range((toDate-lastCardDate).days)]
 
 
@@ -368,8 +369,9 @@ def update():
 def getIDs():
     # create persons
     result = []
-
-    data = requests.get(API_URL+'/getMPs').json()
+    #getAllPeople
+    data = requests.get(API_URL+'/getAllPeople').json()
+    #data = requests.get(API_URL+'/getMPs').json()
 
     for mp in data:
         result.append(mp['id'])

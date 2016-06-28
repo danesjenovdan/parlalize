@@ -1331,9 +1331,9 @@ def runSetters(request, date_to):
         # CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
 
         MPStaticPL: setMPStaticPL,
-        MembershipsOfMember: setMembershipsOfMember,
-        LessEqualVoters: setLessEqualVoters,
-        EqualVoters: setMostEqualVoters,
+        #MembershipsOfMember: setMembershipsOfMember,
+        #LessEqualVoters: setLessEqualVoters,
+        #EqualVoters: setMostEqualVoters,
     }
     IDs = getIDs()
     # print IDs
@@ -1344,7 +1344,7 @@ def runSetters(request, date_to):
         print ID
         print "".join(["*" for i in range(curentId)] + ["_" for i in range(allIds-curentId)])
         for model, setter in setters_models.items():
-            print setter
+            print setter, date_to
             dates = findDatesFromLastCard(model, ID, date_to)
             print dates
             for date in dates:
