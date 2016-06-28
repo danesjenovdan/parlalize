@@ -13,9 +13,6 @@ from math import fabs
 
 # Create your views here.
 
-#dej tole v utils in v runner v utils
-
-
 def getSpeech(request, speech_id):
     speech = Speech.objects.get(id_parladata=speech_id)
     out={"speech_id":speech.id_parladata, "content":speech.content}
@@ -28,7 +25,7 @@ def getSpeech(request, speech_id):
     }
     return JsonResponse(result)
 
-def getSessionSpeeches(request, session_id,):
+def getSessionSpeeches(request, session_id):
     out = []
     session = Session.objects.get(id_parladata=session_id)
     for speech in Speech.objects.filter(session=session).order_by("-start_time"):
@@ -42,14 +39,9 @@ def getSessionSpeeches(request, session_id,):
     }
     return JsonResponse(result, safe=False)
 
-def setMotionOfSession(request, id_se, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
-    else:
-        date_of = datetime.now().date()
-
+def setMotionOfSession(request, id_se):
     motion  = requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
-
+    session = Session.objects.get(id_parladata=id_se)
     tab = []
     yes = 0
     no = 0
@@ -86,9 +78,8 @@ def setMotionOfSession(request, id_se, date_=None):
                 not_present = not_present + 1
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])
-
-        result = saveOrAbortNew1(model=Vote,
-                                    created_for=date_of,
+        result = saveOrAbortNew(model=Vote,
+                                   created_for=session.start_time,
                                    session=Session.objects.get(id_parladata=int(id_se)),
                                    motion=mot['text'],
                                    votes_for=yes,
@@ -96,7 +87,8 @@ def setMotionOfSession(request, id_se, date_=None):
                                    abstain=kvorum,
                                    not_present=not_present,
                                    result=mot['result'],
-                                   id_parladata=mot['vote_id']
+                                   id_parladata=mot['vote_id'],
+                                   id_parladata_session=int(id_se)
                                    )
 
         vg = saveOrAbort(model=Vote_graph,
@@ -352,6 +344,8 @@ def setPresenceOfPG(request, id_se):
     membersOfPG = requests.get(API_URL+'/getMembersOfPGs/').json()
     votes = requests.get(API_URL+'/getVotesOfSession/'+str(id_se)+'/').json()
     motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
+    session = Session.objects.get(id_parladata=id_se)
+
     onSession = {}
     yesdic = defaultdict(int)
     allsessionsinone = defaultdict(list)
@@ -381,7 +375,8 @@ def setPresenceOfPG(request, id_se):
         for i in temp:
             final[i] = int((float(temp[i]) / float(allPgs[str(i)])) * 100)
 
-        result = saveOrAbortPres(model=PresenceOfPG,
+        result = saveOrAbortNew(model=PresenceOfPG,
+                                created_for=session.start_time,
                                 presence=[final],
                                 id_parladata = int(id_se)
                                 )
@@ -389,7 +384,9 @@ def setPresenceOfPG(request, id_se):
     return JsonResponse({'alliswell': True})
 
 def getPresenceOfPG(request, id_se, date=False):
+
     results = []
+
     if date:
         presence = PresenceOfPG.objects.get(id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
     else:
@@ -401,19 +398,20 @@ def getPresenceOfPG(request, id_se, date=False):
     return JsonResponse(results, safe=False)
 
 def runSetters(request, date_to):
-    IDs = getPGIDs()
+   
+    
     setters_models = {
 
         Vote: setMotionOfSession
+        #PresenceOfPG: setPresenceOfPG
     }
     for model, setter in setters_models.items():
+        dates = findDatesFromLastCard(model, None, date_to)
+        if dates==[]:
+            continue
+        IDs = getSesIDs(dates[1],dates[-1])
+
         for ID in IDs:
-            print setter
-            dates = findDatesFromLastCard(model, ID, date_to)
-            print dates
-            for date in dates:
-                #print date.strftime(API_DATE_FORMAT)
-                # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
-                setter(request, str(ID), date.strftime(API_DATE_FORMAT))
-        curentId += 1
+            print ID
+            setter(request, str(ID))       
     return JsonResponse({"status": "all is fine :D"}, safe=False)
