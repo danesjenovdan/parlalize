@@ -198,7 +198,11 @@ class AbsentMPs(Timestampable, models.Model):
     id_parladata = models.IntegerField(_('parladata id'),
                             blank=True, null=True,help_text=_('id parladata'))
     absentMPs = JSONField(blank=True, null=True)
-
+    
+    created_for = models.DateField(_('date of vote'),
+                                    blank=True,
+                                    null=True,
+                                    help_text=_('date of vote'))
 class Quote(models.Model):
 
     quoted_text = models.TextField(_('quoted text'),

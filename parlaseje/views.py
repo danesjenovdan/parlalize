@@ -58,7 +58,8 @@ def setMotionOfSession(request, id_se):
     npdic = defaultdict(int)
     tyes = []
     for mot in motion:
-        votes  = requests.get(API_URL + '/getVotesOfMotion/'+str(mot['id'])+'/').json()
+        votes  = requests.get(API_URL + '/getVotesOfMotion/'+str(mot['vote_id'])+'/').json()
+        print votes
         for vote in votes:
             if vote['option'] == str('za'):
                 yes = yes + 1
@@ -305,6 +306,7 @@ def getMotionGraph(request, id_se):
 def setAbsentMPs(request, id_se):
     votes = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
     mps = requests.get(API_URL+'/getMPs/').json()
+    session = Session.objects.get(id_parladata=id_se)
     onSession = []
     mpsID = []
     if len(votes) != 0:
@@ -312,27 +314,33 @@ def setAbsentMPs(request, id_se):
             onSession.append(vote['mp_id'])
 
         onSession = list(set(onSession))
+
         [mpsID.append(mpID['id'])for mpID in mps]
 
         for mp in onSession:
             if mp in mpsID:
                 mpsID.remove(mp)
 
-        result = saveOrAbortAbsent(model=AbsentMPs,
+        result = saveOrAbortNew(model=AbsentMPs,
                                 id_parladata=id_se,
-                                absentMPs=mpsID
+                                absentMPs=mpsID,
+                                created_for=session.start_time
                                 )
+        onSession = []
+        mpsID = []
+    return JsonResponse({'alliswell': True})
+    
 
-        return JsonResponse({'alliswell': True})
+def getAbsentMPs(request, id_se, date=False):
+    if date:
+        ids = AbsentMPs.objects.get(id_parladata=int(id_se), start_time__lte=datetime.strptime(date, '%d.%m.%Y')).absentMPs
     else:
-        return JsonResponse({'No session with this id':id_se})
-
-def getAbsentMPs(request, id_se):
+        ids = AbsentMPs.objects.get(id_parladata=int(id_se)).absentMPs
 
     mps = requests.get(API_URL+'/getMPs/').json()
     result ={}
     results = {}
-    ids = AbsentMPs.objects.get(id_parladata=int(id_se)).absentMPs
+    
     for abMP in ids:
         for mp in mps:
             if str(mp['id']) == str(abMP):
@@ -386,7 +394,7 @@ def setPresenceOfPG(request, id_se):
 def getPresenceOfPG(request, id_se, date=False):
 
     results = []
-
+    
     if date:
         presence = PresenceOfPG.objects.get(id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
     else:
@@ -402,8 +410,9 @@ def runSetters(request, date_to):
     
     setters_models = {
 
-        Vote: setMotionOfSession
+        #Vote: setMotionOfSession
         #PresenceOfPG: setPresenceOfPG
+        AbsentMPs: setAbsentMPs   
     }
     for model, setter in setters_models.items():
         dates = findDatesFromLastCard(model, None, date_to)
@@ -412,6 +421,5 @@ def runSetters(request, date_to):
         IDs = getSesIDs(dates[1],dates[-1])
 
         for ID in IDs:
-            print ID
             setter(request, str(ID))       
     return JsonResponse({"status": "all is fine :D"}, safe=False)
