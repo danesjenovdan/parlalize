@@ -59,7 +59,6 @@ def setMotionOfSession(request, id_se):
     tyes = []
     for mot in motion:
         votes  = requests.get(API_URL + '/getVotesOfMotion/'+str(mot['vote_id'])+'/').json()
-        print votes
         for vote in votes:
             if vote['option'] == str('za'):
                 yes = yes + 1
@@ -305,8 +304,11 @@ def getMotionGraph(request, id_se):
 
 def setAbsentMPs(request, id_se):
     votes = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
-    mps = requests.get(API_URL+'/getMPs/').json()
     session = Session.objects.get(id_parladata=id_se)
+    date = str(session.start_time.date())
+    date = str(date[8:10])+"."+str(date[5:7])+"."+str(date[:4])
+    mps = requests.get(API_URL+'/getMPs/'+ date).json()
+
     onSession = []
     mpsID = []
     if len(votes) != 0:
@@ -349,10 +351,12 @@ def getAbsentMPs(request, id_se, date=False):
     return JsonResponse(results, safe=False)
 
 def setPresenceOfPG(request, id_se):
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGs/').json()
     votes = requests.get(API_URL+'/getVotesOfSession/'+str(id_se)+'/').json()
     motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
+    date = str(session.start_time.date())
+    date = str(date[8:10])+"."+str(date[5:7])+"."+str(date[:4])
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ date).json()
 
     onSession = {}
     yesdic = defaultdict(int)
@@ -381,7 +385,8 @@ def setPresenceOfPG(request, id_se):
     if len(results)>0:
         temp = dict(results[results.keys()[0]])
         for i in temp:
-            final[i] = int((float(temp[i]) / float(allPgs[str(i)])) * 100)
+            if allPgs[str(i)] != 0:
+                final[i] = int((float(temp[i]) / float(allPgs[str(i)])) * 100)
 
         result = saveOrAbortNew(model=PresenceOfPG,
                                 created_for=session.start_time,
@@ -410,8 +415,8 @@ def runSetters(request, date_to):
     
     setters_models = {
 
-        #Vote: setMotionOfSession
-        #PresenceOfPG: setPresenceOfPG
+        Vote: setMotionOfSession
+        PresenceOfPG: setPresenceOfPG
         AbsentMPs: setAbsentMPs   
     }
     for model, setter in setters_models.items():
