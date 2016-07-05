@@ -77,22 +77,42 @@ class PercentOFAttendedSession(Timestampable, models.Model): #Model for presence
                                related_name='childrenPG',
                                help_text=_('PG'))
 
-    organization_value = models.IntegerField(_('Presence of this PG'),
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    organization_value_sessions = models.FloatField(_('Presence of this PG'),
                                    blank=True, null=True,
                                    help_text=_('Presence of this PG'))
 
 
-    maxPG = models.ForeignKey('Organization',
-                               blank=True, null=True,
-                               related_name='childrenMaxMP',
+    maxPG_sessions = JSONField(blank=True, null=True,
                                help_text=_('PG who has max prfesence of sessions'))
 
 
-    average = models.IntegerField(_('average'),
+    average_sessions = models.FloatField(_('average'),
                                    blank=True, null=True,
                                    help_text=_('Average of PG attended sessions'))
 
-    maximum = models.IntegerField(_('max'),
+    maximum_sessions = models.FloatField(_('max'),
+                                   blank=True, null=True,
+                                   help_text=_('Max of PG attended sessions'))
+
+    organization_value_votes = models.FloatField(_('Presence of this PG'),
+                                   blank=True, null=True,
+                                   help_text=_('Presence of this PG'))
+
+
+    maxPG_votes = JSONField(blank=True, null=True,
+                            help_text=_('PG who has max prfesence of sessions'))
+
+
+    average_votes = models.FloatField(_('average'),
+                                   blank=True, null=True,
+                                   help_text=_('Average of PG attended sessions'))
+
+    maximum_votes = models.FloatField(_('max'),
                                    blank=True, null=True,
                                    help_text=_('Max of PG attended sessions'))
 
