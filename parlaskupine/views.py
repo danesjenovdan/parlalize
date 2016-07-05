@@ -334,7 +334,7 @@ def getMPStaticPersonData(id_, date_):
     try:
         return requests.get(BASE_URL+'/p/getMPStatic/'+str(id_)+"/"+date_).json()["person"]
     except:
-        return {}
+        return {"id": id_}
 
 
 def getMostMatchingThem(request, pg_id, date_=None):
