@@ -25,7 +25,7 @@ urlpatterns = patterns('',
     url(r'^setDeviationInOrg/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setDeviationInOrg),
     url(r'^setDeviationInOrg/(?P<pg_id>\d+)', setDeviationInOrg),
 
-    url(r'^setCutVotes/(?P<pg_id>\d+)/(?P<date>[\w].+)', setCutVotes),
+    url(r'^setCutVotes/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setCutVotes),
     url(r'^setCutVotes/(?P<pg_id>\d+)', setCutVotes),
 
 
