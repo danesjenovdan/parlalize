@@ -110,26 +110,38 @@ def getMPStaticPL(request, person_id, date_=None):
 
 
 #Saves to DB percent of attended sessions of MP and maximum and average of attended sessions
-def setPercentOFAttendedSession(request, person_id):
-    data = {}
-    number = requests.get(API_URL+'/getNumberOfAllMPAttendedSessions/')
-    sessions =  requests.get(API_URL+'/getSessions/')
-    sessions = sessions.json()
-    number = number.json()
+def setPercentOFAttendedSession(request, person_id, date_):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+    data = requests.get(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
+    thisMP = data["sessions"][person_id]
+    maximum = max(data["sessions"].values())
+    maximumMP = [pId for pId in data["sessions"] if data["sessions"][pId]==maximum]
+    average = sum(data["sessions"].values()) / len(data["sessions"])
 
-    data = {i:number[i]*100 / len(sessions) for i in number.keys()}
+    thisMPVotes = data["votes"][person_id]
+    maximumVotes = max(data["votes"].values())
+    maximumMPVotes = [pId for pId in data["votes"] if data["votes"][pId]==maximum]
+    averageVotes = sum(data["votes"].values()) / len(data["votes"])
 
-    thisMP = data[person_id]
-    maximumMP = max(data.iterkeys(), key=(lambda key: data[key])) #kaj ce jih je vec z isto vrednostjo
-    average = sum(data.values()) / 90
-    maximum = data[maximumMP]
-
-    result = saveOrAbort(model=Presence, person=Person.objects.get(id_parladata=int(person_id)), person_value=thisMP, maxMP=Person.objects.get(id_parladata=int(maximumMP)), average=average, maximum=maximum)
+    result = saveOrAbort(model=Presence, 
+                         created_for=date_of, 
+                         person=Person.objects.get(id_parladata=int(person_id)), 
+                         person_value_sessions=thisMP, 
+                         maxMP_sessions=maximumMP, 
+                         average_sessions=average, 
+                         maximum_sessions=maximum,
+                         person_value_votes=thisMPVotes, 
+                         maxMP_votes=maximumMPVotes, 
+                         average_votes=averageVotes, 
+                         maximum_votes=maximumVotes)
 
     return JsonResponse({'alliswell': result})
 
 def getPercentOFAttendedSession(request, person_id, date=None):
-    equalVoters = getPersonCardModel(Presence, person_id, date)
+    equalVoters = getPersonCardModelNew(Presence, person_id, date)
 
     out  = {
         'person': {
@@ -137,12 +149,21 @@ def getPercentOFAttendedSession(request, person_id, date=None):
             "id": equalVoters.person.id_parladata,
         },
         'results': {
-            "value": equalVoters.person_value,
-            "average": equalVoters.average,
-            "max": {
-                "name": equalVoters.maxMP.name,
-                "id": equalVoters.maxMP.id_parladata,
-                "value": equalVoters.maximum,
+            "sessions":{
+                "value": equalVoters.person_value_sessions,
+                "average": equalVoters.average_sessions,
+                "max": {
+                    "id": equalVoters.maxMP_sessions,
+                    "value": equalVoters.maximum_sessions,
+                }
+            },
+            "votes": {
+                "value": equalVoters.person_value_votes,
+                "average": equalVoters.average_votes,
+                "max": {
+                    "ids": equalVoters.maxMP_votes,
+                    "value": equalVoters.maximum_votes,
+                }
             }
         }
     }

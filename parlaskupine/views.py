@@ -52,39 +52,80 @@ def getBasicInfOfPG(request, pg_id, date=None):
 
     return JsonResponse(data)
 
-def setPercentOFAttendedSessionPG(request, pg_id):
+def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = findDatesFromLastCard(PercentOFAttendedSession, pg_id, datetime.now().date())[0]
+
     allSum = {}
     data = {}
 
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGs/').json()
-    sessions =  requests.get(API_URL+'/getSessions/').json()
-    data = {i:[requests.get(API_URL+'/getNumberOfMPAttendedSessions/'+str(mem)+'/').json() for mem in membersOfPG[i]] for i in membersOfPG}
-    allSum = {i:(float(float(sum(data[i])) / (len(sessions)*len(data[i])))) * 100 for i in data}
-    maximumPG = max(allSum.iterkeys(), key=(lambda key: allSum[key]))
-    average = sum(allSum.values()) / len(allSum)
-    maximum = allSum[maximumPG]
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGs/'+date_).json()
+    data = requests.get(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
+
+    sessions = {pg:[] for pg in membersOfPG if membersOfPG[pg]}
+    votes = {pg:[] for pg in membersOfPG if membersOfPG[pg]}
+    for pg in membersOfPG:
+        if not membersOfPG[pg]:
+            continue
+        for member in membersOfPG[pg]:
+            sessions[pg].append(data["sessions"][str(member)])
+            votes[pg].append(data["votes"][str(member)])
+        sessions[pg] = sum(sessions[pg])/len(sessions[pg])
+        votes[pg] = sum(votes[pg])/len(votes[pg])
+
+    print sessions
+    print votes
+
+
+
+    thisMPSessions = sessions[pg_id]
+    maximumSessions = max(sessions.values())
+    maximumPGSessions = [pgId for pgId in sessions if sessions[pgId]==maximumSessions]
+    averageSessions = sum(data["sessions"].values()) / len(data["sessions"])
+    thisMPVotes = votes[pg_id]
+    maximumVotes = max(votes.values())
+    maximumPGVotes = [pgId for pgId in votes if votes[pgId]==maximumVotes]
+    averageVotes = sum(data["sessions"].values()) / len(data["sessions"])
 
     #kaksen bo interfejs ko bo imela prav ta PG maksimum
     result = saveOrAbort(model=PercentOFAttendedSession,
+                         created_for=date_of,
                          organization=Organization.objects.get(id_parladata=int(pg_id)),
-                         organization_value = allSum[pg_id],
-                         maxPG=Organization.objects.get(id_parladata=maximumPG),
-                         average=average,
-                         maximum=maximum)
+                         organization_value_sessions = thisMPSessions,
+                         maxPG_sessions=maximumPGSessions,
+                         average_sessions=averageSessions,
+                         maximum_sessions=maximumSessions,
+                         organization_value_votes = thisMPVotes,
+                         maxPG_votes=maximumPGVotes,
+                         average_votes=averageVotes,
+                         maximum_votes=maximumVotes)
 
     return JsonResponse({'alliswell': True})
 
-def getPercentOFAttendedSessionPG(request, pg_id, date=None):
+def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
 
-    card = getPGCardModel(PercentOFAttendedSession, pg_id, date)
+    card = getPGCardModelNew(PercentOFAttendedSession, pg_id, date_)
 
     # uprasi ce isto kot pri personu razdelimo
     data = {
-           'organization':card.organization,
-           'organization_valuer':card.organization_value,
-           'maxPG':card.maxPG,
-           'average':card.average,
-           'maximum':card.maximum,
+           'organization': {
+                'name': card.organization.name,
+                'id': card.organization.id
+                },
+           "sessions":{
+                'organization_value':card.organization_value_sessions,
+                'maxPG':card.maxPG_sessions,
+                'average':card.average_sessions,
+                'maximum':card.maximum_sessions,
+                },
+            "votes":{
+                'organization_valuer':card.organization_value_votes,
+                'maxPG':card.maxPG_votes,
+                'average':card.average_votes,
+                'maximum':card.maximum_votes,
+                }
            }
 
     return JsonResponse(data)
