@@ -6,9 +6,10 @@ import requests
 from parlaposlanci.models import Person, LastActivity, MPStaticPL
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Vote, Speech, Session, Ballot
-from parlalize.settings import VOTE_MAP, API_URL, BASE_URL
+from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT
 import requests
 import json
+import numpy as np
 
 
 def voteToLogical(vote):
@@ -382,3 +383,92 @@ def getPGIDs():
     data = requests.get(API_URL+'/getMembersOfPGs/').json()
 
     return [pg for pg in data]
+
+
+def getRangeVotes(pgs, date_, votes_type="logic"):
+    print date_
+    def getVotesOnDay(votesPerDay_, day):
+        #tempList = sorted(votesPerDay_, key=lambda k: k['time'])
+        if day in votesPerDay_.keys():
+            votesPerDay_[day].sort(key=lambda r: r["time"])
+        else:
+            return []
+        try:
+            out = [a["id"] for a in votesPerDay_[day]]
+            return out
+        except:
+            return []
+
+    #get data
+    r = requests.get(API_URL+'/getMembersOfPGsOnDate/'+date_)
+    membersInPGs = r.json()
+
+    r = requests.get(API_URL+'/getMembersOfPGsRanges/'+date_)
+    membersInPGsRanges = r.json()
+
+    #create dict votesPerDay
+    r = requests.get(API_URL+'/getAllVotes/'+date_)
+    allVotesData = r.json()
+
+    if date_:
+        if votes_type=="logic":
+            votes = getLogicVotes(date_)
+        else:
+            r = requests.get(API_URL+'/getVotes/'+date_)
+            print API_URL+'/getVotes/'
+            print "kurac"
+            votes = r.json()
+
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        if votes_type=="logic":
+            votes = getLogicVotes()
+        else:
+            r = requests.get(API_URL+'/getVotes/'+date_)
+            print API_URL+'/getVotes/'
+            votes = r.json()
+            print "KURAC"
+        date_of = datetime.now().date()
+
+    #print votes
+    #prepare votes in "windows"
+    votesPerDay = {}
+    for vote in allVotesData:
+        vote_date = vote["start_time"].split("T")[0]
+        if vote_date in votesPerDay.keys():
+            votesPerDay[vote_date].append({"id": vote["id"], "time": datetime.strptime(vote["start_time"], "%Y-%m-%dT%X")})
+        else:
+            votesPerDay[vote_date] = [{"id": vote["id"], "time": datetime.strptime(vote["start_time"], "%Y-%m-%dT%X")}]
+
+    # get average score of PG
+    if votes_type=="logic":
+        pg_score=np.array([])
+    else:
+        pg_score=[]
+    counter = 0
+    all_votes = []
+    for membersInRange in membersInPGsRanges:
+        start_date = datetime.strptime(membersInRange["start_date"], API_DATE_FORMAT).date()
+        end_date = datetime.strptime(membersInRange["end_date"], API_DATE_FORMAT).date()
+        days = (end_date - start_date).days
+        votes_ids = [vote_id for i in range(days+1) for vote_id in getVotesOnDay(votesPerDay, (start_date+timedelta(days=i)).strftime("%Y-%m-%d"))]
+        if votes_ids==[]:
+            continue
+        all_votes = all_votes + votes_ids
+        counter+=len(votes_ids)
+        if votes_type=="logic":
+            pg_score_temp = np.mean([[votes[str(member)][str(b)]
+                                    for b in votes_ids]
+                                    for pg_id in pgs for member in membersInRange["members"][pg_id]],
+                                    axis=0)
+        else:
+            ivan = [member for pg_id in pgs for member in membersInRange["members"][pg_id]]
+            print ivan
+            pg_score_temp =[votes[str(member)][str(b)] for mamber in ivan for b in votes_ids]
+
+        if votes_type=="logic":
+            pg_score = np.concatenate((pg_score,pg_score_temp), axis=0)
+        else:
+            pg_score = pg_score+pg_score_temp
+
+    return pg_score, membersInPGs, votes, all_votes

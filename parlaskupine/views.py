@@ -145,65 +145,12 @@ def getSpeechesOfPG(request, pg_id, date_=False):
 
 
 def howMatchingThem(request, pg_id, type_of, date_=None):
-    def getVotesOnDay(votesPerDay_, day):
-        #tempList = sorted(votesPerDay_, key=lambda k: k['time'])
-        if day in votesPerDay_.keys():
-            votesPerDay_[day].sort(key=lambda r: r["time"])
-        else: 
-            return []
-        try:
-            out = [a["id"] for a in votesPerDay_[day]]
-            return out
-        except:
-            return []
-
-    #get data
-    r = requests.get(API_URL+'/getMembersOfPGsOnDate/'+date_)
-    membersInPGs = r.json()
-    r = requests.get(API_URL+'/getMembersOfPGsRanges/'+date_)
-    membersInPGsRanges = r.json()
-
-    #create dict votesPerDay 
-    r = requests.get(API_URL+'/getAllVotes/'+date_)
-    allVotesData = r.json()
-
     if date_:
-        votes = getLogicVotes(date_)
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        votes = getLogicVotes()
         date_of = datetime.now().date()
 
-    #prepare votes in "windows"
-    votesPerDay = {} 
-    for vote in allVotesData:
-        vote_date = vote["start_time"].split("T")[0]
-        if vote_date in votesPerDay.keys():
-            votesPerDay[vote_date].append({"id": vote["id"], "time": datetime.strptime(vote["start_time"], "%Y-%m-%dT%X")})
-        else:
-            votesPerDay[vote_date] = [{"id": vote["id"], "time": datetime.strptime(vote["start_time"], "%Y-%m-%dT%X")}]
-
-    pgVotes = {}
-
-    # get average score of PG
-    pg_score=np.array([])
-    counter = 0
-    all_votes = []
-    for membersInRange in membersInPGsRanges:
-        start_date = datetime.strptime(membersInRange["start_date"], API_DATE_FORMAT).date()
-        end_date = datetime.strptime(membersInRange["end_date"], API_DATE_FORMAT).date()
-        days = (end_date - start_date).days
-        votes_ids = [vote_id for i in range(days+1) for vote_id in getVotesOnDay(votesPerDay, (start_date+timedelta(days=i)).strftime("%Y-%m-%d"))]
-        if votes_ids==[]:
-            continue
-        all_votes = all_votes + votes_ids
-        counter+=len(votes_ids)
-        pg_score_temp = np.mean([[votes[str(member)][str(b)]
-                                for b in votes_ids]
-                                for member in membersInRange["members"][pg_id]],
-                                axis=0)
-
-        pg_score = np.concatenate((pg_score,pg_score_temp), axis=0)
+    pg_score, membersInPGs, votes, all_votes = getRangeVotes([pg_id], date_, "logic")
 
     # most match them
     if type_of == "match":
@@ -449,21 +396,15 @@ def getDeviationInOrg(request, pg_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
-def setCutVotes(request, pg_id, date=None):
+def setCutVotes(request, pg_id, date_=None):
     def getMaxOrgData(data, ids):
         d = {str(pg): data[pg] for pg in ids}
         return ",".join([key for key,val in d.iteritems() if val == max(d.values())])
 
-    r = requests.get(API_URL+'/getMembersOfPGs/')
-    membersInPGs = r.json()
-
-    if date:
-        r = requests.get(API_URL+'/getVotes/' + date)
-        date_of = datetime.strptime(date, API_DATE_FORMAT).date()
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        r = requests.get(API_URL+'/getVotes/')
         date_of = datetime.now().date()
-    votes = r.json()
 
     r = requests.get(API_URL+'/getCoalitionPGs/')
     coalition = r.json()
@@ -480,6 +421,10 @@ def setCutVotes(request, pg_id, date=None):
 
     coal_pgs = [str(pg) for pg in coalition["coalition"]]
     oppo_pgs = [str(pg) for pg in coalition["opposition"]]
+
+    pg_score_C, membersInPGs, votes, all_votes = getRangeVotes(coal_pgs, date_, "plain")
+    pg_score_O, membersInPGs, votes, all_votes = getRangeVotes(oppo_pgs, date_, "plain")
+
 
     votes_count = len(Vote.objects.all())
     tempVotesCoal = {"votes": [], "count": 0}
@@ -506,14 +451,14 @@ def setCutVotes(request, pg_id, date=None):
             tempVotesOppo["count"] += len(membersInPGs[str(pg)])
 
     # Calculate coalition and opposition average
-    coal_avg["for"] = normalize(sum(map(voteFor, tempVotesCoal["votes"]))/tempVotesCoal["count"], votes_count)
-    oppo_avg["for"] = normalize(sum(map(voteFor, tempVotesOppo["votes"]))/tempVotesOppo["count"], votes_count)
-    coal_avg["against"] = normalize(sum(map(voteAgainst, tempVotesCoal["votes"]))/tempVotesCoal["count"], votes_count)
-    oppo_avg["against"] = normalize(sum(map(voteAgainst, tempVotesOppo["votes"]))/tempVotesOppo["count"], votes_count)
-    coal_avg["abstain"] = normalize(float(sum(map(voteAbstain, tempVotesCoal["votes"])))/float(tempVotesCoal["count"]), votes_count)
-    oppo_avg["abstain"] = normalize(sum(map(voteAbstain, tempVotesOppo["votes"]))/tempVotesOppo["count"], votes_count)
-    coal_avg["absent"] = normalize(sum(map(voteAbsent, tempVotesCoal["votes"]))/tempVotesCoal["count"], votes_count)
-    oppo_avg["absent"] = normalize(sum(map(voteAbsent, tempVotesOppo["votes"]))/tempVotesOppo["count"], votes_count)
+    coal_avg["for"] = int((float(sum(map(voteFor, pg_score_C)))/float(len(pg_score_C)))*100)
+    oppo_avg["for"] = int((float(sum(map(voteFor, pg_score_O)))/float(len(pg_score_O)))*100)
+    coal_avg["against"] = int((float(sum(map(voteAgainst, pg_score_C)))/float(len(pg_score_C)))*100)
+    oppo_avg["against"] = int((float(sum(map(voteAgainst, pg_score_O)))/float(len(pg_score_O)))*100)
+    coal_avg["abstain"] = int((float(sum(map(voteAbstain, pg_score_C)))/float(len(pg_score_C)))*100)
+    oppo_avg["abstain"] = int((float(sum(map(voteAbstain, pg_score_O)))/float(len(pg_score_O)))*100)
+    coal_avg["absent"] = int((float(sum(map(voteAbsent, pg_score_C)))/float(len(pg_score_C)))*100)
+    oppo_avg["absent"] = int((float(sum(map(voteAbsent, pg_score_O)))/float(len(pg_score_O)))*100)
 
     # get votes against
     for pg in membersInPGs:

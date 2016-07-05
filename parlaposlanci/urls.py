@@ -32,7 +32,7 @@ urlpatterns = patterns(
 
     url(r'^setNumberOfSpokenWordsALL/', setNumberOfSpokenWordsALL),
 
-    url(r'^setCutVotes/(?P<person_id>\d+)/(?P<date>[\w].+)', setCutVotes),
+    url(r'^setCutVotes/(?P<person_id>\d+)/(?P<date_>[\w].+)', setCutVotes),
     url(r'^setCutVotes/(?P<person_id>\d+)', setCutVotes),
 
     url(r'^setCompass', setCompass),
