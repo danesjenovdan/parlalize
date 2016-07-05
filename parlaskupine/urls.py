@@ -10,6 +10,8 @@ urlpatterns = patterns('',
     # TJ
     url(r'^setBasicInfOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setBasicInfOfPG),
     url(r'^setBasicInfOfPG/(?P<pg_id>\d+)', setBasicInfOfPG),
+
+    url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setPercentOFAttendedSessionPG),
     url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
     url(r'^setBasicInfOfPG/(?P<pg_id>\d+)', setBasicInfOfPG),
     url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
@@ -25,13 +27,15 @@ urlpatterns = patterns('',
     url(r'^setDeviationInOrg/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setDeviationInOrg),
     url(r'^setDeviationInOrg/(?P<pg_id>\d+)', setDeviationInOrg),
 
-    url(r'^setCutVotes/(?P<pg_id>\d+)/(?P<date>[\w].+)', setCutVotes),
+    url(r'^setCutVotes/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setCutVotes),
     url(r'^setCutVotes/(?P<pg_id>\d+)', setCutVotes),
 
 
     # getters
     # TJ
     url(r'^getBasicInfOfPG/(?P<pg_id>\d+)', getBasicInfOfPG),
+
+    url(r'^getPercentOFAttendedSessionPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getPercentOFAttendedSessionPG),
     url(r'^getPercentOFAttendedSessionPG/(?P<pg_id>\d+)', getPercentOFAttendedSessionPG),
 
     url(r'^getSpeechesOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getSpeechesOfPG),

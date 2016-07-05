@@ -61,24 +61,45 @@ class Presence(Timestampable, models.Model): #Card for presence of MP on session
                                related_name='children',
                                help_text=_('MP'))
 
-    person_value = models.IntegerField(_('Presence of this MP'),
-                                   blank=True, null=True,
-                                   help_text=_('Presence of this MP'))
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    person_value_sessions = models.IntegerField(_('Presence of this MP'),
+                                                blank=True, null=True,
+                                                help_text=_('Presence of this MP'))
 
 
-    maxMP = models.ForeignKey('Person',
-                               blank=True, null=True,
-                               related_name='children_',
-                               help_text=_('Person who has max presence of sessions'))
+    maxMP_sessions = JSONField(blank=True, null=True,
+                                      help_text=_('Person who has max presence of sessions'))
 
 
-    average = models.IntegerField(_('average'),
-                                   blank=True, null=True,
-                                   help_text=_('Average of MP attended sessions'))
+    average_sessions = models.IntegerField(_('average'),
+                                           blank=True, null=True,
+                                           help_text=_('Average of MP attended sessions'))
 
-    maximum = models.IntegerField(_('max'),
-                                   blank=True, null=True,
-                                   help_text=_('Max of MP attended sessions'))
+    maximum_sessions = models.IntegerField(_('max'),
+                                           blank=True, null=True,
+                                           help_text=_('Max of MP attended sessions'))
+
+
+    person_value_votes = models.IntegerField(_('Presence of this MP'),
+                                             blank=True, null=True,
+                                             help_text=_('Presence of this MP'))
+
+
+    maxMP_votes = JSONField(blank=True, null=True,
+                                   help_text=_('Person who has max presence of sessions'))
+
+
+    average_votes = models.IntegerField(_('average'),
+                                        blank=True, null=True,
+                                        help_text=_('Average of MP attended sessions'))
+
+    maximum_votes = models.IntegerField(_('max'),
+                                        blank=True, null=True,
+                                        help_text=_('Max of MP attended sessions'))
 
 
 
