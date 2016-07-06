@@ -312,26 +312,24 @@ def setAbsentMPs(request, id_se):
     date = str(date[8:10])+"."+str(date[5:7])+"."+str(date[:4])
     mps = requests.get(API_URL+'/getMPs/'+ date).json()
 
-    onSession = []
+  
     mpsID = []
+
     if len(votes) != 0:
-        for vote in votes:
-            onSession.append(vote['mp_id'])
-
-        onSession = list(set(onSession))
-
         [mpsID.append(mpID['id'])for mpID in mps]
 
-        for mp in onSession:
-            if mp in mpsID:
-                mpsID.remove(mp)
+        for vote in votes:
+            if vote['option'] != 'ni':
+                if vote['mp_id'] in mpsID:
+                    mpsID.remove(vote['mp_id'])
+  
 
         result = saveOrAbortNew(model=AbsentMPs,
                                 id_parladata=id_se,
                                 absentMPs=mpsID,
                                 created_for=session.start_time
                                 )
-        onSession = []
+   
         mpsID = []
     return JsonResponse({'alliswell': True})
     
@@ -421,9 +419,8 @@ def runSetters(request, date_to):
    
     
     setters_models = {
-
-        Vote: setMotionOfSession,
-        PresenceOfPG: setPresenceOfPG,
+        #Vote: setMotionOfSession,
+        #PresenceOfPG: setPresenceOfPG,
         AbsentMPs: setAbsentMPs   
     }
     for model, setter in setters_models.items():
