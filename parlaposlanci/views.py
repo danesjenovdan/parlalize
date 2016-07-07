@@ -638,7 +638,7 @@ def setCutVotes(request, person_id, date_=None):
     coal_avg["absent"] = int((float(sum(map(voteAbsent, pg_score_C)))/float(len(pg_score_C)))*100)
     oppo_avg["absent"] = int((float(sum(map(voteAbsent, pg_score_O)))/float(len(pg_score_O)))*100)
 
-    memList = getMPsList(request)
+    memList = getMPsList(request, date_)
     members = {str(mp['id']):mp for mp in json.loads(memList.content)}
 
     votes_count = len(Vote.objects.all())
