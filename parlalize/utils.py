@@ -165,7 +165,7 @@ def saveOrAbortNew(model, **kwargs):
     return False
 
 
-def findDatesFromLastCard(model, id, lastParsedDate):
+def findDatesFromLastCard(model, id, lastParsedDate, minDate=None):
     toDate = datetime.strptime(lastParsedDate, '%d.%m.%Y').date()
     print model._meta.app_label
     try:
@@ -176,10 +176,13 @@ def findDatesFromLastCard(model, id, lastParsedDate):
         elif model._meta.app_label == "parlaseje":
             lastCardDate = model.objects.all().order_by("-created_for")[0].created_for
     except:
-        lastCardDate = datetime.strptime("01.08.2014", '%d.%m.%Y').date()
+        lastCardDate = datetime.strptime("02.08.2014", '%d.%m.%Y').date()
     #lastCardDate = lastCardDate.replace(tzinfo=None)
     if not lastCardDate:
-	lastCardDate = datetime.strptime("01.08.2014", '%d.%m.%Y').date()
+        if minDate:
+            lastCardDate = datetime.strptime(minDate, '%d.%m.%Y').date()  
+        else: 
+            lastCardDate = datetime.strptime("02.08.2014", '%d.%m.%Y').date()
     return [(lastCardDate+timedelta(days=days)) for days in range((toDate-lastCardDate).days)]
 
 
