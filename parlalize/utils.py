@@ -502,5 +502,4 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
 def getMPGovId(id_parladata):
     person = Person.objects.filter(id_parladata=id_parladata)[0]
     out = {"id":person.id_parladata, "gov_id":person.gov_id}
-    print out
     return out
