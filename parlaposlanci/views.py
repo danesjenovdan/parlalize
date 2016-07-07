@@ -171,15 +171,17 @@ def getPercentOFAttendedSession(request, person_id, date=None):
 
 
 #Saves to DB number of spoken word of MP and maximum and average of spoken words
-def setNumberOfSpokenWordsALL(request):
+def setNumberOfSpokenWordsALL(request, date_):
+    date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+
     print '[INFO] Getting MPs'
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
 
     mp_results = []
 
     for mp in mps:
         print '[INFO] Pasting speeches for MP ' + str(mp['id'])
-        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id'])).json()
+        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id']) + "/" + date_).json()
 
         text = ''.join([speech['content'] for speech in speeches])
 
@@ -189,7 +191,7 @@ def setNumberOfSpokenWordsALL(request):
     mps_sorted = sorted(mp_results, key=lambda k: k['wordcount'])
 
     print '[INFO] Getting all speeches'
-    all_speeches = requests.get(API_URL+'/getAllSpeeches/').json()
+    all_speeches = requests.get(API_URL+'/getAllSpeeches/'+date_).json()
     print '[INFO] Joining all speeches'
     text = ''.join([speech['content'] for speech in all_speeches])
 
@@ -200,13 +202,19 @@ def setNumberOfSpokenWordsALL(request):
 
     for result in mp_results:
         print '[INFO] Saving or updating MP\'s results'
-        print saveOrAbort(model=SpokenWords, person=Person.objects.get(id_parladata=int(result['person_id'])), score=int(result['wordcount']), maxMP=Person.objects.get(id_parladata=int(mps_sorted[-1]['person_id'])), average=average_words, maximum=mps_sorted[-1]['wordcount'])
+        print saveOrAbortNew(model=SpokenWords, 
+                             created_for=date_of, 
+                             person=Person.objects.get(id_parladata=int(result['person_id'])), 
+                             score=int(result['wordcount']), 
+                             maxMP=Person.objects.get(id_parladata=int(mps_sorted[-1]['person_id'])), 
+                             average=average_words, 
+                             maximum=mps_sorted[-1]['wordcount'])
 
     return HttpResponse('All iz well')
 
 def getNumberOfSpokenWords(request, person_id, date=None):
 
-    card = getPersonCardModel(SpokenWords, person_id, date)
+    card = getPersonCardModelNew(SpokenWords, person_id, date)
 
     results = {
         'person': {
@@ -1353,37 +1361,48 @@ def getMPsIDs(request):
 
 
 def runSetters(request, date_to):
+    toDate = datetime.strptime(date_to, '%d.%m.%Y').date()
     setters_models = {
         #model: setter,
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
         # CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
 
-        MPStaticPL: setMPStaticPL,
+        #MPStaticPL: setMPStaticPL,
         #MembershipsOfMember: setMembershipsOfMember,
         #LessEqualVoters: setLessEqualVoters,
         #EqualVoters: setMostEqualVoters,
+        Presence: setPercentOFAttendedSession,
     }
+    memberships = requests.get(API_URL+'/getAllTimeMemberships').json()
     IDs = getIDs()
     # print IDs
     allIds = len(IDs)
     curentId = 0
-    for ID in IDs:
+    for membership in memberships:
+        if membership["end_time"]:
+            end_time = datetime.datetime.strptime(a[-1]["end_time"].split("T")[0],"%Y-%m-%d")
+            if end_time>toDate:
+                end_time=toDate
+        else:
+            end_time=toDate
 
-        print ID
-        print "".join(["*" for i in range(curentId)] + ["_" for i in range(allIds-curentId)])
         for model, setter in setters_models.items():
             print setter, date_to
-            dates = findDatesFromLastCard(model, ID, date_to)
-            print dates
+            if membership["start_time"]:
+                print "START",membership["start_time"]
+                start_time = datetime.datetime.strptime(a[-1]["start_time"].split("T")[0],"%Y-%m-%d")
+                dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT, start_time.strftime(API_DATE_FORMAT)))
+            else:
+                dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT))
             for date in dates:
                 print date.strftime('%d.%m.%Y')
-                # print setter + str(ID) + "/" + date.strftime('%d.%m.%Y')
-                setter(request, str(ID), date.strftime('%d.%m.%Y'))
+                print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
+                setter(request, str(membership["id"]), date.strftime('%d.%m.%Y'))
 
                 #if setter == setMPStaticPL: # Prevent that runner doesn't waste time with ... Which doesn't change often
                 #    break;
         #setLastActivity allways runs without date
-        setLastActivity(request, str(ID))
+        setLastActivity(request, str(membership["id"]))
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
 
