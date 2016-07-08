@@ -153,7 +153,7 @@ def getPercentOFAttendedSession(request, person_id, date=None):
                 "value": equalVoters.person_value_sessions,
                 "average": equalVoters.average_sessions,
                 "max": {
-                    "id": equalVoters.maxMP_sessions,
+                    "ids": equalVoters.maxMP_sessions,
                     "value": equalVoters.maximum_sessions,
                 }
             },
