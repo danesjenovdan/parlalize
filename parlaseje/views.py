@@ -308,16 +308,14 @@ def getMotionGraph(request, id_se):
 def setAbsentMPs(request, id_se):
     votes = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
-    date = str(session.start_time.date())
-    date = str(date[8:10])+"."+str(date[5:7])+"."+str(date[:4])
-    mps = requests.get(API_URL+'/getMPs/'+ date).json()
+    mps = requests.get(API_URL+'/getMPs/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
 
   
     mpsID = []
 
     if len(votes) != 0:
-        [mpsID.append(mpID['id'])for mpID in mps]
-
+        mpsID = [mpID['id'] for mpID in mps]
+        print mpsID
         for vote in votes:
             if vote['option'] != 'ni':
                 if vote['mp_id'] in mpsID:
@@ -358,9 +356,7 @@ def setPresenceOfPG(request, id_se):
     votes = requests.get(API_URL+'/getVotesOfSession/'+str(id_se)+'/').json()
     motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
-    date = str(session.start_time.date())
-    date = str(date[8:10])+"."+str(date[5:7])+"."+str(date[:4])
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ date).json()
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
 
     onSession = {}
     yesdic = defaultdict(int)
