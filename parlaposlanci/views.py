@@ -373,11 +373,11 @@ def getEqualVoters(request, id, date_=None):
     else:
         votes = getLogicVotes()
         date_of = datetime.now().date()
-    #votes = getLogicVotes()
 
-    members = getMPsList(request)
+    members = getMPsList(request, date_)
     membersDict = {str(mp['id']):mp for mp in json.loads(members.content)}
-
+    tempVotes = {voter: votes_ for voter, votes_ in votes.items() if voter in membersDict.keys()}
+    votes = tempVotes
     out = {vote:pearsonr(votes[str(id)].values(), votes[str(vote)].values())[0] for vote in sorted(votes.keys())}
     keys = sorted(out, key=out.get)
 
