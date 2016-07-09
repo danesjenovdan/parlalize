@@ -228,3 +228,13 @@ class PresenceOfPG(Timestampable, models.Model):
 
     id_parladata = models.IntegerField(_('parladata id'),
                             blank=True, null=True,help_text=_('id parladata'))
+
+
+class AverageSpeeches(Timestampable, models.Model):
+
+    speechesOnSession = JSONField(blank=True, null=True)
+
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))

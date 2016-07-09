@@ -6,7 +6,7 @@ import requests
 from parlalize.utils import saveOrAbortNew
 from parlaposlanci.models import Person, LastActivity
 from parlaskupine.models import Organization
-from parlaseje.models import Session, Vote, Speech, Session, Ballot, Vote_graph, Vote, AbsentMPs
+from parlaseje.models import *
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT
 import requests
 
