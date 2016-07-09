@@ -315,7 +315,6 @@ def setAbsentMPs(request, id_se):
 
     if len(votes) != 0:
         mpsID = [mpID['id'] for mpID in mps]
-        print mpsID
         for vote in votes:
             if vote['option'] != 'ni':
                 if vote['mp_id'] in mpsID:
@@ -411,20 +410,101 @@ def getPresenceOfPG(request, id_se, date=False):
         return JsonResponse({"status": "No card MOFO"}, safe=False)
     return JsonResponse(results, safe=False)
 
+def setSpeechesSnSession(request, date=False):
+    if date:
+        numberOfSessions = len(Session.objects.filter(start_time__lte=datetime.strptime(date, '%d.%m.%Y')))
+        mps = requests.get(API_URL+'/getMPs/'+ date).json()
+        date = datetime.strptime(date, '%d.%m.%Y')
+    else:
+        numberOfSessions = len(Session.objects.filter(start_time=datetime.now().date()).json())
+        mps = requests.get(API_URL+'/getMPs/'+  str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
+        date = datetime.now().date()
+
+    mpsID = {}
+    
+    for mp in mps: 
+        speech = len(requests.get(API_URL+'/getSpeechesOfMP/'+ str(mp['id'])).json())
+        if numberOfSessions !=0:
+            mpsID.update({mp['id']:float(float(speech)/float(numberOfSessions))})
+
+    print mpsID
+    result = saveOrAbortNew(model=AverageSpeeches,
+                                created_for=date,
+                                speechesOnSession=mpsID
+                                )
+
+   
+
+
+    return JsonResponse({'alliswell': True})
+
+
+def getMinSpeechesSnSession(request, date=False):
+    results = []
+    try:
+        if date:
+            averageSpeeches = AverageSpeeches.objects.get(created_for__lte=datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
+            mps = requests.get(API_URL+'/getMPs/'+ date).json()
+        else:
+            averageSpeeches = AverageSpeeches.objects.get().speechesOnSession
+            mps = requests.get(API_URL+'/getMPs/'+  str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
+    
+
+
+        sort = sorted(averageSpeeches.items(), key=lambda x:x[1])
+        
+        for s in sort:
+            for mp in mps:
+                print s[0], mp['id']
+                if int(s[0]) == int(mp['id']):
+                    results.append({"name": mp['name'], "image":mp['image'], "speeches":s[1]})
+    except ObjectDoesNotExist:
+        return JsonResponse({"status": "No card MOFO"}, safe=False)
+    return JsonResponse(results, safe=False)
+
+
+def getMaxSpeechesSnSession(request, date=False):
+    results = []
+    try:
+        if date:
+            averageSpeeches = AverageSpeeches.objects.get(created_for__lte=datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
+            mps = requests.get(API_URL+'/getMPs/'+ date).json()
+        else:
+            averageSpeeches = AverageSpeeches.objects.get().speechesOnSession
+            mps = requests.get(API_URL+'/getMPs/'+ str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
+    
+
+
+        sort = sorted(averageSpeeches.items(), key=lambda x:x[1], reverse=True)
+        for s in sort:
+            for mp in mps:
+                if int(s[0]) == int(mp['id']):
+                    results.append({"name": mp['name'], "image":mp['image'], "speeches":s[1]})
+        
+    except ObjectDoesNotExist:
+        return JsonResponse({"status": "No card MOFO"}, safe=False)
+    return JsonResponse(results, safe=False)
+
+
+
 def runSetters(request, date_to):
    
     
     setters_models = {
         #Vote: setMotionOfSession,
         #PresenceOfPG: setPresenceOfPG,
-        AbsentMPs: setAbsentMPs   
+        #AbsentMPs: setAbsentMPs,
+        AverageSpeeches: setSpeechesSnSession   
     }
     for model, setter in setters_models.items():
         dates = findDatesFromLastCard(model, None, date_to)
         if dates==[]:
             continue
-        IDs = getSesIDs(dates[1],dates[-1])
+        if model != "AverageSpeeches":
+            IDs = getSesIDs(dates[1],dates[-1])
 
-        for ID in IDs:
-            setter(request, str(ID))       
+            for ID in IDs:
+                setter(request, str(ID))
+        
+
     return JsonResponse({"status": "all is fine :D"}, safe=False)
