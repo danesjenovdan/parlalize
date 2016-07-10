@@ -126,7 +126,7 @@ def setPercentOFAttendedSession(request, person_id, date_):
     maximumMPVotes = [getMPGovId(pId) for pId in data["votes"] if data["votes"][pId]==maximumVotes]
     averageVotes = sum(data["votes"].values()) / len(data["votes"])
 
-    result = saveOrAbort(model=Presence, 
+    result = saveOrAbortNew(model=Presence, 
                          created_for=date_of, 
                          person=Person.objects.get(id_parladata=int(person_id)), 
                          person_value_sessions=thisMP, 
@@ -1380,7 +1380,7 @@ def runSetters(request, date_to):
     curentId = 0
     for membership in memberships:
         if membership["end_time"]:
-            end_time = datetime.datetime.strptime(a[-1]["end_time"].split("T")[0],"%Y-%m-%d")
+            end_time = datetime.strptime(a[-1]["end_time"].split("T")[0],"%Y-%m-%d")
             if end_time>toDate:
                 end_time=toDate
         else:
