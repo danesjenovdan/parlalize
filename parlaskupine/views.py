@@ -61,7 +61,7 @@ def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
     allSum = {}
     data = {}
 
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGs/'+date_).json()
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
     data = requests.get(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
 
     sessions = {pg:[] for pg in membersOfPG if membersOfPG[pg]}
@@ -75,22 +75,18 @@ def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
         sessions[pg] = sum(sessions[pg])/len(sessions[pg])
         votes[pg] = sum(votes[pg])/len(votes[pg])
 
-    print sessions
-    print votes
-
-
-
     thisMPSessions = sessions[pg_id]
     maximumSessions = max(sessions.values())
     maximumPGSessions = [pgId for pgId in sessions if sessions[pgId]==maximumSessions]
     averageSessions = sum(data["sessions"].values()) / len(data["sessions"])
+
     thisMPVotes = votes[pg_id]
     maximumVotes = max(votes.values())
     maximumPGVotes = [pgId for pgId in votes if votes[pgId]==maximumVotes]
-    averageVotes = sum(data["sessions"].values()) / len(data["sessions"])
+    averageVotes = sum(data["votes"].values()) / len(data["votes"])
 
     #kaksen bo interfejs ko bo imela prav ta PG maksimum
-    result = saveOrAbort(model=PercentOFAttendedSession,
+    result = saveOrAbortNew(model=PercentOFAttendedSession,
                          created_for=date_of,
                          organization=Organization.objects.get(id_parladata=int(pg_id)),
                          organization_value_sessions = thisMPSessions,
@@ -121,7 +117,7 @@ def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
                 'maximum':card.maximum_sessions,
                 },
             "votes":{
-                'organization_valuer':card.organization_value_votes,
+                'organization_value':card.organization_value_votes,
                 'maxPG':card.maxPG_votes,
                 'average':card.average_votes,
                 'maximum':card.maximum_votes,
