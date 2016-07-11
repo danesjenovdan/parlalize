@@ -289,11 +289,11 @@ def getLastActivity(request, person_id, date_=None):
             if types[i] == "ballot":
                 data.append({
                     "option": options[i],
-                    "result": Vote.objects.get(id_parladata=activity_ids[i]).result,
+                    "result": Vote.objects.filter(id_parladata=activity_ids[i]).order_by("-created_at")[0].result,
                     "vote_name": vote_names[i],
                     "vote_id": int(activity_ids[i]),
                     "type": types[i],
-                    "session_id": Vote.objects.get(id_parladata=int(activity_ids[i])).session.id
+                    "session_id": Vote.objects.filter(id_parladata=int(activity_ids[i])).order_by("-created_at")[0].session.id
                     })
             elif types[i] == "speech":
                 data.append({
