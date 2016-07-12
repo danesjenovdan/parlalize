@@ -110,7 +110,7 @@ def getMPStaticPL(request, person_id, date_=None):
 
 
 #Saves to DB percent of attended sessions of MP and maximum and average of attended sessions
-def setPercentOFAttendedSession(request, person_id, date_):
+def setPercentOFAttendedSession(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -1295,18 +1295,23 @@ def setAverageNumberOfSpeechesPerSession(request, person_id):
 
     return HttpResponse('All iz well')
 
-def setAverageNumberOfSpeechesPerSessionAll(request):
+def setAverageNumberOfSpeechesPerSessionAll(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+        date_=""
 
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
     mp_scores = []
 
     for mp in mps:
-        mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
+        mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])  + ("/"+date_) if date_ else "").json())
 
         # fix for "Dajem besedo"
-        mp_no_of_speeches = mp_no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id'])).text)
+        #mp_no_of_speeches = mp_no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").text)
 
-        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
+        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id']) + ("/"+date_) if date_ else "").json()['sessions_with_speech']
 
         if mp_no_of_sessions > 0:
             mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
@@ -1323,8 +1328,9 @@ def setAverageNumberOfSpeechesPerSessionAll(request):
         score = mp['score']
 
 
-        saveOrAbort(
+        saveOrAbortNew(
             model=AverageNumberOfSpeechesPerSession,
+            created_for=date_of,
             person=person,
             score=score,
             average=average,
@@ -1335,7 +1341,7 @@ def setAverageNumberOfSpeechesPerSessionAll(request):
 
 def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
-    card = getPersonCardModel(AverageNumberOfSpeechesPerSession, person_id, date)
+    card = getPersonCardModelNew(AverageNumberOfSpeechesPerSession, person_id, date)
     static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
@@ -1393,7 +1399,7 @@ def runSetters(request, date_to):
     curentId = 0
     for membership in memberships:
         if membership["end_time"]:
-            end_time = datetime.strptime(a[-1]["end_time"].split("T")[0],"%Y-%m-%d")
+            end_time = datetime.strptime(membership["end_time"].split("T")[0],"%Y-%m-%d")
             if end_time>toDate:
                 end_time=toDate
         else:
@@ -1403,7 +1409,7 @@ def runSetters(request, date_to):
             print setter, date_to
             if membership["start_time"]:
                 print "START",membership["start_time"]
-                start_time = datetime.datetime.strptime(a[-1]["start_time"].split("T")[0],"%Y-%m-%d")
+                start_time = datetime.datetime.strptime(membership["start_time"].split("T")[0],"%Y-%m-%d")
                 dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT, start_time.strftime(API_DATE_FORMAT)))
             else:
                 dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT))
