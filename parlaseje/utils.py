@@ -133,6 +133,13 @@ def getSesIDs(start_date, end_date):
 		result.append(ids.id_parladata)
 	return result
 
+def getSesDates(end_date):
+	result = []
+	data = requests.get(API_URL + '/getSessions/').json()
+	session = Session.objects.filter(start_time__lte=end_date)
+	for ids in session:
+		result.append(ids.start_time)
+	return result
 
 def getSesCardModelNew(model, id, date=None):
     if date:

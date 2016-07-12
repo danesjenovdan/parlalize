@@ -26,12 +26,12 @@ urlpatterns = patterns(
     url(r'^getPresenceOfPG/(?P<id_se>\d+)', getPresenceOfPG),
     url(r'^getPresenceOfPG/(?P<id_se>\d+)/(?P<date>[\w].+)', getPresenceOfPG),
 
-    url(r'^setSpeechesSnSession/(?P<date>[\w].+)', setSpeechesSnSession),
-    url(r'^getMinSpeechesSnSession/(?P<date>[\w].+)', getMinSpeechesSnSession),
-    url(r'^getMinSpeechesSnSession/(?P<date>[\w].+)', getMinSpeechesSnSession),
+    url(r'^setSpeechesOnSession/(?P<date>[\w].+)', setSpeechesOnSession),
+    url(r'^getMaxSpeechesOnSession/(?P<date>[\w].+)', getMaxSpeechesOnSession),
+    url(r'^getMinSpeechesOnSession/(?P<date>[\w].+)', getMinSpeechesOnSession),
 
-    url(r'^getMinSpeechesSnSession/', getMinSpeechesSnSession),
-    url(r'^getMaxSpeechesSnSession/', getMaxSpeechesSnSession),
+    url(r'^getMinSpeechesOnSession/', getMinSpeechesOnSession),
+    url(r'^getMaxSpeechesOnSession/', getMaxSpeechesOnSession),
 
     #runenr
     url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
