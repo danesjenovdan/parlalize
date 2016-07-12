@@ -1162,7 +1162,7 @@ def setVocabularySizeALL(request, date_):
 #    result.append({'person_id': vocabularies_sorted[-1]['person_id'], 'vocabulary_size': vocabularies_sorted[-1]['vocabulary_size']})
 
     for p in vocabularies_sorted:
-        saveOrAbort(
+        saveOrAbortNew(
             VocabularySize,
             person=Person.objects.get(id_parladata=int(p['person_id'])),
             created_for=date_of,
