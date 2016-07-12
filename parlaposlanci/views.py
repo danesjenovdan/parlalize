@@ -1125,18 +1125,23 @@ def getTFIDF(request, person_id, date=None):
 
     return JsonResponse(out)
 
-def setVocabularySizeALL(request):
+def setVocabularySizeALL(request, date_):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+        date_=""
 
 #    thisperson = Person.objects.get(id_parladata=int(person_id))
 
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
 
     vocabulary_sizes = []
     result = {}
 
     for mp in mps:
 
-        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id'])).json()
+        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").json()
 
         text = ''.join([speech['content'] for speech in speeches])
 
@@ -1160,6 +1165,7 @@ def setVocabularySizeALL(request):
         saveOrAbort(
             VocabularySize,
             person=Person.objects.get(id_parladata=int(p['person_id'])),
+            created_for=date_of,
             score=[v['vocabulary_size'] for v in vocabularies_sorted if v['person_id'] == p['person_id']][0],
             maxMP=maxMP,
             average=result['average'],
@@ -1176,18 +1182,23 @@ def setVocabularySizeALL(request):
 #
 #    return JsonResponse(result, safe=False)
 
-def setVocabularySize(request, person_id):
+def setVocabularySize(request, person_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+        date_=""
 
     thisperson = Person.objects.get(id_parladata=int(person_id))
 
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
 
     vocabulary_sizes = []
     result = {}
 
     for mp in mps:
 
-        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id'])).json()
+        speeches = requests.get(API_URL+'/getSpeeches/'+date_ + str(mp['id'])).json()
 
         text = ''.join([speech['content'] for speech in speeches])
 
@@ -1218,19 +1229,21 @@ def setVocabularySize(request, person_id):
 #
 #    return HttpResponse('All MPs updated.')
 
-    if saveOrAbort(VocabularySize, person=thisperson, score=result['person'], maxMP=maxMP, average=result['average'], maximum=result['max']):
+    if saveOrAbortNew(VocabularySize, 
+                      person=thisperson,
+                      created_for=date_of,
+                      score=result['person'],
+                      maxMP=maxMP,
+                      average=result['average'],
+                      maximum=result['max']):
         return HttpResponse('All iz well')
     else:
         return HttpResponse('All was well')
 
-    result_ = saveOrAbort(model=VocabularySize, person=Person.objects.get(id_parladata=int(person_id)), this_person=result[0]['vocabulary_size'], maxMP=Person.objects.get(id_parladata=int(vocabularies_sorted[-1]['person_id'])), average=float(sum(scores))/float(len(scores)), maximum=vocabularies_sorted[-1]['vocabulary_size'])
 
-    return JsonResponse(result, safe=False)
+def getVocabularySize(request, person_id, date_=None):
 
-
-def getVocabularySize(request, person_id, date=None):
-
-    card = getPersonCardModel(VocabularySize, person_id, date)
+    card = getPersonCardModelNew(VocabularySize, person_id, date_)
 
     out = {
         'person': {
