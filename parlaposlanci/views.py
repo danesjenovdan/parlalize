@@ -110,7 +110,7 @@ def getMPStaticPL(request, person_id, date_=None):
 
 
 #Saves to DB percent of attended sessions of MP and maximum and average of attended sessions
-def setPercentOFAttendedSession(request, person_id, date_):
+def setPercentOFAttendedSession(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -1125,18 +1125,23 @@ def getTFIDF(request, person_id, date=None):
 
     return JsonResponse(out)
 
-def setVocabularySizeALL(request):
+def setVocabularySizeALL(request, date_):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+        date_=""
 
 #    thisperson = Person.objects.get(id_parladata=int(person_id))
 
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
 
     vocabulary_sizes = []
     result = {}
 
     for mp in mps:
 
-        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id'])).json()
+        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").json()
 
         text = ''.join([speech['content'] for speech in speeches])
 
@@ -1157,9 +1162,10 @@ def setVocabularySizeALL(request):
 #    result.append({'person_id': vocabularies_sorted[-1]['person_id'], 'vocabulary_size': vocabularies_sorted[-1]['vocabulary_size']})
 
     for p in vocabularies_sorted:
-        saveOrAbort(
+        saveOrAbortNew(
             VocabularySize,
             person=Person.objects.get(id_parladata=int(p['person_id'])),
+            created_for=date_of,
             score=[v['vocabulary_size'] for v in vocabularies_sorted if v['person_id'] == p['person_id']][0],
             maxMP=maxMP,
             average=result['average'],
@@ -1176,18 +1182,23 @@ def setVocabularySizeALL(request):
 #
 #    return JsonResponse(result, safe=False)
 
-def setVocabularySize(request, person_id):
+def setVocabularySize(request, person_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+        date_=""
 
     thisperson = Person.objects.get(id_parladata=int(person_id))
 
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
 
     vocabulary_sizes = []
     result = {}
 
     for mp in mps:
 
-        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id'])).json()
+        speeches = requests.get(API_URL+'/getSpeeches/'+date_ + str(mp['id'])).json()
 
         text = ''.join([speech['content'] for speech in speeches])
 
@@ -1218,19 +1229,21 @@ def setVocabularySize(request, person_id):
 #
 #    return HttpResponse('All MPs updated.')
 
-    if saveOrAbort(VocabularySize, person=thisperson, score=result['person'], maxMP=maxMP, average=result['average'], maximum=result['max']):
+    if saveOrAbortNew(VocabularySize, 
+                      person=thisperson,
+                      created_for=date_of,
+                      score=result['person'],
+                      maxMP=maxMP,
+                      average=result['average'],
+                      maximum=result['max']):
         return HttpResponse('All iz well')
     else:
         return HttpResponse('All was well')
 
-    result_ = saveOrAbort(model=VocabularySize, person=Person.objects.get(id_parladata=int(person_id)), this_person=result[0]['vocabulary_size'], maxMP=Person.objects.get(id_parladata=int(vocabularies_sorted[-1]['person_id'])), average=float(sum(scores))/float(len(scores)), maximum=vocabularies_sorted[-1]['vocabulary_size'])
 
-    return JsonResponse(result, safe=False)
+def getVocabularySize(request, person_id, date_=None):
 
-
-def getVocabularySize(request, person_id, date=None):
-
-    card = getPersonCardModel(VocabularySize, person_id, date)
+    card = getPersonCardModelNew(VocabularySize, person_id, date_)
 
     out = {
         'person': {
@@ -1282,18 +1295,23 @@ def setAverageNumberOfSpeechesPerSession(request, person_id):
 
     return HttpResponse('All iz well')
 
-def setAverageNumberOfSpeechesPerSessionAll(request):
+def setAverageNumberOfSpeechesPerSessionAll(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+        date_=""
 
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
     mp_scores = []
 
     for mp in mps:
-        mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
+        mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])  + ("/"+date_) if date_ else "").json())
 
         # fix for "Dajem besedo"
-        mp_no_of_speeches = mp_no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id'])).text)
+        #mp_no_of_speeches = mp_no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").text)
 
-        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
+        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id']) + ("/"+date_) if date_ else "").json()['sessions_with_speech']
 
         if mp_no_of_sessions > 0:
             mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
@@ -1310,8 +1328,9 @@ def setAverageNumberOfSpeechesPerSessionAll(request):
         score = mp['score']
 
 
-        saveOrAbort(
+        saveOrAbortNew(
             model=AverageNumberOfSpeechesPerSession,
+            created_for=date_of,
             person=person,
             score=score,
             average=average,
@@ -1322,7 +1341,7 @@ def setAverageNumberOfSpeechesPerSessionAll(request):
 
 def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
-    card = getPersonCardModel(AverageNumberOfSpeechesPerSession, person_id, date)
+    card = getPersonCardModelNew(AverageNumberOfSpeechesPerSession, person_id, date)
     static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
@@ -1380,7 +1399,7 @@ def runSetters(request, date_to):
     curentId = 0
     for membership in memberships:
         if membership["end_time"]:
-            end_time = datetime.strptime(a[-1]["end_time"].split("T")[0],"%Y-%m-%d")
+            end_time = datetime.strptime(membership["end_time"].split("T")[0],"%Y-%m-%d")
             if end_time>toDate:
                 end_time=toDate
         else:
@@ -1390,7 +1409,7 @@ def runSetters(request, date_to):
             print setter, date_to
             if membership["start_time"]:
                 print "START",membership["start_time"]
-                start_time = datetime.datetime.strptime(a[-1]["start_time"].split("T")[0],"%Y-%m-%d")
+                start_time = datetime.datetime.strptime(membership["start_time"].split("T")[0],"%Y-%m-%d")
                 dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT, start_time.strftime(API_DATE_FORMAT)))
             else:
                 dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT))
