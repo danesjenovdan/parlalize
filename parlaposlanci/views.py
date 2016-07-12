@@ -779,11 +779,11 @@ def getCutVotes(request, person_id, date=None):
             'abstain': {
                 'score': cutVotes.this_abstain,
                 'maxCoalition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_abstain_max_person.split(',')])],
+                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_abstain_max_person.split(',')])],
                     'score': cutVotes.coalition_abstain_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_abstain_max_person.split(',')])],
+                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_abstain_max_person.split(',')])],
                     'score': cutVotes.opposition_abstain_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_abstain},
@@ -792,11 +792,11 @@ def getCutVotes(request, person_id, date=None):
             "against": {
                 'score': cutVotes.this_against,
                 'maxCoalition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_against_max_person.split(',')])],
+                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_against_max_person.split(',')])],
                     'score': cutVotes.coalition_against_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_against_max_person.split(',')])],
+                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_against_max_person.split(',')])],
                     'score': cutVotes.opposition_against_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_against},
@@ -805,11 +805,11 @@ def getCutVotes(request, person_id, date=None):
             "absent": {
                 'score': cutVotes.this_absent,
                 'maxCoalition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_absent_max_person.split(',')])],
+                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_absent_max_person.split(',')])],
                     'score': cutVotes.coalition_absent_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_absent_max_person.split(',')])],
+                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_absent_max_person.split(',')])],
                     'score': cutVotes.opposition_absent_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_absent},
@@ -818,11 +818,11 @@ def getCutVotes(request, person_id, date=None):
             'for': {
                 'score': cutVotes.this_for,
                 'maxCoalition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_for_max_person.split(',')])],
+                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_for_max_person.split(',')])],
                     'score': cutVotes.coalition_for_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_for_max_person.split(',')])],
+                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_for_max_person.split(',')])],
                     'score': cutVotes.opposition_for_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_for},
