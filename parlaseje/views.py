@@ -308,30 +308,25 @@ def getMotionGraph(request, id_se):
 def setAbsentMPs(request, id_se):
     votes = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
-    date = str(session.start_time.date())
-    date = str(date[8:10])+"."+str(date[5:7])+"."+str(date[:4])
-    mps = requests.get(API_URL+'/getMPs/'+ date).json()
+    mps = requests.get(API_URL+'/getMPs/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
 
-    onSession = []
+  
     mpsID = []
+
     if len(votes) != 0:
+        mpsID = [mpID['id'] for mpID in mps]
         for vote in votes:
-            onSession.append(vote['mp_id'])
-
-        onSession = list(set(onSession))
-
-        [mpsID.append(mpID['id'])for mpID in mps]
-
-        for mp in onSession:
-            if mp in mpsID:
-                mpsID.remove(mp)
+            if vote['option'] != 'ni':
+                if vote['mp_id'] in mpsID:
+                    mpsID.remove(vote['mp_id'])
+  
 
         result = saveOrAbortNew(model=AbsentMPs,
                                 id_parladata=id_se,
                                 absentMPs=mpsID,
                                 created_for=session.start_time
                                 )
-        onSession = []
+   
         mpsID = []
     return JsonResponse({'alliswell': True})
     
@@ -360,9 +355,7 @@ def setPresenceOfPG(request, id_se):
     votes = requests.get(API_URL+'/getVotesOfSession/'+str(id_se)+'/').json()
     motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
-    date = str(session.start_time.date())
-    date = str(date[8:10])+"."+str(date[5:7])+"."+str(date[:4])
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ date).json()
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
 
     onSession = {}
     yesdic = defaultdict(int)
@@ -417,21 +410,95 @@ def getPresenceOfPG(request, id_se, date=False):
         return JsonResponse({"status": "No card MOFO"}, safe=False)
     return JsonResponse(results, safe=False)
 
+def setSpeechesOnSession(request, date=False):
+    if date:
+        numberOfSessions = len(Session.objects.filter(start_time__lte=datetime.strptime(date, '%d.%m.%Y')))
+        mps = requests.get(API_URL+'/getMPs/'+ date).json()
+    else:
+        numberOfSessions = len(Session.objects.filter(start_time__lte=datetime.now().date()).json())
+        mps = requests.get(API_URL+'/getMPs/'+  str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
+        date = datetime.now().date()
+
+    mpsID = {}
+    for mp in mps: 
+        speech = len(requests.get(API_URL+'/getSpeechesOfMP/'+ str(mp['id'])+'/'+ date).json())
+        if numberOfSessions !=0:
+            mpsID.update({mp['id']:float(float(speech)/float(numberOfSessions))})
+    date = datetime.strptime(date, '%d.%m.%Y')
+    result = saveOrAbortNew(model=AverageSpeeches,
+                                created_for=date,
+                                speechesOnSession=mpsID
+                                )
+    return JsonResponse({'alliswell': True})
+
+
+def getMinSpeechesOnSession(request, date=False):
+    results = []
+    try:
+        if date:
+            averageSpeeches = AverageSpeeches.objects.get(created_for=datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
+            mps = requests.get(API_URL+'/getMPs/'+ date).json()
+        else:
+            averageSpeeches = AverageSpeeches.objects.get().speechesOnSession
+            mps = requests.get(API_URL+'/getMPs/'+  str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
+    
+
+
+        sort = sorted(averageSpeeches.items(), key=lambda x:x[1])
+        
+        for s in sort:
+            for mp in mps:
+                if int(s[0]) == int(mp['id']):
+                    results.append({"name": mp['name'], "image":mp['image'], "speeches":s[1]})
+    except ObjectDoesNotExist:
+        return JsonResponse({"status": "No card MOFO"}, safe=False)
+    return JsonResponse(results, safe=False)
+
+
+def getMaxSpeechesOnSession(request, date=False):
+    results = []
+    try:
+        if date:
+            averageSpeeches = AverageSpeeches.objects.get(created_for = datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
+            mps = requests.get(API_URL+'/getMPs/'+ date).json()
+        else:
+            averageSpeeches = AverageSpeeches.objects.get().speechesOnSession
+            mps = requests.get(API_URL+'/getMPs/'+ str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
+    
+
+
+        sort = sorted(averageSpeeches.items(), key=lambda x:x[1], reverse=True)
+        for s in sort:
+            for mp in mps:
+                if int(s[0]) == int(mp['id']):
+                    results.append({"name": mp['name'], "image":mp['image'], "speeches":s[1]})
+        
+    except ObjectDoesNotExist:
+        return JsonResponse({"status": "No card MOFO"}, safe=False)
+    return JsonResponse(results, safe=False)
+
+
+
 def runSetters(request, date_to):
    
     
     setters_models = {
-
-        Vote: setMotionOfSession,
-        PresenceOfPG: setPresenceOfPG,
-        AbsentMPs: setAbsentMPs   
+        #Vote: setMotionOfSession,
+        #PresenceOfPG: setPresenceOfPG,
+        AbsentMPs: setAbsentMPs,
+        AverageSpeeches: setSpeechesOnSession   
     }
     for model, setter in setters_models.items():
         dates = findDatesFromLastCard(model, None, date_to)
+        print dates
         if dates==[]:
             continue
-        IDs = getSesIDs(dates[1],dates[-1])
-
-        for ID in IDs:
-            setter(request, str(ID))       
+        if model != AverageSpeeches:
+            IDs = getSesIDs(dates[1],dates[-1])
+            for ID in IDs:
+                setter(request, str(ID))        
+        else:
+            datesSes = getSesDates(dates[-1])
+            for date in datesSes:
+                setter(request, date.strftime(API_DATE_FORMAT))
     return JsonResponse({"status": "all is fine :D"}, safe=False)
