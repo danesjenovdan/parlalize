@@ -410,40 +410,33 @@ def getPresenceOfPG(request, id_se, date=False):
         return JsonResponse({"status": "No card MOFO"}, safe=False)
     return JsonResponse(results, safe=False)
 
-def setSpeechesSnSession(request, date=False):
+def setSpeechesOnSession(request, date=False):
     if date:
         numberOfSessions = len(Session.objects.filter(start_time__lte=datetime.strptime(date, '%d.%m.%Y')))
         mps = requests.get(API_URL+'/getMPs/'+ date).json()
-        date = datetime.strptime(date, '%d.%m.%Y')
     else:
-        numberOfSessions = len(Session.objects.filter(start_time=datetime.now().date()).json())
+        numberOfSessions = len(Session.objects.filter(start_time__lte=datetime.now().date()).json())
         mps = requests.get(API_URL+'/getMPs/'+  str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
         date = datetime.now().date()
 
     mpsID = {}
-    
     for mp in mps: 
-        speech = len(requests.get(API_URL+'/getSpeechesOfMP/'+ str(mp['id'])).json())
+        speech = len(requests.get(API_URL+'/getSpeechesOfMP/'+ str(mp['id'])+'/'+ date).json())
         if numberOfSessions !=0:
             mpsID.update({mp['id']:float(float(speech)/float(numberOfSessions))})
-
-    print mpsID
+    date = datetime.strptime(date, '%d.%m.%Y')
     result = saveOrAbortNew(model=AverageSpeeches,
                                 created_for=date,
                                 speechesOnSession=mpsID
                                 )
-
-   
-
-
     return JsonResponse({'alliswell': True})
 
 
-def getMinSpeechesSnSession(request, date=False):
+def getMinSpeechesOnSession(request, date=False):
     results = []
     try:
         if date:
-            averageSpeeches = AverageSpeeches.objects.get(created_for__lte=datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
+            averageSpeeches = AverageSpeeches.objects.get(created_for=datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
             mps = requests.get(API_URL+'/getMPs/'+ date).json()
         else:
             averageSpeeches = AverageSpeeches.objects.get().speechesOnSession
@@ -455,7 +448,6 @@ def getMinSpeechesSnSession(request, date=False):
         
         for s in sort:
             for mp in mps:
-                print s[0], mp['id']
                 if int(s[0]) == int(mp['id']):
                     results.append({"name": mp['name'], "image":mp['image'], "speeches":s[1]})
     except ObjectDoesNotExist:
@@ -463,11 +455,11 @@ def getMinSpeechesSnSession(request, date=False):
     return JsonResponse(results, safe=False)
 
 
-def getMaxSpeechesSnSession(request, date=False):
+def getMaxSpeechesOnSession(request, date=False):
     results = []
     try:
         if date:
-            averageSpeeches = AverageSpeeches.objects.get(created_for__lte=datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
+            averageSpeeches = AverageSpeeches.objects.get(created_for = datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
             mps = requests.get(API_URL+'/getMPs/'+ date).json()
         else:
             averageSpeeches = AverageSpeeches.objects.get().speechesOnSession
@@ -493,18 +485,20 @@ def runSetters(request, date_to):
     setters_models = {
         #Vote: setMotionOfSession,
         #PresenceOfPG: setPresenceOfPG,
-        #AbsentMPs: setAbsentMPs,
-        AverageSpeeches: setSpeechesSnSession   
+        AbsentMPs: setAbsentMPs,
+        AverageSpeeches: setSpeechesOnSession   
     }
     for model, setter in setters_models.items():
         dates = findDatesFromLastCard(model, None, date_to)
+        print dates
         if dates==[]:
             continue
-        if model != "AverageSpeeches":
+        if model != AverageSpeeches:
             IDs = getSesIDs(dates[1],dates[-1])
-
             for ID in IDs:
-                setter(request, str(ID))
-        
-
+                setter(request, str(ID))        
+        else:
+            datesSes = getSesDates(dates[-1])
+            for date in datesSes:
+                setter(request, date.strftime(API_DATE_FORMAT))
     return JsonResponse({"status": "all is fine :D"}, safe=False)
