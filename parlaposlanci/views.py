@@ -1409,8 +1409,8 @@ def runSetters(request, date_to):
             print setter, date_to
             if membership["start_time"]:
                 print "START",membership["start_time"]
-                start_time = datetime.datetime.strptime(membership["start_time"].split("T")[0],"%Y-%m-%d")
-                dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT, start_time.strftime(API_DATE_FORMAT)))
+                start_time = datetime.strptime(membership["start_time"].split("T")[0],"%Y-%m-%d")
+                dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT), start_time.strftime(API_DATE_FORMAT))
             else:
                 dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT))
             for date in dates:
@@ -1421,9 +1421,23 @@ def runSetters(request, date_to):
                 #if setter == setMPStaticPL: # Prevent that runner doesn't waste time with ... Which doesn't change often
                 #    break;
         #setLastActivity allways runs without date
-        setLastActivity(request, str(membership["id"]))
+        #setLastActivity(request, str(membership["id"]))
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
+
+    #Runner for setters ALL
+    all_in_one_setters_models = {
+        VocabularySize: setVocabularySizeALL,
+    }
+
+    zero=datetime(day=2, month=8, year=2014).date()
+    for model, setter in all_in_one_setters_models.items():
+        print (toDate-datetime(day=2, month=8, year=2014).date()).days
+        for i in range((toDate-datetime(day=2, month=8, year=2014).date()).days):
+            print (zero+timedelta(days=i)).strftime('%d.%m.%Y')
+            setter(request, (zero+timedelta(days=i)).strftime('%d.%m.%Y'))
+
+
 
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 
