@@ -507,3 +507,16 @@ def getMPGovId(id_parladata):
     person = Person.objects.filter(id_parladata=id_parladata)[0]
     out = {"id":person.id_parladata, "gov_id":person.gov_id}
     return out
+
+
+def getPersonData(id_parladata, date_=None):
+    if not date_:
+        date_ = datetime.now().strftime(API_DATE_FORMAT)
+    data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
+    return {
+            'name': data.person.name,
+            'id': int(data.person.id_parladata),
+            'gov_id': data.gov_id,
+            'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData()
+        }
+
