@@ -24,13 +24,18 @@ urlpatterns = patterns(
     url(r'^setStyleScoresALL/', setStyleScoresALL),
 
     url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
+
+    url(r'^setAverageNumberOfSpeechesPerSessionALL/(?P<date_>[\w].+)', setAverageNumberOfSpeechesPerSessionAll),
     url(r'^setAverageNumberOfSpeechesPerSessionALL/', setAverageNumberOfSpeechesPerSessionAll),
 
     url(r'^setVocabularySize/(?P<person_id>\d+)', setVocabularySize),
+
+    url(r'^setVocabularySizeALL/(?P<date_>[\w].+)', setVocabularySizeALL),
     url(r'^setVocabularySizeALL/', setVocabularySizeALL),
 
     url(r'^setLastActivity/(?P<person_id>\d+)', setLastActivity),
 
+    url(r'^setNumberOfSpokenWordsALL/(?P<date_>[\w].+)', setNumberOfSpokenWordsALL),
     url(r'^setNumberOfSpokenWordsALL/', setNumberOfSpokenWordsALL),
 
     url(r'^setCutVotes/(?P<person_id>\d+)/(?P<date_>[\w].+)', setCutVotes),
@@ -74,7 +79,7 @@ urlpatterns = patterns(
     url(r'^getLastActivity/(?P<person_id>\d+)/(?P<date_>[\w].+)', getLastActivity),
     url(r'^getLastActivity/(?P<person_id>\d+)', getLastActivity),
 
-    url(r'^getVocabularySize/(?P<person_id>\d+)/(?P<date>[\w].+)', getVocabularySize),
+    url(r'^getVocabularySize/(?P<person_id>\d+)/(?P<date_>[\w].+)', getVocabularySize),
     url(r'^getVocabularySize/(?P<person_id>\d+)', getVocabularySize),
 
     url(r'^getCutVotes/(?P<person_id>\d+)/(?P<date>[\w].+)', getCutVotes),
