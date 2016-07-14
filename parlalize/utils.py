@@ -294,10 +294,14 @@ def updateOrganizations():
             org = Organization.objects.get(id_parladata=pg)
             org.name = data[pg]['name']
             org.classification = data[pg]['classification']
+            org.acronym = data[pg]['acronym']
+            print data[pg]['acronym']
+            org.save()
         else:
             org = Organization(name=data[pg]['name'],
                                classification=data[pg]['classification'],
-                               id_parladata=pg)
+                               id_parladata=pg,
+                               acronym=data[pg]['acronym'])
             org.save()
     return 1
 
