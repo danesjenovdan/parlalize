@@ -108,16 +108,16 @@ def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
     data = {
            'organization': card.organization.getOrganiaztionData(),
            "sessions":{
-                'organization_value':card.organization_value_sessions,
-                'maxPG':card.maxPG_sessions,
-                'average':card.average_sessions,
-                'maximum':card.maximum_sessions,
+                'organization_value': card.organization_value_sessions,
+                'maxPG': [Organization.objects.get(id_parladata=pg).getOrganiaztionData() for pg in card.maxPG_sessions],
+                'average': card.average_sessions,
+                'maximum': card.maximum_sessions,
                 },
             "votes":{
-                'organization_value':card.organization_value_votes,
-                'maxPG':card.maxPG_votes,
-                'average':card.average_votes,
-                'maximum':card.maximum_votes,
+                'organization_value': card.organization_value_votes,
+                'maxPG': [Organization.objects.get(id_parladata=pg).getOrganiaztionData() for pg in card.maxPG_votes],
+                'average': card.average_votes,
+                'maximum': card.maximum_votes,
                 }
            }
 
@@ -626,9 +626,10 @@ def runSetters(request, date_to):
     setters_models = {
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
         CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
-        DeviationInOrganization: setDeviationInOrg,
-        LessMatchingThem: setLessMatchingThem,
-        MostMatchingThem: setMostMatchingThem
+        #DeviationInOrganization: setDeviationInOrg,
+        #LessMatchingThem: setLessMatchingThem,
+        #MostMatchingThem: setMostMatchingThem
+
     }
 
     IDs = getPGIDs()
@@ -654,10 +655,12 @@ def runSetters(request, date_to):
 def runSetters(date_to):
     setters_models = {
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
-        CutVotes: "/setCutVotes/",#BASE_URL+'/p/setCutVotes/',
-        DeviationInOrganization: "/setDeviationInOrg/",
-        LessMatchingThem: "/setLessMatchingThem/",
-        MostMatchingThem: "/setMostMatchingThem/"
+        #CutVotes: "/setCutVotes/",#BASE_URL+'/p/setCutVotes/',
+        #DeviationInOrganization: "/setDeviationInOrg/",
+        #LessMatchingThem: "/setLessMatchingThem/",
+        #MostMatchingThem: "/setMostMatchingThem/",
+        PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
+
     }
 
     IDs = getPGIDs()
