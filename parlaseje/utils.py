@@ -6,7 +6,7 @@ import requests
 from parlalize.utils import saveOrAbortNew
 from parlaposlanci.models import Person, LastActivity
 from parlaskupine.models import Organization
-from parlaseje.models import Session, Vote, Speech, Session, Ballot, Vote_graph, Vote, AbsentMPs
+from parlaseje.models import *
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT
 import requests
 
@@ -133,6 +133,13 @@ def getSesIDs(start_date, end_date):
 		result.append(ids.id_parladata)
 	return result
 
+def getSesDates(end_date):
+	result = []
+	data = requests.get(API_URL + '/getSessions/').json()
+	session = Session.objects.filter(start_time__lte=end_date)
+	for ids in session:
+		result.append(ids.start_time)
+	return result
 
 def getSesCardModelNew(model, id, date=None):
     if date:
