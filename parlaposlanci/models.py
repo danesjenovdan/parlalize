@@ -110,6 +110,11 @@ class SpokenWords(Timestampable, models.Model): #Card for spoken words of MP on 
                                related_name='childrenSW',
                                help_text=_('MP'))
 
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
     score = models.IntegerField(_('SW of this MP'),
                                    blank=True, null=True,
                                    help_text=_('SW of this MP'))
@@ -393,7 +398,12 @@ class NumberOfSpeechesPerSession(Timestampable, models.Model): #Card for Average
                                related_name='speaker',
                                help_text=_('MP'))
 
-    person_value = models.IntegerField(_('Number of speeches of this MP'),
+    created_for = models.DateField(_('date of activity'),
+                               blank=True,
+                               null=True,
+                               help_text=_('date of analize'))
+
+    person_value = models.FloatField(_('Number of speeches of this MP'),
                                    blank=True, null=True,
                                    help_text=_('Number of speeches of this MP'))
 
@@ -402,11 +412,11 @@ class NumberOfSpeechesPerSession(Timestampable, models.Model): #Card for Average
                                related_name='childrenNOSPS',
                                help_text=_('Person who has max speeches per session'))
 
-    average = models.IntegerField(_('average'),
+    average = models.FloatField(_('average'),
                                    blank=True, null=True,
                                    help_text=_('Average of MP speeches per session'))
 
-    maximum = models.IntegerField(_('max'),
+    maximum = models.FloatField(_('max'),
                                    blank=True, null=True,
                                    help_text=_('Max of MP speeches per session'))
 
@@ -415,6 +425,11 @@ class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of
                                blank=True, null=True,
                                related_name='childrenVS',
                                help_text=_('MP'))
+
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
 
     score = models.IntegerField(_('Vacabularty size of this MP'),
                                    blank=True, null=True,
@@ -477,6 +492,11 @@ class AverageNumberOfSpeechesPerSession(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                help_text=_('MP'))
+
+    created_for = models.DateField(_('date of analize'),
+                               blank=True,
+                               null=True,
+                               help_text=_('date of activity'))
 
     score = models.FloatField(blank=True, null=True, help_text=_('MP score'))
 
