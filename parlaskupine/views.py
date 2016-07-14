@@ -106,10 +106,7 @@ def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
 
     # uprasi ce isto kot pri personu razdelimo
     data = {
-           'organization': {
-                'name': card.organization.name,
-                'id': card.organization.id
-                },
+           'organization': card.organization.getOrganiaztionData(),
            "sessions":{
                 'organization_value':card.organization_value_sessions,
                 'maxPG':card.maxPG_sessions,
@@ -326,10 +323,7 @@ def getMostMatchingThem(request, pg_id, date_=None):
     if not date_:
         date_=""
     out = {
-        'organization': {
-            'name': Organization.objects.get(id_parladata=int(pg_id)).name,
-            'id': int(pg_id)
-        },
+        'organization': Organization.objects.get(id_parladata=int(pg_id)).getOrganiaztionData(),
         'results': [
             {
                 "ratio": mostMatching.votes1,
@@ -362,10 +356,7 @@ def getLessMatchingThem(request, pg_id, date_=None):
     if not date_:
         date_=""
     out = {
-        'organization': {
-            'name': Organization.objects.get(id_parladata=int(pg_id)).name,
-            'id': int(pg_id)
-        },
+        'organization': Organization.objects.get(id_parladata=int(pg_id)).getOrganiaztionData(),
         'results': [
             {
                 "ratio": mostMatching.votes1,
@@ -397,10 +388,7 @@ def getDeviationInOrg(request, pg_id, date_=None):
     if not date_:
         date_=""
     out = {
-        'organization': {
-            'name': Organization.objects.get(id_parladata=int(pg_id)).name,
-            'id': int(pg_id)
-        },
+        'organization': Organization.objects.get(id_parladata=int(pg_id)).getOrganiaztionData(),
         'results': [
             {
                 "ratio": mostMatching.votes1,
@@ -562,21 +550,18 @@ def setCutVotes(request, pg_id, date_=None):
 
 def getCutVotes(request, pg_id, date=None):
     cutVotes = getPGCardModelNew(CutVotes, pg_id, date)
-
+    this_org = Organization.objects.get(id_parladata=int(pg_id))
     out = {
-        'organization': {
-            'id': int(pg_id),
-            'name': Organization.objects.get(id_parladata=int(pg_id)).name
-        },
+        'organization': this_org.getOrganiaztionData(),
         'results': {
             'abstain': {
                 'score': cutVotes.this_abstain,
                 'maxCoalition': {
-                    'mps': [{'name': org.name, 'id': org.id_parladata} for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_abstain_max_org.split(',')])],
+                    'mps': [org.getOrganiaztionData() for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_abstain_max_org.split(',')])],
                     'score': cutVotes.coalition_abstain_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': org.name, 'id': org.id_parladata} for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_abstain_max_org.split(',')])],
+                    'mps': [org.getOrganiaztionData() for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_abstain_max_org.split(',')])],
                     'score': cutVotes.opposition_abstain_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_abstain},
@@ -585,11 +570,11 @@ def getCutVotes(request, pg_id, date=None):
             "against": {
                 'score': cutVotes.this_against,
                 'maxCoalition': {
-                    'mps': [{'name': org.name, 'id': org.id_parladata} for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_against_max_org.split(',')])],
+                    'mps': [org.getOrganiaztionData()for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_against_max_org.split(',')])],
                     'score': cutVotes.coalition_against_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': org.name, 'id': org.id_parladata} for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_against_max_org.split(',')])],
+                    'mps': [org.getOrganiaztionData() for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_against_max_org.split(',')])],
                     'score': cutVotes.opposition_against_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_against},
@@ -598,11 +583,11 @@ def getCutVotes(request, pg_id, date=None):
             "absent": {
                 'score': cutVotes.this_absent,
                 'maxCoalition': {
-                    'mps': [{'name': org.name, 'id': org.id_parladata} for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_absent_max_org.split(',')])],
+                    'mps': [org.getOrganiaztionData() for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_absent_max_org.split(',')])],
                     'score': cutVotes.coalition_absent_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': org.name, 'id': org.id_parladata} for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_absent_max_org.split(',')])],
+                    'mps': [org.getOrganiaztionData() for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_absent_max_org.split(',')])],
                     'score': cutVotes.opposition_absent_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_absent},
@@ -611,11 +596,11 @@ def getCutVotes(request, pg_id, date=None):
             'for': {
                 'score': cutVotes.this_for,
                 'maxCoalition': {
-                    'mps': [{'name': org.name, 'id': org.id_parladata} for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_for_max_org.split(',')])],
+                    'mps': [org.getOrganiaztionData() for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_for_max_org.split(',')])],
                     'score': cutVotes.coalition_for_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': org.name, 'id': org.id_parladata} for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_for_max_org.split(',')])],
+                    'mps': [org.getOrganiaztionData() for org in Organization.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_for_max_org.split(',')])],
                     'score': cutVotes.opposition_for_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_for},
