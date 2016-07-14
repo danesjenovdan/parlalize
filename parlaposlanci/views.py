@@ -1399,7 +1399,7 @@ def runSetters(request, date_to):
     curentId = 0
     for membership in memberships:
         if membership["end_time"]:
-            end_time = datetime.strptime(membership["end_time"].split("T")[0],"%Y-%m-%d")
+            end_time = datetime.strptime(membership["end_time"].split("T")[0],"%Y-%m-%d").date()
             if end_time>toDate:
                 end_time=toDate
         else:
