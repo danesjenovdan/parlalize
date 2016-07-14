@@ -431,7 +431,7 @@ class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of
                                    null=True,
                                    help_text=_('date of analize'))
 
-    score = models.IntegerField(_('Vacabularty size of this MP'),
+    score = models.FloatField(_('Vacabularty size of this MP'),
                                    blank=True, null=True,
                                    help_text=_('Vacabularty size of this MP'))
 
@@ -440,11 +440,11 @@ class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of
                                related_name='childrenVacSiz',
                                help_text=_('Person who has max vacabularty size'))
 
-    average = models.IntegerField(_('average'),
+    average = models.FloatField(_('average'),
                                    blank=True, null=True,
                                    help_text=_('Vacabularty size of MP'))
 
-    maximum = models.IntegerField(_('max'),
+    maximum = models.FloatField(_('max'),
                                    blank=True, null=True,
                                    help_text=_('Max of MP vacabularty size '))
 
