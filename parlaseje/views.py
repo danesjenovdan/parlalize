@@ -339,14 +339,14 @@ def getAbsentMPs(request, id_se, date=False):
             ids = AbsentMPs.objects.get(id_parladata=int(id_se)).absentMPs
 
         mps = requests.get(API_URL+'/getMPs/').json()
-        result ={}
-        results = {}
+        
+        results = []
         
         for abMP in ids:
             for mp in mps:
                 if str(mp['id']) == str(abMP):
-                    result = {'name':mp['name'], 'acronym':mp['acronym'], 'image':mp['image']}
-                    results[mp['id']]= result
+                    results.append({"id":mp['id'], "gov_id":mp['gov_id'],'name':mp['name'], 'acronym':mp['acronym'], 'image':mp['image']})
+                    
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
     return JsonResponse(results, safe=False)
@@ -405,7 +405,7 @@ def getPresenceOfPG(request, id_se, date=False):
             presence = PresenceOfPG.objects.get(id_parladata=id_se)
         
             for p in presence.presence[0]:
-                results.append({"name":Organization.objects.get(id_parladata=p).name, "percent":presence.presence[0][p]})
+                results.append({"id":Organization.objects.get(id_parladata=p).id_parladata, "name":Organization.objects.get(id_parladata=p).name, "percent":presence.presence[0][p], "acronym":Organization.objects.get(id_parladata=p).acronym})
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
     return JsonResponse(results, safe=False)
@@ -449,7 +449,7 @@ def getMinSpeechesOnSession(request, date=False):
         for s in sort:
             for mp in mps:
                 if int(s[0]) == int(mp['id']):
-                    results.append({"name": mp['name'], "image":mp['image'], "speeches":s[1]})
+                    results.append({"id":mp['id'], "gov_id":mp['gov_id'], "name": mp['name'], "image":mp['image'], "speeches":s[1]})
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
     return JsonResponse(results, safe=False)
@@ -471,7 +471,7 @@ def getMaxSpeechesOnSession(request, date=False):
         for s in sort:
             for mp in mps:
                 if int(s[0]) == int(mp['id']):
-                    results.append({"name": mp['name'], "image":mp['image'], "speeches":s[1]})
+                    results.append({"id":mp['id'], "gov_id":mp['gov_id'], "name": mp['name'], "image":mp['image'], "speeches":s[1]})
         
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
@@ -484,7 +484,7 @@ def runSetters(request, date_to):
     
     setters_models = {
         #Vote: setMotionOfSession,
-        #PresenceOfPG: setPresenceOfPG,
+        PresenceOfPG: setPresenceOfPG,
         AbsentMPs: setAbsentMPs,
         AverageSpeeches: setSpeechesOnSession   
     }
