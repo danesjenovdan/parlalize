@@ -80,16 +80,7 @@ def getMPStaticPL(request, person_id, date_=None):
 
     data = {
         'date_of_card':card.created_for.strftime(API_DATE_FORMAT),
-        'person': {
-            'name': card.person.name,
-            'id': int(person_id),
-            'gov_id': card.gov_id,
-            'party': {
-                'id': card.party_id,
-                'acronym': card.acronym,
-                'name': card.party_name
-            }
-        },
+        'person': getPersonData(person_id, date_),
         'results': {
             'voters': card.voters,
             'age': card.age,
@@ -118,12 +109,12 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     data = requests.get(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
     thisMP = data["sessions"][person_id]
     maximum = max(data["sessions"].values())
-    maximumMP = [getMPGovId(pId) for pId in data["sessions"] if data["sessions"][pId]==maximum]
+    maximumMP = [pId for pId in data["sessions"] if data["sessions"][pId]==maximum]
     average = sum(data["sessions"].values()) / len(data["sessions"])
 
     thisMPVotes = data["votes"][person_id]
     maximumVotes = max(data["votes"].values())
-    maximumMPVotes = [getMPGovId(pId) for pId in data["votes"] if data["votes"][pId]==maximumVotes]
+    maximumMPVotes = [pId for pId in data["votes"] if data["votes"][pId]==maximumVotes]
     averageVotes = sum(data["votes"].values()) / len(data["votes"])
 
     result = saveOrAbortNew(model=Presence, 
@@ -144,16 +135,13 @@ def getPercentOFAttendedSession(request, person_id, date=None):
     equalVoters = getPersonCardModelNew(Presence, person_id, date)
 
     out  = {
-        'person': {
-            "name": equalVoters.person.name,
-            "id": equalVoters.person.id_parladata,
-        },
+        'person': getPersonData(person_id, date),
         'results': {
             "sessions":{
                 "value": equalVoters.person_value_sessions,
                 "average": equalVoters.average_sessions,
                 "max": {
-                    "ids": equalVoters.maxMP_sessions,
+                    "ids": [getPersonData(person, date) for person in equalVoters.maxMP_sessions],
                     "value": equalVoters.maximum_sessions,
                 }
             },
@@ -161,7 +149,7 @@ def getPercentOFAttendedSession(request, person_id, date=None):
                 "value": equalVoters.person_value_votes,
                 "average": equalVoters.average_votes,
                 "max": {
-                    "ids": equalVoters.maxMP_votes,
+                    "ids": [getPersonData(person, date) for person in equalVoters.maxMP_votes],
                     "value": equalVoters.maximum_votes,
                 }
             }
@@ -217,10 +205,7 @@ def getNumberOfSpokenWords(request, person_id, date=None):
     card = getPersonCardModelNew(SpokenWords, person_id, date)
 
     results = {
-        'person': {
-            'id': int(person_id),
-            'name': Person.objects.get(id_parladata=int(person_id)).name
-        },
+        'person': getPersonData(person_id, date),
         'results': {
             'score': card.score,
             'average': card.average,
@@ -320,16 +305,7 @@ def getLastActivity(request, person_id, date_=None):
 
     result = {
         'date_of_card':lastDay,
-        'person': {
-            'name': static.person.name,
-            'id': int(person_id),
-            'gov_id': static.gov_id,
-            'party': {
-                'id': static.party_id,
-                'acronym': static.acronym,
-                'name': static.party_name
-            }
-        },
+        'person': getPersonData(person_id, date_),
         'results': out
         }
     return JsonResponse(result, safe=False)
@@ -355,10 +331,7 @@ def getAllSpeeches(request, person_id, date_=None):
 
 
     result  = {
-        'person': {
-            "name": Person.objects.get(id_parladata=person_id).name,
-            "id": person_id,
-        },
+        'person': getPersonData(person_id, date_),
         'results': out
         }
     return JsonResponse(result, safe=False)
@@ -419,10 +392,7 @@ def getMostEqualVoters(request, person_id, date_=None):
 
     out = {
         'date_of_card':equalVoters.created_for.strftime(API_DATE_FORMAT),
-        'person': {
-            'name': Person.objects.get(id_parladata=int(person_id)).name,
-            'id': int(person_id)
-        },
+        'person': getPersonData(person_id, date_),
         'results': [
             {
                 "ratio": equalVoters.votes1,
@@ -494,10 +464,7 @@ def getLessEqualVoters(request, person_id, date_=None):
     equalVoters = getPersonCardModelNew(LessEqualVoters, person_id, date_)
     out = {
         'date_of_card':equalVoters.created_for.strftime(API_DATE_FORMAT),
-        'person': {
-            'name': Person.objects.get(id_parladata=int(person_id)).name,
-            'id': int(person_id)
-        },
+        'person': getPersonData(person_id, date_),
         'results': [
             {
                 "ratio": equalVoters.votes1,
@@ -765,16 +732,7 @@ def getCutVotes(request, person_id, date=None):
     static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
-        'person': {
-            'name': static.person.name,
-            'id': int(person_id),
-            'gov_id': static.gov_id,
-            'party': {
-                'id': static.party_id,
-                'acronym': static.acronym,
-                'name': static.party_name
-            }
-        },
+        'person': getPersonData(person_id, date),
         'results': {
             'abstain': {
                 'score': cutVotes.this_abstain,
@@ -984,19 +942,9 @@ def setStyleScores(request, person_id):
 
 def getStyleScores(request, person_id, date=None):
     card = getPersonCardModel(StyleScores, int(person_id), date)
-    static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
-        'person': {
-            'name': static.person.name,
-            'id': int(person_id),
-            'gov_id': static.gov_id,
-            'party': {
-                'id': static.party_id,
-                'acronym': static.acronym,
-                'name': static.party_name
-            }
-        },
+        'person': getPersonData(person_id, date),
         'results': {
             'privzdignjeno': card.privzdignjeno,
             'problematicno': card.problematicno,
@@ -1116,10 +1064,7 @@ def getTFIDF(request, person_id, date=None):
     card = getPersonCardModel(Tfidf, int(person_id), date)
 
     out = {
-        'person': {
-            'name': Person.objects.get(id_parladata=int(person_id)).name,
-            'id': int(person_id)
-        },
+        'person': getPersonData(person_id, date),
         'results': card.data
     }
 
@@ -1129,7 +1074,7 @@ def setVocabularySizeALL(request, date_):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+        date_of = datetime.now().date()
         date_=""
 
 #    thisperson = Person.objects.get(id_parladata=int(person_id))
@@ -1186,7 +1131,7 @@ def setVocabularySize(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+        date_of = findDatesFromLastCard(VocabularySize, person_id, datetime.now().strftime(API_DATE_FORMAT))[0]
         date_=""
 
     thisperson = Person.objects.get(id_parladata=int(person_id))
@@ -1246,10 +1191,7 @@ def getVocabularySize(request, person_id, date_=None):
     card = getPersonCardModelNew(VocabularySize, person_id, date_)
 
     out = {
-        'person': {
-            'name': Person.objects.get(id_parladata=int(person_id)).name,
-            'id': int(person_id)
-        },
+        'person': getPersonData(person_id, date_),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -1342,19 +1284,10 @@ def setAverageNumberOfSpeechesPerSessionAll(request, date_=None):
 def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
     card = getPersonCardModelNew(AverageNumberOfSpeechesPerSession, person_id, date)
-    static = getPersonCardModelNew(MPStaticPL, person_id, date)
+    #static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
-        'person': {
-            'name': static.person.name,
-            'id': int(person_id),
-            'gov_id': static.gov_id,
-            'party': {
-                'id': static.party_id,
-                'acronym': static.acronym,
-                'name': static.party_name
-            }
-        },
+        'person': getPersonData(person_id, date),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -1480,15 +1413,7 @@ def getTaggedBallots(request, person_id, date=None):
     static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
-        'person': {
-            'name': static.person.name,
-            'id': int(person_id),
-            'party': {
-                'id': static.party_id,
-                'acronym': static.acronym,
-                'name': static.party_name
-            }
-        },
+        'person': getPersonData(person_id, date),
         'ballots': card.data
     }
 
@@ -1517,15 +1442,7 @@ def getMembershipsOfMember(request, person_id, date=None):
     static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
-        'person': {
-            'name': static.person.name,
-            'id': int(person_id),
-            'party': {
-                'id': static.party_id,
-                'acronym': static.acronym,
-                'name': static.party_name
-            }
-        },
+        'person': getPersonData(person_id, date),
         'memberships': card.data
     }
 
