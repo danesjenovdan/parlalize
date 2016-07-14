@@ -24,13 +24,31 @@ class Organization(Timestampable, models.Model):
                             help_text=_('A primary name, e.g. a legally recognized name'))
 
     id_parladata = models.IntegerField(_('parladata id'),
-                            blank=True, null=True,help_text=_('id parladata'))
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))
 
-    classification = models.TextField(_('Classification'), blank=True, null=True, help_text=_('Organization calssification.'))
+    classification = models.TextField(_('Classification'),
+                                      blank=True,
+                                      null=True,
+                                      help_text=_('Organization calssification.'))
+
+    acronym = models.CharField(_('acronym'),
+                               blank = True,
+                               null = True,
+                               max_length = 128,
+                               help_text=_('Organization acronym'))
 
 
     def __str__(self):
         return self.name
+
+    def getOrganiaztionData(self):
+        return {
+                  'id': self.id_parladata,
+                  'name': self.name,
+                  'acronym': self.acronym,
+               }
 
 class PGStatic(Timestampable, models.Model):
     organization = models.ForeignKey('Organization', 
