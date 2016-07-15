@@ -43,7 +43,7 @@ class Organization(Timestampable, models.Model):
     def __str__(self):
         return self.name
 
-    def getOrganiaztionData(self):
+    def getOrganizationData(self):
         return {
                   'id': self.id_parladata,
                   'name': self.name,
