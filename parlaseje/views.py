@@ -459,7 +459,19 @@ def getMinSpeechesOnSession(request, date=False):
         for s in sort:
             for mp in mps:
                 if int(s[0]) == int(mp['id']):
-                    results.append({"id":mp['id'], "gov_id":mp['gov_id'], "name": mp['name'], "image":mp['image'], "speeches":s[1]})
+                    result = {
+                        'party': {
+                            'acronym': mp['acronym'],
+                            'id': mp['party_id'],
+                            'name': mp['membership']
+                        },
+                        'name': mp['name'],
+                        'gov_id': mp['gov_id'],
+                        'id': mp['id'],
+                        'speeches': s[1]
+                    }
+                    results.append(result)
+
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
     return JsonResponse(results, safe=False)
