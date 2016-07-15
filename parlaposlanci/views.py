@@ -396,38 +396,23 @@ def getMostEqualVoters(request, person_id, date_=None):
         'results': [
             {
                 "ratio": equalVoters.votes1,
-                "id": equalVoters.person1.id_parladata,
-                "name": equalVoters.person1.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person1.id_parladata)).json(),
-                "gov_id": equalVoters.person1.gov_id
+                "person": getPersonData(equalVoters.person1.id_parladata, date_),
             },
             {
                 "ratio": equalVoters.votes2,
-                "id": equalVoters.person2.id_parladata,
-                "name": equalVoters.person2.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person2.id_parladata) + '/').json(),
-                "gov_id": equalVoters.person2.gov_id
+                "person": getPersonData(equalVoters.person2.id_parladata, date_),
             },
             {
                 "ratio": equalVoters.votes3,
-                "id": equalVoters.person3.id_parladata,
-                "name": equalVoters.person3.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person3.id_parladata) + '/').json(),
-                "gov_id": equalVoters.person3.gov_id
+                "person": getPersonData(equalVoters.person3.id_parladata, date_),
             },
             {
                 "ratio": equalVoters.votes4,
-                "id": equalVoters.person4.id_parladata,
-                "name": equalVoters.person4.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person4.id_parladata) + '/').json(),
-                "gov_id": equalVoters.person4.gov_id
+                "person": getPersonData(equalVoters.person4.id_parladata, date_),
             },
             {
                 "ratio": equalVoters.votes5,
-                "id": equalVoters.person5.id_parladata,
-                "name": equalVoters.person5.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person5.id_parladata) + '/').json(),
-                "gov_id": equalVoters.person5.gov_id
+                "person": getPersonData(equalVoters.person5.id_parladata, date_),
             }
         ]
     }
@@ -468,38 +453,23 @@ def getLessEqualVoters(request, person_id, date_=None):
         'results': [
             {
                 "ratio": equalVoters.votes1,
-                "id": equalVoters.person1.id_parladata,
-                "name": equalVoters.person1.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person1.id_parladata)).json(),
-                "gov_id": equalVoters.person1.gov_id
+                "person": getPersonData(equalVoters.person1.id_parladata, date_),
             },
             {
                 "ratio": equalVoters.votes2,
-                "id": equalVoters.person2.id_parladata,
-                "name": equalVoters.person2.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person2.id_parladata) + '/').json(),
-                "gov_id": equalVoters.person2.gov_id
+                "person": getPersonData(equalVoters.person2.id_parladata, date_),
             },
             {
                 "ratio": equalVoters.votes3,
-                "id": equalVoters.person3.id_parladata,
-                "name": equalVoters.person3.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person3.id_parladata) + '/').json(),
-                "gov_id": equalVoters.person3.gov_id
+                "person": getPersonData(equalVoters.person3.id_parladata, date_),
             },
             {
                 "ratio": equalVoters.votes4,
-                "id": equalVoters.person4.id_parladata,
-                "name": equalVoters.person4.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person4.id_parladata) + '/').json(),
-                "gov_id": equalVoters.person4.gov_id
+                "person": getPersonData(equalVoters.person4.id_parladata, date_),
             },
             {
                 "ratio": equalVoters.votes5,
-                "id": equalVoters.person5.id_parladata,
-                "name": equalVoters.person5.name,
-                "party": requests.get(API_URL+'/getMPParty/' + str(equalVoters.person5.id_parladata) + '/').json(),
-                "gov_id": equalVoters.person5.gov_id
+                "person": getPersonData(equalVoters.person5.id_parladata, date_),
             }
         ]
     }
@@ -737,11 +707,11 @@ def getCutVotes(request, person_id, date=None):
             'abstain': {
                 'score': cutVotes.this_abstain,
                 'maxCoalition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_abstain_max_person.split(',')])],
+                    'mps': [getPersonData(person_id, date) for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_abstain_max_person.split(',')])],
                     'score': cutVotes.coalition_abstain_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_abstain_max_person.split(',')])],
+                    'mps': [getPersonData(person_id, date) for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_abstain_max_person.split(',')])],
                     'score': cutVotes.opposition_abstain_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_abstain},
@@ -750,11 +720,11 @@ def getCutVotes(request, person_id, date=None):
             "against": {
                 'score': cutVotes.this_against,
                 'maxCoalition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_against_max_person.split(',')])],
+                    'mps': [getPersonData(person_id, date) for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_against_max_person.split(',')])],
                     'score': cutVotes.coalition_against_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_against_max_person.split(',')])],
+                    'mps': [getPersonData(person_id, date) for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_against_max_person.split(',')])],
                     'score': cutVotes.opposition_against_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_against},
@@ -763,11 +733,11 @@ def getCutVotes(request, person_id, date=None):
             "absent": {
                 'score': cutVotes.this_absent,
                 'maxCoalition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_absent_max_person.split(',')])],
+                    'mps': [getPersonData(person_id, date) for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_absent_max_person.split(',')])],
                     'score': cutVotes.coalition_absent_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_absent_max_person.split(',')])],
+                    'mps': [getPersonData(person_id, date) for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_absent_max_person.split(',')])],
                     'score': cutVotes.opposition_absent_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_absent},
@@ -776,11 +746,11 @@ def getCutVotes(request, person_id, date=None):
             'for': {
                 'score': cutVotes.this_for,
                 'maxCoalition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_for_max_person.split(',')])],
+                    'mps': [getPersonData(person_id, date) for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.coalition_for_max_person.split(',')])],
                     'score': cutVotes.coalition_for_max
                 },
                 'maxOpposition': {
-                    'mps': [{'name': person.name, 'id': person.id_parladata, 'gov_id': person.gov_id} for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_for_max_person.split(',')])],
+                    'mps': [getPersonData(person_id, date) for person in Person.objects.filter(id_parladata__in=[int(textid) for textid in cutVotes.opposition_for_max_person.split(',')])],
                     'score': cutVotes.opposition_for_max
                 },
                 "avgOpposition": {'score': cutVotes.opposition_for},
