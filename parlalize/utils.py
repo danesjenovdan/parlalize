@@ -6,7 +6,7 @@ import requests
 from parlaposlanci.models import Person, LastActivity, MPStaticPL
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Vote, Speech, Session, Ballot
-from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT
+from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT, DEBUG
 import requests
 import json
 import numpy as np
@@ -195,7 +195,10 @@ def getPersonCardModelNew(model, id, date=None):
     if not modelObject:
         #if model == LastActivity:
             #return None
-        raise Http404("Nismo našli kartice")
+        if DEBUG:
+            raise Http404("Nismo našli kartice"+ str(model)+str(id))
+        else:
+            raise Http404("Nismo našli kartice")
     else:
         if model == LastActivity:
             latest_day = modelObject.latest('created_for').created_for
