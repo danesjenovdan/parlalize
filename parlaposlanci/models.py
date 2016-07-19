@@ -66,7 +66,7 @@ class Presence(Timestampable, models.Model): #Card for presence of MP on session
                                    null=True,
                                    help_text=_('date of analize'))
 
-    person_value_sessions = models.IntegerField(_('Presence of this MP'),
+    person_value_sessions = models.FloatField(_('Presence of this MP'),
                                                 blank=True, null=True,
                                                 help_text=_('Presence of this MP'))
 
@@ -75,16 +75,16 @@ class Presence(Timestampable, models.Model): #Card for presence of MP on session
                                       help_text=_('Person who has max presence of sessions'))
 
 
-    average_sessions = models.IntegerField(_('average'),
+    average_sessions = models.FloatField(_('average'),
                                            blank=True, null=True,
                                            help_text=_('Average of MP attended sessions'))
 
-    maximum_sessions = models.IntegerField(_('max'),
+    maximum_sessions = models.FloatField(_('max'),
                                            blank=True, null=True,
                                            help_text=_('Max of MP attended sessions'))
 
 
-    person_value_votes = models.IntegerField(_('Presence of this MP'),
+    person_value_votes = models.FloatField(_('Presence of this MP'),
                                              blank=True, null=True,
                                              help_text=_('Presence of this MP'))
 
@@ -93,11 +93,11 @@ class Presence(Timestampable, models.Model): #Card for presence of MP on session
                                    help_text=_('Person who has max presence of sessions'))
 
 
-    average_votes = models.IntegerField(_('average'),
+    average_votes = models.FloatField(_('average'),
                                         blank=True, null=True,
                                         help_text=_('Average of MP attended sessions'))
 
-    maximum_votes = models.IntegerField(_('max'),
+    maximum_votes = models.FloatField(_('max'),
                                         blank=True, null=True,
                                         help_text=_('Max of MP attended sessions'))
 
