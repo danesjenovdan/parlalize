@@ -1165,7 +1165,7 @@ def getVocabularySize(request, person_id, date_=None):
         'results': {
             'max': {
                 'score': card.maximum,
-                'id': card.maxMP.id_parladata
+                'mps': [getPersonData(card.maxMP.id_parladata, date_)]
             },
             'average': card.average,
             'score': card.score
