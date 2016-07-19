@@ -138,19 +138,19 @@ def getPercentOFAttendedSession(request, person_id, date=None):
         'person': getPersonData(person_id, date),
         'results': {
             "sessions":{
-                "value": equalVoters.person_value_sessions,
+                "score": equalVoters.person_value_sessions,
                 "average": equalVoters.average_sessions,
                 "max": {
                     "mps": [getPersonData(person, date) for person in equalVoters.maxMP_sessions],
-                    "value": equalVoters.maximum_sessions,
+                    "score": equalVoters.maximum_sessions,
                 }
             },
             "votes": {
-                "value": equalVoters.person_value_votes,
+                "score": equalVoters.person_value_votes,
                 "average": equalVoters.average_votes,
                 "max": {
                     "mps": [getPersonData(person, date) for person in equalVoters.maxMP_votes],
-                    "value": equalVoters.maximum_votes,
+                    "score": equalVoters.maximum_votes,
                 }
             }
         }
