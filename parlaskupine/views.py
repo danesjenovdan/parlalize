@@ -165,8 +165,8 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     for pgMembersRange in membersOfPGRanges:
         startTime = datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT)
         endTime = datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT)
-        speeches = [[speech for speech in Speech.objects.filter(person__id_parladata__in = pgMembersRange["members"][pg_id], start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in Speech.objects.filter(start_time__lte=endTime, start_time__gte=startTime, person__id_parladata__in = pgMembersRange["members"][pg_id]).order_by("start_time").datetimes('start_time', 'day')]
-        for day in speeches:
+        speeches = [[speech for speech in Speech.objects.filter(person__id_parladata__in = pgMembersRange["members"][pg_id], start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in Speech.objects.filter(start_time__lte=endTime, start_time__gte=startTime, person__id_parladata__in = pgMembersRange["members"][pg_id]).datetimes('start_time', 'day')]
+        for day in reversed(speeches):
             dayData = {"date": str(day[0].start_time.date()), "sessions":[]}
             addedPersons = []
             addedSessions = []
