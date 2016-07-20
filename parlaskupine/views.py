@@ -176,16 +176,15 @@ def getSpeechesOfPG(request, pg_id, date_=False):
                 print speech.person.id_parladata, speech.session.id_parladata
                 if speech.session.id_parladata in addedSessions:
                     if speech.person.id_parladata in addedPersons:
-                        dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"][addedPersons.index(speech.person.id_parladata)]["speeches"].append({"speech_id": speech.id_parladata})
+                        dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"][addedPersons.index(speech.person.id_parladata)]["speeches"].append(speech.id_parladata)
                     else:
                         addedPersons.append(speech.person.id_parladata)
-                        dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"].append({"speeches":[{"speech_id": speech.id_parladata,
-                                                             }],
+                        dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"].append({"speeches":[speech.id_parladata],
                                                 "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))})
                 else:
                     addedSessions.append(speech.session.id_parladata)
                     addedPersons.append(speech.person.id_parladata)
-                    dayData["sessions"].append({"session_name": speech.session.name,"session_id": speech.session.id_parladata, "speakers":[{"speeches":[{"speech_id": speech.id_parladata}],
+                    dayData["sessions"].append({"session_name": speech.session.name,"session_id": speech.session.id_parladata, "speakers":[{"speeches":[speech.id_parladata],
                                                 "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))}]})
             out.append(dayData)
 
