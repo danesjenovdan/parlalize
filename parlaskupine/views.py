@@ -154,28 +154,45 @@ def getMPsOfPG(request, pg_id):
 
 
 def getSpeechesOfPG(request, pg_id, date_=False):
-  if date_:
-    allSessions = Session.objects.filter(start_time__lte=datetime.strptime(date_, '%d.%m.%Y').date())
-  else:
-    allSessions = Session.objects.all()
-  results = list()
-  mp = dict()
-  speec = list()
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_ = ""
 
-  for session in allSessions:
-    if Activity.objects.filter(session_id=session.id):
-      allSpeeches = Speech.objects.filter(session_id=session.id, organization = pg_id)
-      for speech in allSpeeches:
-        if speech.person_id in mp:
-          mp[speech.person_id]['speech'].append(speech.id)
-        else:
-          mp.update({speech.person_id:{'name':Person.objects.get(id=speech.person_id).name,'image':Person.objects.get(id=speech.person_id).image, 'speech':list([speech.id])}})
-      results.append({'session':session.name,'time':session.start_time, 'mps':mp})
-      mp={}
-      speec = []
-  return JsonResponse(results, safe=False)
- #cutVotes
- #getSpeechesOfMP
+    membersOfPGRanges = reversed(requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+date_) if date_ else "").json())
+    out = []
+    for pgMembersRange in membersOfPGRanges:
+        startTime = datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT)
+        endTime = datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT)
+        speeches = [[speech for speech in Speech.objects.filter(person__id_parladata__in = pgMembersRange["members"][pg_id], start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in Speech.objects.filter(start_time__lte=endTime, start_time__gte=startTime, person__id_parladata__in = pgMembersRange["members"][pg_id]).order_by("start_time").datetimes('start_time', 'day')]
+        for day in speeches:
+            dayData = {"date": str(day[0].start_time.date()), "sessions":[]}
+            addedPersons = []
+            addedSessions = []
+            print str(day[0].start_time.date())
+            for speech in day:
+                print addedPersons, addedSessions
+                print speech.person.id_parladata, speech.session.id_parladata
+                if speech.session.id_parladata in addedSessions:
+                    if speech.person.id_parladata in addedPersons:
+                        dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"][addedPersons.index(speech.person.id_parladata)]["speeches"].append({"speech_id": speech.id_parladata})
+                    else:
+                        addedPersons.append(speech.person.id_parladata)
+                        dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"].append({"speeches":[{"speech_id": speech.id_parladata,
+                                                             }],
+                                                "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))})
+                else:
+                    addedSessions.append(speech.session.id_parladata)
+                    addedPersons.append(speech.person.id_parladata)
+                    dayData["sessions"].append({"session_name": speech.session.name,"session_id": speech.session.id_parladata, "speakers":[{"speeches":[{"speech_id": speech.id_parladata}],
+                                                "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))}]})
+            out.append(dayData)
+
+    result  = {
+        'results': out
+        }
+    return JsonResponse(result, safe=False)
 
 
 def howMatchingThem(request, pg_id, type_of, date_=None):
