@@ -1182,7 +1182,7 @@ def setAverageNumberOfSpeechesPerSession(request, person_id):
     no_of_speeches = len(speeches)
 
     # fix for "Dajem besedo"
-    no_of_speeches = no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + person_id))
+    #no_of_speeches = no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + person_id))
 
     no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + person_id).json()['sessions_with_speech']
 
@@ -1261,7 +1261,7 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
         'results': {
             'max': {
                 'score': card.maximum,
-                'id': card.maxMP.id_parladata
+                'mps': [getPersonData(card.maxMP.id_parladata, date)]
             },
             'average': card.average,
             'score': card.score
@@ -1331,6 +1331,7 @@ def runSetters(request, date_to):
     #Runner for setters ALL
     all_in_one_setters_models = {
         VocabularySize: setVocabularySizeALL,
+        AverageNumberOfSpeechesPerSession, setAverageNumberOfSpeechesPerSessionAll,
     }
 
     zero=datetime(day=2, month=8, year=2014).date()
