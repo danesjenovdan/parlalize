@@ -80,7 +80,7 @@ def setMotionOfSession(request, id_se):
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])
         if Vote.objects.filter(id_parladata=mot['vote_id']):
-            Vote.objects.filter(id_parladata=mot['vote_id']).update(                                   created_for=session.start_time,
+            Vote.objects.filter(id_parladata=mot['vote_id']).update(created_for=session.start_time,
                                        session=Session.objects.get(id_parladata=int(id_se)),
                                        motion=mot['text'],
                                        votes_for=yes,
