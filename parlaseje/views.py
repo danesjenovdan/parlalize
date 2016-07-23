@@ -79,19 +79,31 @@ def setMotionOfSession(request, id_se):
                 not_present = not_present + 1
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])
-        result = saveOrAbortNew(model=Vote,
-                                   created_for=session.start_time,
-                                   session=Session.objects.get(id_parladata=int(id_se)),
-                                   motion=mot['text'],
-                                   votes_for=yes,
-                                   against=no,
-                                   abstain=kvorum,
-                                   not_present=not_present,
-                                   result=mot['result'],
-                                   id_parladata=mot['vote_id'],
-                                   id_parladata_session=int(id_se)
-                                   )
-
+        if Vote.objects.filter(id_parladata=mot['vote_id']):
+            Vote.objects.filter(id_parladata=mot['vote_id']).update(created_for=session.start_time,
+                                       session=Session.objects.get(id_parladata=int(id_se)),
+                                       motion=mot['text'],
+                                       votes_for=yes,
+                                       against=no,
+                                       abstain=kvorum,
+                                       not_present=not_present,
+                                       result=mot['result'],
+                                       id_parladata=mot['vote_id'],
+                                       id_parladata_session=int(id_se))
+        else:
+            result = saveOrAbortNew(model=Vote,
+                                       created_for=session.start_time,
+                                       session=Session.objects.get(id_parladata=int(id_se)),
+                                       motion=mot['text'],
+                                       votes_for=yes,
+                                       against=no,
+                                       abstain=kvorum,
+                                       not_present=not_present,
+                                       result=mot['result'],
+                                       id_parladata=mot['vote_id'],
+                                       id_parladata_session=int(id_se)
+                                       )
+        '''
         vg = saveOrAbort(model=Vote_graph,
                          motion=mot['text'],
                          votes_for=yes,
@@ -109,6 +121,7 @@ def setMotionOfSession(request, id_se):
                          mp_np=tabnp,
                          mp_kvor=tabkvo
                          )
+        '''
         yes = 0
         no = 0
         kvorum = 0
