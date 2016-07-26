@@ -159,9 +159,12 @@ def getPercentOFAttendedSession(request, person_id, date=None):
 
 
 #Saves to DB number of spoken word of MP and maximum and average of spoken words
-def setNumberOfSpokenWordsALL(request, date_):
-    date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-
+def setNumberOfSpokenWordsALL(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=""
     print '[INFO] Getting MPs'
     mps = requests.get(API_URL+'/getMPs/'+date_).json()
 
@@ -210,7 +213,7 @@ def getNumberOfSpokenWords(request, person_id, date=None):
             'score': card.score,
             'average': card.average,
             'max': {
-                'id': card.maxMP.id_parladata,
+                'id': getPersonData(card.maxMP.id_parladata, date),
                 'score': card.maximum
             }
         }
@@ -1331,7 +1334,8 @@ def runSetters(request, date_to):
     #Runner for setters ALL
     all_in_one_setters_models = {
         VocabularySize: setVocabularySizeALL,
-        AverageNumberOfSpeechesPerSession, setAverageNumberOfSpeechesPerSessionAll,
+        AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
+        SpokenWords:setNumberOfSpokenWordsALL,
     }
 
     zero=datetime(day=2, month=8, year=2014).date()
