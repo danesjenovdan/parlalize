@@ -12,5 +12,6 @@ urlpatterns = patterns('',
     (r'^v1/pg/', include('parlaskupine.urls')),
     (r'^v1/s/', include('parlaseje.urls')),
     (r'^v1/utils/getPersonData/(?P<person_id>\d+)/(?P<date_>[\w].+)', getPersonData),
+    (r'^v1/utils/getPersonData/(?P<person_id>\d+)', getPersonData),
 
 )
