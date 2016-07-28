@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 import numpy
 from datetime import datetime, timedelta
-from django.http import Http404
+from django.http import Http404, JsonResponse
 import requests
 from parlaposlanci.models import Person, LastActivity, MPStaticPL
 from parlaskupine.models import Organization
@@ -527,9 +527,9 @@ def getPersonDataAPI(request, id_parladata, date_=None):
     if not date_:
         date_ = datetime.now().strftime(API_DATE_FORMAT)
     data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
-    return {
+    return JsonResponse({
             'name': data.person.name,
             'id': int(data.person.id_parladata),
             'gov_id': data.gov_id,
             'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData()
-        }
+        })
