@@ -1296,7 +1296,7 @@ def runSetters(request, date_to):
         #MembershipsOfMember: setMembershipsOfMember,
         #LessEqualVoters: setLessEqualVoters,
         #EqualVoters: setMostEqualVoters,
-        Presence: setPercentOFAttendedSession,
+        #Presence: setPercentOFAttendedSession,
     }
     memberships = requests.get(API_URL+'/getAllTimeMemberships').json()
     IDs = getIDs()
@@ -1333,8 +1333,8 @@ def runSetters(request, date_to):
 
     #Runner for setters ALL
     all_in_one_setters_models = {
-        VocabularySize: setVocabularySizeALL,
-        AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
+        #VocabularySize: setVocabularySizeALL,
+        #AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
         SpokenWords:setNumberOfSpokenWordsALL,
     }
 
