@@ -215,7 +215,7 @@ def getNumberOfSpokenWords(request, person_id, date=None):
             'max': {
                 'mps': [
                     getPersonData(card.maxMP.id_parladata, date)
-                ]
+                ],
                 'score': card.maximum
             }
         }
