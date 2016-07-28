@@ -180,8 +180,8 @@ def findDatesFromLastCard(model, id, lastParsedDate, minDate=None):
     #lastCardDate = lastCardDate.replace(tzinfo=None)
     if not lastCardDate:
         if minDate:
-            lastCardDate = datetime.strptime(minDate, '%d.%m.%Y').date()  
-        else: 
+            lastCardDate = datetime.strptime(minDate, '%d.%m.%Y').date()
+        else:
             lastCardDate = datetime.strptime("02.08.2014", '%d.%m.%Y').date()
     return [(lastCardDate+timedelta(days=days)) for days in range((toDate-lastCardDate).days)]
 
@@ -523,3 +523,13 @@ def getPersonData(id_parladata, date_=None):
             'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData()
         }
 
+def getPersonDataAPI(request, id_parladata, date_=None):
+    if not date_:
+        date_ = datetime.now().strftime(API_DATE_FORMAT)
+    data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
+    return {
+            'name': data.person.name,
+            'id': int(data.person.id_parladata),
+            'gov_id': data.gov_id,
+            'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData()
+        }
