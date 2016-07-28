@@ -474,7 +474,7 @@ def getMinSpeechesOnSession(request, date=False):
 
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
-    return JsonResponse(results[:10], safe=False)
+    return JsonResponse(results[:5], safe=False)
 
 
 def getMaxSpeechesOnSession(request, date=False):
@@ -509,7 +509,7 @@ def getMaxSpeechesOnSession(request, date=False):
 
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
-    return JsonResponse(results[:10], safe=False)
+    return JsonResponse(results[:5], safe=False)
 
 
 
