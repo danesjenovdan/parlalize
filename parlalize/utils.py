@@ -520,6 +520,6 @@ def getPersonData(id_parladata, date_=None):
             'name': data.person.name,
             'id': int(data.person.id_parladata),
             'gov_id': data.gov_id,
-            'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData()
+            'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData(),
+            'gender':data.gender
         }
-

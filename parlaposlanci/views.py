@@ -63,7 +63,8 @@ def setMPStaticPL(request, person_id, date_=None):
                             linkedin=data['social']['linkedin'],
                             party_name=data['party'],
                             acronym=data['acronym'],
-                            gov_id=data['gov_id'])
+                            gov_id=data['gov_id'],
+                            gender=data['gender'])
 
     if result:
         for group in data['groups']:
