@@ -383,6 +383,10 @@ class MPStaticPL(Timestampable, models.Model):
                             help_text=_('The ID of the official on the government website.')
                             )
 
+    gender = models.CharField(max_length=1, 
+                              default="f",
+                              help_text=_('Gender'))
+
 class MPStaticGroup(Timestampable, models.Model):
 
     person = models.ForeignKey('MPStaticPL', help_text=_('Person foreign key to MPStaticPL'))
