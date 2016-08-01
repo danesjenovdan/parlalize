@@ -4,6 +4,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from parlaposlanci.models import *
 from parlaseje.models import *
+from jsonfield import JSONField
 
 from behaviors.models import Timestampable
 
@@ -364,3 +365,26 @@ class CutVotes(Timestampable, models.Model):
     opposition_against_max_org = models.CharField(max_length=500)
     opposition_abstain_max_org = models.CharField(max_length=500)
     opposition_absent_max_org = models.CharField(max_length=500)
+
+
+class WorkingBodies(Timestampable, models.Model):
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    organization = models.ForeignKey("Organization")
+
+    president = JSONField()
+
+    vice_president = JSONField()
+
+    members = JSONField()
+
+    coal_ratio = models.FloatField()
+
+    oppo_ratio = models.FloatField()
+
+    seats = JSONField()
+
+    sessions = JSONField()
