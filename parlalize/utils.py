@@ -444,8 +444,6 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
             votes = getLogicVotes(date_)
         else:
             r = requests.get(API_URL+'/getVotes/'+date_)
-            print API_URL+'/getVotes/'
-            print "kurac"
             votes = r.json()
 
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -454,9 +452,7 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
             votes = getLogicVotes()
         else:
             r = requests.get(API_URL+'/getVotes/'+date_)
-            print API_URL+'/getVotes/'
             votes = r.json()
-            print "KURAC"
         date_of = datetime.now().date()
 
     #print votes
