@@ -440,8 +440,9 @@ def getDeviationInOrg(request, pg_id, date_=None):
 def setCutVotes(request, pg_id, date_=None):
     def getMaxOrgData(data, ids):
         d = {str(pg): data[pg] for pg in ids}
-        return ",".join([key for key,val in d.iteritems() if val == max(d.values())])
-
+        keys =  ",".join([key for key,val in d.iteritems() if val == max(d.values())])
+        values = "val"
+        return keys, max(d.values())
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -474,8 +475,8 @@ def setCutVotes(request, pg_id, date_=None):
     for pg in membersInPGs:
         # in pg
         try:
-            pgs_for[str(pg)] = normalize(sum(map(voteFor, [votes[str(member)][b]
-                                         for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)]), votes_count)
+            pgs_for[str(pg)] = sum(map(voteFor, [votes[str(member)][b]
+                                         for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)])
         except:
             pgs_for[str(pg)] = 0
 
@@ -505,8 +506,8 @@ def setCutVotes(request, pg_id, date_=None):
     for pg in membersInPGs:
         # in PGs
         try:
-            pgs_against[str(pg)] = normalize(sum(map(voteAgainst, [votes[str(member)][b]
-                                             for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)]), votes_count)
+            pgs_against[str(pg)] = sum(map(voteAgainst, [votes[str(member)][b]
+                                             for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)])
         except:
             pgs_against[str(pg)] = 0
 
@@ -514,16 +515,16 @@ def setCutVotes(request, pg_id, date_=None):
     # get votes abstain of PGs
     for pg in membersInPGs:
         try:
-            pgs_abstain[str(pg)] = normalize(sum(map(voteAbstain, [votes[str(member)][b]
-                                             for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)]), votes_count)
+            pgs_abstain[str(pg)] = sum(map(voteAbstain, [votes[str(member)][b]
+                                             for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)])
         except:
             pgs_abstain[str(pg)] = 0
 
     # get votes obsent of PGs
     for pg in membersInPGs:
         try:
-            pgs_absent[str(pg)] = normalize(sum(map(voteAbsent, [votes[str(member)][b]
-                                            for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)]), votes_count)
+            pgs_absent[str(pg)] = sum(map(voteAbsent, [votes[str(member)][b]
+                                            for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)])
         except:
             pgs_absent[str(pg)] = 0
 
@@ -539,26 +540,26 @@ def setCutVotes(request, pg_id, date_=None):
         coalition_against=coal_avg["against"],
         coalition_abstain=coal_avg["abstain"],
         coalition_absent=coal_avg["absent"],
-        coalition_for_max=max([pgs_for[pg] for pg in coal_pgs]),
-        coalition_against_max=max([pgs_against[pg] for pg in coal_pgs]),
-        coalition_abstain_max=max([pgs_abstain[pg] for pg in coal_pgs]),
-        coalition_absent_max=max([pgs_absent[pg] for pg in coal_pgs]),
-        coalition_for_max_org=getMaxOrgData(pgs_for, coal_pgs),
-        coalition_against_max_org=getMaxOrgData(pgs_against, coal_pgs),
-        coalition_abstain_max_org=getMaxOrgData(pgs_abstain, coal_pgs),
-        coalition_absent_max_org=getMaxOrgData(pgs_absent, coal_pgs),
+        coalition_for_max=getMaxOrgData(pgs_for, coal_pgs)[1],
+        coalition_against_max=getMaxOrgData(pgs_against, coal_pgs)[1],
+        coalition_abstain_max=getMaxOrgData(pgs_abstain, coal_pgs)[1],
+        coalition_absent_max=getMaxOrgData(pgs_absent, coal_pgs)[1],
+        coalition_for_max_org=getMaxOrgData(pgs_for, coal_pgs)[0],
+        coalition_against_max_org=getMaxOrgData(pgs_against, coal_pgs)[0],
+        coalition_abstain_max_org=getMaxOrgData(pgs_abstain, coal_pgs)[0],
+        coalition_absent_max_org=getMaxOrgData(pgs_absent, coal_pgs)[0],
         opposition_for=oppo_avg["for"],
         opposition_against=oppo_avg["against"],
         opposition_abstain=oppo_avg["abstain"],
         opposition_absent=oppo_avg["absent"],
-        opposition_for_max=max([pgs_for[pg] for pg in oppo_pgs]),
-        opposition_against_max=max([pgs_against[pg] for pg in oppo_pgs]),
-        opposition_abstain_max=max([pgs_abstain[pg] for pg in oppo_pgs]),
-        opposition_absent_max=max([pgs_absent[pg] for pg in oppo_pgs]),
-        opposition_for_max_org=getMaxOrgData(pgs_for, oppo_pgs),
-        opposition_against_max_org=getMaxOrgData(pgs_against, oppo_pgs),
-        opposition_abstain_max_org=getMaxOrgData(pgs_abstain, oppo_pgs),
-        opposition_absent_max_org=getMaxOrgData(pgs_absent, oppo_pgs)
+        opposition_for_max=getMaxOrgData(pgs_for, oppo_pgs)[1],
+        opposition_against_max=getMaxOrgData(pgs_against, oppo_pgs)[1],
+        opposition_abstain_max=getMaxOrgData(pgs_abstain, oppo_pgs)[1],
+        opposition_absent_max=getMaxOrgData(pgs_absent, oppo_pgs)[1],
+        opposition_for_max_org=getMaxOrgData(pgs_for, oppo_pgs)[0],
+        opposition_against_max_org=getMaxOrgData(pgs_against, oppo_pgs)[0],
+        opposition_abstain_max_org=getMaxOrgData(pgs_abstain, oppo_pgs)[0],
+        opposition_absent_max_org=getMaxOrgData(pgs_absent, oppo_pgs)[0]
     )
 
     return JsonResponse({'alliswell': True})
