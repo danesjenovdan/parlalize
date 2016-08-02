@@ -91,7 +91,6 @@ def setMotionOfSession(request, id_se):
                                        id_parladata=mot['vote_id'],
                                        id_parladata_session=int(id_se))
         else:
-            print "kwa"
             result = saveOrAbortNew(model=Vote,
                                        created_for=session.start_time,
                                        session=Session.objects.get(id_parladata=int(id_se)),
@@ -354,7 +353,6 @@ def getAbsentMPs(request, id_se, date=False):
             ids = AbsentMPs.objects.get(id_parladata=int(id_se)).absentMPs
             date_ = datetime.now().date()
             date = date_.strftime(API_DATE_FORMAT)
-
         results = []
 
         for abMP in ids:
@@ -466,7 +464,6 @@ def getMinSpeechesOnSession(request, date=False):
                 'speeches': s[1]
             }
             results.append(result)
- 
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
     return JsonResponse(results[:5], safe=False)
