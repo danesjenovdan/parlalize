@@ -87,10 +87,11 @@ def setMotionOfSession(request, id_se):
                                        against=no,
                                        abstain=kvorum,
                                        not_present=not_present,
-                                       result=mot['result'],
+                                       result=resultOfMotion(yes, no, kvorum,not_present),
                                        id_parladata=mot['vote_id'],
                                        id_parladata_session=int(id_se))
         else:
+            print "kwa"
             result = saveOrAbortNew(model=Vote,
                                        created_for=session.start_time,
                                        session=Session.objects.get(id_parladata=int(id_se)),
@@ -99,7 +100,7 @@ def setMotionOfSession(request, id_se):
                                        against=no,
                                        abstain=kvorum,
                                        not_present=not_present,
-                                       result=mot['result'],
+                                       result=resultOfMotion(yes, no, kvorum,not_present),
                                        id_parladata=mot['vote_id'],
                                        id_parladata_session=int(id_se)
                                        )
@@ -347,28 +348,20 @@ def setAbsentMPs(request, id_se):
 def getAbsentMPs(request, id_se, date=False):
     try:
         if date:
-            ids = AbsentMPs.objects.get(id_parladata=int(id_se), start_time__lte=datetime.strptime(date, '%d.%m.%Y')).absentMPs
+            date_ = datetime.strptime(date, API_DATE_FORMAT)
+            ids = AbsentMPs.objects.get(id_parladata=int(id_se), start_time__lte=data_).absentMPs
         else:
             ids = AbsentMPs.objects.get(id_parladata=int(id_se)).absentMPs
-
-        mps = requests.get(API_URL+'/getMPs/').json()
+            date_ = datetime.now().date()
+            date = date_.strftime(API_DATE_FORMAT)
 
         results = []
 
         for abMP in ids:
-            for mp in mps:
-                if str(mp['id']) == str(abMP):
-                    result = {
-                        'party': {
-                            'acronym': mp['acronym'],
-                            'id': mp['party_id'],
-                            'name': mp['membership']
-                        },
-                        'name': mp['name'],
-                        'gov_id': mp['gov_id'],
-                        'id': mp['id']
-                    }
-                    results.append(result)
+            result = {
+            "person": getPersonData(abMP, date)
+            }
+            results.append(result)
 
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
@@ -459,66 +452,45 @@ def getMinSpeechesOnSession(request, date=False):
     results = []
     try:
         if date:
-            averageSpeeches = AverageSpeeches.objects.get(created_for=datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
-            mps = requests.get(API_URL+'/getMPs/'+ date).json()
+            date_ = datetime.strptime(date, API_DATE_FORMAT)
+            averageSpeeches = AverageSpeeches.objects.get(created_for=date_).speechesOnSession
         else:
             averageSpeeches = AverageSpeeches.objects.get().speechesOnSession
-            mps = requests.get(API_URL+'/getMPs/'+  str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
-
-
-
+            date_ = datetime.now().date()
+            date = date_.strftime(API_DATE_FORMAT)
         sort = sorted(averageSpeeches.items(), key=lambda x:x[1])
-
+ 
         for s in sort:
-            for mp in mps:
-                if int(s[0]) == int(mp['id']):
-                    result = {
-                        'party': {
-                            'acronym': mp['acronym'],
-                            'id': mp['party_id'],
-                            'name': mp['membership']
-                        },
-                        'name': mp['name'],
-                        'gov_id': mp['gov_id'],
-                        'id': mp['id'],
-                        'speeches': s[1]
-                    }
-                    results.append(result)
-
+            result = {
+                "person": getPersonData(s[0], date),
+                'speeches': s[1]
+            }
+            results.append(result)
+ 
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
-    return JsonResponse(results, safe=False)
+    return JsonResponse(results[:5], safe=False)
 
 
 def getMaxSpeechesOnSession(request, date=False):
     results = []
     try:
         if date:
-            averageSpeeches = AverageSpeeches.objects.get(created_for = datetime.strptime(date, '%d.%m.%Y')).speechesOnSession
-            mps = requests.get(API_URL+'/getMPs/'+ date).json()
+            date_ = datetime.strptime(date, API_DATE_FORMAT)
+            averageSpeeches = AverageSpeeches.objects.get(created_for=date_).speechesOnSession
         else:
             averageSpeeches = AverageSpeeches.objects.get().speechesOnSession
-            mps = requests.get(API_URL+'/getMPs/'+ str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
-
+            date_ = datetime.now().date()
+            date = date_.strftime(API_DATE_FORMAT)
 
 
         sort = sorted(averageSpeeches.items(), key=lambda x:x[1], reverse=True)
         for s in sort:
-            for mp in mps:
-                if int(s[0]) == int(mp['id']):
-
-                    result = {
-                        'party': {
-                            'acronym': mp['acronym'],
-                            'id': mp['party_id'],
-                            'name': mp['membership']
-                        },
-                        'name': mp['name'],
-                        'gov_id': mp['gov_id'],
-                        'id': mp['id'],
-                        'speeches': s[1]
-                    }
-                    results.append(result)
+            result = {
+                "person": getPersonData(s[0], date),
+                'speeches': s[1]
+            }
+            results.append(result)
 
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
@@ -532,12 +504,11 @@ def runSetters(request, date_to):
     setters_models = {
         #Vote: setMotionOfSession,
         PresenceOfPG: setPresenceOfPG,
-        AbsentMPs: setAbsentMPs,
-        AverageSpeeches: setSpeechesOnSession
+        #AbsentMPs: setAbsentMPs,
+        #AverageSpeeches: setSpeechesOnSession
     }
     for model, setter in setters_models.items():
         dates = findDatesFromLastCard(model, None, date_to)
-        print dates
         if dates==[]:
             continue
         if model != AverageSpeeches:

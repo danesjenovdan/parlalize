@@ -157,3 +157,13 @@ def getSesCardModelNew(model, id, date=None):
         modelObject = modelObject.latest('created_for')
         print "get object BUBU", modelObject.created_for
     return modelObject
+
+def resultOfMotion(votes_for, against, abstain, not_present):
+	allMPs = 0.666666667 * (int(votes_for) + int(against) + int(abstain) + int(not_present))
+	if votes_for < allMPs:
+		allMPs = 0
+		return False
+
+	else:
+		allMPs = 0
+		return True
