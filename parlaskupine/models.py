@@ -375,7 +375,9 @@ class WorkingBodies(Timestampable, models.Model):
 
     organization = models.ForeignKey("Organization")
 
-    president = JSONField()
+    president = models.ForeignKey('parlaposlanci.Person',
+                                  blank=True, null=True,
+                                  help_text=_('President'))
 
     vice_president = JSONField()
 

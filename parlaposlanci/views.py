@@ -535,23 +535,6 @@ def getMPsWhichFitsToPG(request, id):
 
 
 def setCutVotes(request, person_id, date_=None):
-
-    #Add data of person to dictionary
-    """
-        ObjectOut: output dictionary
-        rootKey: root key
-        id: id of person
-        objectIn: dictionary with persons
-    """
-    def getIdImageName(ObjectOut, rootKey, ids, objectIn):
-        ObjectOut[rootKey+"ID"] = []
-        ObjectOut[rootKey+"Name"] = []
-        ObjectOut[rootKey+"Image"] = []
-        for id in ids:
-            ObjectOut[rootKey+"ID"].append(str(id))
-            ObjectOut[rootKey+"Name"].append(objectIn[str(id)]['name'])
-            ObjectOut[rootKey+"Image"].append(objectIn[str(id)]['image'])
-
     print "cut"
     if date_:
         date_of = datetime.strptime(date_, '%d.%m.%Y')
@@ -572,19 +555,17 @@ def setCutVotes(request, person_id, date_=None):
 
 
     # Calculate coalition and opposition average
-    coal_avg["for"] = int((float(sum(map(voteFor, pg_score_C)))/float(len(pg_score_C)))*100)
-    oppo_avg["for"] = int((float(sum(map(voteFor, pg_score_O)))/float(len(pg_score_O)))*100)
-    coal_avg["against"] = int((float(sum(map(voteAgainst, pg_score_C)))/float(len(pg_score_C)))*100)
-    oppo_avg["against"] = int((float(sum(map(voteAgainst, pg_score_O)))/float(len(pg_score_O)))*100)
-    coal_avg["abstain"] = int((float(sum(map(voteAbstain, pg_score_C)))/float(len(pg_score_C)))*100)
-    oppo_avg["abstain"] = int((float(sum(map(voteAbstain, pg_score_O)))/float(len(pg_score_O)))*100)
-    coal_avg["absent"] = int((float(sum(map(voteAbsent, pg_score_C)))/float(len(pg_score_C)))*100)
-    oppo_avg["absent"] = int((float(sum(map(voteAbsent, pg_score_O)))/float(len(pg_score_O)))*100)
+    coal_avg["for"] = (float(sum(map(voteFor, pg_score_C)))/float(len(pg_score_C)))*100
+    oppo_avg["for"] = (float(sum(map(voteFor, pg_score_O)))/float(len(pg_score_O)))*100
+    coal_avg["against"] = (float(sum(map(voteAgainst, pg_score_C)))/float(len(pg_score_C)))*100
+    oppo_avg["against"] = (float(sum(map(voteAgainst, pg_score_O)))/float(len(pg_score_O)))*100
+    coal_avg["abstain"] = (float(sum(map(voteAbstain, pg_score_C)))/float(len(pg_score_C)))*100
+    oppo_avg["abstain"] = (float(sum(map(voteAbstain, pg_score_O)))/float(len(pg_score_O)))*100
+    coal_avg["absent"] = (float(sum(map(voteAbsent, pg_score_C)))/float(len(pg_score_C)))*100
+    oppo_avg["absent"] = (float(sum(map(voteAbsent, pg_score_O)))/float(len(pg_score_O)))*100
 
     memList = getMPsList(request, date_)
     members = {str(mp['id']):mp for mp in json.loads(memList.content)}
-
-    votes_count = len(Vote.objects.all())
 
     out = dict()
     out["for"] = dict()
@@ -592,79 +573,76 @@ def setCutVotes(request, person_id, date_=None):
     out["abstain"] = dict()
     out["absent"] = dict()
     #Calculations for this member
-    out["for"]["this"]=normalize(sum(map(voteFor, votes[person_id].values())),votes_count)
-    out["against"]["this"]=normalize(sum(map(voteAgainst, votes[person_id].values())),votes_count)
-    out["abstain"]["this"]=normalize(sum(map(voteAbstain, votes[person_id].values())),votes_count)
-    out["absent"]["this"]=normalize(sum(map(voteAbsent, votes[person_id].values())),votes_count)
+    out["for"]["this"]=float(sum(map(voteFor, votes[person_id].values())))/float(len(votes[person_id].values()))*100
+    out["against"]["this"]=float(sum(map(voteAgainst, votes[person_id].values())))/float(len(votes[person_id].values()))*100
+    out["abstain"]["this"]=float(sum(map(voteAbstain, votes[person_id].values())))/float(len(votes[person_id].values()))*100
+    out["absent"]["this"]=float(sum(map(voteAbsent, votes[person_id].values())))/float(len(votes[person_id].values()))*100
     memReq = getMPStaticPL(request, person_id)
     memberData = json.loads(memReq.content)
     out["thisName"]=memberData['person']['name']
 
     #Calculations for coalition
-    idsForCoal, coalFor = zip(*[(member,sum(map(voteFor,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
-    idsCoalAgainst, coalAgainst = zip(*[(member,sum(map(voteAgainst,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
-    idsCoalAbstain, coalAbstain = zip(*[(member,sum(map(voteAbstain,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
-    idsCoalAbsent, coalAbsent = zip(*[(member,sum(map(voteAbsent,votes[str(member)].values()))) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
+    idsForCoal, coalFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
+    idsCoalAgainst, coalAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
+    idsCoalAbstain, coalAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
+    idsCoalAbsent, coalAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
 
     coalMaxPercentFor = max(coalFor)
     coalMaxPercentAgainst = max(coalAgainst)
     coalMaxPercentAbstain = max(coalAbstain)
     coalMaxPercentAbsent = max(coalAbsent)
 
-    out["for"]["maxCoal"]=normalize(coalMaxPercentFor,votes_count)
+    out["for"]["maxCoal"]=coalMaxPercentFor
     idsMaxForCoal = numpy.array(idsForCoal)[numpy.where(numpy.array(coalFor) == coalMaxPercentFor)[0]]
-    getIdImageName(out["for"], "maxCoal", idsMaxForCoal, members)
+    out["for"]["maxCoalID"] = list(idsMaxForCoal)
 
-    out["against"]["maxCoal"]=normalize(coalMaxPercentAgainst,votes_count)
+    out["against"]["maxCoal"]=coalMaxPercentAgainst
     idsMaxAgainstCoal = numpy.array(idsCoalAgainst)[numpy.where(numpy.array(coalAgainst) == coalMaxPercentAgainst)[0]]
-    getIdImageName(out["against"], "maxCoal", idsMaxAgainstCoal, members)
+    out["against"]["maxCoalID"] = list(idsMaxAgainstCoal)
 
-    out["abstain"]["maxCoal"]=normalize(coalMaxPercentAbstain,votes_count)
+    out["abstain"]["maxCoal"]=coalMaxPercentAbstain
     idsMaxAbstainCoal = numpy.array(idsCoalAbstain)[numpy.where(numpy.array(coalAbstain) == coalMaxPercentAbstain)[0]]
-    getIdImageName(out["abstain"], "maxCoal", idsMaxAbstainCoal, members)
+    out["abstain"]["maxCoalID"] = list(idsMaxAbstainCoal)
 
-    out["absent"]["maxCoal"]=normalize(coalMaxPercentAbsent,votes_count)
+    out["absent"]["maxCoal"]=coalMaxPercentAbsent
     idsMaxAbsentCoal = numpy.array(idsCoalAbsent)[numpy.where(numpy.array(coalAbsent) == coalMaxPercentAbsent)[0]]
-    getIdImageName(out["absent"], "maxCoal", idsMaxAbsentCoal, members)
+    out["absent"]["maxCoalID"] = list(idsMaxAbsentCoal)
 
     #Calculations for opozition
     #delete coalition groups from members in PGs
     map(membersInPGs.__delitem__, [str(coalitionIds) for coalitionIds in coalition['coalition']])
-    idsForOpp, oppFor = zip(*[(member,sum(map(voteFor,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-    idsOppAgainst ,oppAgainst = zip(*[(member,sum(map(voteAgainst,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-    idsOppAbstain, oppAbstain = zip(*[(member,sum(map(voteAbstain,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-    idsOppAbsent, oppAbsent = zip(*[(member,sum(map(voteAbsent,votes[str(member)].values()))) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
+    idsForOpp, oppFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
+    idsOppAgainst, oppAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
+    idsOppAbstain, oppAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
+    idsOppAbsent, oppAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
     oppMaxPercentFor = max(oppFor)
     oppMaxPercentAgainst = max(oppAgainst)
     oppMaxPercentAbstain = max(oppAbstain)
     oppMaxPercentAbsent = max(oppAbsent)
 
-    out["for"]["maxOpp"]=normalize(oppMaxPercentFor,votes_count)
+    out["for"]["maxOpp"]=oppMaxPercentFor
 
     memReq = getMPStaticPL(request, idsForOpp[oppFor.index(oppMaxPercentFor)])
     memberData = json.loads(memReq.content)
     idsMaxForOppo = numpy.array(idsForOpp)[numpy.where(numpy.array(oppFor) == oppMaxPercentFor)[0]]
-    getIdImageName(out["for"], "maxOpp", idsMaxForOppo, members)
+    out["for"]["maxOppID"] = list(idsMaxForOppo)
 
-    out["against"]["maxOpp"]=normalize(oppMaxPercentAgainst,votes_count)
+    out["against"]["maxOpp"]=oppMaxPercentAgainst
     memReq = getMPStaticPL(request, idsOppAgainst[oppAgainst.index(oppMaxPercentAgainst)])
     memberData = json.loads(memReq.content)
     idsMaxAgainstOppo = numpy.array(idsOppAgainst)[numpy.where(numpy.array(oppAgainst) == oppMaxPercentAgainst)[0]]
-    getIdImageName(out["against"], "maxOpp", idsMaxAgainstOppo, members)
+    out["against"]["maxOppID"] = list(idsMaxAgainstOppo)
 
-    out["abstain"]["maxOpp"]=normalize(oppMaxPercentAbstain,votes_count)
+    out["abstain"]["maxOpp"]=oppMaxPercentAbstain
 
     memReq = getMPStaticPL(request, idsOppAbstain[oppAbstain.index(oppMaxPercentAbstain)])
     memberData = json.loads(memReq.content)
     idsMaxAbstainOppo = numpy.array(idsOppAbstain)[numpy.where(numpy.array(oppAbstain) == oppMaxPercentAbstain)[0]]
-    getIdImageName(out["abstain"], "maxOpp", idsMaxAbstainOppo, members)
+    out["abstain"]["maxOppID"] = list(idsMaxAbstainOppo)
 
-    out["absent"]["maxOpp"]=normalize(oppMaxPercentAbsent,votes_count)
-
-    memReq = getMPStaticPL(request, idsOppAbsent[oppAbsent.index(oppMaxPercentAbsent)])
-    memberData = json.loads(memReq.content)
+    out["absent"]["maxOpp"]=oppMaxPercentAbsent
     idsMaxAbsentOppo = numpy.array(idsOppAbsent)[numpy.where(numpy.array(oppAbsent) == oppMaxPercentAbsent)[0]]
-    getIdImageName(out["absent"], "maxOpp", idsMaxAbsentOppo, members)
+    out["absent"]["maxOppID"] = list(idsMaxAbsentOppo)
 
     final_response = saveOrAbortNew(
         CutVotes,
