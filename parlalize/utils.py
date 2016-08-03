@@ -488,9 +488,7 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
                                     axis=0)
         else:
             members = [member for pg_id in pgs for member in membersInRange["members"][pg_id]]
-            print members
-            print votes_ids
-            print [0 if "2826" in votes[str(member)].keys() else member for member in members]
+        
             pg_score_temp =[votes[str(member)][str(b)] for member in members for b in votes_ids]
 
         if votes_type=="logic":
