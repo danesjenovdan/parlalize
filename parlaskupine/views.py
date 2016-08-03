@@ -627,6 +627,34 @@ def getCutVotes(request, pg_id, date=None):
     return JsonResponse(out)
 
 
+def getWorkingBodies(request, org_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+    members = requests.get(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
+    out = {}
+    name = members.pop("name")
+    all_members = [member for role in members.values() for member in role]
+    coalitionPGs = requests.get(API_URL+'/getCoalitionPGs/').json()
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
+    sessions = requests.get(API_URL+'/getSessionsOfOrg/'+org_id+(("/"+date_) if date_ else "")).json()
+    coal_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["coalition"]}
+    oppo_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["opposition"]}
+
+    coal_members = sum([len(member) for member in coal_pgs.values()])
+    oppo_members = sum([len(member) for member in oppo_pgs.values()])
+
+    kol = 100.0/float(coal_members+oppo_members)
+    seats = [{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "coalition"}for pg_id, members_list in coal_pgs.items() if len(members_list)>0]+[{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "opposition"}for pg_id, members_list in oppo_pgs.items() if len(members_list)>0]
+    out["info"] = {role: [getPersonData(member) for member in members_list] for role, members_list in members.items()}
+    out["ratio"] = {"coalition": coal_members*kol, "opposition": oppo_members*kol}
+    out["seats_per_pg"] = list(reversed(sorted(seats, key=lambda s: s["seats"])))
+    out["sessions"] = [{"id": session["id"], "name": session["name"], "date": session["start_time"]} for session in sessions]
+    out["name"] = name
+    return JsonResponse(out)
+
+
 # get PGs IDs
 def getPGsIDs(request):
     output = []

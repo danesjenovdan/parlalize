@@ -63,7 +63,8 @@ def setMPStaticPL(request, person_id, date_=None):
                             linkedin=data['social']['linkedin'],
                             party_name=data['party'],
                             acronym=data['acronym'],
-                            gov_id=data['gov_id'])
+                            gov_id=data['gov_id'],
+                            gender=data['gender'])
 
     if result:
         for group in data['groups']:
@@ -117,16 +118,16 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     maximumMPVotes = [pId for pId in data["votes"] if data["votes"][pId]==maximumVotes]
     averageVotes = sum(data["votes"].values()) / len(data["votes"])
 
-    result = saveOrAbortNew(model=Presence, 
-                         created_for=date_of, 
-                         person=Person.objects.get(id_parladata=int(person_id)), 
-                         person_value_sessions=thisMP, 
-                         maxMP_sessions=maximumMP, 
-                         average_sessions=average, 
+    result = saveOrAbortNew(model=Presence,
+                         created_for=date_of,
+                         person=Person.objects.get(id_parladata=int(person_id)),
+                         person_value_sessions=thisMP,
+                         maxMP_sessions=maximumMP,
+                         average_sessions=average,
                          maximum_sessions=maximum,
-                         person_value_votes=thisMPVotes, 
-                         maxMP_votes=maximumMPVotes, 
-                         average_votes=averageVotes, 
+                         person_value_votes=thisMPVotes,
+                         maxMP_votes=maximumMPVotes,
+                         average_votes=averageVotes,
                          maximum_votes=maximumVotes)
 
     return JsonResponse({'alliswell': result})
@@ -159,9 +160,12 @@ def getPercentOFAttendedSession(request, person_id, date=None):
 
 
 #Saves to DB number of spoken word of MP and maximum and average of spoken words
-def setNumberOfSpokenWordsALL(request, date_):
-    date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-
+def setNumberOfSpokenWordsALL(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=""
     print '[INFO] Getting MPs'
     mps = requests.get(API_URL+'/getMPs/'+date_).json()
 
@@ -190,12 +194,12 @@ def setNumberOfSpokenWordsALL(request, date_):
 
     for result in mp_results:
         print '[INFO] Saving or updating MP\'s results'
-        print saveOrAbortNew(model=SpokenWords, 
-                             created_for=date_of, 
-                             person=Person.objects.get(id_parladata=int(result['person_id'])), 
-                             score=int(result['wordcount']), 
-                             maxMP=Person.objects.get(id_parladata=int(mps_sorted[-1]['person_id'])), 
-                             average=average_words, 
+        print saveOrAbortNew(model=SpokenWords,
+                             created_for=date_of,
+                             person=Person.objects.get(id_parladata=int(result['person_id'])),
+                             score=int(result['wordcount']),
+                             maxMP=Person.objects.get(id_parladata=int(mps_sorted[-1]['person_id'])),
+                             average=average_words,
                              maximum=mps_sorted[-1]['wordcount'])
 
     return HttpResponse('All iz well')
@@ -210,7 +214,9 @@ def getNumberOfSpokenWords(request, person_id, date=None):
             'score': card.score,
             'average': card.average,
             'max': {
-                'id': card.maxMP.id_parladata,
+                'mps': [
+                    getPersonData(card.maxMP.id_parladata, date)
+                ],
                 'score': card.maximum
             }
         }
@@ -1144,7 +1150,7 @@ def setVocabularySize(request, person_id, date_=None):
 #
 #    return HttpResponse('All MPs updated.')
 
-    if saveOrAbortNew(VocabularySize, 
+    if saveOrAbortNew(VocabularySize,
                       person=thisperson,
                       created_for=date_of,
                       score=result['person'],
@@ -1293,7 +1299,7 @@ def runSetters(request, date_to):
         #MembershipsOfMember: setMembershipsOfMember,
         #LessEqualVoters: setLessEqualVoters,
         #EqualVoters: setMostEqualVoters,
-        Presence: setPercentOFAttendedSession,
+        #Presence: setPercentOFAttendedSession,
     }
     memberships = requests.get(API_URL+'/getAllTimeMemberships').json()
     IDs = getIDs()
@@ -1330,8 +1336,9 @@ def runSetters(request, date_to):
 
     #Runner for setters ALL
     all_in_one_setters_models = {
-        VocabularySize: setVocabularySizeALL,
-        AverageNumberOfSpeechesPerSession, setAverageNumberOfSpeechesPerSessionAll,
+        #VocabularySize: setVocabularySizeALL,
+        #AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
+        SpokenWords:setNumberOfSpokenWordsALL,
     }
 
     zero=datetime(day=2, month=8, year=2014).date()

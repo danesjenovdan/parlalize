@@ -491,7 +491,7 @@ def getMaxSpeechesOnSession(request, date=False):
 
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
-    return JsonResponse(results, safe=False)
+    return JsonResponse(results[:5], safe=False)
 
 
 
@@ -499,8 +499,13 @@ def runSetters(request, date_to):
 
 
     setters_models = {
+<<<<<<< HEAD
         #Vote: setMotionOfSession,
         PresenceOfPG: setPresenceOfPG,
+=======
+        Vote: setMotionOfSession,
+        #PresenceOfPG: setPresenceOfPG,
+>>>>>>> master
         #AbsentMPs: setAbsentMPs,
         #AverageSpeeches: setSpeechesOnSession
     }
