@@ -457,7 +457,7 @@ def getMinSpeechesOnSession(request, date=False):
             date_ = datetime.now().date()
             date = date_.strftime(API_DATE_FORMAT)
         sort = sorted(averageSpeeches.items(), key=lambda x:x[1])
- 
+
         for s in sort:
             result = {
                 "person": getPersonData(s[0], date),
@@ -499,13 +499,8 @@ def runSetters(request, date_to):
 
 
     setters_models = {
-<<<<<<< HEAD
-        #Vote: setMotionOfSession,
-        PresenceOfPG: setPresenceOfPG,
-=======
         Vote: setMotionOfSession,
         #PresenceOfPG: setPresenceOfPG,
->>>>>>> master
         #AbsentMPs: setAbsentMPs,
         #AverageSpeeches: setSpeechesOnSession
     }
