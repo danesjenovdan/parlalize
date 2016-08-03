@@ -441,7 +441,6 @@ def setCutVotes(request, pg_id, date_=None):
     def getMaxOrgData(data, ids):
         d = {str(pg): data[pg] for pg in ids}
         keys =  ",".join([key for key,val in d.iteritems() if val == max(d.values())])
-        values = "val"
         return keys, max(d.values())
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
