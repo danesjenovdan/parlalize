@@ -582,10 +582,10 @@ def setCutVotes(request, person_id, date_=None):
     out["thisName"]=memberData['person']['name']
 
     #Calculations for coalition
-    idsForCoal, coalFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
-    idsCoalAgainst, coalAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
-    idsCoalAbstain, coalAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
-    idsCoalAbsent, coalAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)]])
+    idsForCoal, coalFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    idsCoalAgainst, coalAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    idsCoalAbstain, coalAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    idsCoalAbsent, coalAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
 
     coalMaxPercentFor = max(coalFor)
     coalMaxPercentAgainst = max(coalAgainst)
@@ -611,10 +611,10 @@ def setCutVotes(request, person_id, date_=None):
     #Calculations for opozition
     #delete coalition groups from members in PGs
     map(membersInPGs.__delitem__, [str(coalitionIds) for coalitionIds in coalition['coalition']])
-    idsForOpp, oppFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-    idsOppAgainst, oppAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-    idsOppAbstain, oppAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
-    idsOppAbsent, oppAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)]])
+    idsForOpp, oppFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    idsOppAgainst, oppAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    idsOppAbstain, oppAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    idsOppAbsent, oppAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
     oppMaxPercentFor = max(oppFor)
     oppMaxPercentAgainst = max(oppAgainst)
     oppMaxPercentAbstain = max(oppAbstain)
