@@ -468,63 +468,39 @@ def setCutVotes(request, pg_id, date_=None):
     pg_score_O, membersInPGs, votes, all_votes = getRangeVotes(oppo_pgs, date_, "plain")
 
 
-    votes_count = len(Vote.objects.all())
-    tempVotesCoal = {"votes": [], "count": 0}
-    tempVotesOppo = {"votes": [], "count": 0}
-    # votes for
-    for pg in membersInPGs:
-        # in pg
-        try:
-            pgs_for[str(pg)] = sum(map(voteFor, [votes[str(member)][b]
-                                         for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)])
-        except:
-            pgs_for[str(pg)] = 0
-
-        # average
-        if pg in map(str, coalition["coalition"]):
-            tempVotesCoal["votes"].extend([votes[str(member)][b]
-                                           for member in membersInPGs[str(pg)]
-                                           for b in sorted(votes[str(member)])])
-            tempVotesCoal["count"] += len(membersInPGs[str(pg)])
-        else:
-            tempVotesOppo["votes"].extend([votes[str(member)][b]
-                                           for member in membersInPGs[str(pg)]
-                                           for b in sorted(votes[str(member)])])
-            tempVotesOppo["count"] += len(membersInPGs[str(pg)])
-
     # Calculate coalition and opposition average
-    coal_avg["for"] = int((float(sum(map(voteFor, pg_score_C)))/float(len(pg_score_C)))*100)
-    oppo_avg["for"] = int((float(sum(map(voteFor, pg_score_O)))/float(len(pg_score_O)))*100)
-    coal_avg["against"] = int((float(sum(map(voteAgainst, pg_score_C)))/float(len(pg_score_C)))*100)
-    oppo_avg["against"] = int((float(sum(map(voteAgainst, pg_score_O)))/float(len(pg_score_O)))*100)
-    coal_avg["abstain"] = int((float(sum(map(voteAbstain, pg_score_C)))/float(len(pg_score_C)))*100)
-    oppo_avg["abstain"] = int((float(sum(map(voteAbstain, pg_score_O)))/float(len(pg_score_O)))*100)
-    coal_avg["absent"] = int((float(sum(map(voteAbsent, pg_score_C)))/float(len(pg_score_C)))*100)
-    oppo_avg["absent"] = int((float(sum(map(voteAbsent, pg_score_O)))/float(len(pg_score_O)))*100)
+    coal_avg["for"] = (float(sum(map(voteFor, pg_score_C)))/float(len(pg_score_C)))*100
+    oppo_avg["for"] = (float(sum(map(voteFor, pg_score_O)))/float(len(pg_score_O)))*100
+    coal_avg["against"] = (float(sum(map(voteAgainst, pg_score_C)))/float(len(pg_score_C)))*100
+    oppo_avg["against"] = (float(sum(map(voteAgainst, pg_score_O)))/float(len(pg_score_O)))*100
+    coal_avg["abstain"] = (float(sum(map(voteAbstain, pg_score_C)))/float(len(pg_score_C)))*100
+    oppo_avg["abstain"] = (float(sum(map(voteAbstain, pg_score_O)))/float(len(pg_score_O)))*100
+    coal_avg["absent"] = (float(sum(map(voteAbsent, pg_score_C)))/float(len(pg_score_C)))*100
+    oppo_avg["absent"] = (float(sum(map(voteAbsent, pg_score_O)))/float(len(pg_score_O)))*100
 
     # get votes against
     for pg in membersInPGs:
-        # in PGs
+        votesOfPG = [votes[str(member)][b] for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]
+        # get votes for of PGs
         try:
-            pgs_against[str(pg)] = sum(map(voteAgainst, [votes[str(member)][b]
-                                             for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)])
+            pgs_for[str(pg)] = (float(sum(map(voteFor, votesOfPG)))/float(len(votesOfPG)))*100
+        except:
+            pgs_for[str(pg)] = 0
+        # get votes against of PGs
+        try:                 
+            pgs_against[str(pg)] = (float(sum(map(voteAgainst, votesOfPG)))/float(len(votesOfPG)))*100
         except:
             pgs_against[str(pg)] = 0
 
-
-    # get votes abstain of PGs
-    for pg in membersInPGs:
+        # get votes abstain of PGs
         try:
-            pgs_abstain[str(pg)] = sum(map(voteAbstain, [votes[str(member)][b]
-                                             for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)])
+            pgs_abstain[str(pg)] = (float(sum(map(voteAbstain, votesOfPG)))/float(len(votesOfPG)))*100
         except:
             pgs_abstain[str(pg)] = 0
 
-    # get votes obsent of PGs
-    for pg in membersInPGs:
+        # get votes obsent of PGs
         try:
-            pgs_absent[str(pg)] = sum(map(voteAbsent, [votes[str(member)][b]
-                                            for member in membersInPGs[str(pg)] for b in sorted(votes[str(member)])]))/len(membersInPGs[str(pg)])
+            pgs_absent[str(pg)] = (float(sum(map(voteAbsent, votesOfPG)))/float(len(votesOfPG)))*100
         except:
             pgs_absent[str(pg)] = 0
 
@@ -625,6 +601,46 @@ def getCutVotes(request, pg_id, date=None):
             },
         }
     }
+    return JsonResponse(out)
+
+
+def setWorkingBodies(request, org_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+    members = requests.get(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
+    out = {}
+    name = members.pop("name")
+    all_members = [member for role in members.values() for member in role]
+    coalitionPGs = requests.get(API_URL+'/getCoalitionPGs/').json()
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
+    sessions = requests.get(API_URL+'/getSessionsOfOrg/'+org_id+(("/"+date_) if date_ else "")).json()
+    coal_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["coalition"]}
+    oppo_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["opposition"]}
+
+    coal_members = sum([len(member) for member in coal_pgs.values()])
+    oppo_members = sum([len(member) for member in oppo_pgs.values()])
+
+    kol = 100.0/float(coal_members+oppo_members)
+    seats = [{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "coalition"}for pg_id, members_list in coal_pgs.items() if len(members_list)>0]+[{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "opposition"}for pg_id, members_list in oppo_pgs.items() if len(members_list)>0]
+    out["info"] = {role: [member for member in members_list] for role, members_list in members.items()}
+    out["ratio"] = {"coalition": coal_members*kol, "opposition": oppo_members*kol}
+    out["seats_per_pg"] = list(reversed(sorted(seats, key=lambda s: s["seats"])))
+    out["sessions"] = [{"id": session["id"], "name": session["name"], "date": session["start_time"]} for session in sessions]
+    out["name"] = name
+    final_response = saveOrAbortNew(
+        WorkingBodies,
+        created_for=date_of,
+        organization=Organization.objects.get(id_parladata=org_id),
+        president = Person.objects.get(id_parladata=out["info"]["president"][0]),
+        vice_president = out["info"]["vice_president"],
+        members = out["info"]["members"],
+        coal_ratio = coal_members*kol,
+        oppo_ratio = oppo_members*kol,
+        seats = list(reversed(sorted(seats, key=lambda s: s["seats"]))),
+        sessions = [session["id"] for session in sessions],
+    )
     return JsonResponse(out)
 
 
