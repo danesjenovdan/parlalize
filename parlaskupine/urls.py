@@ -30,6 +30,9 @@ urlpatterns = patterns('',
     url(r'^setCutVotes/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setCutVotes),
     url(r'^setCutVotes/(?P<pg_id>\d+)', setCutVotes),
 
+    url(r'^getWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies),
+    url(r'^getWorkingBodies/(?P<org_id>\d+)', getWorkingBodies),
+
 
     # getters
     # TJ
