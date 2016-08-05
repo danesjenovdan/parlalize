@@ -81,20 +81,22 @@ def setMotionOfSession(request, id_se):
                 tabnp.append(vote['mp_id'])
         if Vote.objects.filter(id_parladata=mot['vote_id']):
             Vote.objects.filter(id_parladata=mot['vote_id']).update(created_for=session.start_time,
-                                       session=Session.objects.get(id_parladata=int(id_se)),
-                                       motion=mot['text'],
-                                       votes_for=yes,
-                                       against=no,
-                                       abstain=kvorum,
-                                       not_present=not_present,
-                                       result=resultOfMotion(yes, no, kvorum,not_present),
-                                       id_parladata=mot['vote_id'],
-                                       id_parladata_session=int(id_se))
+                                                                    session=Session.objects.get(id_parladata=int(id_se)),
+                                                                    motion=mot['text'],
+                                                                    tags=mot['tags'],
+                                                                    votes_for=yes,
+                                                                    against=no,
+                                                                    abstain=kvorum,
+                                                                    not_present=not_present,
+                                                                    result=resultOfMotion(yes, no, kvorum,not_present),
+                                                                    id_parladata=mot['vote_id'],
+                                                                    id_parladata_session=int(id_se))
         else:
             result = saveOrAbortNew(model=Vote,
                                        created_for=session.start_time,
                                        session=Session.objects.get(id_parladata=int(id_se)),
                                        motion=mot['text'],
+                                       tags=mot['tags'],
                                        votes_for=yes,
                                        against=no,
                                        abstain=kvorum,
@@ -492,6 +494,20 @@ def getMaxSpeechesOnSession(request, date=False):
     except ObjectDoesNotExist:
         return JsonResponse({"status": "No card MOFO"}, safe=False)
     return JsonResponse(results[:5], safe=False)
+
+
+
+def updateTags(request):
+    tags = requests.get(API_URL+'/getTags').json()
+    existing_tags = Tag.objects.all().values_list("name", flat=True)
+    count = 0
+    for tag in tags: 
+        if tag not in existing_tags:
+            print tag
+            Tag(name=tag).save()
+            count += 1
+    return JsonResponse({'alliswell': True, "add_tags": count})
+
 
 
 

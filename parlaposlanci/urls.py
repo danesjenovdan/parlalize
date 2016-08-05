@@ -92,7 +92,7 @@ urlpatterns = patterns(
 
     url(r'^getCompass', getCompass),
 
-    url(r'^getTaggedBallots/(?P<person_id>\d+)/(?P<date>[\w].+)', getTaggedBallots),
+    url(r'^getTaggedBallots/(?P<person_id>\d+)/(?P<date_>[\w].+)', getTaggedBallots),
     url(r'^getTaggedBallots/(?P<person_id>\d+)', getTaggedBallots),
 
     url(r'^getMembershipsOfMember/(?P<person_id>\d+)/(?P<date>[\w].+)', getMembershipsOfMember),

@@ -33,6 +33,8 @@ urlpatterns = patterns(
     url(r'^getMinSpeechesOnSession/', getMinSpeechesOnSession),
     url(r'^getMaxSpeechesOnSession/', getMaxSpeechesOnSession),
 
+    url(r'^updateTags/', updateTags),
+
     #runenr
     url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
 )

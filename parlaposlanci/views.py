@@ -15,7 +15,7 @@ from collections import Counter
 from parlalize.settings import LAST_ACTIVITY_COUNT
 from .models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT
-from parlaseje.models import Session
+from parlaseje.models import Session, Tag
 
 from parlaposlanci import compass
 
@@ -1363,7 +1363,7 @@ def setTaggedBallots(request, person_id):
 
     return HttpResponse('All iz well')
 
-def getTaggedBallots(request, person_id, date=None):
+def getTaggedBallots_(request, person_id, date=None):
 
     card = getPersonCardModel(TaggedBallots, person_id, date)
     static = getPersonCardModelNew(MPStaticPL, person_id, date)
@@ -1403,3 +1403,32 @@ def getMembershipsOfMember(request, person_id, date=None):
     }
 
     return JsonResponse(out, safe=False)
+
+
+def getTaggedBallots(request, person_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date()
+    out = []
+    ballots = Ballot.objects.filter(person__id_parladata=person_id, start_time__lte=date_of)
+    ballots = [[ballot for ballot in ballots.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in ballots.order_by("start_time").datetimes('start_time', 'day')]
+    for day in ballots:
+        dayData = {"date": str(day[0].start_time.date()), "ballots":[]}
+        for ballot in day:
+            dayData["ballots"].append({
+                "motion": ballot.vote.motion,
+                "ballot_id": ballot.id_parladata,
+                "session_id": ballot.vote.session.id_parladata if ballot.vote.session else None,
+                "option": ballot.option,
+                "tags": ballot.vote.tags})
+        out.append(dayData)
+
+
+    tags = list(Tag.objects.all().values_list("name", flat=True))
+    result  = {
+        'person': getPersonData(person_id, date_),
+        'all_tags': tags,
+        'results': list(reversed(out))
+        }
+    return JsonResponse(result, safe=False)
