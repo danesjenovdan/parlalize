@@ -91,7 +91,7 @@ def getData():
         if len(person) < max(lengths):
             for vote_id in all_vote_ids:
                 if vote_id not in [ballot['vote'] for ballot in person]:
-                    person.append({'vote': vote_id, 'voter': person[0]['id'], 'option': 'ni obstajal', 'id': 666})
+                    person.append({'vote': vote_id, 'voter': person[0]['id'], 'option': 'ni obstajal', 'id': -1})
 
     # sort ballots
     people_ballots_sorted = sorted([sorted(person, key=lambda k: k['vote']) for person in people_ballots], key=lambda j: j[0]['voter'])
