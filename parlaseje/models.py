@@ -136,6 +136,8 @@ class Vote(Timestampable, models.Model):
     motion = models.TextField(blank=True, null=True,
                               help_text='The motion for which the vote took place')
 
+    tags = JSONField(blank=True, null=True)
+
     votes_for = models.IntegerField(blank=True, null=True,
                                    help_text='Number of votes for')
 
@@ -238,3 +240,9 @@ class AverageSpeeches(Timestampable, models.Model):
                                    blank=True,
                                    null=True,
                                    help_text=_('date of analize'))
+
+
+class Tag(models.Model):
+    name = models.TextField(blank=True,
+                            null=True,
+                            help_text=_('tag name'))
