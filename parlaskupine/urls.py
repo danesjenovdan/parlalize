@@ -15,6 +15,8 @@ urlpatterns = patterns('',
     url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
     url(r'^setBasicInfOfPG/(?P<pg_id>\d+)', setBasicInfOfPG),
     url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
+
+    url(r'^setMPsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setMPsOfPG),
     url(r'^setMPsOfPG/(?P<pg_id>\d+)', setMPsOfPG),
 
     # TK
@@ -46,7 +48,10 @@ urlpatterns = patterns('',
     
     url(r'^getBasicInfOfPG/(?P<pg_id>\d+)', getBasicInfOfPG),
     url(r'^getPercentOFAttendedSessionPG/(?P<pg_id>\d+)', getPercentOFAttendedSessionPG),
+
+    url(r'^getMPsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getMPsOfPG),
     url(r'^getMPsOfPG/(?P<pg_id>\d+)', getMPsOfPG),
+    
     # TK
     url(r'^getMostMatchingThem/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getMostMatchingThem),
     url(r'^getMostMatchingThem/(?P<pg_id>\d+)/', getMostMatchingThem),
