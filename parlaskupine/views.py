@@ -27,11 +27,11 @@ def setBasicInfOfPG(request, pg_id, date_):
                          created_for=date_of,
                          organization=Organization.objects.get(id_parladata=int(pg_id)),
                          headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG'])),
-                         #viceOfPG = Person.objects.get(id_parladata = data['ViceOfPG']),
+                         viceOfPG = Person.objects.get(id_parladata = data['ViceOfPG']),
                          numberOfSeats=data['NumberOfSeats'],
-                         #allVoters=data['AllVoters'] ,facebook=data['Facebook'],
-                         # twitter=data['Twitter'],
-                         #email=data['Mail']
+                         allVoters=data['AllVoters'] ,facebook=data['Facebook'],
+                         twitter=data['Twitter'],
+                         email=data['Mail']
                          )
 
     return JsonResponse({'alliswell': True})
@@ -124,33 +124,36 @@ def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
     return JsonResponse(data)
 
 
-def setMPsOfPG(request, pg_id):
-    result ={}
-    results = []
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGs/').json()
-    for mOfPg in membersOfPG[pg_id]:
-      results.append(mOfPg)
+def setMPsOfPG(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_ = datetime.now().date()
 
-    result = saveOrAbort(model=MPOfPg,
+    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ date_).json()
+
+    result = saveOrAbortNew(model=MPOfPg,
                         id_parladata=pg_id,
-                        MPs =  results
+                        MPs =  membersOfPG[pg_id],
+                        created_for=date_of
                         )
- 
+
     return JsonResponse({'alliswell': True})
 
-#shranjevaje se naredi
-def getMPsOfPG(request, pg_id):
-    mps = requests.get(API_URL+'/getMPs/').json()
-    result ={}
-    results = {}
-    ids = MPOfPg.objects.get(id_parladata=int(pg_id)).MPs
-    print ids
+def getMPsOfPG(request, pg_id, date_=None):
+
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_ = ""
+
+    result =[]
+    ids = MPOfPg.objects.get(id_parladata=int(pg_id), created_for=date_of).MPs
     for MP in ids:
-        for mp in mps:
-            if str(mp['id']) == str(MP):
-                result = {'name':mp['name'], 'image':mp['image']}
-                results[mp['id']] = result
-    return JsonResponse(results, safe=False)
+        result.append(getPersonData(MP, date_))
+    return JsonResponse(result, safe=False)
 
 
 def getSpeechesOfPG(request, pg_id, date_=False):
@@ -685,11 +688,11 @@ def getPGsIDs(request):
 def runSetters(request, date_to):
     setters_models = {
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
-        CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
+        #CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
         #DeviationInOrganization: setDeviationInOrg,
         #LessMatchingThem: setLessMatchingThem,
         #MostMatchingThem: setMostMatchingThem
-
+        MPOfPg: setMPsOfPG
     }
 
     IDs = getPGIDs()
@@ -719,7 +722,8 @@ def runSetters(date_to):
         #DeviationInOrganization: "/setDeviationInOrg/",
         #LessMatchingThem: "/setLessMatchingThem/",
         #MostMatchingThem: "/setMostMatchingThem/",
-        PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
+        #PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
+        MPOfPg:"/setMPsOfPG/"
 
     }
 

@@ -143,6 +143,11 @@ class MPOfPg(Timestampable, models.Model):
 
     MPs = JSONField(blank=True, null=True)
 
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
 
 class MostMatchingThem(Timestampable, models.Model):
 
