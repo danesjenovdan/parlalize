@@ -60,6 +60,9 @@ urlpatterns = patterns('',
     url(r'^getCutVotes/(?P<pg_id>\d+)/(?P<date>[\w].+)', getCutVotes),
     url(r'^getCutVotes/(?P<pg_id>\d+)', getCutVotes),
 
+    url(r'^getTaggedBallots/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getTaggedBallots),
+    url(r'^getTaggedBallots/(?P<pg_id>\d+)', getTaggedBallots),
+
     url(r'^getPGsIDs', getPGsIDs),
 
     ####################################################################################
