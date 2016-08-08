@@ -1414,7 +1414,7 @@ def getTaggedBallots(request, person_id, date_=None):
     ballots = Ballot.objects.filter(person__id_parladata=person_id, start_time__lte=date_of)
     ballots = [[ballot for ballot in ballots.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in ballots.order_by("start_time").datetimes('start_time', 'day')]
     for day in ballots:
-        dayData = {"date": str(day[0].start_time.date()), "ballots":[]}
+        dayData = {"date": day[0].start_time.strftime(API_DATE_FORMAT), "ballots":[]}
         for ballot in day:
             dayData["ballots"].append({
                 "motion": ballot.vote.motion,
