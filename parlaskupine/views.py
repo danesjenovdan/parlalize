@@ -682,7 +682,7 @@ def getTaggedBallots(request, pg_id, date_=None):
         ballots = Ballot.objects.filter(person__id_parladata__in=pgMembersRange["members"], start_time__lte=datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT), start_time__gte=datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT))
         ballots = [ballots.filter(start_time__range=[t_date, t_date+timedelta(days=1)])for t_date in ballots.order_by("start_time").datetimes('start_time', 'day')]
         for day in ballots:
-            dayData = {"date": str(day[0].start_time.date()), "ballots":[]}
+            dayData = {"date": day[0].start_time.strftime(API_DATE_FORMAT), "ballots":[]}
             votes = list(set(day.order_by("start_time").values_list("vote_id", flat=True)))
             for vote in votes:
                 vote_balots = day.filter(vote_id=vote)
