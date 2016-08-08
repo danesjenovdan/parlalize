@@ -698,6 +698,7 @@ def getTaggedBallots(request, pg_id, date_=None):
 
     tags = list(Tag.objects.all().values_list("name", flat=True))
     result  = {
+        'party':Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
         'all_tags': tags,
         'results': list(reversed(out))
         }
