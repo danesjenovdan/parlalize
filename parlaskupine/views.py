@@ -671,6 +671,39 @@ def getWorkingBodies(request, org_id, date_=None):
     return JsonResponse(out)
 
 
+def getTaggedBallots(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date()
+    membersOfPGRanges = (requests.get(API_URL+'/getMembersOfPGRanges/'+ pg_id + ("/"+date_ if date_ else "/")).json())
+    out = []
+    for pgMembersRange in membersOfPGRanges:
+        ballots = Ballot.objects.filter(person__id_parladata__in=pgMembersRange["members"], start_time__lte=datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT), start_time__gte=datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT))
+        ballots = [ballots.filter(start_time__range=[t_date, t_date+timedelta(days=1)])for t_date in ballots.order_by("start_time").datetimes('start_time', 'day')]
+        for day in ballots:
+            dayData = {"date": str(day[0].start_time.date()), "ballots":[]}
+            votes = list(set(day.order_by("start_time").values_list("vote_id", flat=True)))
+            for vote in votes:
+                vote_balots = day.filter(vote_id=vote)
+                counter = Counter(vote_balots.values_list("option", flat=True))
+                dayData["ballots"].append({
+                    "motion": vote_balots[0].vote.motion,
+                    "vote_id": vote_balots[0].vote.id,
+                    "session_id": vote_balots[0].vote.session.id_parladata if vote_balots[0].vote.session else None,
+                    "option": max(counter, key=counter.get),
+                    "tags": vote_balots[0].vote.tags})
+            out.append(dayData)
+
+
+    tags = list(Tag.objects.all().values_list("name", flat=True))
+    result  = {
+        'all_tags': tags,
+        'results': list(reversed(out))
+        }
+    return JsonResponse(result, safe=False)
+
+
 # get PGs IDs
 def getPGsIDs(request):
     output = []
