@@ -12,6 +12,7 @@ from scipy.stats.stats import pearsonr
 from parlaposlanci.models import Person
 from parlaposlanci.views import getMPsList
 import math
+from kvalifikatorji.scripts import countWords
 
 # Create your views here.
 
@@ -676,7 +677,7 @@ def getTaggedBallots(request, pg_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
         date_of = datetime.now().date()
-    membersOfPGRanges = (requests.get(API_URL+'/getMembersOfPGRanges/'+ pg_id + ("/"+date_ if date_ else "/")).json())
+    membersOfPGRanges = requests.get(API_URL+'/getMembersOfPGRanges/'+ pg_id + ("/"+date_ if date_ else "/")).json()
     out = []
     for pgMembersRange in membersOfPGRanges:
         ballots = Ballot.objects.filter(person__id_parladata__in=pgMembersRange["members"], start_time__lte=datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT), start_time__gte=datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT))
@@ -704,6 +705,79 @@ def getTaggedBallots(request, pg_id, date_=None):
         }
     return JsonResponse(result, safe=False)
 
+
+def setVocabularySizeALL(request, date_):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=""
+
+#    thisperson = Person.objects.get(id_parladata=int(person_id))
+
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "/")).json()
+    print "setVocabularySizeALL " + date_
+    text = {}
+    vocabulary_sizes = []
+    result = {}
+    for pgMembersRange in membersOfPGsRanges:
+        print "___" + pgMembersRange["start_date"]
+        for pg in pgMembersRange["members"].keys():
+            for member in pgMembersRange["members"][pg]: 
+                speeches = requests.get(API_URL+'/getSpeechesInRange/' + str(member) + "/" + pgMembersRange["start_date"] + "/" + pgMembersRange["end_date"]).json()
+                if pg in text.keys():
+                    text[pg] += ''.join([speech['content'] for speech in speeches])
+                else:
+                    text[pg] = ''.join([speech['content'] for speech in speeches])
+                    
+    for pg, words in text.items():
+        vocabulary_sizes.append({'pg': pg, 'vocabulary_size': len(countWords(words, Counter()))})
+
+#        if int(mp['id']) == int(person_id):
+#            result['person'] = len(countWords(text, Counter()))
+
+    vocabularies_sorted = sorted(vocabulary_sizes, key=lambda k: k['vocabulary_size'])
+
+    scores = [org['vocabulary_size'] for org in vocabulary_sizes]
+
+    result['average'] = float(sum(scores))/float(len(scores))
+
+    result['max'] = vocabularies_sorted[-1]['vocabulary_size']
+    maxOrg = Organization.objects.get(id_parladata=vocabularies_sorted[-1]['pg'])
+
+#    result.append({'person_id': vocabularies_sorted[-1]['person_id'], 'vocabulary_size': vocabularies_sorted[-1]['vocabulary_size']})
+
+    for p in vocabularies_sorted:
+        saveOrAbortNew(
+            VocabularySize,
+            organization=Organization.objects.get(id_parladata=int(p['pg'])),
+            created_for=date_of,
+            score=[v['vocabulary_size'] for v in vocabularies_sorted if v['pg'] == p['pg']][0],
+            maxOrg=maxOrg,
+            average=result['average'],
+            maximum=result['max'])
+
+    return JsonResponse({'alliswell': True})
+
+
+def getVocabularySize(request, pg_id, date_=None):
+
+    card = getPGCardModelNew(VocabularySize, pg_id, date_)
+
+    out = {
+        'party': card.organization.getOrganizationData(),
+        'results': {
+            'max': {
+                'score': card.maximum,
+                'parties': [card.maxOrg.getOrganizationData()]
+            },
+            'average': card.average,
+            'score': card.score
+        }
+    }
+
+    return JsonResponse(out, safe=False)
 
 # get PGs IDs
 def getPGsIDs(request):
@@ -775,4 +849,16 @@ def runSetters(date_to):
                 a = requests.get(url)
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
+
+    #Runner for setters ALL
+    all_in_one_setters_models = {
+        VocabularySize: setVocabularySizeALL,
+    }
+
+    zero=datetime(day=2, month=8, year=2014).date()
+    for model, setter in all_in_one_setters_models.items():
+        print (toDate-datetime(day=2, month=8, year=2014).date()).days
+        for i in range((toDate-datetime(day=2, month=8, year=2014).date()).days):
+            print (zero+timedelta(days=i)).strftime('%d.%m.%Y')
+            setter(request, (zero+timedelta(days=i)).strftime('%d.%m.%Y'))
     return {"status": "all is fine :D"}
