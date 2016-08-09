@@ -17,7 +17,7 @@ from .models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT
 from parlaseje.models import Session, Tag
 
-from parlaposlanci import compass
+from kompas2 import notes
 
 # Create your views here.
 
@@ -1316,7 +1316,8 @@ def runSetters(request, date_to):
     all_in_one_setters_models = {
         #VocabularySize: setVocabularySizeALL,
         #AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
-        SpokenWords:setNumberOfSpokenWordsALL,
+        SpokenWords: setNumberOfSpokenWordsALL,
+        Compass: setCompass,
     }
 
     zero=datetime(day=2, month=8, year=2014).date()
@@ -1330,25 +1331,30 @@ def runSetters(request, date_to):
 
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 
-def setCompass(request):
-    data = compass.getData()
-
-    if data['calculated_from'] != None:
-        newcompass = Compass(
-            # calculated_from=datetime.strptime(data['calculated_from']), # TODO fix date parsing
-            created_for=datetime.now().date(),
-            data=data['people']
-        )
+def setCompass(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        newcompass = Compass(
-            created_for=datetime.now().date(),
-            data=data['people']
-        )
-    newcompass.save()
+        date_of = datetime.now().date()
+        date_=""
+
+    data = notes.getData(date_of)
+    existing_compas = Compass.objects.filter(created_for=date_of)
+    if existing_compas:
+        existing_compas[0].data = data
+        existing_compas[0].save()
+    else:
+        Compass(created_for=date_of,
+                data=data).save()
 
     return HttpResponse('All iz well')
 
-def getCompass(request): # TODO make propper setters and getters
+def getCompass(request, date_=None): # TODO make propper setters and getters
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=""
     data = Compass.objects.all().order_by('created_for')[0].data
 
     return JsonResponse(data, safe=False)
