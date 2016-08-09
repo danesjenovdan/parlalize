@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
+from parlalize.settings import API_URL, API_DATE_FORMAT
 
 def showCompass():
 
@@ -26,10 +27,10 @@ def assignValueToOption(option):
     if option == 'ni obstajal':
         return 4
 
-def getPeoplesNames(ids):
+def getPeoplesNames(ids, date_of):
     names_list = []
     for person_id in ids:
-        data = requests.get('https://analize.parlameter.si/v1/p/getMPStatic/' + str(person_id) + '/').json()
+        data = requests.get('https://analize.parlameter.si/v1/p/getMPStatic/' + str(person_id) + '/' + date_of.strftime(API_DATE_FORMAT)).json()
         name = data['person']['name']
 
         names_list.append(data['person']['name'].encode('ascii', errors='xmlcharrefreplace'))
@@ -58,17 +59,17 @@ def makeSimilarities(people_ballots_sorted_list):
 
     return np.array(similarities)
 
-def enrichData(vT1, vT2, people):
+def enrichData(vT1, vT2, people, date_of):
 
-    enriched = [{'person': requests.get('https://analize.parlameter.si/v1/utils/getPersonData/' + str(speaker)).json(), 'score': {'vT1': vT1[i], 'vT2': vT2[i]}} for i, speaker in enumerate(people)]
+    enriched = [{'person': requests.get('https://analize.parlameter.si/v1/utils/getPersonData/' + str(speaker) + "/" + date_of.strftime(API_DATE_FORMAT)).json(), 'score': {'vT1': vT1[i], 'vT2': vT2[i]}} for i, speaker in enumerate(people)]
 
     return enriched
 
 
-def getData():
+def getData(date_of):
     # getting all the necessary data
-    allballots = requests.get('https://data.parlameter.si/v1/getAllBallots/').json()
-    people = requests.get('https://data.parlameter.si/v1/getMPs/').json()
+    allballots = requests.get(API_URL+'/getAllBallots/'+date_of.strftime(API_DATE_FORMAT)).json()
+    people = requests.get(API_URL+'/getMPs/'+date_of.strftime(API_DATE_FORMAT)).json()
 
     # sort people's ids
     people_ids = sorted([person['id'] for person in people])
@@ -106,7 +107,7 @@ def getData():
     thearray = np.array(people_ballots_sorted_list)
 
     # get people's names
-    people_names = getPeoplesNames(people_ids)
+    people_names = getPeoplesNames(people_ids, date_of)
 
     # sklearn_pca = sklearnPCA(n_components=2)
     # sklearn_transf = sklearn_pca.fit_transform(thearray)
@@ -138,6 +139,6 @@ def getData():
     #     ax3.annotate(str(txt), (vT[1,:][i], vT[0,:][i]))
     # plt.savefig('SVD.png')
 
-    return enrichData(vT[1,:], vT[0,:], people_ids)
+    return enrichData(vT[1,:], vT[0,:], people_ids, date_of)
 
     #return people_ids, people_ballots_sorted, people_ballots_sorted_list#, sklearn_mda
