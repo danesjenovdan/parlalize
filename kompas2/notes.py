@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 
 def showCompass():
 
@@ -30,7 +30,7 @@ def assignValueToOption(option):
 def getPeoplesNames(ids, date_of):
     names_list = []
     for person_id in ids:
-        data = requests.get('https://analize.parlameter.si/v1/p/getMPStatic/' + str(person_id) + '/' + date_of.strftime(API_DATE_FORMAT)).json()
+        data = requests.get(BASE_URL+'/p/getMPStatic/' + str(person_id) + '/' + date_of.strftime(API_DATE_FORMAT)).json()
         name = data['person']['name']
 
         names_list.append(data['person']['name'].encode('ascii', errors='xmlcharrefreplace'))
@@ -61,7 +61,7 @@ def makeSimilarities(people_ballots_sorted_list):
 
 def enrichData(vT1, vT2, people, date_of):
 
-    enriched = [{'person': requests.get('https://analize.parlameter.si/v1/utils/getPersonData/' + str(speaker) + "/" + date_of.strftime(API_DATE_FORMAT)).json(), 'score': {'vT1': vT1[i], 'vT2': vT2[i]}} for i, speaker in enumerate(people)]
+    enriched = [{'person': requests.get(BASE_URL+'/utils/getPersonData/' + str(speaker) + "/" + date_of.strftime(API_DATE_FORMAT)).json(), 'score': {'vT1': vT1[i], 'vT2': vT2[i]}} for i, speaker in enumerate(people)]
 
     return enriched
 
@@ -74,10 +74,14 @@ def getData(date_of):
     # sort people's ids
     people_ids = sorted([person['id'] for person in people])
 
+    people_without_ballots = []
+
     # group ballots by people
     people_ballots = []
     for voter in people_ids:
         people_ballots.append([ballot for ballot in allballots if ballot['voter'] == voter])
+        if people_ballots[-1]==[]:
+            people_without_ballots.append(voter)
     lengths = [len(person) for person in people_ballots]
 
     # get ids of all votes
@@ -89,10 +93,15 @@ def getData(date_of):
 
     # pad votes and write in "ni obstajal" for people who didn't exist yet
     for person in people_ballots:
+        print "person", person
         if len(person) < max(lengths):
             for vote_id in all_vote_ids:
-                if vote_id not in [ballot['vote'] for ballot in person]:
-                    person.append({'vote': vote_id, 'voter': person[0]['id'], 'option': 'ni obstajal', 'id': -1})
+                if len(person) == 0:
+                    if vote_id not in [ballot['vote'] for ballot in person]:
+                        person.append({'vote': vote_id, 'voter': people_without_ballots.pop(obj=people_without_ballots[0]), 'option': 'ni obstajal', 'id': -1})
+                else:
+                    if vote_id not in [ballot['vote'] for ballot in person]:
+                        person.append({'vote': vote_id, 'voter': person[0]['id'], 'option': 'ni obstajal', 'id': -1})
 
     # sort ballots
     people_ballots_sorted = sorted([sorted(person, key=lambda k: k['vote']) for person in people_ballots], key=lambda j: j[0]['voter'])
