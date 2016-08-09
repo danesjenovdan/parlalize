@@ -41,6 +41,7 @@ urlpatterns = patterns(
     url(r'^setCutVotes/(?P<person_id>\d+)/(?P<date_>[\w].+)', setCutVotes),
     url(r'^setCutVotes/(?P<person_id>\d+)', setCutVotes),
 
+    url(r'^setCompass/(?P<date_>[\w].+)', setCompass),
     url(r'^setCompass', setCompass),
 
     url(r'^setTaggedBallots/(?P<person_id>\d+)', setTaggedBallots),

@@ -1339,6 +1339,9 @@ def setCompass(request, date_=None):
         date_=""
 
     data = notes.getData(date_of)
+    if data == []:
+        return JsonResponse({"status": "no data"})
+    print data
     existing_compas = Compass.objects.filter(created_for=date_of)
     if existing_compas:
         existing_compas[0].data = data
@@ -1347,7 +1350,7 @@ def setCompass(request, date_=None):
         Compass(created_for=date_of,
                 data=data).save()
 
-    return HttpResponse('All iz well')
+    JsonResponse({"status": 'All iz well'})
 
 def getCompass(request, date_=None): # TODO make propper setters and getters
     if date_:
