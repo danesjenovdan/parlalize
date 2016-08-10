@@ -22,14 +22,15 @@ def setBasicInfOfPG(request, pg_id, date_):
     else:
         date_of = datetime.now().date()
     data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/').json()
-#vprasi za shranjevanje yes and no
-    result = saveOrAbort(model=PGStatic,
+
+    result = saveOrAbortNew(model=PGStatic,
                          created_for=date_of,
                          organization=Organization.objects.get(id_parladata=int(pg_id)),
                          headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG'])),
                          viceOfPG = Person.objects.get(id_parladata = data['ViceOfPG']),
                          numberOfSeats=data['NumberOfSeats'],
-                         allVoters=data['AllVoters'] ,facebook=data['Facebook'],
+                         allVoters=data['AllVoters'],
+                         facebook=data['Facebook'],
                          twitter=data['Twitter'],
                          email=data['Mail']
                          )
@@ -134,6 +135,7 @@ def setMPsOfPG(request, pg_id, date_=None):
     membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ date_).json()
 
     result = saveOrAbortNew(model=MPOfPg,
+                        organization=Organization.objects.get(id_parladata=pg_id),
                         id_parladata=pg_id,
                         MPs =  membersOfPG[pg_id],
                         created_for=date_of
@@ -149,10 +151,8 @@ def getMPsOfPG(request, pg_id, date_=None):
         date_of = datetime.now().date()
         date_ = ""
 
-    result =[]
     ids = MPOfPg.objects.get(id_parladata=int(pg_id), created_for=date_of).MPs
-    for MP in ids:
-        result.append(getPersonData(MP, date_))
+    result = [getPersonData(MP, date_) for MP in ids]
     return JsonResponse(result, safe=False)
 
 
@@ -692,7 +692,8 @@ def runSetters(request, date_to):
         #DeviationInOrganization: setDeviationInOrg,
         #LessMatchingThem: setLessMatchingThem,
         #MostMatchingThem: setMostMatchingThem
-        MPOfPg: setMPsOfPG
+        #MPOfPg: setMPsOfPG
+        PGStatic:setBasicInfOfPG
     }
 
     IDs = getPGIDs()
@@ -713,36 +714,3 @@ def runSetters(request, date_to):
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
     return JsonResponse({"status": "all is fine :D"}, safe=False)
-
-
-def runSetters(date_to):
-    setters_models = {
-        # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
-        #CutVotes: "/setCutVotes/",#BASE_URL+'/p/setCutVotes/',
-        #DeviationInOrganization: "/setDeviationInOrg/",
-        #LessMatchingThem: "/setLessMatchingThem/",
-        #MostMatchingThem: "/setMostMatchingThem/",
-        #PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
-        MPOfPg:"/setMPsOfPG/"
-
-    }
-
-    IDs = getPGIDs()
-    #IDs = [1, 2]
-    # print IDs
-    allIds = len(IDs)
-    curentId = 0
-    
-    for model, setter in setters_models.items():
-        for ID in IDs:
-            print setter
-            dates = findDatesFromLastCard(model, ID, date_to)
-            print dates
-            for date in dates:
-                url = BASE_URL+"/pg"+setter+str(ID)+'/'+date.strftime(API_DATE_FORMAT)
-                print url
-                # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
-                a = requests.get(url)
-        curentId += 1
-                # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
-    return {"status": "all is fine :D"}
