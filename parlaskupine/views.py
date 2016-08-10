@@ -164,7 +164,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
         date_of = datetime.now().date()
         date_ = ""
 
-    membersOfPGRanges = reversed(requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+date_) if date_ else "").json())
+    membersOfPGRanges = reversed(requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "")).json())
     out = []
     for pgMembersRange in membersOfPGRanges:
         startTime = datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT)
@@ -174,10 +174,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
             dayData = {"date": str(day[0].start_time.date()), "sessions":[]}
             addedPersons = []
             addedSessions = []
-            print str(day[0].start_time.date())
             for speech in day:
-                print addedPersons, addedSessions
-                print speech.person.id_parladata, speech.session.id_parladata
                 if speech.session.id_parladata in addedSessions:
                     if speech.person.id_parladata in addedPersons:
                         dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"][addedPersons.index(speech.person.id_parladata)]["speeches"].append(speech.id_parladata)
@@ -218,7 +215,9 @@ def howMatchingThem(request, pg_id, type_of, date_=None):
         del membersInPGs[str(pg_id)]
         for pgs in membersInPGs.keys():
             for voter in membersInPGs[str(pgs)]:
-                votes.pop(str(voter))
+                #WORKAROUND: if one person is in more then one PG
+                if voter in votes:
+                    votes.pop(str(voter))
 
 
     members = getMPsList(request, date_)
@@ -796,17 +795,18 @@ def getPGsIDs(request):
 
 
 def runSetters(request, date_to):
+    toDate = datetime.strptime(date_to, '%d.%m.%Y').date()
     setters_models = {
-        # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
         #CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
         #DeviationInOrganization: setDeviationInOrg,
         #LessMatchingThem: setLessMatchingThem,
         #MostMatchingThem: setMostMatchingThem
-        MPOfPg: setMPsOfPG
+        #PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
+        #MPOfPg: setMPsOfPG
     }
 
     IDs = getPGIDs()
-    IDs = [1, 2]
+    #IDs = [1, 2]
     # print IDs
     allIds = len(IDs)
     curentId = 0
@@ -822,43 +822,11 @@ def runSetters(request, date_to):
                 setter(request, str(ID), date.strftime(API_DATE_FORMAT))
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
-    return JsonResponse({"status": "all is fine :D"}, safe=False)
 
-
-def runSetters(date_to):
-    setters_models = {
-        # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
-        #CutVotes: "/setCutVotes/",#BASE_URL+'/p/setCutVotes/',
-        #DeviationInOrganization: "/setDeviationInOrg/",
-        #LessMatchingThem: "/setLessMatchingThem/",
-        #MostMatchingThem: "/setMostMatchingThem/",
-        #PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
-        MPOfPg:"/setMPsOfPG/"
-
-    }
-
-    IDs = getPGIDs()
-    #IDs = [1, 2]
-    # print IDs
-    allIds = len(IDs)
-    curentId = 0
-    
-    for model, setter in setters_models.items():
-        for ID in IDs:
-            print setter
-            dates = findDatesFromLastCard(model, ID, date_to)
-            print dates
-            for date in dates:
-                url = BASE_URL+"/pg"+setter+str(ID)+'/'+date.strftime(API_DATE_FORMAT)
-                print url
-                # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
-                a = requests.get(url)
-        curentId += 1
-                # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
 
     #Runner for setters ALL
     all_in_one_setters_models = {
-        VocabularySize: setVocabularySizeALL,
+        #VocabularySize: setVocabularySizeALL,
     }
 
     zero=datetime(day=2, month=8, year=2014).date()
@@ -867,4 +835,5 @@ def runSetters(date_to):
         for i in range((toDate-datetime(day=2, month=8, year=2014).date()).days):
             print (zero+timedelta(days=i)).strftime('%d.%m.%Y')
             setter(request, (zero+timedelta(days=i)).strftime('%d.%m.%Y'))
-    return {"status": "all is fine :D"}
+
+    return JsonResponse({"status": "all is fine :D"}, safe=False)
