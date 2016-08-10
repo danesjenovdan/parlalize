@@ -338,7 +338,7 @@ def getAllSpeeches(request, person_id, date_=None):
 
     result  = {
         'person': getPersonData(person_id, date_),
-        'results': out
+        'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
 
