@@ -98,7 +98,8 @@ def getData(date_of):
             for vote_id in all_vote_ids:
                 if len(person) == 0:
                     if vote_id not in [ballot['vote'] for ballot in person]:
-                        person.append({'vote': vote_id, 'voter': people_without_ballots.pop(obj=people_without_ballots[0]), 'option': 'ni obstajal', 'id': -1})
+                        person.append({'vote': vote_id, 'voter': people_without_ballots[0], 'option': 'ni obstajal', 'id': -1})
+			people_without_ballots.remove(people_without_ballots[0])
                 else:
                     if vote_id not in [ballot['vote'] for ballot in person]:
                         person.append({'vote': vote_id, 'voter': person[0]['id'], 'option': 'ni obstajal', 'id': -1})
