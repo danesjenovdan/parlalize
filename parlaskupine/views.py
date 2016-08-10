@@ -169,12 +169,18 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     for pgMembersRange in membersOfPGRanges:
         startTime = datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT)
         endTime = datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT)
-        speeches = [[speech for speech in Speech.objects.filter(person__id_parladata__in = pgMembersRange["members"][pg_id], start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in Speech.objects.filter(start_time__lte=endTime, start_time__gte=startTime, person__id_parladata__in = pgMembersRange["members"][pg_id]).datetimes('start_time', 'day')]
+        speeches = [[speech for speech in Speech.objects.filter(person__id_parladata__in = pgMembersRange["members"][pg_id], start_time__range=[t_date, t_date+timedelta(days=1)]).order_by("-id_parladata")] for t_date in Speech.objects.filter(start_time__lte=endTime, start_time__gte=startTime, person__id_parladata__in = pgMembersRange["members"][pg_id]).datetimes('start_time', 'day')]
         for day in reversed(speeches):
             dayData = {"date": str(day[0].start_time.date()), "sessions":[]}
             addedPersons = []
             addedSessions = []
             for speech in day:
+                #debug
+                #print addedPersons, addedSessions
+                #print dayData
+                #print "add", speech.person.id_parladata, speech.session.id_parladata
+                #print speech.id_parladata, speech.start_time
+                #print "index", addedPersons.index(speech.person.id_parladata), addedSessions.index(speech.session.id_parladata)
                 if speech.session.id_parladata in addedSessions:
                     if speech.person.id_parladata in addedPersons:
                         dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"][addedPersons.index(speech.person.id_parladata)]["speeches"].append(speech.id_parladata)
