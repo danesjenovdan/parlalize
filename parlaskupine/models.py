@@ -400,3 +400,32 @@ class WorkingBodies(Timestampable, models.Model):
     seats = JSONField()
 
     sessions = JSONField()
+
+
+class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of Org
+    organization = models.ForeignKey('Organization',
+                                     blank=True, null=True,
+                                     related_name='childrenVS',
+                                     help_text=_('Org'))
+
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    score = models.FloatField(_('Vacabularty size of this Org'),
+                                   blank=True, null=True,
+                                   help_text=_('Vacabularty size of this Org'))
+
+    maxOrg = models.ForeignKey('Organization',
+                               blank=True, null=True,
+                               related_name='childrenVacSiz',
+                               help_text=_('Organization which has max vacabularty size'))
+
+    average = models.FloatField(_('average'),
+                                   blank=True, null=True,
+                                   help_text=_('Vacabularty size of Org'))
+
+    maximum = models.FloatField(_('max'),
+                                   blank=True, null=True,
+                                   help_text=_('Max of Org vacabularty size '))
