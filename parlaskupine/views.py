@@ -183,6 +183,8 @@ def getSpeechesOfPG(request, pg_id, date_=False):
                         dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"].append({"speeches":[speech.id_parladata],
                                                 "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))})
                 else:
+                    #reset persons for each session on date
+                    addedPersons = []
                     addedSessions.append(speech.session.id_parladata)
                     addedPersons.append(speech.person.id_parladata)
                     dayData["sessions"].append({"session_name": speech.session.name,"session_id": speech.session.id_parladata, "speakers":[{"speeches":[speech.id_parladata],
