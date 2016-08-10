@@ -692,8 +692,8 @@ def runSetters(request, date_to):
         #DeviationInOrganization: setDeviationInOrg,
         #LessMatchingThem: setLessMatchingThem,
         #MostMatchingThem: setMostMatchingThem
-        #MPOfPg: setMPsOfPG
-        PGStatic:setBasicInfOfPG
+        MPOfPg: setMPsOfPG
+        #PGStatic:setBasicInfOfPG
     }
 
     IDs = getPGIDs()
