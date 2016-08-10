@@ -212,7 +212,9 @@ def howMatchingThem(request, pg_id, type_of, date_=None):
         del membersInPGs[str(pg_id)]
         for pgs in membersInPGs.keys():
             for voter in membersInPGs[str(pgs)]:
-                votes.pop(str(voter))
+                #WORKAROUND: if one person is in more then one PG
+                if voter in votes:
+                    votes.pop(str(voter))
 
 
     members = getMPsList(request, date_)
