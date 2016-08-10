@@ -35,6 +35,9 @@ urlpatterns = patterns('',
     url(r'^getWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies),
     url(r'^getWorkingBodies/(?P<org_id>\d+)', getWorkingBodies),
 
+    url(r'^setVocabularySizeALL/(?P<date_>[\w].+)', setVocabularySizeALL),
+    url(r'^setVocabularySizeALL', setVocabularySizeALL),
+
 
     # getters
     # TJ
@@ -64,6 +67,12 @@ urlpatterns = patterns('',
 
     url(r'^getCutVotes/(?P<pg_id>\d+)/(?P<date>[\w].+)', getCutVotes),
     url(r'^getCutVotes/(?P<pg_id>\d+)', getCutVotes),
+
+    url(r'^getTaggedBallots/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getTaggedBallots),
+    url(r'^getTaggedBallots/(?P<pg_id>\d+)', getTaggedBallots),
+
+    url(r'^getVocabularySize/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getVocabularySize),
+    url(r'^getVocabularySize/(?P<pg_id>\d+)', getVocabularySize),
 
     url(r'^getPGsIDs', getPGsIDs),
 

@@ -503,7 +503,6 @@ def updateTags(request):
     count = 0
     for tag in tags: 
         if tag not in existing_tags:
-            print tag
             Tag(name=tag).save()
             count += 1
     return JsonResponse({'alliswell': True, "add_tags": count})
