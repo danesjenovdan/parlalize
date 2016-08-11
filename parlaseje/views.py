@@ -11,6 +11,7 @@ from parlaseje.utils import *
 from collections import defaultdict
 from math import fabs
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 
@@ -508,7 +509,21 @@ def updateTags(request):
     return JsonResponse({'alliswell': True, "add_tags": count})
 
 
+def setQuote(request, speech_id, start_pos, end_pos):
+    speech = get_object_or_404(Speech, id_parladata=speech_id)
+    quote = Quote(speech=speech, first_char=start_pos, last_char=end_pos, quoted_text=speech.content[int(start_pos):int(end_pos)])
+    quote.save()
 
+    return JsonResponse({"status": "alliswell", "id": quote.id})
+
+
+def getQuote(request, quote_id):
+    quote = get_object_or_404(Quote, id=quote_id)
+
+    return JsonResponse({"quoted_text": quote.quoted_text, 
+                         "start_idx": quote.first_char, 
+                         "end_idx": quote.last_char, 
+                         "speech_id": quote.speech.id_parladata})
 
 def runSetters(request, date_to):
 
