@@ -205,8 +205,9 @@ class AbsentMPs(Timestampable, models.Model):
                                     blank=True,
                                     null=True,
                                     help_text=_('date of vote'))
-class Quote(models.Model):
 
+
+class Quote(models.Model):
     quoted_text = models.TextField(_('quoted text'),
                                     blank=True,
                                     null=True,
