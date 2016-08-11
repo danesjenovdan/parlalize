@@ -3,8 +3,10 @@ from parlaseje.views import *
 
 
 urlpatterns = patterns(
-	url(r'^getSpeech/(?P<speech_id>\d+)', getSpeech),
-	url(r'^setAllSessions/', setAllSessions),
+    #wtf fix (first url was ignored)
+    (),
+    url(r'^getSpeech/(?P<speech_id>\d+)', getSpeech),
+    url(r'^setAllSessions/', setAllSessions),
 
     
     url(r'^setMotionOfSession/(?P<id_se>\d+)', setMotionOfSession),
@@ -34,6 +36,9 @@ urlpatterns = patterns(
     url(r'^getMaxSpeechesOnSession/', getMaxSpeechesOnSession),
 
     url(r'^updateTags/', updateTags),
+
+    url(r'^setQuote/(?P<speech_id>\d+)/(?P<start_pos>\d+)/(?P<end_pos>\d+)', setQuote),
+    url(r'^getQuote/(?P<quote_id>\d+)', getQuote),
 
     #runenr
     url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
