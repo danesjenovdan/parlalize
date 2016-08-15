@@ -260,6 +260,7 @@ def getMotionGraph(request, id_mo, date=False):
         out_kvor.append({'option':'kvorum','total_votes': model[0].abstain, 'breakdown':option_kvor})
     
     for pg in model[0].pgs_yes:
+        parties = Organization.objects.get(id_parladata=pg).getOrganizationData()
         for mp in model[0].mp_yes:
             mps.append(getPersonData(mp, date))
         option_for.append({'pg':parties, 'mps': mps})
@@ -267,6 +268,7 @@ def getMotionGraph(request, id_mo, date=False):
         out_for.append({'option':'za','total_votes': model[0].votes_for, 'breakdown':option_for})
 
     for pg in model[0].pgs_no:
+        parties = Organization.objects.get(id_parladata=pg).getOrganizationData()
         for mp in model[0].mp_no:
             mps.append(getPersonData(mp, date))
         option_against.append({'pg':parties, 'mps': mps})
@@ -274,6 +276,7 @@ def getMotionGraph(request, id_mo, date=False):
         out_against.append({'option':'proti','total_votes': model[0].against, 'breakdown':option_against})
 
     for pg in model[0].pgs_np:
+        parties = Organization.objects.get(id_parladata=pg).getOrganizationData()
         for mp in model[0].mp_np:
             mps.append(getPersonData(mp, date))
         option_np.append({'pg':parties, 'mps': mps})
