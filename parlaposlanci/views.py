@@ -1159,6 +1159,19 @@ def getVocabularySize(request, person_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
+def getVocabolarySizeLanding(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        person_id=None
+        date_of = VocabularySize.objects.all().order_by("-created_for")[0].created_for
+        date_ = date_of.strftime(API_DATE_FORMAT)
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    datas = [getPersonCardModelNew(VocabularySize, mp["id"], date_) for mp in mps]
+    return JsonResponse(sorted([{"person": getPersonData(data.person_id, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
+
+
+#just method ALL is edited for date
 def setAverageNumberOfSpeechesPerSession(request, person_id):
 
     person = Person.objects.get(id_parladata=int(person_id))
