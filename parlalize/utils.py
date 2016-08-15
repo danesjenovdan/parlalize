@@ -509,7 +509,17 @@ def getMPGovId(id_parladata):
 def getPersonData(id_parladata, date_=None):
     if not date_:
         date_ = datetime.now().strftime(API_DATE_FORMAT)
-    data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
+    try:
+        data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
+    except:
+        return {
+                'party': {
+                          'acronym': 'unknown', 
+                          'id': 'unknown', 
+                          'name': 'unknown'}, 
+                'name': 'unknown', 
+                'gov_id': 'unknown', 
+                'id': id_parladata}
     return {
             'name': data.person.name,
             'id': int(data.person.id_parladata),
