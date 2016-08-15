@@ -9,11 +9,15 @@ urlpatterns = patterns(
     
     url(r'^setMotionOfSession/(?P<id_se>\d+)', setMotionOfSession),
     url(r'^setMotionOfSession/(?P<id_se>\d+)/(?P<date_>[\w].+)', setMotionOfSession),
+
+    url(r'^setMotionOfSessionGraph/(?P<id_se>\d+)/(?P<date_>[\w].+)', setMotionOfSessionGraph),
+    url(r'^setMotionOfSessionGraph/(?P<id_se>\d+)', setMotionOfSessionGraph),
     
     url(r'^getMotionOfSession/(?P<id_se>\d+)', getMotionOfSession),
     url(r'^getMotionOfSession/(?P<id_se>\d+)/(?P<date>[\w].+)', getMotionOfSession),
     
-    url(r'^getMotionGraph/(?P<id_se>\d+)', getMotionGraph),
+    url(r'^getMotionGraph/(?P<id_mo>\d+)', getMotionGraph),
+    url(r'^getMotionGraph/(?P<id_mo>\d+)/(?P<date>[\w].+)', getMotionGraph),
 
     url(r'^setAbsentMPs/(?P<id_se>\d+)', setAbsentMPs),
     
