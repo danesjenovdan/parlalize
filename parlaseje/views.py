@@ -289,18 +289,16 @@ def getMotionGraph(request, id_mo, date=False):
 def setAbsentMPs(request, id_se):
     votes = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
-    mps = requests.get(API_URL+'/getMPs/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
+    mps = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
 
 
     mpsID = []
-
     if len(votes) != 0:
-        mpsID = [mpID['id'] for mpID in mps]
+        mpsID = reduce(lambda x,y: x+y,mps.values())
         for vote in votes:
             if vote['option'] != 'ni':
                 if vote['mp_id'] in mpsID:
                     mpsID.remove(vote['mp_id'])
-
 
         result = saveOrAbortNew(model=AbsentMPs,
                                 id_parladata=id_se,
@@ -338,7 +336,7 @@ def setPresenceOfPG(request, id_se):
     motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
     membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
-
+    
     onSession = {}
     yesdic = defaultdict(int)
     allsessionsinone = defaultdict(list)
@@ -357,18 +355,19 @@ def setPresenceOfPG(request, id_se):
 
     for i in membersOfPG:
         allPgs[i] = len(membersOfPG[i]) * len(motions)
-
+    
     for b in onSession:
         for i in onSession[b]:
             yesdic[i] += 1
         results[b] = yesdic
-
+   
     if len(results)>0:
         temp = dict(results[results.keys()[0]])
         for i in temp:
             if allPgs[str(i)] != 0:
                 final[i] = int((float(temp[i]) / float(allPgs[str(i)])) * 100)
-
+        
+                
         result = saveOrAbortNew(model=PresenceOfPG,
                                 created_for=session.start_time,
                                 presence=[final],
