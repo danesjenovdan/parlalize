@@ -385,7 +385,7 @@ class WorkingBodies(Timestampable, models.Model):
 
     organization = models.ForeignKey("Organization")
 
-    president = models.ForeignKey('parlaposlanci.Person',
+    president = models.ForeignKey(Person,
                                   blank=True, null=True,
                                   help_text=_('President'))
 

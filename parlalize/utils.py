@@ -401,16 +401,37 @@ def getPGIDs():
 
 def setAllSessions():
     data  = requests.get(API_URL + '/getSessions/').json()
+    session_ids = list(Session.objects.all().values_list("id_parladata", flat=True))
     for sessions in data:
-        if not Session.objects.filter(id_parladata=sessions['id']):
-
-            result = saveOrAbort(model=Session,
-                            name=sessions['name'],
+        if sessions['id'] not in session_ids:
+            result = Session(name=sessions['name'],
                              gov_id=sessions['gov_id'],
                              start_time=sessions['start_time'],
                              end_time=sessions['end_time'],
                              classification=sessions['classification'],
-                             id_parladata=sessions['id'])
+                             id_parladata=sessions['id'],
+                             organization=Organization.objects.get(id_parladata=sessions['organization_id']),
+                             ).save()
+        else:
+            if not Session.objects.filter(name=sessions['name'],
+                                          gov_id=sessions['gov_id'],
+                                          start_time=sessions['start_time'],
+                                          end_time=sessions['end_time'],
+                                          classification=sessions['classification'],
+                                          id_parladata=sessions['id'],
+                                          organization=Organization.objects.get(id_parladata=sessions['organization_id']),):
+                #save changes
+                session = Session.objects.get(id_parladata=sessions['id'])
+                session.name = sessions['name']
+                session.gov_id = sessions['gov_id']
+                session.start_time = sessions['start_time']
+                session.end_time = sessions['end_time']
+                session.classification = sessions['classification']
+                session.id_parladata = sessions['id']
+                session.organization = Organization.objects.get(id_parladata=sessions['organization_id'])
+                session.save()
+
+
 
     return 1
 
