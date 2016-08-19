@@ -619,7 +619,12 @@ def setWorkingBodies(request, org_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
+    print "set "+org_id+" "+date_
     members = requests.get(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
+    if not len(members["president"]) or not len(members["members"]) or not len(members["vice_president"]):
+        return JsonResponse({'alliswell': False, "status": {"president_count": len(members["president"]),
+                                                            "vice_president": len(members["members"]),
+                                                            "mambers": len(members["vice_president"])}})
     out = {}
     name = members.pop("name")
     all_members = [member for role in members.values() for member in role]
@@ -633,6 +638,7 @@ def setWorkingBodies(request, org_id, date_=None):
     oppo_members = sum([len(member) for member in oppo_pgs.values()])
 
     kol = 100.0/float(coal_members+oppo_members)
+    
     seats = [{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "coalition"}for pg_id, members_list in coal_pgs.items() if len(members_list)>0]+[{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "opposition"}for pg_id, members_list in oppo_pgs.items() if len(members_list)>0]
     out["info"] = {role: [member for member in members_list] for role, members_list in members.items()}
     out["ratio"] = {"coalition": coal_members*kol, "opposition": oppo_members*kol}
@@ -655,6 +661,23 @@ def setWorkingBodies(request, org_id, date_=None):
 
 
 def getWorkingBodies(request, org_id, date_=None):
+    workingBodies = getPGCardModelNew(WorkingBodies, org_id, date_)
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+    sessions = [{"id": session.id, "name": session.name} for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
+    return JsonResponse({"organization": workingBodies.organization.getOrganizationData(),
+                         "info": {"president": getPersonData(workingBodies.president.id_parladata),
+                                  "vice_president": [getPersonData(person) for person in workingBodies.vice_president],
+                                  "members": [getPersonData(person) for person in workingBodies.members],},
+                         "ratio":{"coalition": workingBodies.coal_ratio,
+                                  "opposition": workingBodies.oppo_ratio},
+                         "seats_per_pg": workingBodies.seats,
+                         "sessions": sessions})
+
+
+def getWorkingBodies_live(request, org_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -849,6 +872,14 @@ def runSetters(request, date_to):
         for i in range((toDate-datetime(day=2, month=8, year=2014).date()).days):
             print (zero+timedelta(days=i)).strftime('%d.%m.%Y')
             setter(request, (zero+timedelta(days=i)).strftime('%d.%m.%Y'))
+
+    organizations = requests.get(API_URL+"/getOrganizatonByClassification").json()
+    print organizations
+    for org in organizations["working_bodies"]+organizations["council"]:
+        print org
+        dates = findDatesFromLastCard(WorkingBodies, org["id"], date_to)
+        for date in dates:
+            print setWorkingBodies(request, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
 
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 >>>>>>> master
