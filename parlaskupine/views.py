@@ -666,7 +666,7 @@ def getWorkingBodies(request, org_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-    sessions = [{"id": session.id, "name": session.name} for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
+    sessions = [{"id": session.id_parladata, "name": session.name} for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
     return JsonResponse({"organization": workingBodies.organization.getOrganizationData(),
                          "info": {"president": getPersonData(workingBodies.president.id_parladata),
                                   "vice_president": [getPersonData(person) for person in workingBodies.vice_president],
@@ -830,13 +830,8 @@ def runSetters(request, date_to):
         #DeviationInOrganization: setDeviationInOrg,
         #LessMatchingThem: setLessMatchingThem,
         #MostMatchingThem: setMostMatchingThem
-<<<<<<< HEAD
-        MPOfPg: setMPsOfPG
-        #PGStatic:setBasicInfOfPG
-=======
         #PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
         #MPOfPg: setMPsOfPG
->>>>>>> master
     }
 
     IDs = getPGIDs()
@@ -856,9 +851,6 @@ def runSetters(request, date_to):
                 setter(request, str(ID), date.strftime(API_DATE_FORMAT))
         curentId += 1
                 # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
-<<<<<<< HEAD
-    return JsonResponse({"status": "all is fine :D"}, safe=False)
-=======
 
 
     #Runner for setters ALL
@@ -882,4 +874,4 @@ def runSetters(request, date_to):
             print setWorkingBodies(request, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
 
     return JsonResponse({"status": "all is fine :D"}, safe=False)
->>>>>>> master
+
