@@ -32,8 +32,8 @@ urlpatterns = patterns('',
     url(r'^setCutVotes/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setCutVotes),
     url(r'^setCutVotes/(?P<pg_id>\d+)', setCutVotes),
 
-    url(r'^getWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies),
-    url(r'^getWorkingBodies/(?P<org_id>\d+)', getWorkingBodies),
+    url(r'^setWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', setWorkingBodies),
+    url(r'^setWorkingBodies/(?P<org_id>\d+)', setWorkingBodies),
 
     url(r'^setVocabularySizeALL/(?P<date_>[\w].+)', setVocabularySizeALL),
     url(r'^setVocabularySizeALL', setVocabularySizeALL),
@@ -74,10 +74,17 @@ urlpatterns = patterns('',
     url(r'^getVocabularySize/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getVocabularySize),
     url(r'^getVocabularySize/(?P<pg_id>\d+)', getVocabularySize),
 
+    url(r'^getWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies),
+    url(r'^getWorkingBodies/(?P<org_id>\d+)', getWorkingBodies),
+
     url(r'^getPGsIDs', getPGsIDs),
 
     ####################################################################################
 
     # runenr
     url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
+
+
+
+    url(r'^getWorkingBodiesLive/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies_live),
 )
