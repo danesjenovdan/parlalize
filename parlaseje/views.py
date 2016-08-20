@@ -79,7 +79,7 @@ def setMotionOfSession(request, id_se):
                 not_present = not_present + 1
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])
-                
+
         if Vote.objects.filter(id_parladata=mot['vote_id']):
             Vote.objects.filter(id_parladata=mot['vote_id']).update(created_for=session.start_time,
                                                                     session=Session.objects.get(id_parladata=int(id_se)),
@@ -106,9 +106,9 @@ def setMotionOfSession(request, id_se):
                                        id_parladata=mot['vote_id'],
                                        id_parladata_session=int(id_se)
                                        )
-        
 
-        
+
+
         yes = 0
         no = 0
         kvorum = 0
@@ -181,7 +181,7 @@ def setMotionOfSessionGraph(request, id_se):
                          mp_np=tabnp,
                          mp_kvor=tabkvo
                          )
-        
+
         yes = 0
         no = 0
         kvorum = 0
@@ -247,8 +247,8 @@ def getMotionGraph(request, id_mo, date=False):
     out_against = []
     out_np = []
     mps =[]
-    
-    
+
+
     for pg in model[0].pgs_kvor:
         parties = Organization.objects.get(id_parladata=pg).getOrganizationData()
 
@@ -256,9 +256,9 @@ def getMotionGraph(request, id_mo, date=False):
             mps.append(getPersonData(mp, date))
         option_kvor.append({'pg':parties, 'mps': mps})
         mps = []
-      
+
         out_kvor.append({'option':'kvorum','total_votes': model[0].abstain, 'breakdown':option_kvor})
-    
+
     for pg in model[0].pgs_yes:
         parties = Organization.objects.get(id_parladata=pg).getOrganizationData()
         for mp in model[0].mp_yes:
@@ -283,7 +283,7 @@ def getMotionGraph(request, id_mo, date=False):
         mps = []
         out_np.append({'option':'odsotni','total_votes': model[0].not_present, 'breakdown':option_np})
 
-    out = {'id':id_mo, 'name': model[0].motion, 'result':model[0].result, 'required':'62', 'all': [out_kvor,out_for, out_against, out_np]}
+    out = {'id':id_mo, 'name': model[0].motion, 'result':model[0].result, 'required':'62', 'all': {'kvorum': out_kvor, 'for': out_for, 'against': out_against, 'not_present': out_np}}
     return JsonResponse(out, safe=False)
 
 def setAbsentMPs(request, id_se):
@@ -336,7 +336,7 @@ def setPresenceOfPG(request, id_se):
     motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
     membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
-    
+
     onSession = {}
     yesdic = defaultdict(int)
     allsessionsinone = defaultdict(list)
@@ -355,19 +355,19 @@ def setPresenceOfPG(request, id_se):
 
     for i in membersOfPG:
         allPgs[i] = len(membersOfPG[i]) * len(motions)
-    
+
     for b in onSession:
         for i in onSession[b]:
             yesdic[i] += 1
         results[b] = yesdic
-   
+
     if len(results)>0:
         temp = dict(results[results.keys()[0]])
         for i in temp:
             if allPgs[str(i)] != 0:
                 final[i] = int((float(temp[i]) / float(allPgs[str(i)])) * 100)
-        
-                
+
+
         result = saveOrAbortNew(model=PresenceOfPG,
                                 created_for=session.start_time,
                                 presence=[final],
@@ -461,12 +461,12 @@ def getMaxSpeechesOnSession(request, date=False):
     return JsonResponse(results[:5], safe=False)
 
 
- 
+
 def updateTags(request):
     tags = requests.get(API_URL+'/getTags').json()
     existing_tags = Tag.objects.all().values_list("name", flat=True)
     count = 0
-    for tag in tags: 
+    for tag in tags:
         if tag not in existing_tags:
             Tag(name=tag).save()
             count += 1
@@ -484,9 +484,9 @@ def setQuote(request, speech_id, start_pos, end_pos):
 def getQuote(request, quote_id):
     quote = get_object_or_404(Quote, id=quote_id)
 
-    return JsonResponse({"quoted_text": quote.quoted_text, 
-                         "start_idx": quote.first_char, 
-                         "end_idx": quote.last_char, 
+    return JsonResponse({"quoted_text": quote.quoted_text,
+                         "start_idx": quote.first_char,
+                         "end_idx": quote.last_char,
                          "speech_id": quote.speech.id_parladata})
 
 def runSetters(request, date_to):
