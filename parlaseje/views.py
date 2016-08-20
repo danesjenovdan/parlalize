@@ -273,7 +273,7 @@ def getMotionGraph(request, id_mo, date=False):
 
         mps = []
 
-        out_for = {'option':'za','total_votes': model[0].votes_for, 'breakdown':option_for}
+        out_for = {'option':'for','total_votes': model[0].votes_for, 'breakdown':option_for}
 
     for pg in model[0].pgs_no:
         party = Organization.objects.get(id_parladata=pg).getOrganizationData()
@@ -287,7 +287,7 @@ def getMotionGraph(request, id_mo, date=False):
 
         mps = []
 
-        out_against = {'option':'proti','total_votes': model[0].against, 'breakdown':option_against}
+        out_against = {'option':'against','total_votes': model[0].against, 'breakdown':option_against}
 
     for pg in model[0].pgs_np:
         party = Organization.objects.get(id_parladata=pg).getOrganizationData()
@@ -301,7 +301,7 @@ def getMotionGraph(request, id_mo, date=False):
 
         mps = []
 
-        out_np = {'option':'odsotni','total_votes': model[0].not_present, 'breakdown':option_np}
+        out_np = {'option':'not_present','total_votes': model[0].not_present, 'breakdown':option_np}
 
     out = {'id':id_mo, 'name': model[0].motion, 'result':model[0].result, 'required':'62', 'all': {'kvorum': out_kvor, 'for': out_for, 'against': out_against, 'not_present': out_np}}
     return JsonResponse(out, safe=False)
