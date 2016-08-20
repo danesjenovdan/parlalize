@@ -249,7 +249,7 @@ def getMotionGraph(request, id_mo, date=False):
         party = Organization.objects.get(id_parladata=pg).getOrganizationData()
 
         for mp in model[0].mp_kvor:
-            persondata = getPersonData(mp, date))
+            persondata = getPersonData(mp, date)
 
             if persondata['party']['acronym'] == party['acronym']:
                 mps.append(persondata)
@@ -264,7 +264,7 @@ def getMotionGraph(request, id_mo, date=False):
         party = Organization.objects.get(id_parladata=pg).getOrganizationData()
 
         for mp in model[0].mp_yes:
-            persondata = getPersonData(mp, date))
+            persondata = getPersonData(mp, date)
 
             if persondata['party']['acronym'] == party['acronym']:
                 mps.append(persondata)
@@ -278,7 +278,7 @@ def getMotionGraph(request, id_mo, date=False):
     for pg in model[0].pgs_no:
         party = Organization.objects.get(id_parladata=pg).getOrganizationData()
         for mp in model[0].mp_no:
-            persondata = getPersonData(mp, date))
+            persondata = getPersonData(mp, date)
 
             if persondata['party']['acronym'] == party['acronym']:
                 mps.append(persondata)
@@ -292,7 +292,7 @@ def getMotionGraph(request, id_mo, date=False):
     for pg in model[0].pgs_np:
         party = Organization.objects.get(id_parladata=pg).getOrganizationData()
         for mp in model[0].mp_np:
-            persondata = getPersonData(mp, date))
+            persondata = getPersonData(mp, date)
 
             if persondata['party']['acronym'] == party['acronym']:
                 mps.append(persondata)
