@@ -241,48 +241,69 @@ def getMotionGraph(request, id_mo, date=False):
     option_kvor = []
     option_against = []
     option_np = []
+    breakdown = []
     mps =[]
 
 
     for pg in model[0].pgs_kvor:
-        parties = Organization.objects.get(id_parladata=pg).getOrganizationData()
+        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
 
         for mp in model[0].mp_kvor:
-            mps.append(getPersonData(mp, date))
-        option_kvor = ({'pg':parties, 'mps': mps})
+            persondata = getPersonData(mp, date))
+
+            if persondata['party']['acronym'] == party['acronym']:
+                mps.append(persondata)
+
+        option_kvor.append({'pg': party, 'mps': mps})
+
         mps = []
 
         out_kvor = {'option':'kvorum','total_votes': model[0].abstain, 'breakdown':option_kvor}
 
     for pg in model[0].pgs_yes:
-        parties = Organization.objects.get(id_parladata=pg).getOrganizationData()
+        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
+
         for mp in model[0].mp_yes:
-            mps.append(getPersonData(mp, date))
-        option_for.append({'pg':parties, 'mps': mps})
+            persondata = getPersonData(mp, date))
+
+            if persondata['party']['acronym'] == party['acronym']:
+                mps.append(persondata)
+
+        option_for.append({'pg': party, 'mps': mps})
+
         mps = []
 
         out_for = {'option':'za','total_votes': model[0].votes_for, 'breakdown':option_for}
 
     for pg in model[0].pgs_no:
-        parties = Organization.objects.get(id_parladata=pg).getOrganizationData()
+        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
         for mp in model[0].mp_no:
-            mps.append(getPersonData(mp, date))
-        option_against.append({'pg':parties, 'mps': mps})
+            persondata = getPersonData(mp, date))
+
+            if persondata['party']['acronym'] == party['acronym']:
+                mps.append(persondata)
+
+        option_against.append({'pg': party, 'mps': mps})
+
         mps = []
 
         out_against = {'option':'proti','total_votes': model[0].against, 'breakdown':option_against}
 
     for pg in model[0].pgs_np:
-        parties = Organization.objects.get(id_parladata=pg).getOrganizationData()
+        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
         for mp in model[0].mp_np:
-            mps.append(getPersonData(mp, date))
-        option_np.append({'pg':parties, 'mps': mps})
+            persondata = getPersonData(mp, date))
+
+            if persondata['party']['acronym'] == party['acronym']:
+                mps.append(persondata)
+
+        option_np.append({'pg': party, 'mps': mps})
+
         mps = []
 
         out_np = {'option':'odsotni','total_votes': model[0].not_present, 'breakdown':option_np}
 
     out = {'id':id_mo, 'name': model[0].motion, 'result':model[0].result, 'required':'62', 'all': {'kvorum': out_kvor, 'for': out_for, 'against': out_against, 'not_present': out_np}}
-
     return JsonResponse(out, safe=False)
 
 def setAbsentMPs(request, id_se):
