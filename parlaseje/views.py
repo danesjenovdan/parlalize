@@ -525,11 +525,30 @@ def getQuote(request, quote_id):
                          "end_idx": quote.last_char, 
                          "speech_id": quote.speech.id_parladata})
 
-def runSetters(request, date_to):
 
+def getLastSessionLanding(request, date_=None):
+    if date_:
+        fdate = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        fdate=datetime.now().today()
+    presence = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for")[0]
+
+    result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
+                                "percent":presence.presence[0][p],} for p in presence.presence[0]]
+
+    motions = getMotionOfSession(request, presence.id_parladata).content
+
+
+    result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
+                                "percent":presence.presence[0][p],} for p in presence.presence[0]]
+
+    return JsonResponse({"presence": result, "motions": json.loads(motions)}, safe=False)
+               
+def runSetters(request, date_to):
+ 
 
     setters_models = {
-        Vote: setMotionOfSession,
+        #Vote: setMotionOfSession,
         #PresenceOfPG: setPresenceOfPG,
         #AbsentMPs: setAbsentMPs,
         #AverageSpeeches: setSpeechesOnSession
