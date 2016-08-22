@@ -44,6 +44,8 @@ urlpatterns = patterns(
     url(r'^setQuote/(?P<speech_id>\d+)/(?P<start_pos>\d+)/(?P<end_pos>\d+)', setQuote),
     url(r'^getQuote/(?P<quote_id>\d+)', getQuote),
 
+    url(r'^getLastSessionLanding(/(?P<date_>[\w].+))?', getLastSessionLanding),
+
     #runenr
     url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
 )
