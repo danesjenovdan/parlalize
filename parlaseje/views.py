@@ -536,7 +536,13 @@ def getLastSessionLanding(request, date_=None):
     result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
                                 "percent":presence.presence[0][p],} for p in presence.presence[0]]
 
-    return JsonResponse({"presence": result, "motions": motions, "tfidf": tfidf.json()}, safe=False)
+    return JsonResponse({'session': {'name': Session.objects.get(id_parladata=int(presence.id_parladata)).name,
+                                     'date': Session.objects.get(id_parladata=int(presence.id_parladata)).start_time.date(),
+                                     'id': int(presence.id_parladata)
+                                    }, 
+                         "presence": result, 
+                         "motions": motions, 
+                         "tfidf": tfidf.json()}, safe=False)
                
 def runSetters(request, date_to):
  
