@@ -62,7 +62,6 @@ def setMotionOfSession(request, id_se):
             if vote['option'] == str('za'):
                 yes = yes + 1
                 yesdic[vote['pg_id']] += 1
-                #TODO da ti seteje po acronymu
                 tabyes.append(vote['mp_id'])
             if vote['option'] == str('proti'):
                 no = no + 1
@@ -77,6 +76,7 @@ def setMotionOfSession(request, id_se):
                 not_present = not_present + 1
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])
+
         if Vote.objects.filter(id_parladata=mot['vote_id']):
             Vote.objects.filter(id_parladata=mot['vote_id']).update(created_for=session.start_time,
                                                                     session=Session.objects.get(id_parladata=int(id_se)),
@@ -103,25 +103,9 @@ def setMotionOfSession(request, id_se):
                                        id_parladata=mot['vote_id'],
                                        id_parladata_session=int(id_se)
                                        )
-        '''
-        vg = saveOrAbort(model=Vote_graph,
-                         motion=mot['text'],
-                         votes_for=yes,
-                         against=no,
-                         abstain=kvorum,
-                         not_present=not_present,
-                         result=mot['result'],
-                         id_parladata=mot['vote_id'],
-                         pgs_yes=yesdic,
-                         pgs_no=nodic,
-                         pgs_np=npdic,
-                         pgs_kvor=kvordic,
-                         mp_yes=tabyes,
-                         mp_no=tabno,
-                         mp_np=tabnp,
-                         mp_kvor=tabkvo
-                         )
-        '''
+
+
+
         yes = 0
         no = 0
         kvorum = 0
@@ -136,6 +120,78 @@ def setMotionOfSession(request, id_se):
         npdic = defaultdict(int)
     return JsonResponse({'alliswell': True})
 
+def setMotionOfSessionGraph(request, id_se):
+    motion  = requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
+    session = Session.objects.get(id_parladata=id_se)
+    tab = []
+    yes = 0
+    no = 0
+    kvorum = 0
+    not_present = 0
+    option = ""
+    tabyes = []
+    tabno = []
+    tabkvo = []
+    tabnp = []
+    yesdic = defaultdict(int)
+    nodic = defaultdict(int)
+    kvordic = defaultdict(int)
+    npdic = defaultdict(int)
+    tyes = []
+    for mot in motion:
+        votes  = requests.get(API_URL + '/getVotesOfMotion/'+str(mot['vote_id'])+'/').json()
+        for vote in votes:
+            if vote['option'] == str('za'):
+                yes = yes + 1
+                yesdic[vote['pg_id']] += 1
+                tabyes.append(vote['mp_id'])
+            if vote['option'] == str('proti'):
+                no = no + 1
+                nodic[vote['pg_id']] += 1
+                tabno.append(vote['mp_id'])
+
+            if vote['option'] == str('kvorum'):
+                kvorum = kvorum + 1
+                kvordic[vote['pg_id']] += 1
+                tabkvo.append(vote['mp_id'])
+            if vote['option'] == str('ni'):
+                not_present = not_present + 1
+                npdic[vote['pg_id']] += 1
+                tabnp.append(vote['mp_id'])
+
+        vg = saveOrAbortNew(model=Vote_graph,
+                         session=Session.objects.get(id_parladata=int(id_se)),
+                         created_for=session.start_time,
+                         motion=mot['text'],
+                         votes_for=yes,
+                         against=no,
+                         abstain=kvorum,
+                         not_present=not_present,
+                         result=resultOfMotion(yes, no, kvorum,not_present),
+                         id_parladata=mot['id'],
+                         pgs_yes=yesdic,
+                         pgs_no=nodic,
+                         pgs_np=npdic,
+                         pgs_kvor=kvordic,
+                         mp_yes=tabyes,
+                         mp_no=tabno,
+                         mp_np=tabnp,
+                         mp_kvor=tabkvo
+                         )
+
+        yes = 0
+        no = 0
+        kvorum = 0
+        not_present = 0
+        tabyes = []
+        tabno = []
+        tabkvo = []
+        tabnp = []
+        yesdic = defaultdict(int)
+        nodic = defaultdict(int)
+        kvordic = defaultdict(int)
+        npdic = defaultdict(int)
+    return JsonResponse({'alliswell': True})
 
 def getMotionOfSession(request, id_se, date=False):
     out = []
@@ -169,170 +225,97 @@ def getMotionOfSession(request, id_se, date=False):
     return JsonResponse(out, safe=False)
 
 
-def getMotionGraph(request, id_se):
-    card = getGraphCardModel(Vote_graph, id_se)
+def getMotionGraph(request, id_mo, date=False):
+    out = []
+    if Vote_graph.objects.filter(id_parladata=id_mo):
+        if date:
+            model = Vote_graph.objects.filter(id_parladata=id_mo, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
+        else:
+            model = Vote_graph.objects.filter(id_parladata=id_mo)
 
 
-    option_for = {
-        'option': 'za',
-        'total_votes': card.votes_for,
-        'breakdown': []
-    }
-    option_against = {
-        'option': 'proti',
-        'total_votes': card.against,
-        'breakdown': []
-    }
-    option_kvor = {
-        'option': 'kvorum',
-        'total_votes': card.abstain,
-        'breakdown': []
-    }
-    option_np = {
-        'option': 'ni',
-        'total_votes': card.not_present,
-        'breakdown': []
-    }
-
-    parties = requests.get(API_URL + '/getAllPGsExt/').json()
-    mps = requests.get(API_URL + '/getMPs/').json()
-
-    for i, party in enumerate(card.pgs_yes):
-        option_for['breakdown'].append({
-            'acronym': parties[party]['acronym'],
-            'party_id': int(party),
-            'total_votes': card.pgs_yes[party],
-            'mps': []
-        })
-
-        for person_id in card.mp_yes:
-            mp = filter(lambda person: person['id'] == int(person_id), mps)
-            if len(mp) > 0:
-                mp = mp[0]
-                if mp['party_id'] == int(party):
-                    option_for['breakdown'][i]['mps'].append({
-                        'name': mp['name'],
-                        'id': person_id,
-                        'gov_id': mp['gov_id'],
-                        'party': {
-                            'acronym': parties[party]['acronym'],
-                            'id': int(party),
-                            'name': parties[party]['name']
-                        }
-                    })
-
-    for i, party in enumerate(card.pgs_no):
-        option_against['breakdown'].append({
-            'acronym': parties[party]['acronym'],
-            'party_id': int(party),
-            'total_votes': card.pgs_no[party],
-            'mps': []
-        })
-
-        for person_id in card.mp_no:
-            mp = filter(lambda person: person['id'] == int(person_id), mps)
-            if len(mp) > 0:
-                mp = mp[0]
-                if mp['party_id'] == int(party):
-                    option_against['breakdown'][i]['mps'].append({
-                        'name': mp['name'],
-                        'id': person_id,
-                        'gov_id': mp['gov_id'],
-                        'party': {
-                            'acronym': parties[party]['acronym'],
-                            'id': int(party),
-                            'name': parties[party]['name']
-                        }
-                    })
-
-    for i, party in enumerate(card.pgs_kvor):
-        option_kvor['breakdown'].append({
-            'acronym': parties[party]['acronym'],
-            'party_id': int(party),
-            'total_votes': card.pgs_kvor[party],
-            'mps': []
-        })
-
-        for person_id in card.mp_kvor:
-            mp = filter(lambda person: person['id'] == int(person_id), mps)
-            if len(mp) > 0:
-                mp = mp[0]
-                if mp['party_id'] == int(party):
-                    option_kvor['breakdown'][i]['mps'].append({
-                        'name': mp['name'],
-                        'id': person_id,
-                        'gov_id': mp['gov_id'],
-                        'party': {
-                            'acronym': parties[party]['acronym'],
-                            'id': int(party),
-                            'name': parties[party]['name']
-                        }
-                    })
-
-    for i, party in enumerate(card.pgs_np):
-        option_np['breakdown'].append({
-            'acronym': parties[party]['acronym'],
-            'party_id': int(party),
-            'total_votes': card.pgs_np[party],
-            'mps': []
-        })
-
-        for person_id in card.mp_np:
-            mp = filter(lambda person: person['id'] == int(person_id), mps)
-            if len(mp) > 0:
-                mp = mp[0]
-                if mp['party_id'] == int(party):
-                    option_np['breakdown'][i]['mps'].append({
-                        'name': mp['name'],
-                        'id': person_id,
-                        'gov_id': mp['gov_id'],
-                        'party': {
-                            'acronym': parties[party]['acronym'],
-                            'id': int(party),
-                            'name': parties[party]['name']
-                        }
-                    })
-
-    out = {
-        'results': {
-
-                'motion_id': card.id_parladata,
-                'text': card.motion,
-                'votes_for': card.votes_for,
-                'against': card.against,
-                'abstain': card.abstain,
-                'not_present':card.not_present,
-                'result':card.result,
-                'pgs_yes':card.pgs_yes,
-                'pgs_no':card.pgs_no,
-                'pgs_kvor':card.pgs_kvor,
-                'pgs_np':card.pgs_np,
-                'mp_yes':card.mp_yes,
-                'mp_no':card.mp_no,
-                'mp_kvor':card.mp_kvor,
-                'mp_np':card.mp_np,
-                'layered_data': [option_for, option_against, option_kvor, option_np]
-        }
-    }
+    option_for = []
+    option_kvor = []
+    option_against = []
+    option_np = []
+    breakdown = []
+    mps =[]
 
 
+    for pg in model[0].pgs_kvor:
+        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
+
+        for mp in model[0].mp_kvor:
+            persondata = getPersonData(mp, date)
+
+            if persondata['party']['acronym'] == party['acronym']:
+                mps.append(persondata)
+
+        option_kvor.append({'pg': party, 'mps': mps})
+
+        mps = []
+
+    out_kvor = {'option':'kvorum','total_votes': model[0].abstain, 'breakdown':option_kvor}
+
+    for pg in model[0].pgs_yes:
+        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
+
+        for mp in model[0].mp_yes:
+            persondata = getPersonData(mp, date)
+
+            if persondata['party']['acronym'] == party['acronym']:
+                mps.append(persondata)
+
+        option_for.append({'pg': party, 'mps': mps})
+
+        mps = []
+
+    out_for = {'option':'for','total_votes': model[0].votes_for, 'breakdown':option_for}
+
+    for pg in model[0].pgs_no:
+        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
+        for mp in model[0].mp_no:
+            persondata = getPersonData(mp, date)
+
+            if persondata['party']['acronym'] == party['acronym']:
+                mps.append(persondata)
+
+        option_against.append({'pg': party, 'mps': mps})
+
+        mps = []
+
+    out_against = {'option':'against','total_votes': model[0].against, 'breakdown':option_against}
+
+    for pg in model[0].pgs_np:
+        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
+        for mp in model[0].mp_np:
+            persondata = getPersonData(mp, date)
+
+            if persondata['party']['acronym'] == party['acronym']:
+                mps.append(persondata)
+
+        option_np.append({'pg': party, 'mps': mps})
+
+        mps = []
+
+    out_np = {'option':'not_present','total_votes': model[0].not_present, 'breakdown':option_np}
+
+    out = {'id':id_mo, 'name': model[0].motion, 'result':model[0].result, 'required':'62', 'all': {'kvorum': out_kvor, 'for': out_for, 'against': out_against, 'not_present': out_np}}
     return JsonResponse(out, safe=False)
 
 def setAbsentMPs(request, id_se):
     votes = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
-    mps = requests.get(API_URL+'/getMPs/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
+    mps = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
 
 
     mpsID = []
-
     if len(votes) != 0:
-        mpsID = [mpID['id'] for mpID in mps]
+        mpsID = reduce(lambda x,y: x+y,mps.values())
         for vote in votes:
             if vote['option'] != 'ni':
                 if vote['mp_id'] in mpsID:
                     mpsID.remove(vote['mp_id'])
-
 
         result = saveOrAbortNew(model=AbsentMPs,
                                 id_parladata=id_se,
@@ -400,6 +383,7 @@ def setPresenceOfPG(request, id_se):
         for i in temp:
             if allPgs[str(i)] != 0:
                 final[i] = int((float(temp[i]) / float(allPgs[str(i)])) * 100)
+
 
         result = saveOrAbortNew(model=PresenceOfPG,
                                 created_for=session.start_time,
@@ -499,7 +483,7 @@ def updateTags(request):
     tags = requests.get(API_URL+'/getTags').json()
     existing_tags = Tag.objects.all().values_list("name", flat=True)
     count = 0
-    for tag in tags: 
+    for tag in tags:
         if tag not in existing_tags:
             Tag(name=tag).save()
             count += 1
@@ -517,12 +501,19 @@ def setQuote(request, speech_id, start_pos, end_pos):
 def getQuote(request, quote_id):
     quote = get_object_or_404(Quote, id=quote_id)
 
+<<<<<<< HEAD
     return JsonResponse({"person": getPersonData(quote.speech.person.id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
                          "quoted_text": quote.quoted_text, 
                          "start_idx": quote.first_char, 
                          "end_idx": quote.last_char, 
                          "speech_id": quote.speech.id_parladata,
                          "content": quote.speech.content})
+=======
+    return JsonResponse({"quoted_text": quote.quoted_text,
+                         "start_idx": quote.first_char,
+                         "end_idx": quote.last_char,
+                         "speech_id": quote.speech.id_parladata})
+>>>>>>> c9464e94ee8b097d6e9e9204e03d0ecbf54ab593
 
 
 def getLastSessionLanding(request, date_=None):
@@ -566,7 +557,8 @@ def runSetters(request, date_to):
         #Vote: setMotionOfSession,
         #PresenceOfPG: setPresenceOfPG,
         #AbsentMPs: setAbsentMPs,
-        #AverageSpeeches: setSpeechesOnSession
+        #AverageSpeeches: setSpeechesOnSession,
+        #Vote_graph: setMotionOfSessionGraph
     }
     for model, setter in setters_models.items():
         dates = findDatesFromLastCard(model, None, date_to)
