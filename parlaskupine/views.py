@@ -20,31 +20,17 @@ from kvalifikatorji.scripts import countWords
 def setBasicInfOfPG(request, pg_id, date_):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_).json()
     else:
         date_of = datetime.now().date()
-        data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_of).json()
-
-    headOfPG = 0
-    viceOfPG = 0
-    if data['HeadOfPG'] != None:
-        headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG']))
-    else:
-        headOfPG = None
-
-    if data['ViceOfPG'] != None:
-        viceOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG']))
-    else:
-        viceOfPG = None
-
-    result = saveOrAbortNew(model=PGStatic,
+    data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/').json()
+#vprasi za shranjevanje yes and no
+    result = saveOrAbort(model=PGStatic,
                          created_for=date_of,
                          organization=Organization.objects.get(id_parladata=int(pg_id)),
-                         headOfPG = headOfPG,
-                         viceOfPG = viceOfPG,
+                         headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG'])),
+                         viceOfPG = Person.objects.get(id_parladata = data['ViceOfPG']),
                          numberOfSeats=data['NumberOfSeats'],
-                         allVoters=data['AllVoters'],
-                         facebook=data['Facebook'],
+                         allVoters=data['AllVoters'] ,facebook=data['Facebook'],
                          twitter=data['Twitter'],
                          email=data['Mail']
                          )
@@ -53,22 +39,11 @@ def setBasicInfOfPG(request, pg_id, date_):
 
 def getBasicInfOfPG(request, pg_id, date=None):
     card = getPGCardModel(PGStatic, pg_id, date)
-    headOfPG = 0
-    viceOfPG = 0
-    if card.headOfPG:
-        headOfPG = getPersonData(card.headOfPG.id_parladata, date)
-    else:
-        headOfPG = 0
-
-    if card.viceOfPG:
-        viceOfPG = getPersonData(card.viceOfPG.id_parladata, date)
-    else:
-        viceOfPG = 0
 
     data = {
-           'organization':card.organization.getOrganizationData(),
-           'headOfPG':headOfPG,
-           'viceOfPG':viceOfPG,
+           'organization':card.organization,
+           'headOfPG':card.heafOfPG,
+           'viceOfPG':card.viceOfPG,
            'numberOfSeats':card.numberOfSeats,
            'allVoters':card.allVoters,
            'facebook':card.facebook,
@@ -160,7 +135,6 @@ def setMPsOfPG(request, pg_id, date_=None):
     membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ date_).json()
 
     result = saveOrAbortNew(model=MPOfPg,
-                        organization=Organization.objects.get(id_parladata=pg_id),
                         id_parladata=pg_id,
                         MPs =  membersOfPG[pg_id],
                         created_for=date_of
@@ -176,8 +150,10 @@ def getMPsOfPG(request, pg_id, date_=None):
         date_of = datetime.now().date()
         date_ = ""
 
+    result =[]
     ids = MPOfPg.objects.get(id_parladata=int(pg_id), created_for=date_of).MPs
-    result = [getPersonData(MP, date_) for MP in ids]
+    for MP in ids:
+        result.append(getPersonData(MP, date_))
     return JsonResponse(result, safe=False)
 
 
@@ -690,7 +666,7 @@ def getWorkingBodies(request, org_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-    sessions = [{"id": session.id_parladata, "name": session.name} for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
+    sessions = [{"id": session.id, "name": session.name} for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
     return JsonResponse({"organization": workingBodies.organization.getOrganizationData(),
                          "info": {"president": getPersonData(workingBodies.president.id_parladata),
                                   "vice_president": [getPersonData(person) for person in workingBodies.vice_president],
@@ -856,7 +832,6 @@ def runSetters(request, date_to):
         #MostMatchingThem: setMostMatchingThem
         #PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
         #MPOfPg: setMPsOfPG
-        #PGStatic: setBasicInfOfPG
     }
 
     IDs = getPGIDs()
@@ -899,4 +874,3 @@ def runSetters(request, date_to):
             print setWorkingBodies(request, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
 
     return JsonResponse({"status": "all is fine :D"}, safe=False)
-
