@@ -172,6 +172,15 @@ class Vote_graph(Timestampable, models.Model):
     motion = models.TextField(blank=True, null=True,
                               help_text='The motion for which the vote took place')
 
+    session = models.ForeignKey('Session',
+                               blank=True, null=True,
+                               related_name='in_session_for_VG',
+                               help_text=_('Session '))
+
+    created_for = models.DateField(_('date of vote'),
+                                    blank=True,
+                                    null=True,
+                                    help_text=_('date of vote'))
 
     votes_for = models.IntegerField(blank=True, null=True,
                                    help_text='Number of votes for')
