@@ -60,12 +60,10 @@ class PGStatic(Timestampable, models.Model):
                                    null=True,
                                    help_text=_('date of analize'))
 
-    headOfPG = models.ForeignKey('parlaposlanci.Person',
-                                 null = True,
+    headOfPG = models.ForeignKey('parlaposlanci.Person', 
                                  related_name='PGStaticH', help_text=_('Head of MP'))
 
     viceOfPG = models.ForeignKey('parlaposlanci.Person' , 
-                                 null = True,
                                  related_name='PGStaticV', help_text=_('Vice of MP'))
 
     numberOfSeats = models.IntegerField(blank = True, 
@@ -139,11 +137,6 @@ class PercentOFAttendedSession(Timestampable, models.Model): #Model for presence
 
 
 class MPOfPg(Timestampable, models.Model):
-
-    organization = models.ForeignKey('Organization',
-                           blank=True, null=True,
-                           related_name='MPOfPg_',
-                           help_text=_('PG'))
 
     id_parladata = models.IntegerField(_('parladata id'),
                             blank=True, null=True,help_text=_('id parladata'))
