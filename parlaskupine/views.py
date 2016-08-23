@@ -20,15 +20,28 @@ from kvalifikatorji.scripts import countWords
 def setBasicInfOfPG(request, pg_id, date_):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_).json()
     else:
         date_of = datetime.now().date()
-    data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/').json()
+        data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_of).json()
+
+    headOfPG = 0
+    viceOfPG = 0
+    if data['HeadOfPG'] != None:
+        headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG']))
+    else:
+        headOfPG = None
+
+    if data['ViceOfPG'] != None:
+        viceOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG']))
+    else:
+        viceOfPG = None
 
     result = saveOrAbortNew(model=PGStatic,
                          created_for=date_of,
                          organization=Organization.objects.get(id_parladata=int(pg_id)),
-                         headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG'])),
-                         viceOfPG = Person.objects.get(id_parladata = data['ViceOfPG']),
+                         headOfPG = headOfPG,
+                         viceOfPG = viceOfPG,
                          numberOfSeats=data['NumberOfSeats'],
                          allVoters=data['AllVoters'],
                          facebook=data['Facebook'],
@@ -40,11 +53,22 @@ def setBasicInfOfPG(request, pg_id, date_):
 
 def getBasicInfOfPG(request, pg_id, date=None):
     card = getPGCardModel(PGStatic, pg_id, date)
+    headOfPG = 0
+    viceOfPG = 0
+    if card.headOfPG:
+        headOfPG = getPersonData(card.headOfPG.id_parladata, date)
+    else:
+        headOfPG = 0
+
+    if card.viceOfPG:
+        viceOfPG = getPersonData(card.viceOfPG.id_parladata, date)
+    else:
+        viceOfPG = 0
 
     data = {
-           'organization':card.organization,
-           'headOfPG':card.heafOfPG,
-           'viceOfPG':card.viceOfPG,
+           'organization':card.organization.getOrganizationData(),
+           'headOfPG':headOfPG,
+           'viceOfPG':viceOfPG,
            'numberOfSeats':card.numberOfSeats,
            'allVoters':card.allVoters,
            'facebook':card.facebook,
@@ -832,6 +856,7 @@ def runSetters(request, date_to):
         #MostMatchingThem: setMostMatchingThem
         #PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
         #MPOfPg: setMPsOfPG
+        #PGStatic: setBasicInfOfPG
     }
 
     IDs = getPGIDs()
