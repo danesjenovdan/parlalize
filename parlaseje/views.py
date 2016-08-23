@@ -531,18 +531,28 @@ def getLastSessionLanding(request, date_=None):
         fdate = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         fdate=datetime.now().today()
-    presence = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for")[0]
+    ready = False
+    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for")
+    presence_intex = 0
+    motions = None
+    presence = None
+
+    while not ready:
+        presence = presences[presence_intex]
+        motions = json.loads(getMotionOfSession(None, presence.id_parladata).content)
+        if type(motions)==list:
+            tfidf = requests.get("https://isci.parlameter.si/tfidf/s/"+str(presence.id_parladata))
+            if tfidf.status_code == 200:
+                ready = True
+            else:
+                presence_intex += 1                
+        else:
+            presence_intex += 1
 
     result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
                                 "percent":presence.presence[0][p],} for p in presence.presence[0]]
 
-    motions = getMotionOfSession(request, presence.id_parladata).content
-
-
-    result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
-                                "percent":presence.presence[0][p],} for p in presence.presence[0]]
-
-    return JsonResponse({"presence": result, "motions": json.loads(motions)}, safe=False)
+    return JsonResponse({"presence": result, "motions": motions, "tfidf": tfidf.json()}, safe=False)
                
 def runSetters(request, date_to):
  
