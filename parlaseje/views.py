@@ -500,20 +500,12 @@ def setQuote(request, speech_id, start_pos, end_pos):
 
 def getQuote(request, quote_id):
     quote = get_object_or_404(Quote, id=quote_id)
-
-<<<<<<< HEAD
     return JsonResponse({"person": getPersonData(quote.speech.person.id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
                          "quoted_text": quote.quoted_text, 
                          "start_idx": quote.first_char, 
                          "end_idx": quote.last_char, 
                          "speech_id": quote.speech.id_parladata,
                          "content": quote.speech.content})
-=======
-    return JsonResponse({"quoted_text": quote.quoted_text,
-                         "start_idx": quote.first_char,
-                         "end_idx": quote.last_char,
-                         "speech_id": quote.speech.id_parladata})
->>>>>>> c9464e94ee8b097d6e9e9204e03d0ecbf54ab593
 
 
 def getLastSessionLanding(request, date_=None):
