@@ -60,10 +60,12 @@ class PGStatic(Timestampable, models.Model):
                                    null=True,
                                    help_text=_('date of analize'))
 
-    headOfPG = models.ForeignKey('parlaposlanci.Person', 
+    headOfPG = models.ForeignKey('parlaposlanci.Person',
+                                 null = True,
                                  related_name='PGStaticH', help_text=_('Head of MP'))
 
     viceOfPG = models.ForeignKey('parlaposlanci.Person' , 
+                                 null = True,
                                  related_name='PGStaticV', help_text=_('Vice of MP'))
 
     numberOfSeats = models.IntegerField(blank = True, 
