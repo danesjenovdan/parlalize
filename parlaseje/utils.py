@@ -9,6 +9,7 @@ from parlaskupine.models import Organization
 from parlaseje.models import *
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT
 import requests
+from django.http import JsonResponse
 
 
 def getGraphCardModel(model, id, date=None):
@@ -167,3 +168,15 @@ def resultOfMotion(votes_for, against, abstain, not_present):
 	else:
 		allMPs = 0
 		return True
+
+
+def getSessionDataAPI(requests, session_id):
+	session = Session.objects.filter(id_parladata=session_id)
+	if session:
+		return JsonResponse(session[0].getSessionData())
+	else:
+		return JsonResponse({
+							  'name': "unkonwn",
+                			  'date': "unkonwn",
+                			  'id': "unkonwn",
+                			})
