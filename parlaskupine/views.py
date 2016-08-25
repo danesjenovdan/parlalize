@@ -690,7 +690,7 @@ def getWorkingBodies(request, org_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-    sessions = [{"id": session.id_parladata, "name": session.name} for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
+    sessions = [session.getSessionData() for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
     return JsonResponse({"organization": workingBodies.organization.getOrganizationData(),
                          "info": {"president": getPersonData(workingBodies.president.id_parladata),
                                   "vice_president": [getPersonData(person) for person in workingBodies.vice_president],
