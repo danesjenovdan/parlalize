@@ -30,10 +30,7 @@ def getSessionSpeeches(request, session_id):
     for speech in Speech.objects.filter(session=session).order_by("-start_time"):
         out.append({"speech_id": speech.id_parladata, "content": speech.content, "person_id": speech.person.id_parladata})
     result = {
-        'session': {
-            'name': session.name,
-            'id': int(session.id_parladata)
-        },
+        'session': session.getSessionData(),
         'results': out
     }
     return JsonResponse(result, safe=False)
@@ -203,12 +200,7 @@ def getMotionOfSession(request, id_se, date=False):
 
         for card in model:
             out.append({
-            'session': {
-
-                'name': Session.objects.get(id_parladata=int(id_se)).name,
-                'date': Session.objects.get(id_parladata=int(id_se)).start_time.date(),
-                'id': int(id_se)
-            },
+            'session': Session.objects.get(id_parladata=int(id_se)).getSessionData(),
             'results': {
 
                     'motion_id': card.id_parladata,
@@ -534,10 +526,7 @@ def getLastSessionLanding(request, date_=None):
     result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
                                 "percent":presence.presence[0][p],} for p in presence.presence[0]]
 
-    return JsonResponse({'session': {'name': Session.objects.get(id_parladata=int(presence.id_parladata)).name,
-                                     'date': Session.objects.get(id_parladata=int(presence.id_parladata)).start_time.date(),
-                                     'id': int(presence.id_parladata)
-                                    }, 
+    return JsonResponse({'session': Session.objects.get(id_parladata=int(presence.id_parladata)).getSessionData(), 
                          "presence": result, 
                          "motions": motions, 
                          "tfidf": tfidf.json()}, safe=False)
