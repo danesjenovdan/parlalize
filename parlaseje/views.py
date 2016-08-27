@@ -497,7 +497,8 @@ def getQuote(request, quote_id):
                          "start_idx": quote.first_char, 
                          "end_idx": quote.last_char, 
                          "speech_id": quote.speech.id_parladata,
-                         "content": quote.speech.content})
+                         "content": quote.speech.content,
+                         'session': quote.speech.session.getSessionData()})
 
 
 def getLastSessionLanding(request, date_=None):
