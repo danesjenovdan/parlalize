@@ -26,16 +26,20 @@ def setBasicInfOfPG(request, pg_id, date_):
         data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_of).json()
 
     headOfPG = 0
-    viceOfPG = 0
+    viceOfPG = []
     if data['HeadOfPG'] != None:
         headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG']))
     else:
         headOfPG = None
-
-    if data['ViceOfPG'] != None:
-        viceOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG']))
+   
+    if data['ViceOfPG']:
+        for vice in data['ViceOfPG']:
+            if vice != None:
+                viceOfPG.append(vice)
+            else:
+                viceOfPG.append(None)
     else:
-        viceOfPG = None
+                viceOfPG.append(None)
 
     result = saveOrAbortNew(model=PGStatic,
                          created_for=date_of,
@@ -54,16 +58,16 @@ def setBasicInfOfPG(request, pg_id, date_):
 def getBasicInfOfPG(request, pg_id, date=None):
     card = getPGCardModel(PGStatic, pg_id, date)
     headOfPG = 0
-    viceOfPG = 0
+    viceOfPG = []
     if card.headOfPG:
         headOfPG = getPersonData(card.headOfPG.id_parladata, date)
     else:
         headOfPG = 0
-
-    if card.viceOfPG:
-        viceOfPG = getPersonData(card.viceOfPG.id_parladata, date)
-    else:
-        viceOfPG = 0
+    for vice in card.viceOfPG:
+        if vice:
+            viceOfPG.append(getPersonData(vice, date))
+        else:
+            viceOfPG.append(0)
 
     data = {
            'organization':card.organization.getOrganizationData(),
@@ -71,9 +75,11 @@ def getBasicInfOfPG(request, pg_id, date=None):
            'viceOfPG':viceOfPG,
            'numberOfSeats':card.numberOfSeats,
            'allVoters':card.allVoters,
+           'social':{
            'facebook':card.facebook,
            'twitter':card.twitter,
            'email':card.email
+           }
            }
 
     return JsonResponse(data)
