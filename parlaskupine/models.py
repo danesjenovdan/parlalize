@@ -64,9 +64,7 @@ class PGStatic(Timestampable, models.Model):
                                  null = True,
                                  related_name='PGStaticH', help_text=_('Head of MP'))
 
-    viceOfPG = models.ForeignKey('parlaposlanci.Person' , 
-                                 null = True,
-                                 related_name='PGStaticV', help_text=_('Vice of MP'))
+    viceOfPG = JSONField(blank=True, null=True)
 
     numberOfSeats = models.IntegerField(blank = True, 
                                         null = True, 
