@@ -76,7 +76,7 @@ def setMotionOfSession(request, id_se):
 
         if Vote.objects.filter(id_parladata=mot['vote_id']):
             Vote.objects.filter(id_parladata=mot['vote_id']).update(created_for=session.start_time,
-                                                                    session=Session.objects.get(id_parladata=int(id_se)),
+                                                                    session=session,
                                                                     motion=mot['text'],
                                                                     tags=mot['tags'],
                                                                     votes_for=yes,
@@ -89,7 +89,7 @@ def setMotionOfSession(request, id_se):
         else:
             result = saveOrAbortNew(model=Vote,
                                        created_for=session.start_time,
-                                       session=Session.objects.get(id_parladata=int(id_se)),
+                                       session=session,
                                        motion=mot['text'],
                                        tags=mot['tags'],
                                        votes_for=yes,
