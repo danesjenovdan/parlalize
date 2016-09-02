@@ -44,35 +44,18 @@ def setMotionOfSession(request, id_se):
     kvorum = 0
     not_present = 0
     option = ""
-    tabyes = []
-    tabno = []
-    tabkvo = []
-    tabnp = []
-    yesdic = defaultdict(int)
-    nodic = defaultdict(int)
-    kvordic = defaultdict(int)
-    npdic = defaultdict(int)
     tyes = []
     for mot in motion:
         votes  = requests.get(API_URL + '/getVotesOfMotion/'+str(mot['vote_id'])+'/').json()
         for vote in votes:
             if vote['option'] == str('za'):
                 yes = yes + 1
-                yesdic[vote['pg_id']] += 1
-                tabyes.append(vote['mp_id'])
             if vote['option'] == str('proti'):
                 no = no + 1
-                nodic[vote['pg_id']] += 1
-                tabno.append(vote['mp_id'])
-
             if vote['option'] == str('kvorum'):
                 kvorum = kvorum + 1
-                kvordic[vote['pg_id']] += 1
-                tabkvo.append(vote['mp_id'])
             if vote['option'] == str('ni'):
                 not_present = not_present + 1
-                npdic[vote['pg_id']] += 1
-                tabnp.append(vote['mp_id'])
 
         if Vote.objects.filter(id_parladata=mot['vote_id']):
             Vote.objects.filter(id_parladata=mot['vote_id']).update(created_for=session.start_time,
@@ -107,14 +90,6 @@ def setMotionOfSession(request, id_se):
         no = 0
         kvorum = 0
         not_present = 0
-        tabyes = []
-        tabno = []
-        tabkvo = []
-        tabnp = []
-        yesdic = defaultdict(int)
-        nodic = defaultdict(int)
-        kvordic = defaultdict(int)
-        npdic = defaultdict(int)
     return JsonResponse({'alliswell': True})
 
 def setMotionOfSessionGraph(request, id_se):
