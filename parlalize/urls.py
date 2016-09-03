@@ -4,6 +4,7 @@ from django.contrib import admin
 
 from utils import getPersonDataAPI
 from parlaseje.utils import getSessionDataAPI
+from parlaskupine.utils import getPgDataAPI
 
 # admin.autodiscover()
 
@@ -15,5 +16,6 @@ urlpatterns = patterns('',
     (r'^v1/utils/getPersonData/(?P<id_parladata>\d+)/(?P<date_>[\w].+)', getPersonDataAPI),
     (r'^v1/utils/getPersonData/(?P<id_parladata>\d+)', getPersonDataAPI),
     (r'^v1/utils/getSessionData/(?P<session_id>\d+)', getSessionDataAPI),
+    (r'^v1/utils/getPgDataAPI/(?P<id_parladata>\d+)', getPgDataAPI),
 
 )
