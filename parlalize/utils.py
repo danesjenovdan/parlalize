@@ -7,9 +7,11 @@ from parlaposlanci.models import *
 from parlaskupine.models import *
 from parlaseje.models import *
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT, DEBUG
+from django.contrib.contenttypes.models import ContentType
 import requests
 import json
 import numpy as np
+
 
 
 def voteToLogical(vote):
@@ -563,25 +565,7 @@ def getPersonDataAPI(request, id_parladata, date_=None):
         })
 
 def modelsData():
-    print "Persons models:"
-    print "Person: ", Person.objects.all().count()
-    print "Presence: ", Presence.objects.all().count()
-    print "SpokenWords: ", SpokenWords.objects.all().count()
-    print "SpeakingStyle: ", SpeakingStyle.objects.all().count()
-    print "CutVotes: ", CutVotes.objects.all().count()
-    print "LastActivity: ", LastActivity.objects.all().count()
-    print "EqualVoters: ", EqualVoters.objects.all().count()
-    print "LessEqualVoters: ", LessEqualVoters.objects.all().count()
-    print "MPsWhichFitsToPG: ", MPsWhichFitsToPG.objects.all().count()
-    print "MPStaticPL: ", MPStaticPL.objects.all().count()
-    print "MPStaticGroup: ", MPStaticGroup.objects.all().count()
-    print "NumberOfSpeechesPerSession: ", NumberOfSpeechesPerSession.objects.all().count()
-    print "VocabularySize: ", VocabularySize.objects.all().count()
-    print "StyleScores: ", StyleScores.objects.all().count()
-    print "Tfidf: ", Tfidf.objects.all().count()
-    print "AverageNumberOfSpeechesPerSession: ", AverageNumberOfSpeechesPerSession.objects.all().count()
-    print "Tfidf: ", Tfidf.objects.all().count()
-    print "TaggedBallots: ", TaggedBallots.objects.all().count()
-    print "MembershipsOfMember: ", MembershipsOfMember.objects.all().count()
-
+    for ct in ContentType.objects.all():
+        m = ct.model_class()
+        print "%s.%s\t%d" % (m.__module__, m.__name__, m._default_manager.count())
     
