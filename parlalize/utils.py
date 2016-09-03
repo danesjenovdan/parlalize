@@ -564,8 +564,11 @@ def getPersonDataAPI(request, id_parladata, date_=None):
             'gender':data.gender
         })
 
-def modelsData():
+def modelsData(request):
+    out = []
     for ct in ContentType.objects.all():
         m = ct.model_class()
-        print "%s.%s\t%d" % (m.__module__, m.__name__, m._default_manager.count())
-
+        out.append({"model":m.__module__,
+                    "Ime modela":m.__name__,
+                    "st:":m._default_manager.count()})
+    return JsonResponse(out, safe=False)
