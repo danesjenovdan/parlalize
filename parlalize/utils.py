@@ -3,9 +3,9 @@ import numpy
 from datetime import datetime, timedelta
 from django.http import Http404, JsonResponse
 import requests
-from parlaposlanci.models import Person, LastActivity, MPStaticPL
-from parlaskupine.models import Organization
-from parlaseje.models import Session, Vote, Speech, Session, Ballot
+from parlaposlanci.models import *
+from parlaskupine.models import *
+from parlaseje.models import *
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT, DEBUG
 import requests
 import json
@@ -561,3 +561,27 @@ def getPersonDataAPI(request, id_parladata, date_=None):
             'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData(),
             'gender':data.gender
         })
+
+def modelsData():
+    print "Persons models:"
+    print "Person: ", Person.objects.all().count()
+    print "Presence: ", Presence.objects.all().count()
+    print "SpokenWords: ", SpokenWords.objects.all().count()
+    print "SpeakingStyle: ", SpeakingStyle.objects.all().count()
+    print "CutVotes: ", CutVotes.objects.all().count()
+    print "LastActivity: ", LastActivity.objects.all().count()
+    print "EqualVoters: ", EqualVoters.objects.all().count()
+    print "LessEqualVoters: ", LessEqualVoters.objects.all().count()
+    print "MPsWhichFitsToPG: ", MPsWhichFitsToPG.objects.all().count()
+    print "MPStaticPL: ", MPStaticPL.objects.all().count()
+    print "MPStaticGroup: ", MPStaticGroup.objects.all().count()
+    print "NumberOfSpeechesPerSession: ", NumberOfSpeechesPerSession.objects.all().count()
+    print "VocabularySize: ", VocabularySize.objects.all().count()
+    print "StyleScores: ", StyleScores.objects.all().count()
+    print "Tfidf: ", Tfidf.objects.all().count()
+    print "AverageNumberOfSpeechesPerSession: ", AverageNumberOfSpeechesPerSession.objects.all().count()
+    print "Tfidf: ", Tfidf.objects.all().count()
+    print "TaggedBallots: ", TaggedBallots.objects.all().count()
+    print "MembershipsOfMember: ", MembershipsOfMember.objects.all().count()
+
+    
