@@ -696,7 +696,7 @@ def getWorkingBodies(request, org_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-    sessions = [{"id": session.id_parladata, "name": session.name} for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
+    sessions = [session.getSessionData() for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
     return JsonResponse({"organization": workingBodies.organization.getOrganizationData(),
                          "info": {"president": getPersonData(workingBodies.president.id_parladata),
                                   "vice_president": [getPersonData(person) for person in workingBodies.vice_president],
@@ -874,9 +874,14 @@ def runSetters(request, date_to):
     for model, setter in setters_models.items():
         for ID in IDs:
             print setter
+            membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGRanges/' + str(ID) + ("/"+date_to if date_to else "/")).json()
+            start_time = datetime.strptime(membersOfPGsRanges[0]["start_date"], '%d.%m.%Y').date()
+            end_time = datetime.strptime(membersOfPGsRanges[-1]["end_date"], '%d.%m.%Y').date()
             dates = findDatesFromLastCard(model, ID, date_to)
             print dates
             for date in dates:
+                if date < start_time or date > end_time:
+                    break
                 print date.strftime(API_DATE_FORMAT)
                 # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
                 setter(request, str(ID), date.strftime(API_DATE_FORMAT))

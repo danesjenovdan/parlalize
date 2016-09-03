@@ -19,10 +19,7 @@ def getSpeech(request, speech_id):
     speech = Speech.objects.get(id_parladata=speech_id)
     out={"speech_id":speech.id_parladata, "content":speech.content}
     result = {
-        'person': {
-            'name': speech.person.name,
-            'id': int(speech.person.id_parladata)
-        },
+        'person': getPersonData(speech.person.id_parladata, speech.session.start_time.strftime(API_DATE_FORMAT)),
         'results': out
     }
     return JsonResponse(result)
@@ -33,10 +30,7 @@ def getSessionSpeeches(request, session_id):
     for speech in Speech.objects.filter(session=session).order_by("-start_time"):
         out.append({"speech_id": speech.id_parladata, "content": speech.content, "person_id": speech.person.id_parladata})
     result = {
-        'session': {
-            'name': session.name,
-            'id': int(session.id_parladata)
-        },
+        'session': session.getSessionData(),
         'results': out
     }
     return JsonResponse(result, safe=False)
@@ -50,39 +44,22 @@ def setMotionOfSession(request, id_se):
     kvorum = 0
     not_present = 0
     option = ""
-    tabyes = []
-    tabno = []
-    tabkvo = []
-    tabnp = []
-    yesdic = defaultdict(int)
-    nodic = defaultdict(int)
-    kvordic = defaultdict(int)
-    npdic = defaultdict(int)
     tyes = []
     for mot in motion:
         votes  = requests.get(API_URL + '/getVotesOfMotion/'+str(mot['vote_id'])+'/').json()
         for vote in votes:
             if vote['option'] == str('za'):
                 yes = yes + 1
-                yesdic[vote['pg_id']] += 1
-                tabyes.append(vote['mp_id'])
             if vote['option'] == str('proti'):
                 no = no + 1
-                nodic[vote['pg_id']] += 1
-                tabno.append(vote['mp_id'])
-
             if vote['option'] == str('kvorum'):
                 kvorum = kvorum + 1
-                kvordic[vote['pg_id']] += 1
-                tabkvo.append(vote['mp_id'])
             if vote['option'] == str('ni'):
                 not_present = not_present + 1
-                npdic[vote['pg_id']] += 1
-                tabnp.append(vote['mp_id'])
 
         if Vote.objects.filter(id_parladata=mot['vote_id']):
             Vote.objects.filter(id_parladata=mot['vote_id']).update(created_for=session.start_time,
-                                                                    session=Session.objects.get(id_parladata=int(id_se)),
+                                                                    session=session,
                                                                     motion=mot['text'],
                                                                     tags=mot['tags'],
                                                                     votes_for=yes,
@@ -95,7 +72,7 @@ def setMotionOfSession(request, id_se):
         else:
             result = saveOrAbortNew(model=Vote,
                                        created_for=session.start_time,
-                                       session=Session.objects.get(id_parladata=int(id_se)),
+                                       session=session,
                                        motion=mot['text'],
                                        tags=mot['tags'],
                                        votes_for=yes,
@@ -113,14 +90,6 @@ def setMotionOfSession(request, id_se):
         no = 0
         kvorum = 0
         not_present = 0
-        tabyes = []
-        tabno = []
-        tabkvo = []
-        tabnp = []
-        yesdic = defaultdict(int)
-        nodic = defaultdict(int)
-        kvordic = defaultdict(int)
-        npdic = defaultdict(int)
     return JsonResponse({'alliswell': True})
 
 def setMotionOfSessionGraph(request, id_se):
@@ -206,12 +175,7 @@ def getMotionOfSession(request, id_se, date=False):
 
         for card in model:
             out.append({
-            'session': {
-
-                'name': Session.objects.get(id_parladata=int(id_se)).name,
-                'date': Session.objects.get(id_parladata=int(id_se)).start_time.date(),
-                'id': int(id_se)
-            },
+            'session': Session.objects.get(id_parladata=int(id_se)).getSessionData(),
             'results': {
 
                     'motion_id': card.id_parladata,
@@ -258,7 +222,7 @@ def getMotionGraph(request, id_mo, date=False):
 
         mps = []
 
-        out_kvor = {'option':'kvorum','total_votes': model[0].abstain, 'breakdown':option_kvor}
+    out_kvor = {'option':'kvorum','total_votes': model[0].abstain, 'breakdown':option_kvor}
 
     for pg in model[0].pgs_yes:
         party = Organization.objects.get(id_parladata=pg).getOrganizationData()
@@ -273,7 +237,7 @@ def getMotionGraph(request, id_mo, date=False):
 
         mps = []
 
-        out_for = {'option':'for','total_votes': model[0].votes_for, 'breakdown':option_for}
+    out_for = {'option':'for','total_votes': model[0].votes_for, 'breakdown':option_for}
 
     for pg in model[0].pgs_no:
         party = Organization.objects.get(id_parladata=pg).getOrganizationData()
@@ -287,7 +251,7 @@ def getMotionGraph(request, id_mo, date=False):
 
         mps = []
 
-        out_against = {'option':'against','total_votes': model[0].against, 'breakdown':option_against}
+    out_against = {'option':'against','total_votes': model[0].against, 'breakdown':option_against}
 
     for pg in model[0].pgs_np:
         party = Organization.objects.get(id_parladata=pg).getOrganizationData()
@@ -301,7 +265,7 @@ def getMotionGraph(request, id_mo, date=False):
 
         mps = []
 
-        out_np = {'option':'not_present','total_votes': model[0].not_present, 'breakdown':option_np}
+    out_np = {'option':'not_present','total_votes': model[0].not_present, 'breakdown':option_np}
 
     out = {'id':id_mo, 'name': model[0].motion, 'result':model[0].result, 'required':'62', 'all': {'kvorum': out_kvor, 'for': out_for, 'against': out_against, 'not_present': out_np}}
     return JsonResponse(out, safe=False)
@@ -503,11 +467,13 @@ def setQuote(request, speech_id, start_pos, end_pos):
 
 def getQuote(request, quote_id):
     quote = get_object_or_404(Quote, id=quote_id)
-
-    return JsonResponse({"quoted_text": quote.quoted_text,
-                         "start_idx": quote.first_char,
-                         "end_idx": quote.last_char,
-                         "speech_id": quote.speech.id_parladata})
+    return JsonResponse({"person": getPersonData(quote.speech.person.id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
+                         "quoted_text": quote.quoted_text, 
+                         "start_idx": quote.first_char, 
+                         "end_idx": quote.last_char, 
+                         "speech_id": quote.speech.id_parladata,
+                         "content": quote.speech.content,
+                         'session': quote.speech.session.getSessionData()})
 
 
 def getLastSessionLanding(request, date_=None):
@@ -515,18 +481,31 @@ def getLastSessionLanding(request, date_=None):
         fdate = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         fdate=datetime.now().today()
-    presence = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for")[0]
+    ready = False
+    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for")
+    presence_intex = 0
+    motions = None
+    presence = None
+
+    while not ready:
+        presence = presences[presence_intex]
+        motions = json.loads(getMotionOfSession(None, presence.id_parladata).content)
+        if type(motions)==list:
+            tfidf = requests.get("https://isci.parlameter.si/tfidf/s/"+str(presence.id_parladata))
+            if tfidf.status_code == 200:
+                ready = True
+            else:
+                presence_intex += 1                
+        else:
+            presence_intex += 1
 
     result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
                                 "percent":presence.presence[0][p],} for p in presence.presence[0]]
 
-    motions = getMotionOfSession(request, presence.id_parladata).content
-
-
-    result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
-                                "percent":presence.presence[0][p],} for p in presence.presence[0]]
-
-    return JsonResponse({"presence": result, "motions": json.loads(motions)}, safe=False)
+    return JsonResponse({'session': Session.objects.get(id_parladata=int(presence.id_parladata)).getSessionData(), 
+                         "presence": result, 
+                         "motions": motions, 
+                         "tfidf": tfidf.json()}, safe=False)
                
 def runSetters(request, date_to):
  

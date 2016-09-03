@@ -540,8 +540,8 @@ def getPersonData(id_parladata, date_=None):
                           'acronym': 'unknown', 
                           'id': 'unknown', 
                           'name': 'unknown'}, 
-                'name': 'unknown', 
-                'gov_id': 'unknown', 
+                'name': 'unknown_'+str(id_parladata), 
+                'gov_id': 'unknown_'+str(id_parladata), 
                 'id': id_parladata}
     return {
             'name': data.person.name,
@@ -568,4 +568,4 @@ def modelsData():
     for ct in ContentType.objects.all():
         m = ct.model_class()
         print "%s.%s\t%d" % (m.__module__, m.__name__, m._default_manager.count())
-    
+
