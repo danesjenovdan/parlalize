@@ -315,7 +315,7 @@ def getAbsentMPs(request, id_se, date=False):
             results.append(result)
 
     except ObjectDoesNotExist:
-        return JsonResponse({"status": "No card MOFO"}, safe=False)
+        raise Http404("Nismo našli kartice")
     return JsonResponse(results, safe=False)
 
 def setPresenceOfPG(request, id_se):
@@ -374,8 +374,9 @@ def getPresenceOfPG(request, id_se, date=False):
 
             for p in presence.presence[0]:
                 results.append({"id":Organization.objects.get(id_parladata=p).id_parladata, "name":Organization.objects.get(id_parladata=p).name, "percent":presence.presence[0][p], "acronym":Organization.objects.get(id_parladata=p).acronym})
+            results = sorted(results, key=lambda k: k['percent'], reverse=True)
     except ObjectDoesNotExist:
-        return JsonResponse({"status": "No card MOFO"}, safe=False)
+        raise Http404("Nismo našli kartice")
     return JsonResponse(results, safe=False)
 
 def setSpeechesOnSession(request, date=False):
