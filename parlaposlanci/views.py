@@ -1381,9 +1381,53 @@ def runSetters(request, date_to):
             print (zero+timedelta(days=i)).strftime('%d.%m.%Y')
             setter(request, (zero+timedelta(days=i)).strftime('%d.%m.%Y'))
 
-
-
     return JsonResponse({"status": "all is fine :D"}, safe=False)
+
+
+#Create all cards for data_ date. If date_ is None set for run setters for today.
+def onDateCardRunner(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+    setters = [
+        setCutVotes,
+        setMPStaticPL,
+        setMembershipsOfMember,
+        setLessEqualVoters,
+        setMostEqualVoters,
+        setPercentOFAttendedSession,
+    ]
+
+    memberships = requests.get(API_URL+'/getMPs/'+date_).json()
+    IDs = getIDs()
+    # print IDs
+    allIds = len(IDs)
+    curentId = 0
+    for membership in memberships:
+        for setter in setters:
+            print "running:" + str(setter)
+            try:
+                setter(request, str(membership["id"]), date_)
+            except:
+                print "FAIL on: " + str(setter) + " and with id: " + str(membership["id"])
+        setLastActivity(request, str(membership["id"]))
+
+    #Runner for setters ALL
+    all_in_one_setters = [
+        setAverageNumberOfSpeechesPerSessionAll,
+        setVocabularySizeAndSpokenWords,
+        setCompass,
+    ]
+
+    zero=datetime(day=2, month=8, year=2014).date()
+    for setter in all_in_one_setters:
+        print "running:" + str(setter)
+        try:
+            setter(request, date_)
+        except:
+            print "FAIL on: " + str(setter)
 
 def setCompass(request, date_=None):
     if date_:
