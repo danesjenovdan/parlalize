@@ -237,9 +237,9 @@ def setLastActivity(request, person_id):
         types = []
         sessions = []
         for acti in  activites[date]:
-            print acti.id_parladata
+            #print acti.id_parladata
             if type(acti) == Speech:
-                print "Speech"
+                #print "Speech"
                 avtivity_ids.append(acti.id_parladata)
                 types.append("speech")
                 vote_name.append(acti.session.name)
@@ -247,7 +247,7 @@ def setLastActivity(request, person_id):
                 options.append("None")
                 sessions.append(str(acti.session.id))
             else:
-                print "Ballot"
+                #print "Ballot"
                 avtivity_ids.append(acti.vote.id_parladata)
                 types.append("ballot")
                 vote_name.append(acti.vote.motion)
@@ -1386,6 +1386,9 @@ def runSetters(request, date_to):
 
 #Create all cards for data_ date. If date_ is None set for run setters for today.
 def onDateCardRunner(request, date_=None):
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -1411,7 +1414,7 @@ def onDateCardRunner(request, date_=None):
             try:
                 setter(request, str(membership["id"]), date_)
             except:
-                print "FAIL on: " + str(setter) + " and with id: " + str(membership["id"])
+                print FAIL + "FAIL on: " + str(setter) + " and with id: " + str(membership["id"]) + ENDC
         setLastActivity(request, str(membership["id"]))
 
     #Runner for setters ALL
