@@ -14,7 +14,7 @@ from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScore
 from collections import Counter
 from parlalize.settings import LAST_ACTIVITY_COUNT
 from .models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT
 from parlaseje.models import Session, Tag
 from utils.speech import WordAnalysis
 
@@ -295,12 +295,12 @@ def getLastActivity(request, person_id, date_=None):
                     "session_name": vote_names[i],
                     "session_id": sessions_ids[i]
                     })
-        return {"date": str(day_activites.created_for), "events": data}
+        return {"date": day_activites.created_for.strftime(API_OUT_DATE_FORMAT), "events": data}
 
     out = []
 
     lastActivites = getPersonCardModelNew(LastActivity, person_id, date_)
-    lastDay = lastActivites.created_for.strftime(API_DATE_FORMAT)
+    lastDay = lastActivites.created_for.strftime(API_OUT_DATE_FORMAT)
     out.append(parseDayActivites(lastActivites))
     for i in range(LAST_ACTIVITY_COUNT - 1):
         startDate = lastActivites.created_for - timedelta(days=1)
@@ -328,7 +328,7 @@ def getAllSpeeches(request, person_id, date_=None):
         speeches = [[speech for speech in speeches.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in speeches.order_by("start_time").datetimes('start_time', 'day')]
     out = []
     for day in speeches:
-        dayData = {"date": str(day[0].start_time.date()), "speeches":[]}
+        dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "speeches":[]}
         for speech in day:
             dayData["speeches"].append({
                 "session_name": speech.session.name,
@@ -399,7 +399,7 @@ def getMostEqualVoters(request, person_id, date_=None):
     print equalVoters.person1.id_parladata
 
     out = {
-        'date_of_card':equalVoters.created_for.strftime(API_DATE_FORMAT),
+        'date_of_card':equalVoters.created_for.strftime(API_OUT_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -456,7 +456,7 @@ def setLessEqualVoters(request, person_id, date_=None):
 def getLessEqualVoters(request, person_id, date_=None):
     equalVoters = getPersonCardModelNew(LessEqualVoters, person_id, date_)
     out = {
-        'date_of_card':equalVoters.created_for.strftime(API_DATE_FORMAT),
+        'date_of_card':equalVoters.created_for.strftime(API_OUT_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -539,7 +539,7 @@ def getMPsWhichFitsToPG(request, id):
 def setCutVotes(request, person_id, date_=None):
     print "cut"
     if date_:
-        date_of = datetime.strptime(date_, '%d.%m.%Y')
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
         date_of = datetime.now().date()
 
@@ -1322,7 +1322,7 @@ def getMPsIDs(request):
 
 
 def runSetters(request, date_to):
-    toDate = datetime.strptime(date_to, '%d.%m.%Y').date()
+    toDate = datetime.strptime(date_to, API_DATE_FORMAT).date()
     setters_models = {
         #model: setter,
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
@@ -1477,7 +1477,7 @@ def getTaggedBallots(request, person_id, date_=None):
     ballots = Ballot.objects.filter(person__id_parladata=person_id, start_time__lte=date_of)
     ballots = [[ballot for ballot in ballots.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in ballots.order_by("start_time").datetimes('start_time', 'day')]
     for day in ballots:
-        dayData = {"date": day[0].start_time.strftime(API_DATE_FORMAT), "ballots":[]}
+        dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "ballots":[]}
         for ballot in day:
             dayData["ballots"].append({
                 "motion": ballot.vote.motion,
