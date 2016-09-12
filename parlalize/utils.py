@@ -3,13 +3,15 @@ import numpy
 from datetime import datetime, timedelta
 from django.http import Http404, JsonResponse
 import requests
-from parlaposlanci.models import Person, LastActivity, MPStaticPL
-from parlaskupine.models import Organization
-from parlaseje.models import Session, Vote, Speech, Session, Ballot
+from parlaposlanci.models import *
+from parlaskupine.models import *
+from parlaseje.models import *
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT, DEBUG
+from django.contrib.contenttypes.models import ContentType
 import requests
 import json
 import numpy as np
+
 
 
 def voteToLogical(vote):
@@ -538,8 +540,8 @@ def getPersonData(id_parladata, date_=None):
                           'acronym': 'unknown', 
                           'id': 'unknown', 
                           'name': 'unknown'}, 
-                'name': 'unknown', 
-                'gov_id': 'unknown', 
+                'name': 'unknown_'+str(id_parladata), 
+                'gov_id': 'unknown_'+str(id_parladata), 
                 'id': id_parladata}
     return {
             'name': data.person.name,
@@ -561,3 +563,13 @@ def getPersonDataAPI(request, id_parladata, date_=None):
             'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData(),
             'gender':data.gender
         })
+
+
+def modelsData(request):
+    out = []
+    for ct in ContentType.objects.all():
+        m = ct.model_class()
+        out.append({"model":m.__module__,
+                    "Ime modela":m.__name__,
+                    "st:":m._default_manager.count()})
+    return JsonResponse(out, safe=False)
