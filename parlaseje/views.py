@@ -167,6 +167,7 @@ def setMotionOfSessionGraph(request, id_se):
 
 def getMotionOfSession(request, id_se, date=False):
     out = []
+
     if Vote.objects.filter(session__id_parladata=id_se):
         if date:
             model = Vote.objects.filter(session__id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
@@ -188,7 +189,7 @@ def getMotionOfSession(request, id_se, date=False):
             }
         })
     else:
-        return JsonResponse({"status": "No card MOFO"}, safe=False)
+        raise Http404("Nismo našli kartice")
     return JsonResponse(out, safe=False)
 
 
@@ -201,74 +202,76 @@ def getMotionGraph(request, id_mo, date=False):
             model = Vote_graph.objects.filter(id_parladata=id_mo)
 
 
-    option_for = []
-    option_kvor = []
-    option_against = []
-    option_np = []
-    breakdown = []
-    mps =[]
+        option_for = []
+        option_kvor = []
+        option_against = []
+        option_np = []
+        breakdown = []
+        mps =[]
 
 
-    for pg in model[0].pgs_kvor:
-        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
+        for pg in model[0].pgs_kvor:
+            party = Organization.objects.get(id_parladata=pg).getOrganizationData()
 
-        for mp in model[0].mp_kvor:
-            persondata = getPersonData(mp, date)
+            for mp in model[0].mp_kvor:
+                persondata = getPersonData(mp, date)
 
-            if persondata['party']['acronym'] == party['acronym']:
-                mps.append(persondata)
+                if persondata['party']['acronym'] == party['acronym']:
+                    mps.append(persondata)
 
-        option_kvor.append({'pg': party, 'mps': mps})
+            option_kvor.append({'pg': party, 'mps': mps})
 
-        mps = []
+            mps = []
 
-    out_kvor = {'option':'kvorum','total_votes': model[0].abstain, 'breakdown':option_kvor}
+        out_kvor = {'option':'kvorum','total_votes': model[0].abstain, 'breakdown':option_kvor}
 
-    for pg in model[0].pgs_yes:
-        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
+        for pg in model[0].pgs_yes:
+            party = Organization.objects.get(id_parladata=pg).getOrganizationData()
 
-        for mp in model[0].mp_yes:
-            persondata = getPersonData(mp, date)
+            for mp in model[0].mp_yes:
+                persondata = getPersonData(mp, date)
 
-            if persondata['party']['acronym'] == party['acronym']:
-                mps.append(persondata)
+                if persondata['party']['acronym'] == party['acronym']:
+                    mps.append(persondata)
 
-        option_for.append({'pg': party, 'mps': mps})
+            option_for.append({'pg': party, 'mps': mps})
 
-        mps = []
+            mps = []
 
-    out_for = {'option':'for','total_votes': model[0].votes_for, 'breakdown':option_for}
+        out_for = {'option':'for','total_votes': model[0].votes_for, 'breakdown':option_for}
 
-    for pg in model[0].pgs_no:
-        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
-        for mp in model[0].mp_no:
-            persondata = getPersonData(mp, date)
+        for pg in model[0].pgs_no:
+            party = Organization.objects.get(id_parladata=pg).getOrganizationData()
+            for mp in model[0].mp_no:
+                persondata = getPersonData(mp, date)
 
-            if persondata['party']['acronym'] == party['acronym']:
-                mps.append(persondata)
+                if persondata['party']['acronym'] == party['acronym']:
+                    mps.append(persondata)
 
-        option_against.append({'pg': party, 'mps': mps})
+            option_against.append({'pg': party, 'mps': mps})
 
-        mps = []
+            mps = []
 
-    out_against = {'option':'against','total_votes': model[0].against, 'breakdown':option_against}
+        out_against = {'option':'against','total_votes': model[0].against, 'breakdown':option_against}
 
-    for pg in model[0].pgs_np:
-        party = Organization.objects.get(id_parladata=pg).getOrganizationData()
-        for mp in model[0].mp_np:
-            persondata = getPersonData(mp, date)
+        for pg in model[0].pgs_np:
+            party = Organization.objects.get(id_parladata=pg).getOrganizationData()
+            for mp in model[0].mp_np:
+                persondata = getPersonData(mp, date)
 
-            if persondata['party']['acronym'] == party['acronym']:
-                mps.append(persondata)
+                if persondata['party']['acronym'] == party['acronym']:
+                    mps.append(persondata)
 
-        option_np.append({'pg': party, 'mps': mps})
+            option_np.append({'pg': party, 'mps': mps})
 
-        mps = []
+            mps = []
 
-    out_np = {'option':'not_present','total_votes': model[0].not_present, 'breakdown':option_np}
+        out_np = {'option':'not_present','total_votes': model[0].not_present, 'breakdown':option_np}
 
-    out = {'id':id_mo, 'name': model[0].motion, 'result':model[0].result, 'required':'62', 'all': {'kvorum': out_kvor, 'for': out_for, 'against': out_against, 'not_present': out_np}}
-    return JsonResponse(out, safe=False)
+        out = {'id':id_mo, 'name': model[0].motion, 'result':model[0].result, 'required':'62', 'all': {'kvorum': out_kvor, 'for': out_for, 'against': out_against, 'not_present': out_np}}
+        return JsonResponse(out, safe=False)
+    else:
+        raise Http404("Nismo našli kartice")
 
 def setAbsentMPs(request, id_se):
     votes = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
@@ -312,7 +315,7 @@ def getAbsentMPs(request, id_se, date=False):
             results.append(result)
 
     except ObjectDoesNotExist:
-        return JsonResponse({"status": "No card MOFO"}, safe=False)
+        raise Http404("Nismo našli kartice")
     return JsonResponse(results, safe=False)
 
 def setPresenceOfPG(request, id_se):
@@ -371,8 +374,9 @@ def getPresenceOfPG(request, id_se, date=False):
 
             for p in presence.presence[0]:
                 results.append({"id":Organization.objects.get(id_parladata=p).id_parladata, "name":Organization.objects.get(id_parladata=p).name, "percent":presence.presence[0][p], "acronym":Organization.objects.get(id_parladata=p).acronym})
+            results = sorted(results, key=lambda k: k['percent'], reverse=True)
     except ObjectDoesNotExist:
-        return JsonResponse({"status": "No card MOFO"}, safe=False)
+        raise Http404("Nismo našli kartice")
     return JsonResponse(results, safe=False)
 
 def setSpeechesOnSession(request, date=False):
