@@ -146,7 +146,7 @@ def saveOrAbortNew(model, **kwargs):
         return True
     if model != LastActivity:
         created_for = kwargs.pop('created_for')
-    print kwargs
+    #print kwargs
     savedModel = model.objects.filter(**kwargs)
     if savedModel:
         if 'person' in kwargs:
@@ -340,7 +340,7 @@ def updateBallots():
     existingISs = Ballot.objects.all().values_list("id_parladata", flat=True)
     for dic in data:
         if int(dic["id"]) not in existingISs:#Ballot.objects.filter(id_parladata=dic['id']):
-            print "adding ballot"
+            print "adding ballot " + str(dic['vote'])
             vote = Vote.objects.get(id_parladata=dic['vote'])
             ballots = Ballot(person=Person.objects.get(id_parladata=int(dic['voter'])),
                              option=dic['option'],
@@ -563,6 +563,7 @@ def getPersonDataAPI(request, id_parladata, date_=None):
             'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData(),
             'gender':data.gender
         })
+
 
 def modelsData(request):
     out = []
