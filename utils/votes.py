@@ -15,11 +15,16 @@ class RangeVotes(object):
     votesPlain = None
     votesPerDay = {}
     all_votes = []
+    date_ = None
 
-    pg_score = None
+    pg_score_logic = None
+    pg_score_plain = None
 
-    def __init__(self, api_url):
+    def __init__(self, api_url, date_):
         self.api_url = api_url
+        self.date_ = date_
+        self.loadData(date_)
+        self.setVotesPerDay()
 
     def loadData(self, date_):
         #get data
@@ -79,26 +84,25 @@ class RangeVotes(object):
                 pg_score_temp =[self.votesPlain[str(member)][str(b)] for member in members for b in votes_ids]
 
             if votes_type=="logic":
-                print "score", self.pg_score
-                print "temp", pg_score_temp
-                print type(pg_score_temp)
-                #if not isinstance(pg_score_temp, np.float64):
-                #    print "adding"
-                self.pg_score = np.concatenate((self.pg_score,pg_score_temp), axis=0)
+                self.pg_score_logic = np.concatenate((self.pg_score_logic, pg_score_temp), axis=0)
             else:
-                self.pg_score = self.pg_score+pg_score_temp
+                self.pg_score_plain = self.pg_score_plain+pg_score_temp
 
 
     def logicCalculations(self, pgs, date_):
-        self.loadData(date_)
-        self.setVotesPerDay()
-        self.pg_score=np.array([])
+        self.pg_score_logic=np.array([])
         self.getAverageSocreOfPGs(pgs, "logic")
 
+        #needs for deviation
+        votes_of_pg = {str(voter): votesLogic[str(voter)] for voter in self.membersInPGs[str(pg_id)]}
+
+        #needs for how others matching this group
+        votes_of_others = {str(voter): votesLogic[str(voter)] for pg in self.membersInPGs.keys() if pg != str(pg_id) for voter in self.membersInPGs[str(pg)]}
+
+
+
     def plainCalculations(self, pgs, date_):
-        self.loadData(date_)
-        self.setVotesPerDay()
-        self.pg_score=[]
+        self.pg_score_plain=[]
         self.getAverageSocreOfPGs(pgs)
 
 
@@ -123,7 +127,7 @@ range_ = RangeVotes(API_URL)
 
 class Compare():
     def __init__(self):
-        
+
     def howMatchingThem(request, pg_id, type_of, date_=None):
         if date_:
             date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
