@@ -170,3 +170,4 @@ API_DATE_FORMAT = '%d.%m.%Y'
 
 # CORS config
 CORS_ORIGIN_ALLOW_ALL = True
+API_OUT_DATE_FORMAT = '%d. %m. %Y'
