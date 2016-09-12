@@ -16,6 +16,7 @@ from parlalize.settings import LAST_ACTIVITY_COUNT
 from .models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT
 from parlaseje.models import Session, Tag
+from utils.speech import WordAnalysis
 
 from kompas2 import notes
 
@@ -159,6 +160,7 @@ def getPercentOFAttendedSession(request, person_id, date=None):
     return JsonResponse(out)
 
 
+#Depricated
 #Saves to DB number of spoken word of MP and maximum and average of spoken words
 def setNumberOfSpokenWordsALL(request, date_=None):
     if date_:
@@ -1024,6 +1026,45 @@ def getTFIDF(request, person_id, date=None):
 
     return JsonResponse(out)
 
+def setVocabularySizeAndSpokenWords(request, date_=None):
+    sw = WordAnalysis(API_URL, date_)
+
+    #Vocabolary size
+    all_score = sw.getVocabularySize()
+    max_score, maxMPid = sw.getMaxVocabularySize()
+    avg_score = sw.getAvgVocabularySize()
+    date_of = sw.getDate()
+    maxMP = Person.objects.get(id_parladata=maxMPid)
+
+    print "[INFO] saving vocabulary size"
+    for p in all_score:
+        saveOrAbortNew(model=VocabularySize,
+                       person=Person.objects.get(id_parladata=int(p['person_id'])),
+                       created_for=date_of,
+                       score=int(p['coef']),
+                       maxMP=maxMP,
+                       average=avg_score,
+                       maximum=max_score)
+    #Spoken words
+    all_words = sw.getSpokenWords()
+    max_words, maxWordsMPid = sw.getMaxSpokenWords()
+    avgSpokenWords = sw.getAvgSpokenWords()
+    date_of = sw.getDate()
+    maxMP = Person.objects.get(id_parladata=maxWordsMPid)
+
+    print "[INFO] saving spoken words"
+    for p in all_words:
+        saveOrAbortNew(model=SpokenWords,
+                       created_for=date_of,
+                       person=Person.objects.get(id_parladata=int(p['person_id'])),
+                       score=int(p['wordcount']),
+                       maxMP=maxMP,
+                       average=avgSpokenWords,
+                       maximum=max_words)
+
+    return HttpResponse('All MPs updated.')
+
+#Depricated
 def setVocabularySizeALL(request, date_):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -1168,7 +1209,8 @@ def getVocabolarySizeLanding(request, date_=None):
         date_ = date_of.strftime(API_DATE_FORMAT)
     mps = requests.get(API_URL+'/getMPs/'+date_).json()
     datas = [getPersonCardModelNew(VocabularySize, mp["id"], date_) for mp in mps]
-    return JsonResponse(sorted([{"person": getPersonData(data.person_id, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
+    print datas
+    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
 
 
 #just method ALL is edited for date
@@ -1286,7 +1328,7 @@ def runSetters(request, date_to):
         # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
         # CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
 
-        #MPStaticPL: setMPStaticPL,
+        MPStaticPL: setMPStaticPL,
         #MembershipsOfMember: setMembershipsOfMember,
         #LessEqualVoters: setLessEqualVoters,
         #EqualVoters: setMostEqualVoters,
@@ -1327,10 +1369,9 @@ def runSetters(request, date_to):
 
     #Runner for setters ALL
     all_in_one_setters_models = {
-        #VocabularySize: setVocabularySizeALL,
         #AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
-        SpokenWords: setNumberOfSpokenWordsALL,
-        Compass: setCompass,
+        #VocabularySize: setVocabularySizeAndSpokenWords,
+        #Compass: setCompass,
     }
 
     zero=datetime(day=2, month=8, year=2014).date()
