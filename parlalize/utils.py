@@ -291,6 +291,18 @@ def getPGCardModelNew(model, id, date=None):
         print "get object BUBU", modelObject.created_for
     return modelObject
 
+def getSCardModel(model, id_se, date=None):
+    if date:
+        modelObject = model.objects.filter(id_parladata=id_se,
+                                           created_at__lte=datetime.strptime(date, '%d.%m.%Y'))
+    else:
+        modelObject = model.objects.filter(id_parladata=id_se,
+                                           created_at__lte=datetime.now())
+    if not modelObject:
+        raise Http404("Nismo našli kartice")
+    else:
+        modelObject = modelObject.latest('created_at')
+    return modelObject
 
 def updateOrganizations():
     data = requests.get(API_URL+'/getAllOrganizations').json()
@@ -569,7 +581,37 @@ def modelsData(request):
     out = []
     for ct in ContentType.objects.all():
         m = ct.model_class()
+        
         out.append({"model":m.__module__,
                     "Ime modela":m.__name__,
                     "st:":m._default_manager.count()})
     return JsonResponse(out, safe=False)
+
+def checkSessions():
+    ses = requests.get('http://127.0.0.1:8001/v1/getSessions/').json()
+    sessions  = [s['id'] for s in ses]
+    if len(Session.objects.all()) > 0:
+        print "Seje katerih ni v parlalizah: ", list(set(sessions) - set(Session.objects.values_list('id_parladata', flat=True)))
+    else:
+        print "ni sej sploh"
+
+    if len(Vote.objects.all()) > 0:
+        print "Vote katerih ni v parlalizah: ", list(set(sessions) - set(Vote.objects.values_list('id_parladata', flat=True)))
+    else:
+        print "ni votov sploh"
+
+    if len(Vote_graph.objects.all()) > 0:
+        print "Vote katerih ni v parlalizah: ", list(set(sessions) - set(Vote_graph.objects.all().values_list('session__id_parladata', flat=True)))
+    else:
+        print "ni votov grafov sploh"
+
+    if len(PresenceOfPG.objects.all()) > 0:
+        print "stevilo PresenceOfPG: ", len(PresenceOfPG.objects.all())
+    else:
+        print "ni PresenceOfPG sploh"
+
+    if len(AverageSpeeches.objects.all()) > 0:
+        print "stevilo AverageSpeeches: ", len(AverageSpeeches.objects.all())
+    else:
+        print "ni AverageSpeeches sploh"
+
