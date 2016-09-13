@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 #from parlaposlanci.models import *
 from jsonfield import JSONField
 from behaviors.models import Timestampable
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT
 
 # converting datetime to popolo
 class PopoloDateTimeField(models.DateTimeField):
@@ -80,7 +80,7 @@ class Session(Timestampable, models.Model): # poslanec, minister, predsednik dz 
 
     def getSessionData(self):
         return {'name': self.name,
-                'date': self.start_time.strftime(API_DATE_FORMAT),
+                'date': self.start_time.strftime(API_OUT_DATE_FORMAT),
                 'id': self.id_parladata,}
 
 class Activity(Timestampable, models.Model):
