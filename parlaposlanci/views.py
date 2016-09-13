@@ -14,8 +14,9 @@ from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScore
 from collections import Counter
 from parlalize.settings import LAST_ACTIVITY_COUNT
 from .models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT
 from parlaseje.models import Session, Tag
+from utils.speech import WordAnalysis
 
 from kompas2 import notes
 
@@ -159,6 +160,7 @@ def getPercentOFAttendedSession(request, person_id, date=None):
     return JsonResponse(out)
 
 
+#Depricated
 #Saves to DB number of spoken word of MP and maximum and average of spoken words
 def setNumberOfSpokenWordsALL(request, date_=None):
     if date_:
@@ -235,9 +237,9 @@ def setLastActivity(request, person_id):
         types = []
         sessions = []
         for acti in  activites[date]:
-            print acti.id_parladata
+            #print acti.id_parladata
             if type(acti) == Speech:
-                print "Speech"
+                #print "Speech"
                 avtivity_ids.append(acti.id_parladata)
                 types.append("speech")
                 vote_name.append(acti.session.name)
@@ -245,7 +247,7 @@ def setLastActivity(request, person_id):
                 options.append("None")
                 sessions.append(str(acti.session.id))
             else:
-                print "Ballot"
+                #print "Ballot"
                 avtivity_ids.append(acti.vote.id_parladata)
                 types.append("ballot")
                 vote_name.append(acti.vote.motion)
@@ -293,12 +295,12 @@ def getLastActivity(request, person_id, date_=None):
                     "session_name": vote_names[i],
                     "session_id": sessions_ids[i]
                     })
-        return {"date": str(day_activites.created_for), "events": data}
+        return {"date": day_activites.created_for.strftime(API_OUT_DATE_FORMAT), "events": data}
 
     out = []
 
     lastActivites = getPersonCardModelNew(LastActivity, person_id, date_)
-    lastDay = lastActivites.created_for.strftime(API_DATE_FORMAT)
+    lastDay = lastActivites.created_for.strftime(API_OUT_DATE_FORMAT)
     out.append(parseDayActivites(lastActivites))
     for i in range(LAST_ACTIVITY_COUNT - 1):
         startDate = lastActivites.created_for - timedelta(days=1)
@@ -326,7 +328,7 @@ def getAllSpeeches(request, person_id, date_=None):
         speeches = [[speech for speech in speeches.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in speeches.order_by("start_time").datetimes('start_time', 'day')]
     out = []
     for day in speeches:
-        dayData = {"date": str(day[0].start_time.date()), "speeches":[]}
+        dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "speeches":[]}
         for speech in day:
             dayData["speeches"].append({
                 "session_name": speech.session.name,
@@ -397,7 +399,7 @@ def getMostEqualVoters(request, person_id, date_=None):
     print equalVoters.person1.id_parladata
 
     out = {
-        'date_of_card':equalVoters.created_for.strftime(API_DATE_FORMAT),
+        'date_of_card':equalVoters.created_for.strftime(API_OUT_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -454,7 +456,7 @@ def setLessEqualVoters(request, person_id, date_=None):
 def getLessEqualVoters(request, person_id, date_=None):
     equalVoters = getPersonCardModelNew(LessEqualVoters, person_id, date_)
     out = {
-        'date_of_card':equalVoters.created_for.strftime(API_DATE_FORMAT),
+        'date_of_card':equalVoters.created_for.strftime(API_OUT_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -537,7 +539,7 @@ def getMPsWhichFitsToPG(request, id):
 def setCutVotes(request, person_id, date_=None):
     print "cut"
     if date_:
-        date_of = datetime.strptime(date_, '%d.%m.%Y')
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
         date_of = datetime.now().date()
 
@@ -1024,6 +1026,45 @@ def getTFIDF(request, person_id, date=None):
 
     return JsonResponse(out)
 
+def setVocabularySizeAndSpokenWords(request, date_=None):
+    sw = WordAnalysis(API_URL, date_)
+
+    #Vocabolary size
+    all_score = sw.getVocabularySize()
+    max_score, maxMPid = sw.getMaxVocabularySize()
+    avg_score = sw.getAvgVocabularySize()
+    date_of = sw.getDate()
+    maxMP = Person.objects.get(id_parladata=maxMPid)
+
+    print "[INFO] saving vocabulary size"
+    for p in all_score:
+        saveOrAbortNew(model=VocabularySize,
+                       person=Person.objects.get(id_parladata=int(p['person_id'])),
+                       created_for=date_of,
+                       score=int(p['coef']),
+                       maxMP=maxMP,
+                       average=avg_score,
+                       maximum=max_score)
+    #Spoken words
+    all_words = sw.getSpokenWords()
+    max_words, maxWordsMPid = sw.getMaxSpokenWords()
+    avgSpokenWords = sw.getAvgSpokenWords()
+    date_of = sw.getDate()
+    maxMP = Person.objects.get(id_parladata=maxWordsMPid)
+
+    print "[INFO] saving spoken words"
+    for p in all_words:
+        saveOrAbortNew(model=SpokenWords,
+                       created_for=date_of,
+                       person=Person.objects.get(id_parladata=int(p['person_id'])),
+                       score=int(p['wordcount']),
+                       maxMP=maxMP,
+                       average=avgSpokenWords,
+                       maximum=max_words)
+
+    return HttpResponse('All MPs updated.')
+
+#Depricated
 def setVocabularySizeALL(request, date_):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -1168,7 +1209,8 @@ def getVocabolarySizeLanding(request, date_=None):
         date_ = date_of.strftime(API_DATE_FORMAT)
     mps = requests.get(API_URL+'/getMPs/'+date_).json()
     datas = [getPersonCardModelNew(VocabularySize, mp["id"], date_) for mp in mps]
-    return JsonResponse(sorted([{"person": getPersonData(data.person_id, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
+    print datas
+    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
 
 
 #just method ALL is edited for date
@@ -1279,71 +1321,6 @@ def getMPsIDs(request):
     return JsonResponse(output, safe=False)
 
 
-def runSetters(request, date_to):
-    toDate = datetime.strptime(date_to, '%d.%m.%Y').date()
-    setters_models = {
-        #model: setter,
-        # not working yet #LastActivity: BASE_URL+'/p/setLastActivity/',
-        # CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
-
-        #MPStaticPL: setMPStaticPL,
-        #MembershipsOfMember: setMembershipsOfMember,
-        #LessEqualVoters: setLessEqualVoters,
-        #EqualVoters: setMostEqualVoters,
-        #Presence: setPercentOFAttendedSession,
-    }
-    memberships = requests.get(API_URL+'/getAllTimeMemberships').json()
-    IDs = getIDs()
-    # print IDs
-    allIds = len(IDs)
-    curentId = 0
-    for membership in memberships:
-        if membership["end_time"]:
-            end_time = datetime.strptime(membership["end_time"].split("T")[0],"%Y-%m-%d").date()
-            if end_time>toDate:
-                end_time=toDate
-        else:
-            end_time=toDate
-
-        for model, setter in setters_models.items():
-            print setter, date_to
-            if membership["start_time"]:
-                print "START",membership["start_time"]
-                start_time = datetime.strptime(membership["start_time"].split("T")[0],"%Y-%m-%d")
-                dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT), start_time.strftime(API_DATE_FORMAT))
-            else:
-                dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(API_DATE_FORMAT))
-            for date in dates:
-                print date.strftime('%d.%m.%Y')
-                print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
-                setter(request, str(membership["id"]), date.strftime('%d.%m.%Y'))
-
-                #if setter == setMPStaticPL: # Prevent that runner doesn't waste time with ... Which doesn't change often
-                #    break;
-        #setLastActivity allways runs without date
-        #setLastActivity(request, str(membership["id"]))
-        curentId += 1
-                # result = requests.get(setter + str(ID) + "/" + date.strftime('%d.%m.%Y')).status_code
-
-    #Runner for setters ALL
-    all_in_one_setters_models = {
-        #VocabularySize: setVocabularySizeALL,
-        #AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
-        SpokenWords: setNumberOfSpokenWordsALL,
-        Compass: setCompass,
-    }
-
-    zero=datetime(day=2, month=8, year=2014).date()
-    for model, setter in all_in_one_setters_models.items():
-        print (toDate-datetime(day=2, month=8, year=2014).date()).days
-        for i in range((toDate-datetime(day=2, month=8, year=2014).date()).days):
-            print (zero+timedelta(days=i)).strftime('%d.%m.%Y')
-            setter(request, (zero+timedelta(days=i)).strftime('%d.%m.%Y'))
-
-
-
-    return JsonResponse({"status": "all is fine :D"}, safe=False)
-
 def setCompass(request, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -1436,7 +1413,7 @@ def getTaggedBallots(request, person_id, date_=None):
     ballots = Ballot.objects.filter(person__id_parladata=person_id, start_time__lte=date_of)
     ballots = [[ballot for ballot in ballots.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in ballots.order_by("start_time").datetimes('start_time', 'day')]
     for day in ballots:
-        dayData = {"date": day[0].start_time.strftime(API_DATE_FORMAT), "ballots":[]}
+        dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "ballots":[]}
         for ballot in day:
             dayData["ballots"].append({
                 "motion": ballot.vote.motion,

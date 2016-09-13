@@ -68,7 +68,7 @@ def setMotionOfSession(request, id_se):
                                                                     not_present=not_present,
                                                                     result=resultOfMotion(yes, no, kvorum,not_present),
                                                                     id_parladata=mot['vote_id'],
-                                                                    id_parladata_session=int(id_se))
+                                                                    )
         else:
             result = saveOrAbortNew(model=Vote,
                                        created_for=session.start_time,
@@ -81,7 +81,6 @@ def setMotionOfSession(request, id_se):
                                        not_present=not_present,
                                        result=resultOfMotion(yes, no, kvorum,not_present),
                                        id_parladata=mot['vote_id'],
-                                       id_parladata_session=int(id_se)
                                        )
 
 
@@ -288,7 +287,7 @@ def setAbsentMPs(request, id_se):
                     mpsID.remove(vote['mp_id'])
 
         result = saveOrAbortNew(model=AbsentMPs,
-                                id_parladata=id_se,
+                                session=session,
                                 absentMPs=mpsID,
                                 created_for=session.start_time
                                 )
@@ -301,9 +300,9 @@ def getAbsentMPs(request, id_se, date=False):
     try:
         if date:
             date_ = datetime.strptime(date, API_DATE_FORMAT)
-            ids = AbsentMPs.objects.get(id_parladata=int(id_se), start_time__lte=data_).absentMPs
+            ids = AbsentMPs.objects.get(session__id_parladata=int(id_se), start_time__lte=data_).absentMPs
         else:
-            ids = AbsentMPs.objects.get(id_parladata=int(id_se)).absentMPs
+            ids = AbsentMPs.objects.get(session__id_parladata=int(id_se)).absentMPs
             date_ = datetime.now().date()
             date = date_.strftime(API_DATE_FORMAT)
         results = []
@@ -358,22 +357,21 @@ def setPresenceOfPG(request, id_se):
         result = saveOrAbortNew(model=PresenceOfPG,
                                 created_for=session.start_time,
                                 presence=[final],
-                                id_parladata = int(id_se)
+                                session = session
                                 )
 
     return JsonResponse({'alliswell': True})
 
 def getPresenceOfPG(request, id_se, date=False):
-
     results = []
     try:
         if date:
-            presence = PresenceOfPG.objects.get(id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
+            presence = PresenceOfPG.objects.get(session__id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
         else:
-            presence = PresenceOfPG.objects.get(id_parladata=id_se)
+            presence = PresenceOfPG.objects.get(session__id_parladata=id_se)
 
             for p in presence.presence[0]:
-                results.append({"id":Organization.objects.get(id_parladata=p).id_parladata, "name":Organization.objects.get(id_parladata=p).name, "percent":presence.presence[0][p], "acronym":Organization.objects.get(id_parladata=p).acronym})
+                results.append({"organization": Organization.objects.get(id_parladata=p).getOrganizationData(), "percent": presence.presence[0][p]})
             results = sorted(results, key=lambda k: k['percent'], reverse=True)
     except ObjectDoesNotExist:
         raise Http404("Nismo našli kartice")
