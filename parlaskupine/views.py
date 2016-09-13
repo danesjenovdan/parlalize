@@ -911,3 +911,57 @@ def runSetters(request, date_to):
 
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 
+
+def onDateCardRunner(date_=None):
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    setters = [
+        setCutVotes,
+        setDeviationInOrg,
+        setLessMatchingThem,
+        setMostMatchingThem,
+        setPercentOFAttendedSessionPG,
+        setMPsOfPG,
+        setBasicInfOfPG,
+    ]
+
+    membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGsRanges/'+date_).json()
+    IDs = [key for key, value in membersOfPGsRanges[-1]["members"].items() if value]
+    curentId = 0
+    
+    for setter in setters:
+        for ID in IDs:
+            print setter
+            try:
+                setter(None, str(ID), date_)
+            except:
+                print FAIL + "FAIL on: " + str(setter) + " and with id: " + str(ID) + ENDC
+
+
+    #Runner for setters ALL
+    all_in_one_setters = [
+        setVocabularySizeALL,
+    ]
+
+    for setter in all_in_one_setters:
+        try:
+            setter(None, date_)
+        except:
+            print FAIL + "FAIL on: " + str(setter) + ENDC
+
+    organizations = requests.get(API_URL+"/getOrganizatonByClassification").json()
+    for org in organizations["working_bodies"]+organizations["council"]:
+        print "set working_bodie: " + str(org["id"])
+        try:
+            setWorkingBodies(None, str(org["id"]), date_)
+        except:
+            print FAIL + "FAIL on: " + "setWorkingBodies" + " and with id: " + str(org["id"]) + ENDC
+
+    return True
