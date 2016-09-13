@@ -30,13 +30,7 @@ urlpatterns = patterns(
 
     url(r'^setVocabularySize/(?P<person_id>\d+)', setVocabularySize),
 
-    url(r'^setVocabularySizeALL/(?P<date_>[\w].+)', setVocabularySizeALL),
-    url(r'^setVocabularySizeALL/', setVocabularySizeALL),
-
     url(r'^setLastActivity/(?P<person_id>\d+)', setLastActivity),
-
-    url(r'^setNumberOfSpokenWordsALL/(?P<date_>[\w].+)', setNumberOfSpokenWordsALL),
-    url(r'^setNumberOfSpokenWordsALL/', setNumberOfSpokenWordsALL),
 
     url(r'^setCutVotes/(?P<person_id>\d+)/(?P<date_>[\w].+)', setCutVotes),
     url(r'^setCutVotes/(?P<person_id>\d+)', setCutVotes),
@@ -48,6 +42,9 @@ urlpatterns = patterns(
 
     url(r'^setMembershipsOfMember/(?P<person_id>\d+)/(?P<date>[\w].+)', setMembershipsOfMember),
     url(r'^setMembershipsOfMember/(?P<person_id>\d+)', setMembershipsOfMember),
+
+    url(r'^setVocabularySizeAndSpokenWords/(?P<date_>[\w].+)', setVocabularySizeAndSpokenWords),
+    url(r'^setVocabularySizeAndSpokenWords/', setVocabularySizeAndSpokenWords),
 
 
     ####################################################################################
@@ -105,5 +102,5 @@ urlpatterns = patterns(
     ####################################################################################
 
     #runenr
-    url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
+    #url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
 )

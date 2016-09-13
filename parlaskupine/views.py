@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from parlaskupine.models import *
 from parlaseje.models import Activity,Session
 from collections import Counter
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT
 import numpy as np
 from scipy.stats.stats import pearsonr
 from parlaposlanci.models import Person
@@ -55,6 +55,7 @@ def setBasicInfOfPG(request, pg_id, date_):
 
     return JsonResponse({'alliswell': True})
 
+
 def getBasicInfOfPG(request, pg_id, date=None):
     card = getPGCardModel(PGStatic, pg_id, date)
     headOfPG = 0
@@ -83,6 +84,7 @@ def getBasicInfOfPG(request, pg_id, date=None):
            }
 
     return JsonResponse(data)
+
 
 def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
     if date_:
@@ -201,7 +203,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
         endTime = datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT)
         speeches = [[speech for speech in Speech.objects.filter(person__id_parladata__in = pgMembersRange["members"][pg_id], start_time__range=[t_date, t_date+timedelta(days=1)]).order_by("-id_parladata")] for t_date in Speech.objects.filter(start_time__lte=endTime, start_time__gte=startTime, person__id_parladata__in = pgMembersRange["members"][pg_id]).datetimes('start_time', 'day')]
         for day in reversed(speeches):
-            dayData = {"date": str(day[0].start_time.date()), "sessions":[]}
+            dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "sessions":[]}
             addedPersons = []
             addedSessions = []
             for speech in day:
@@ -746,7 +748,7 @@ def getTaggedBallots(request, pg_id, date_=None):
         ballots = Ballot.objects.filter(person__id_parladata__in=pgMembersRange["members"], start_time__lte=datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT), start_time__gte=datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT))
         ballots = [ballots.filter(start_time__range=[t_date, t_date+timedelta(days=1)])for t_date in ballots.order_by("start_time").datetimes('start_time', 'day')]
         for day in ballots:
-            dayData = {"date": day[0].start_time.strftime(API_DATE_FORMAT), "ballots":[]}
+            dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "ballots":[]}
             votes = list(set(day.order_by("start_time").values_list("vote_id", flat=True)))
             for vote in votes:
                 vote_balots = day.filter(vote_id=vote)
@@ -851,63 +853,3 @@ def getPGsIDs(request):
     output = {"list": [i for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
 
     return JsonResponse(output, safe=False)
-
-
-def runSetters(request, date_to):
-    toDate = datetime.strptime(date_to, '%d.%m.%Y').date()
-    setters_models = {
-        #CutVotes: setCutVotes,#BASE_URL+'/p/setCutVotes/',
-        #DeviationInOrganization: setDeviationInOrg,
-        #LessMatchingThem: setLessMatchingThem,
-        #MostMatchingThem: setMostMatchingThem
-        #PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
-        #MPOfPg: setMPsOfPG
-        #PGStatic: setBasicInfOfPG
-    }
-
-    IDs = getPGIDs()
-    #IDs = [1, 2]
-    # print IDs
-    allIds = len(IDs)
-    curentId = 0
-    
-    for model, setter in setters_models.items():
-        for ID in IDs:
-            print setter
-            membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGRanges/' + str(ID) + ("/"+date_to if date_to else "/")).json()
-            start_time = datetime.strptime(membersOfPGsRanges[0]["start_date"], '%d.%m.%Y').date()
-            end_time = datetime.strptime(membersOfPGsRanges[-1]["end_date"], '%d.%m.%Y').date()
-            dates = findDatesFromLastCard(model, ID, date_to)
-            print dates
-            for date in dates:
-                if date < start_time or date > end_time:
-                    break
-                print date.strftime(API_DATE_FORMAT)
-                # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
-                setter(request, str(ID), date.strftime(API_DATE_FORMAT))
-        curentId += 1
-                # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
-
-
-    #Runner for setters ALL
-    all_in_one_setters_models = {
-        #VocabularySize: setVocabularySizeALL,
-    }
-
-    zero=datetime(day=2, month=8, year=2014).date()
-    for model, setter in all_in_one_setters_models.items():
-        print (toDate-datetime(day=2, month=8, year=2014).date()).days
-        for i in range((toDate-datetime(day=2, month=8, year=2014).date()).days):
-            print (zero+timedelta(days=i)).strftime('%d.%m.%Y')
-            setter(request, (zero+timedelta(days=i)).strftime('%d.%m.%Y'))
-
-    organizations = requests.get(API_URL+"/getOrganizatonByClassification").json()
-    print organizations
-    for org in organizations["working_bodies"]+organizations["council"]:
-        print org
-        dates = findDatesFromLastCard(WorkingBodies, org["id"], date_to)
-        for date in dates:
-            print setWorkingBodies(request, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
-
-    return JsonResponse({"status": "all is fine :D"}, safe=False)
-

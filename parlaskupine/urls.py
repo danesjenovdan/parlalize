@@ -82,7 +82,7 @@ urlpatterns = patterns('',
     ####################################################################################
 
     # runenr
-    url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
+    #url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
 
 
 

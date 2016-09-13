@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 #from parlaposlanci.models import *
 from jsonfield import JSONField
 from behaviors.models import Timestampable
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT
 
 # converting datetime to popolo
 class PopoloDateTimeField(models.DateTimeField):
@@ -55,10 +55,6 @@ class Session(Timestampable, models.Model): # poslanec, minister, predsednik dz 
                                       blank=True, null=True,
                                       help_text='Session classification')
 
-    id_parladata = models.IntegerField(_('parladata id'),
-                            blank=True, null=True,help_text=_('id parladata'))
-
-
     actived = models.CharField(_('actived'),
                             null=True,
                             max_length=128,
@@ -80,7 +76,7 @@ class Session(Timestampable, models.Model): # poslanec, minister, predsednik dz 
 
     def getSessionData(self):
         return {'name': self.name,
-                'date': self.start_time.strftime(API_DATE_FORMAT),
+                'date': self.start_time.strftime(API_OUT_DATE_FORMAT),
                 'id': self.id_parladata,}
 
 class Activity(Timestampable, models.Model):
@@ -162,9 +158,7 @@ class Vote(Timestampable, models.Model):
                               help_text='The result of the vote')
 
     id_parladata = models.IntegerField(_('parladata id'),
-                            blank=True, null=True,help_text=_('id parladata'))
-
-    id_parladata_session = models.IntegerField(blank=True, null=True)
+                            blank=True, null=True, help_text=_('id parladata'))
 
 
 class Vote_graph(Timestampable, models.Model):
@@ -213,8 +207,11 @@ class Vote_graph(Timestampable, models.Model):
 
 class AbsentMPs(Timestampable, models.Model):
 
-    id_parladata = models.IntegerField(_('parladata id'),
-                            blank=True, null=True,help_text=_('id parladata'))
+    session = models.ForeignKey('Session',
+                               blank=True, null=True,
+                               related_name='session_absent',
+                               help_text=_('Session '))
+
     absentMPs = JSONField(blank=True, null=True)
     
     created_for = models.DateField(_('date of vote'),
@@ -237,6 +234,10 @@ class Quote(models.Model):
 
 
 class PresenceOfPG(Timestampable, models.Model):
+    session = models.ForeignKey('Session',
+                               blank=True, null=True,
+                               related_name='session_presence',
+                               help_text=_('Session '))
 
     presence = JSONField(blank=True, null=True)
 
@@ -244,9 +245,6 @@ class PresenceOfPG(Timestampable, models.Model):
                                    blank=True,
                                    null=True,
                                    help_text=_('date of analize'))
-
-    id_parladata = models.IntegerField(_('parladata id'),
-                            blank=True, null=True,help_text=_('id parladata'))
 
 
 class AverageSpeeches(Timestampable, models.Model):
