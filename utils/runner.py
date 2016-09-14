@@ -1,6 +1,6 @@
 import requests
 from parlaposlanci.views import setMPStaticPL
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 from parlalize.utils import getPGIDs, findDatesFromLastCard
 from datetime import datetime
 
