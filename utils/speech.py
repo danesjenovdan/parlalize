@@ -52,7 +52,7 @@ class WordAnalysis(object):
             self.swizec_coef.append({'person_id': mp['id'], 'coef': (M1*M1)/(M2-M1)})
 
         print "[INFO] counting avg words"
-        all_speeches = requests.get(API_URL+'/getAllSpeeches/'+self.date_).json()
+        all_speeches = requests.get(API_URL+'/getAllSpeechesOfMPs/'+self.date_).json()
         text = ''.join([speech['content'] for speech in all_speeches])
         total_words = numberOfWords(text)
         self.average_words = total_words/len(self.allTimeMembers)
