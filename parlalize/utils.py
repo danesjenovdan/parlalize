@@ -239,27 +239,6 @@ def getPersonCardModel(model, id, date=None):
     return modelObject
 
 
-def updatePeople():
-    data = requests.get(API_URL+'/getAllPeople/').json()
-    mps = requests.get(API_URL+'/getMPs/').json()
-    mps_ids = [mp['id'] for mp in mps]
-    for mp in data:
-        if Person.objects.filter(id_parladata=mp['id']):
-            person = Person.objects.get(id_parladata=mp['id'])
-            person.name = mp['name']
-            person.pg = mp['membership']
-            person.id_parladata = int(mp['id'])
-            person.image = mp['image']
-            person.actived = True if int(mp['id']) in mps_ids else False
-            person.gov_id = mp['gov_id']
-            person.save()
-        else:
-            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if int(mp['id']) in mps_ids else False, gov_id=mp['gov_id'])
-            person.save()
-
-    return 1
-
-
 def getPGCardModel(model, id, date=None):
     if date:
         modelObject = model.objects.filter(organization__id_parladata=id,
@@ -304,95 +283,6 @@ def getSCardModel(model, id_se, date=None):
         modelObject = modelObject.latest('created_at')
     return modelObject
 
-def updateOrganizations():
-    data = requests.get(API_URL+'/getAllOrganizations').json()
-    for pg in data:
-        if Organization.objects.filter(id_parladata=pg):
-            org = Organization.objects.get(id_parladata=pg)
-            org.name = data[pg]['name']
-            org.classification = data[pg]['classification']
-            org.acronym = data[pg]['acronym']
-            print data[pg]['acronym']
-            org.save()
-        else:
-            org = Organization(name=data[pg]['name'],
-                               classification=data[pg]['classification'],
-                               id_parladata=pg,
-                               acronym=data[pg]['acronym'])
-            org.save()
-    return 1
-
-
-def updateSpeeches():
-    data = requests.get(API_URL+'/getAllSpeeches').json()
-    existingISs = Speech.objects.all().values_list("id_parladata", flat=True)
-    for dic in data:
-        if int(dic["id"]) not in existingISs:
-            print "adding speech"
-            speech = Speech(person=Person.objects.get(id_parladata=int(dic['speaker'])),
-                            organization=Organization.objects.get(id_parladata=int(dic['party'])),
-                            content=dic['content'], order=dic['order'],
-                            session=Session.objects.get(id_parladata=int(dic['session'])),
-                            start_time=dic['start_time'],
-                            end_time=dic['end_time'],
-                            id_parladata=dic['id'])
-            speech.save()
-    return 1
-
-#treba pofixsat
-def updateMotionOfSession():
-    ses = Session.objects.all()
-    for s in ses:
-        print s.id_parladata
-        requests.get(BASE_URL+'/s/setMotionOfSession/'+str(s.id_parladata))
-
-#treba pofixsat
-def updateBallots():
-    data = requests.get(API_URL+'/getAllBallots').json()
-    existingISs = Ballot.objects.all().values_list("id_parladata", flat=True)
-    for dic in data:
-        if int(dic["id"]) not in existingISs:#Ballot.objects.filter(id_parladata=dic['id']):
-            print "adding ballot " + str(dic['vote'])
-            vote = Vote.objects.get(id_parladata=dic['vote'])
-            ballots = Ballot(person=Person.objects.get(id_parladata=int(dic['voter'])),
-                             option=dic['option'],
-                             vote=vote,
-                             start_time=vote.session.start_time,
-                             end_time=None,
-                             id_parladata=dic['id'])
-            ballots.save()
-    return 1
-
-
-#def updateVotes():
-#    data = requests.get(API_URL+'/getAllVotes').json()
-#    for dic in data:
-#        print dic['session'], dic['motion']
-#        speeches = saveOrAbort(Vote, session=Session.objects.get(id_parladata=int(dic['session'])), motion=dic['motion'], organization=Organization.objects.get(id_parladata=int(dic['party'])), id_parladata=dic['id'], result=dic['result'], start_time=dic['start_time'])
-#    return 1
-
-
-def update():
-
-    updateOrganizations()
-    print "org"
-
-    updatePeople()
-    print "pep"
-
-    setAllSessions()
-    print "Sessions"
-
-    updateSpeeches()
-    print "speeches"
-
-    updateMotionOfSession()
-    print "votes"
-
-    updateBallots()
-    print "ballots"
-
-
 # get all parliament member ID's
 def getIDs():
     # create persons
@@ -413,41 +303,6 @@ def getPGIDs():
 
     return [pg for pg in data]
 
-def setAllSessions():
-    data  = requests.get(API_URL + '/getSessions/').json()
-    session_ids = list(Session.objects.all().values_list("id_parladata", flat=True))
-    for sessions in data:
-        if sessions['id'] not in session_ids:
-            result = Session(name=sessions['name'],
-                             gov_id=sessions['gov_id'],
-                             start_time=sessions['start_time'],
-                             end_time=sessions['end_time'],
-                             classification=sessions['classification'],
-                             id_parladata=sessions['id'],
-                             organization=Organization.objects.get(id_parladata=sessions['organization_id']),
-                             ).save()
-        else:
-            if not Session.objects.filter(name=sessions['name'],
-                                          gov_id=sessions['gov_id'],
-                                          start_time=sessions['start_time'],
-                                          end_time=sessions['end_time'],
-                                          classification=sessions['classification'],
-                                          id_parladata=sessions['id'],
-                                          organization=Organization.objects.get(id_parladata=sessions['organization_id']),):
-                #save changes
-                session = Session.objects.get(id_parladata=sessions['id'])
-                session.name = sessions['name']
-                session.gov_id = sessions['gov_id']
-                session.start_time = sessions['start_time']
-                session.end_time = sessions['end_time']
-                session.classification = sessions['classification']
-                session.id_parladata = sessions['id']
-                session.organization = Organization.objects.get(id_parladata=sessions['organization_id'])
-                session.save()
-
-
-
-    return 1
 
 def getRangeVotes(pgs, date_, votes_type="logic"):
     print date_

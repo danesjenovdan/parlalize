@@ -1,15 +1,145 @@
 import requests
 from parlaposlanci.views import setMPStaticPL
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 from parlalize.utils import getPGIDs, findDatesFromLastCard
 from datetime import datetime
 
 
 from parlaposlanci.views import setCutVotes, setMPStaticPL, setMembershipsOfMember, setLessEqualVoters, setMostEqualVoters, setPercentOFAttendedSession, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass
-from parlaposlanci.models import CutVotes, MPStaticPL, MembershipsOfMember, LessEqualVoters, EqualVoters, Presence, AverageNumberOfSpeechesPerSession, VocabularySize, Compass
+from parlaposlanci.models import Person, CutVotes, MPStaticPL, MembershipsOfMember, LessEqualVoters, EqualVoters, Presence, AverageNumberOfSpeechesPerSession, VocabularySize, Compass
 
 from parlaskupine.views import setCutVotes as setCutVotesPG, setDeviationInOrg, setLessMatchingThem, setMostMatchingThem, setPercentOFAttendedSessionPG, setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL
-from parlaskupine.models import WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic
+from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic
+
+from parlaseje.models import Session, Vote, Ballot
+
+## parlalize initial runner methods ##
+
+def updatePeople():
+    data = requests.get(API_URL + '/getAllPeople/').json()
+    mps = requests.get(API_URL + '/getMPs/').json()
+    mps_ids = [mp['id'] for mp in mps]
+    for mp in data:
+        if Person.objects.filter(id_parladata=mp['id']):
+            person = Person.objects.get(id_parladata=mp['id'])
+            person.name = mp['name']
+            person.pg = mp['membership']
+            person.id_parladata = int(mp['id'])
+            person.image = mp['image']
+            person.actived = True if int(mp['id']) in mps_ids else False
+            person.gov_id = mp['gov_id']
+            person.save()
+        else:
+            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp[
+                            'image'], actived=True if int(mp['id']) in mps_ids else False, gov_id=mp['gov_id'])
+            person.save()
+
+    return 1
+
+
+def updateOrganizations():
+    data = requests.get(API_URL + '/getAllOrganizations').json()
+    for pg in data:
+        if Organization.objects.filter(id_parladata=pg):
+            org = Organization.objects.get(id_parladata=pg)
+            org.name = data[pg]['name']
+            org.classification = data[pg]['classification']
+            org.acronym = data[pg]['acronym']
+            print data[pg]['acronym']
+            org.save()
+        else:
+            org = Organization(name=data[pg]['name'],
+                               classification=data[pg]['classification'],
+                               id_parladata=pg,
+                               acronym=data[pg]['acronym'])
+            org.save()
+    return 1
+
+
+def updateSpeeches():
+    data = requests.get(API_URL + '/getAllSpeeches').json()
+    existingISs = Speech.objects.all().values_list("id_parladata", flat=True)
+    for dic in data:
+        if int(dic["id"]) not in existingISs:
+            print "adding speech"
+            speech = Speech(person=Person.objects.get(id_parladata=int(dic['speaker'])),
+                            organization=Organization.objects.get(
+                                id_parladata=int(dic['party'])),
+                            content=dic['content'], order=dic['order'],
+                            session=Session.objects.get(
+                                id_parladata=int(dic['session'])),
+                            start_time=dic['start_time'],
+                            end_time=dic['end_time'],
+                            id_parladata=dic['id'])
+            speech.save()
+    return 1
+
+# treba pofixsat
+
+
+def updateMotionOfSession():
+    ses = Session.objects.all()
+    for s in ses:
+        print s.id_parladata
+        requests.get(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata))
+
+# treba pofixsat
+
+
+def updateBallots():
+    data = requests.get(API_URL + '/getAllBallots').json()
+    existingISs = Ballot.objects.all().values_list("id_parladata", flat=True)
+    for dic in data:
+        # Ballot.objects.filter(id_parladata=dic['id']):
+        if int(dic["id"]) not in existingISs:
+            print "adding ballot " + str(dic['vote'])
+            vote = Vote.objects.get(id_parladata=dic['vote'])
+            ballots = Ballot(person=Person.objects.get(id_parladata=int(dic['voter'])),
+                             option=dic['option'],
+                             vote=vote,
+                             start_time=vote.session.start_time,
+                             end_time=None,
+                             id_parladata=dic['id'])
+            ballots.save()
+    return 1
+
+
+def setAllSessions():
+    data  = requests.get(API_URL + '/getSessions/').json()
+    session_ids = list(Session.objects.all().values_list("id_parladata", flat=True))
+    for sessions in data:
+        if sessions['id'] not in session_ids:
+            result = Session(name=sessions['name'],
+                             gov_id=sessions['gov_id'],
+                             start_time=sessions['start_time'],
+                             end_time=sessions['end_time'],
+                             classification=sessions['classification'],
+                             id_parladata=sessions['id'],
+                             organization=Organization.objects.get(id_parladata=sessions['organization_id']),
+                             ).save()
+        else:
+            if not Session.objects.filter(name=sessions['name'],
+                                          gov_id=sessions['gov_id'],
+                                          start_time=sessions['start_time'],
+                                          end_time=sessions['end_time'],
+                                          classification=sessions['classification'],
+                                          id_parladata=sessions['id'],
+                                          organization=Organization.objects.get(id_parladata=sessions['organization_id']),):
+                #save changes
+                session = Session.objects.get(id_parladata=sessions['id'])
+                session.name = sessions['name']
+                session.gov_id = sessions['gov_id']
+                session.start_time = sessions['start_time']
+                session.end_time = sessions['end_time']
+                session.classification = sessions['classification']
+                session.id_parladata = sessions['id']
+                session.organization = Organization.objects.get(id_parladata=sessions['organization_id'])
+                session.save()
+
+    return 1
+
+## parlaposlanci runner methods ##
+
 
 def updateMPStatic():
     memberships = requests.get(API_URL + '/getMembersOfPGsRanges/').json()
@@ -133,18 +263,18 @@ def onDateMPCardRunner(date_=None):
             print "FAIL on: " + str(setter)
 
 
-
+## parlaseje runners methods ##
 
 def runSettersPG(request, date_to):
     toDate = datetime.strptime(date_to, '%d.%m.%Y').date()
     setters_models = {
-        #CutVotesPG: setCutVotes,#BASE_URL+'/p/setCutVotes/',
-        #DeviationInOrganization: setDeviationInOrg,
-        #LessMatchingThem: setLessMatchingThem,
-        #MostMatchingThem: setMostMatchingThem
-        #PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
-        #MPOfPg: setMPsOfPG
-        #PGStatic: setBasicInfOfPG
+        # CutVotesPG: setCutVotes,#BASE_URL+'/p/setCutVotes/',
+        # DeviationInOrganization: setDeviationInOrg,
+        # LessMatchingThem: setLessMatchingThem,
+        # MostMatchingThem: setMostMatchingThem
+        # PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
+        # MPOfPg: setMPsOfPG
+        # PGStatic: setBasicInfOfPG
     }
 
     IDs = getPGIDs()
@@ -152,13 +282,16 @@ def runSettersPG(request, date_to):
     # print IDs
     allIds = len(IDs)
     curentId = 0
-    
+
     for model, setter in setters_models.items():
         for ID in IDs:
             print setter
-            membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGRanges/' + str(ID) + ("/"+date_to if date_to else "/")).json()
-            start_time = datetime.strptime(membersOfPGsRanges[0]["start_date"], '%d.%m.%Y').date()
-            end_time = datetime.strptime(membersOfPGsRanges[-1]["end_date"], '%d.%m.%Y').date()
+            membersOfPGsRanges = requests.get(
+                API_URL + '/getMembersOfPGRanges/' + str(ID) + ("/" + date_to if date_to else "/")).json()
+            start_time = datetime.strptime(
+                membersOfPGsRanges[0]["start_date"], '%d.%m.%Y').date()
+            end_time = datetime.strptime(
+                membersOfPGsRanges[-1]["end_date"], '%d.%m.%Y').date()
             dates = findDatesFromLastCard(model, ID, date_to)
             print dates
             for date in dates:
@@ -168,24 +301,24 @@ def runSettersPG(request, date_to):
                 # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
                 setter(request, str(ID), date.strftime(API_DATE_FORMAT))
         curentId += 1
-                # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
+        # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
 
-
-    #Runner for setters ALL
+    # Runner for setters ALL
     all_in_one_setters_models = {
-        #VocabularySize: setVocabularySizeALL,
+        # VocabularySize: setVocabularySizeALL,
     }
 
-    zero=datetime(day=2, month=8, year=2014).date()
+    zero = datetime(day=2, month=8, year=2014).date()
     for model, setter in all_in_one_setters_models.items():
-        print (toDate-datetime(day=2, month=8, year=2014).date()).days
-        for i in range((toDate-datetime(day=2, month=8, year=2014).date()).days):
-            print (zero+timedelta(days=i)).strftime('%d.%m.%Y')
-            setter(request, (zero+timedelta(days=i)).strftime('%d.%m.%Y'))
+        print(toDate - datetime(day=2, month=8, year=2014).date()).days
+        for i in range((toDate - datetime(day=2, month=8, year=2014).date()).days):
+            print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
+            setter(request, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
 
-    organizations = requests.get(API_URL+"/getOrganizatonByClassification").json()
+    organizations = requests.get(
+        API_URL + "/getOrganizatonByClassification").json()
     print organizations
-    for org in organizations["working_bodies"]+organizations["council"]:
+    for org in organizations["working_bodies"] + organizations["council"]:
         print org
         dates = findDatesFromLastCard(WorkingBodies, org["id"], date_to)
         for date in dates:
@@ -197,7 +330,7 @@ def runSettersPG(request, date_to):
 def onDatePGCardRunner(date_=None):
     FAIL = '\033[91m'
     ENDC = '\033[0m'
-    
+
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -214,10 +347,12 @@ def onDatePGCardRunner(date_=None):
         setBasicInfOfPG,
     ]
 
-    membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGsRanges/'+date_).json()
-    IDs = [key for key, value in membersOfPGsRanges[-1]["members"].items() if value]
+    membersOfPGsRanges = requests.get(
+        API_URL + '/getMembersOfPGsRanges/' + date_).json()
+    IDs = [key for key, value in membersOfPGsRanges[-1]["members"].items()
+           if value]
     curentId = 0
-    
+
     for setter in setters:
         for ID in IDs:
             print setter
@@ -226,8 +361,7 @@ def onDatePGCardRunner(date_=None):
             except:
                 print FAIL + "FAIL on: " + str(setter) + " and with id: " + str(ID) + ENDC
 
-
-    #Runner for setters ALL
+    # Runner for setters ALL
     all_in_one_setters = [
         setVocabularySizeALL,
     ]
@@ -238,8 +372,9 @@ def onDatePGCardRunner(date_=None):
         except:
             print FAIL + "FAIL on: " + str(setter) + ENDC
 
-    organizations = requests.get(API_URL+"/getOrganizatonByClassification").json()
-    for org in organizations["working_bodies"]+organizations["council"]:
+    organizations = requests.get(
+        API_URL + "/getOrganizatonByClassification").json()
+    for org in organizations["working_bodies"] + organizations["council"]:
         print "set working_bodie: " + str(org["id"])
         try:
             setWorkingBodies(None, str(org["id"]), date_)
@@ -247,3 +382,27 @@ def onDatePGCardRunner(date_=None):
             print FAIL + "FAIL on: " + "setWorkingBodies" + " and with id: " + str(org["id"]) + ENDC
 
     return True
+
+
+def update():
+    updateOrganizations()
+    print "org"
+
+    updatePeople()
+    print "pep"
+
+    setAllSessions()
+    print "Sessions"
+
+    updateSpeeches()
+    print "speeches"
+
+    updateMotionOfSession()
+    print "votes"
+
+    updateBallots()
+    print "ballots"
+
+    onDateMPCardRunner()
+
+    onDatePGCardRunner()
