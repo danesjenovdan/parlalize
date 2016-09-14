@@ -3,6 +3,7 @@ from parlaposlanci.views import setMPStaticPL
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 from parlalize.utils import getPGIDs, findDatesFromLastCard
 from datetime import datetime
+from django.apps import apps
 
 
 from parlaposlanci.views import setCutVotes, setMPStaticPL, setMembershipsOfMember, setLessEqualVoters, setMostEqualVoters, setPercentOFAttendedSession, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass
@@ -406,3 +407,11 @@ def update():
     onDateMPCardRunner()
 
     onDatePGCardRunner()
+
+
+def deleteAppModels(appName):
+    my_app = apps.get_app_config('appName')
+    my_models = my_app.get_models()
+    for model in my_models:
+        print "delete model: ", model
+        model.objects.all().delete()
