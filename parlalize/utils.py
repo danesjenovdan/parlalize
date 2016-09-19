@@ -442,8 +442,9 @@ def modelsData(request):
                     "st:":m._default_manager.count()})
     return JsonResponse(out, safe=False)
 
+
 def checkSessions():
-    ses = requests.get('http://127.0.0.1:8001/v1/getSessions/').json()
+    ses = requests.get(API_URL + '/getSessions/').json()
     sessions  = [s['id'] for s in ses]
     if len(Session.objects.all()) > 0:
         print "Seje katerih ni v parlalizah: ", list(set(sessions) - set(Session.objects.values_list('id_parladata', flat=True)))
