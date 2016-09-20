@@ -528,10 +528,12 @@ def runSetters(request, date_to):
                 print ID
                 setter(request, str(ID))
         else:
-            dates = findDatesFromLastCard(model, None, date_to)      
+            dates = findDatesFromLastCard(model, None, date_to)
+            print model      
             if dates==[]:
                 continue
             datesSes = getSesDates(dates[-1])
             for date in datesSes:
+                print date
                 setter(request, date.strftime(API_DATE_FORMAT))
     return JsonResponse({"status": "all is fine :D"}, safe=False)
