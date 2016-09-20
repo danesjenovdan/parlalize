@@ -511,7 +511,6 @@ def getLastSessionLanding(request, date_=None):
                
 def runSetters(request, date_to):
  
-
     setters_models = {
         #Vote: setMotionOfSession,
         #PresenceOfPG: setPresenceOfPG,
@@ -520,14 +519,18 @@ def runSetters(request, date_to):
         #Vote_graph: setMotionOfSessionGraph
     }
     for model, setter in setters_models.items():
-        dates = findDatesFromLastCard(model, None, date_to)
-        if dates==[]:
-            continue
         if model != AverageSpeeches:
-            IDs = getSesIDs(dates[1],dates[-1])
-            for ID in IDs:
+            #IDs = getSesIDs(dates[1],dates[-1])
+            last = idsOfSession(model)
+            print last
+            print model
+            for ID in last:
+                print ID
                 setter(request, str(ID))
         else:
+            dates = findDatesFromLastCard(model, None, date_to)      
+            if dates==[]:
+                continue
             datesSes = getSesDates(dates[-1])
             for date in datesSes:
                 setter(request, date.strftime(API_DATE_FORMAT))
