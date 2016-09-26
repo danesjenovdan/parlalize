@@ -591,18 +591,25 @@ def modelsData(request):
 def checkSessions():
     ses = requests.get(API_URL + '/getSessions/').json()
     sessions  = [s['id'] for s in ses]
+    ballots = [s.vote.id_parladata for s in Ballot.objects.all()]
+    motionIDs = []
+    for id_se in sessions:
+        if len(requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()) > 0:
+            motionIDs.append(id_se)
+    print "Vsa glasovanja: ", len(motionIDs)
+    
     if len(Session.objects.all()) > 0:
         print "Seje katerih ni v parlalizah: ", list(set(sessions) - set(Session.objects.values_list('id_parladata', flat=True)))
     else:
         print "ni sej sploh"
 
     if len(Vote.objects.all()) > 0:
-        print "Vote katerih ni v parlalizah: ", list(set(sessions) - set(Vote.objects.values_list('id_parladata', flat=True)))
+        print "Vote katerih ni v parlalizah: ", list(set(motionIDs) - set(Vote.objects.values_list('id_parladata', flat=True)))
     else:
         print "ni votov sploh"
 
     if len(Vote_graph.objects.all()) > 0:
-        print "Vote katerih ni v parlalizah: ", list(set(sessions) - set(Vote_graph.objects.all().values_list('session__id_parladata', flat=True)))
+        print "Vote graph katerih ni v parlalizah: ", list(set(motionIDs) - set(Vote_graph.objects.all().values_list('id_parladata', flat=True)))
     else:
         print "ni votov grafov sploh"
 
@@ -616,3 +623,7 @@ def checkSessions():
     else:
         print "ni AverageSpeeches sploh"
 
+    if len(AbsentMPs.objects.all()) > 0:
+        print "stevilo AbsentMPs: ", len(AbsentMPs.objects.all())
+    else:
+        print "ni AbsentMPs sploh"
