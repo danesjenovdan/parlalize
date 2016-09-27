@@ -630,11 +630,11 @@ def checkSessions():
 
 
 def checkPG():
+    org = [int(i) for i in (requests.get(API_URL+'/getAllOrganizations').json()).keys()]
+    pg = [int(i) for i in (requests.get(API_URL+'/getAllPGs').json()).keys()]
 
-    pg = [i for i in (requests.get(API_URL+'/getAllPGs').json()).keys()]
-    
     if len(Organization.objects.all()) > 0:
-        print "Seje katerih ni v parlalizah: ", list(set(pg) - set(Organization.objects.values_list('id_parladata', flat=True)))
+        print "Organizacij katerih ni v parlalizah: ", list(set(org) - set(Organization.objects.values_list('id_parladata', flat=True)))
     else:
         print "ni sej sploh"
 
