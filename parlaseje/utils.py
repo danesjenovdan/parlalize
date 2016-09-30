@@ -129,7 +129,8 @@ def updateVotes():
 def getSesIDs(start_date, end_date):
 	result = []
 	data = requests.get(API_URL + '/getSessions/').json()
-	session = Session.objects.filter(start_time__gte=start_date, start_time__lte=end_date)
+	#session = Session.objects.filter(start_time__gte=start_date, start_time__lte=end_date)
+	session = Session.objects.all()
 	for ids in session:
 		result.append(ids.id_parladata)
 	return result
@@ -180,3 +181,12 @@ def getSessionDataAPI(requests, session_id):
                 			  'date': "unkonwn",
                 			  'id': "unkonwn",
                 			})
+
+def idsOfSession(model):
+	mod = model.objects.all().values_list('session__id_parladata', flat=True)
+	ses = data = requests.get(API_URL + '/getSessions/').json()
+	ids = [session['id'] for session in ses]
+	if len(mod) == 0:
+		return ids
+	else:
+		return list(set(mod) - set(ids))
