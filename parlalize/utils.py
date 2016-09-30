@@ -366,7 +366,13 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
                                     axis=0)
         else:
             members = [member for pg_id in pgs for member in membersInRange["members"][pg_id]]
-        
+
+            #print member, votes[str(member)].keys()
+            # Print member and vote id where is fail in data for cutVotes
+            for member in members:
+                for b in votes_ids:
+                    if str(b) not in votes[str(member)].keys():
+                        print member, b, "FAIL"
             pg_score_temp =[votes[str(member)][str(b)] for member in members for b in votes_ids]
 
         if votes_type=="logic":
