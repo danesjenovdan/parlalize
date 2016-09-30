@@ -2,7 +2,7 @@ import requests
 from parlaposlanci.views import setMPStaticPL
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 from parlalize.utils import getPGIDs, findDatesFromLastCard
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.apps import apps
 
 
@@ -226,7 +226,7 @@ def onDateMPCardRunner(date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        date_of = datetime.now().date()
+        date_of = (datetime.now()-timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
     setters = [
         setCutVotes,
@@ -335,9 +335,9 @@ def onDatePGCardRunner(date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        date_of = datetime.now().date()
+        date_of = (datetime.now()-timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
-
+    print date_
     setters = [
         setCutVotesPG,
         setDeviationInOrg,
