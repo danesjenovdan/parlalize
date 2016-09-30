@@ -245,7 +245,7 @@ def setLastActivity(request, person_id):
                 vote_name.append(acti.session.name)
                 result.append("None")
                 options.append("None")
-                sessions.append(str(acti.session.id))
+                sessions.append(str(acti.session.id_parladata))
             else:
                 #print "Ballot"
                 avtivity_ids.append(acti.vote.id_parladata)
@@ -292,8 +292,7 @@ def getLastActivity(request, person_id, date_=None):
                 data.append({
                     "speech_id": int(activity_ids[i]),
                     "type": types[i],
-                    "session_name": vote_names[i],
-                    "session_id": sessions_ids[i]
+                    "session": Session.objects.get(id_parladata=sessions_ids[i]).getSessionData(),
                     })
         return {"date": day_activites.created_for.strftime(API_OUT_DATE_FORMAT), "events": data}
 
