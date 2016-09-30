@@ -228,6 +228,10 @@ def getSpeechesOfPG(request, pg_id, date_=False):
                     dayData["sessions"].append({"session_name": speech.session.name,"session_id": speech.session.id_parladata, "speakers":[{"speeches":[speech.id_parladata],
                                                 "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))}]})
             out.append(dayData)
+            if len(out)>14:
+                break
+        if len(out)>14:
+            break
 
     result  = {
         'results': out
