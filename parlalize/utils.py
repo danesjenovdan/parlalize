@@ -270,6 +270,18 @@ def getPGCardModelNew(model, id, date=None):
         print "get object BUBU", modelObject.created_for
     return modelObject
 
+def getSCardModel(model, id_se, date=None):
+    if date:
+        modelObject = model.objects.filter(id_parladata=id_se,
+                                           created_at__lte=datetime.strptime(date, '%d.%m.%Y'))
+    else:
+        modelObject = model.objects.filter(id_parladata=id_se,
+                                           created_at__lte=datetime.now())
+    if not modelObject:
+        raise Http404("Nismo našli kartice")
+    else:
+        modelObject = modelObject.latest('created_at')
+    return modelObject
 
 # get all parliament member ID's
 def getIDs():
@@ -424,7 +436,99 @@ def modelsData(request):
     out = []
     for ct in ContentType.objects.all():
         m = ct.model_class()
+        
         out.append({"model":m.__module__,
                     "Ime modela":m.__name__,
                     "st:":m._default_manager.count()})
     return JsonResponse(out, safe=False)
+
+
+def checkSessions():
+    ses = requests.get(API_URL + '/getSessions/').json()
+    sessions  = [s['id'] for s in ses]
+    ballots = [s.vote.id_parladata for s in Ballot.objects.all()]
+    motionIDs = []
+    for id_se in sessions:
+        if len(requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()) > 0:
+            motionIDs.append(id_se)
+    print "Vsa glasovanja: ", len(motionIDs)
+    
+    if len(Session.objects.all()) > 0:
+        print "Seje katerih ni v parlalizah: ", list(set(sessions) - set(Session.objects.values_list('id_parladata', flat=True)))
+    else:
+        print "ni sej sploh"
+
+    if len(Vote.objects.all()) > 0:
+        print "Vote katerih ni v parlalizah: ", list(set(motionIDs) - set(Vote.objects.values_list('id_parladata', flat=True)))
+    else:
+        print "ni votov sploh"
+
+    if len(Vote_graph.objects.all()) > 0:
+        print "Vote graph katerih ni v parlalizah: ", list(set(motionIDs) - set(Vote_graph.objects.all().values_list('id_parladata', flat=True)))
+    else:
+        print "ni votov grafov sploh"
+
+    if len(PresenceOfPG.objects.all()) > 0:
+        print "stevilo PresenceOfPG: ", len(PresenceOfPG.objects.all())
+    else:
+        print "ni PresenceOfPG sploh"
+
+    if len(AverageSpeeches.objects.all()) > 0:
+        print "stevilo AverageSpeeches: ", len(AverageSpeeches.objects.all())
+    else:
+        print "ni AverageSpeeches sploh"
+
+    if len(AbsentMPs.objects.all()) > 0:
+        print "stevilo AbsentMPs: ", len(AbsentMPs.objects.all())
+    else:
+        print "ni AbsentMPs sploh"
+
+
+def checkPG():
+    org = [int(i) for i in (requests.get(API_URL+'/getAllOrganizations').json()).keys()]
+    pg = [int(i) for i in (requests.get(API_URL+'/getAllPGs').json()).keys()]
+
+    if len(Organization.objects.all()) > 0:
+        print "Organizacij katerih ni v parlalizah: ", list(set(org) - set(Organization.objects.values_list('id_parladata', flat=True)))
+    else:
+        print "ni sej sploh"
+
+    if len(PGStatic.objects.all()) > 0:
+        print "PGStatic: za te PG ni kartice: ", list(set(pg) - set(PGStatic.objects.values_list('organization__id_parladata', flat=True)))
+    else:
+        print "ni PGStatic sploh"
+
+    if len(PercentOFAttendedSession.objects.all()) > 0:
+        print "PercentOFAttendedSession: za te PG ni kartice: ", list(set(pg) - set(PercentOFAttendedSession.objects.values_list('organization__id_parladata', flat=True)))
+    else:
+        print "ni PercentOFAttendedSession sploh"
+
+    if len(MPOfPg.objects.all()) > 0:
+        print "MPOfPg: za te PG ni kartice: ", list(set(pg) - set(MPOfPg.objects.values_list('organization__id_parladata', flat=True)))
+    else:
+        print "ni MPOfPg sploh"
+
+    if len(MostMatchingThem.objects.all()) > 0:
+        print "MostMatchingThem: za te PG ni kartice: ", list(set(pg) - set(MostMatchingThem.objects.values_list('organization__id_parladata', flat=True)))
+    else:
+        print "ni MostMatchingThem sploh"
+
+    if len(LessMatchingThem.objects.all()) > 0:
+        print "LessMatchingThem: za te PG ni kartice: ", list(set(pg) - set(LessMatchingThem.objects.values_list('organization__id_parladata', flat=True)))
+    else:
+        print "ni LessMatchingThem sploh"
+
+    if len(DeviationInOrganization.objects.all()) > 0:
+        print "DeviationInOrganization: za te PG ni kartice: ", list(set(pg) - set(DeviationInOrganization.objects.values_list('organization__id_parladata', flat=True)))
+    else:
+        print "ni DeviationInOrganization sploh"
+
+    if len(CutVotes.objects.all()) > 0:
+        print "CutVotes: za te PG ni kartice: ", list(set(pg) - set(CutVotes.objects.values_list('organization__id_parladata', flat=True)))
+    else:
+        print "ni CutVotes sploh"
+
+    if len(VocabularySize.objects.all()) > 0:
+        print "VocabularySize: za te PG ni kartice: ", list(set(pg) - set(VocabularySize.objects.values_list('organization__id_parladata', flat=True)))
+    else:
+        print "ni VocabularySize sploh"
