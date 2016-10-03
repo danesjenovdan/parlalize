@@ -539,3 +539,92 @@ def checkPG():
         print "VocabularySize: za te PG ni kartice: ", list(set(pg) - set(VocabularySize.objects.values_list('organization__id_parladata', flat=True)))
     else:
         print "ni VocabularySize sploh"
+
+def checkMP():
+    mps = [i['id'] for i in requests.get(API_URL+'/getMPs').json()]
+
+    print mps
+
+    if len(Person.objects.all()) > 0:
+        print "Poslancev katerih ni v parlalizah: ", list(set(mps) - set(Person.objects.values_list('id_parladata', flat=True)))
+    else:
+        print "ni sej sploh"
+    
+    if len(Presence.objects.all()) > 0:
+        print "Presence: za te MP ni kartice: ", list(set(mps) - set(Presence.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni Presence sploh"
+
+    if len(SpokenWords.objects.all()) > 0:
+        print "SpokenWords: za te MP ni kartice: ", list(set(mps) - set(SpokenWords.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni SpokenWords sploh"
+
+    if len(SpeakingStyle.objects.all()) > 0:
+        print "SpeakingStyle: za te MP ni kartice: ", list(set(mps) - set(SpeakingStyle.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni SpeakingStyle sploh"
+
+    if len(CutVotes.objects.all()) > 0:
+        print "CutVotes: za te MP ni kartice: ", list(set(mps) - set(CutVotes.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni CutVotes sploh"
+
+    if len(LastActivity.objects.all()) > 0:
+        print "LastActivity: za te MP ni kartice: ", list(set(mps) - set(LastActivity.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni LastActivity sploh"
+
+    if len(EqualVoters.objects.all()) > 0:
+        print "EqualVoters: za te MP ni kartice: ", list(set(mps) - set(EqualVoters.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni EqualVoters sploh"
+
+    if len(LessEqualVoters.objects.all()) > 0:
+        print "LessEqualVoters: za te MP ni kartice: ", list(set(mps) - set(LessEqualVoters.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni LessEqualVoters sploh"
+
+    if len(MPsWhichFitsToPG.objects.all()) > 0:
+        print "MPsWhichFitsToPG: za te MP ni kartice: ", list(set(mps) - set(MPsWhichFitsToPG.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni MPsWhichFitsToPG sploh"
+
+    if len(MPStaticPL.objects.all()) > 0:
+        print "MPStaticPL: za te MP ni kartice: ", list(set(mps) - set(MPStaticPL.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni MPStaticPL sploh"
+    if len(MPStaticGroup.objects.all()) > 0:
+        print "MPStaticGroup: za te MP ni kartice: ", list(set(mps) - set(MPStaticGroup.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni MPStaticGroup sploh"
+
+    if len(NumberOfSpeechesPerSession.objects.all()) > 0:
+        print "NumberOfSpeechesPerSession: za te MP ni kartice: ", list(set(mps) - set(NumberOfSpeechesPerSession.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni NumberOfSpeechesPerSession sploh"
+
+    if len(VocabularySize.objects.all()) > 0:
+        print "VocabularySize: za te MP ni kartice: ", list(set(mps) - set(VocabularySize.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni VocabularySize sploh"
+
+    if len(AverageNumberOfSpeechesPerSession.objects.all()) > 0:
+        print "AverageNumberOfSpeechesPerSession: za te MP ni kartice: ", list(set(mps) - set(AverageNumberOfSpeechesPerSession.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni AverageNumberOfSpeechesPerSession sploh"
+
+    if len(Compass.objects.all()) > 0:
+        print "Compass: za te MP ni kartice: ", list(set(mps) - set(Compass.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni Compass sploh"
+
+    if len(TaggedBallots.objects.all()) > 0:
+        print "TaggedBallots: za te MP ni kartice: ", list(set(mps) - set(TaggedBallots.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni TaggedBallots sploh"
+
+    if len(MembershipsOfMember.objects.all()) > 0:
+        print "MembershipsOfMember: za te MP ni kartice: ", list(set(mps) - set(MembershipsOfMember.objects.values_list('Person__id_parladata', flat=True)))
+    else:
+        print "ni MembershipsOfMember sploh"
