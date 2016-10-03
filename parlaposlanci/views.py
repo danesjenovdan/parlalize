@@ -1430,3 +1430,32 @@ def getTaggedBallots(request, person_id, date_=None):
         'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
+
+def getListOfMembers(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=date_of.strftime(API_DATE_FORMAT)
+
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    data = []
+    for mp in mps: 
+        person_obj = {}
+        person_obj["results"] = {}
+        person_id = mp["id"]
+        print person_id
+        person_obj["person"] = getPersonData(person_id, date_)
+        print json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["sessions"]["score"]
+        person_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["sessions"]["score"]
+        person_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["votes"]["score"]
+        person_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, person_id, date_).content)["results"]["score"]
+        person_obj["results"]["spoken_words"] = json.loads(getNumberOfSpokenWords(None, person_id, date_).content)["results"]["score"]
+        person_obj["results"]["speeches_per_session"] = json.loads(getAverageNumberOfSpeechesPerSession(None, person_id, date_).content)["results"]["score"]
+        person_obj["results"]["privzdignjeno"] = 0
+        person_obj["results"]["preprosto"] = 0
+        person_obj["results"]["problematicno"] = 0
+
+        data.append(person_obj)
+
+    return JsonResponse({"districts": [], "data": data})
