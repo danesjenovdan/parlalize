@@ -4,6 +4,7 @@ from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 from parlalize.utils import getPGIDs, findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
+from parlaposlanci.models import District
 
 
 from parlaposlanci.views import setCutVotes, setMPStaticPL, setMembershipsOfMember, setLessEqualVoters, setMostEqualVoters, setPercentOFAttendedSession, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass
@@ -404,6 +405,8 @@ def update():
     updateBallots()
     print "ballots"
 
+    updateDistricts()
+
     onDateMPCardRunner()
 
     onDatePGCardRunner()
@@ -415,3 +418,11 @@ def deleteAppModels(appName):
     for model in my_models:
         print "delete model: ", model
         model.objects.all().delete()
+
+
+def updateDistricts():
+    districts = requests.get(API_URL + "/getDistricts").json()
+    for district in districts:
+        if not District.objects.filter(name=district):
+            District(name=district).save()
+    return 1
