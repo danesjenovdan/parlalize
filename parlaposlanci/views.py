@@ -1444,9 +1444,7 @@ def getListOfMembers(request, date_=None):
         person_obj = {}
         person_obj["results"] = {}
         person_id = mp["id"]
-        print person_id
         person_obj["person"] = getPersonData(person_id, date_)
-        print json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["sessions"]["score"]
         person_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["sessions"]["score"]
         person_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["votes"]["score"]
         person_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, person_id, date_).content)["results"]["score"]
@@ -1457,5 +1455,6 @@ def getListOfMembers(request, date_=None):
         person_obj["results"]["problematicno"] = 0
 
         data.append(person_obj)
+    data = sorted(data, key=lambda k: k['person']["name"])
 
-    return JsonResponse({"districts": [], "data": data})
+    return JsonResponse({"districts": list(District.objects.all().values_list("name", flat=True)), "data": data})

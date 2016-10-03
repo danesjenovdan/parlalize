@@ -544,3 +544,9 @@ class MembershipsOfMember(Timestampable, models.Model):
                                    help_text=_('date of analize'))
 
     data = JSONField(blank=True, null=True)
+
+
+class District(models.Model):
+    name =  models.CharField(_('name of district'),
+                            null=True, max_length=128,
+                            help_text=_('District name'))
