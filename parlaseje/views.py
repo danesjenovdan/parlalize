@@ -491,9 +491,9 @@ def getLastSessionLanding(request, date_=None):
 
     while not ready:
         presence = presences[presence_intex]
-        motions = json.loads(getMotionOfSession(None, presence.id_parladata).content)
+        motions = json.loads(getMotionOfSession(None, presence.session.id_parladata).content)
         if type(motions)==list:
-            tfidf = requests.get("https://isci.parlameter.si/tfidf/s/"+str(presence.id_parladata))
+            tfidf = requests.get("https://isci.parlameter.si/tfidf/s/"+str(presence.session.id_parladata))
             if tfidf.status_code == 200:
                 ready = True
             else:
