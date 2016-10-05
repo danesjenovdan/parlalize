@@ -504,7 +504,7 @@ def getLastSessionLanding(request, date_=None):
     result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
                                 "percent":presence.presence[0][p],} for p in presence.presence[0]]
 
-    return JsonResponse({'session': Session.objects.get(id_parladata=int(presence.id_parladata)).getSessionData(), 
+    return JsonResponse({'session': Session.objects.get(id_parladata=int(presence.session.id_parladata)).getSessionData(), 
                          "presence": result, 
                          "motions": motions, 
                          "tfidf": tfidf.json()}, safe=False)
