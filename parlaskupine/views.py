@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from utils.speech import WordAnalysis
 from parlalize.utils import *
 import requests
 import json
@@ -775,7 +776,8 @@ def getTaggedBallots(request, pg_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
-def setVocabularySizeALL(request, date_):
+#Depricated
+def setVocabularySizeALL_(request, date_):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -826,6 +828,30 @@ def setVocabularySizeALL(request, date_):
             maxOrg=maxOrg,
             average=result['average'],
             maximum=result['max'])
+
+    return JsonResponse({'alliswell': True})
+
+
+def setVocabularySizeALL(request, date_=None):
+    sw = WordAnalysis(API_URL, count_of="groups", date_=date_)
+
+    #Vocabolary size
+    all_score = sw.getVocabularySize()
+    max_score, maxPGid = sw.getMaxVocabularySize()
+    avg_score = sw.getAvgVocabularySize()
+    date_of = sw.getDate()
+    maxPG = Organization.objects.get(id_parladata=maxPGid)
+
+    print "[INFO] saving vocabulary size"
+    for p in all_score:
+        saveOrAbortNew(model=VocabularySize,
+                       organization=Organization.objects.get(id_parladata=int(p['counter_id'])),
+                       created_for=date_of,
+                       score=int(p['coef']),
+                       maxOrg=maxPG,
+                       average=avg_score,
+                       maximum=max_score)
+
 
     return JsonResponse({'alliswell': True})
 

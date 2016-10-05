@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from utils import getPersonDataAPI
 from parlaseje.utils import getSessionDataAPI
-from parlaskupine.utils import getPgDataAPI
+from parlaskupine.utils_ import getPgDataAPI
 from parlalize.utils import modelsData
 
 # admin.autodiscover()
