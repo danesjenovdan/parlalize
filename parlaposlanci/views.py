@@ -1026,7 +1026,7 @@ def getTFIDF(request, person_id, date=None):
     return JsonResponse(out)
 
 def setVocabularySizeAndSpokenWords(request, date_=None):
-    sw = WordAnalysis(API_URL, date_)
+    sw = WordAnalysis(API_URL, count_of="members", date_=date_)
 
     #Vocabolary size
     all_score = sw.getVocabularySize()
@@ -1038,7 +1038,7 @@ def setVocabularySizeAndSpokenWords(request, date_=None):
     print "[INFO] saving vocabulary size"
     for p in all_score:
         saveOrAbortNew(model=VocabularySize,
-                       person=Person.objects.get(id_parladata=int(p['person_id'])),
+                       person=Person.objects.get(id_parladata=int(p['counter_id'])),
                        created_for=date_of,
                        score=int(p['coef']),
                        maxMP=maxMP,
@@ -1055,7 +1055,7 @@ def setVocabularySizeAndSpokenWords(request, date_=None):
     for p in all_words:
         saveOrAbortNew(model=SpokenWords,
                        created_for=date_of,
-                       person=Person.objects.get(id_parladata=int(p['person_id'])),
+                       person=Person.objects.get(id_parladata=int(p['counter_id'])),
                        score=int(p['wordcount']),
                        maxMP=maxMP,
                        average=avgSpokenWords,
