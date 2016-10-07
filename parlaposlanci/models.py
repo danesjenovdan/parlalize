@@ -459,7 +459,10 @@ class StyleScores(Timestampable, models.Model): #Card for Style Scores of MP
                                blank=True, null=True,
                                related_name='childrenStSc',
                                help_text=_('MP'))
-
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
     problematicno = models.FloatField(_('Problematicno style score of this MP'),
                                    blank=True, null=True,
                                    help_text=_('Problematicno score of this MP'))

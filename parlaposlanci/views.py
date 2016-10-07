@@ -817,15 +817,21 @@ def setStyleScoresALLShell():
     return HttpResponse('All MPs updated');
 
 
-def setStyleScoresALL(request):
+def setStyleScoresALL(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=date_of.strftime(API_DATE_FORMAT)
 
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
     print 'Starting average scores'
-    average_scores = makeAverageStyleScores()
+    #average_scores = makeAverageStyleScores(date_)
 
     print 'Ending average scores'
 
     print 'Starting MPs'
+    scores = {}
     for mp in mps:
 
         person_id = mp['id']
@@ -843,21 +849,27 @@ def setStyleScoresALL(request):
 #        total = sum(counter.values())
 
         # get word counts with solr
-        counter = Counter(getCountList(int(person_id)))
+        counter = Counter(getCountList(int(person_id), date_))
         total = sum(counter.values())
 
         scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
 
-        average = average_scores
+        #average = average_scores
 
-        print scores_local, average
+        print scores_local, #average
+        scores[person_id] = scores_local
 
-        saveOrAbort(
+
+    print scores
+    average = {"problematicno": sum([score['problematicno'] for score in scores.values()])/len(scores), "privzdignjeno": sum([score['privzdignjeno'] for score in scores.values()])/len(scores), "preprosto": sum([score['preprosto'] for score in scores.values()])/len(scores)}
+    for person, score in scores.items():
+        saveOrAbortNew(
             model=StyleScores,
-            person=Person.objects.get(id_parladata=int(person_id)),
-            problematicno=scores_local['problematicno'],
-            privzdignjeno=scores_local['privzdignjeno'],
-            preprosto=scores_local['preprosto'],
+            created_for=date_of,
+            person=Person.objects.get(id_parladata=int(person)),
+            problematicno=score['problematicno'],
+            privzdignjeno=score['privzdignjeno'],
+            preprosto=score['preprosto'],
             problematicno_average=average['problematicno'],
             privzdignjeno_average=average['privzdignjeno'],
             preprosto_average=average['preprosto']
@@ -895,19 +907,19 @@ def setStyleScores(request, person_id):
 
     return JsonResponse(output, safe=False)
 
-def getStyleScores(request, person_id, date=None):
-    card = getPersonCardModel(StyleScores, int(person_id), date)
+def getStyleScores(request, person_id, date_=None):
+    card = getPersonCardModelNew(StyleScores, int(person_id), date_)
 
     out = {
         'person': getPersonData(person_id, date),
         'results': {
-            'privzdignjeno': card.privzdignjeno,
-            'problematicno': card.problematicno,
-            'preprosto': card.preprosto,
+            'privzdignjeno': card.privzdignjeno*10000,
+            'problematicno': card.problematicno*10000,
+            'preprosto': card.preprosto*10000,
             'average': {
-                'privzdignjeno_average': card.privzdignjeno_average,
-                'problematicno_average': card.problematicno_average,
-                'preprosto_average': card.preprosto_average
+                'privzdignjeno_average': card.privzdignjeno_average*10000,
+                'problematicno_average': card.problematicno_average*10000,
+                'preprosto_average': card.preprosto_average*10000
             }
         }
     }
@@ -952,27 +964,18 @@ def getTotalStyleScores(request):
 
     return JsonResponse(output, safe=False)
 
-def makeAverageStyleScores():
+def makeAverageStyleScores(date_):
 #    speeches = requests.get(API_URL+'/getAllSpeeches/').json()
 #    speeches_content = [speech['content'] for speech in speeches]
 #    speeches_megastring = string.join(speeches_content)
 
-    data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
+    #data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
+    data = requests.get('https://isci.parlameter.si/dfall/'+date_).json()
 
-    wordlist = data['fields']['content_t']['topTerms']
+    #wordlist = data['fields']['content_t']['topTerms']
 
-    wordlist_new = {}
-    i = 0
-    limit = len(wordlist)/2
+    wordlist_new = {word["term"]: word["df"] for word in data}
 
-    while i < limit:
-
-        if wordlist[i + 1] > 0:
-            wordlist_new[wordlist[i]] = wordlist[i + 1]
-        else:
-            break
-
-        i = i + 2
 
     counter = Counter(wordlist_new)
 #    counter = countWords(speeches_megastring, counter)
