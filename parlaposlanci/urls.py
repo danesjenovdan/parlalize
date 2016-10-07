@@ -21,6 +21,7 @@ urlpatterns = patterns(
     url(r'^setPresence/(?P<person_id>\d+)', setPercentOFAttendedSession),
 
     url(r'^setStyleScores/(?P<person_id>\d+)', setStyleScores),
+    url(r'^setStyleScoresALL/(?P<date_>[\w].+)', setStyleScoresALL),
     url(r'^setStyleScoresALL/', setStyleScoresALL),
 
     url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
@@ -65,7 +66,7 @@ urlpatterns = patterns(
     url(r'^getPresence/(?P<person_id>\d+)/(?P<date>[\w].+)', getPercentOFAttendedSession),
     url(r'^getPresence/(?P<person_id>\d+)', getPercentOFAttendedSession),
 
-    url(r'^getStyleScores/(?P<person_id>\d+)/(?P<date>[\w].+)', getStyleScores),
+    url(r'^getStyleScores/(?P<person_id>\d+)/(?P<date_>[\w].+)', getStyleScores),
     url(r'^getStyleScores/(?P<person_id>\d+)', getStyleScores),
 
     url(r'^getAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)/(?P<date>[\w].+)', getAverageNumberOfSpeechesPerSession),

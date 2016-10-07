@@ -57,23 +57,12 @@ def countWords(text, counter):
 
     return counter
 
-def getCountList(speaker_id):
-    data = requests.get('http://parlameter.si:8983/solr/knedl/select?q=speaker_i:' + str(speaker_id) + '&facet=true&facet.field=content_t&facet.limit=10000&wt=json&facet.method=enum').json()
+def getCountList(speaker_id, date_):
+    data = requests.get('https://isci.parlameter.si/tfidfALL/p/' + str(speaker_id) + "/" + date_).json()
 
-    wordlist = data['facet_counts']['facet_fields']['content_t']
+    wordlist = data['results']
 
-    wordlist_new = {}
-    i = 0
-    limit = len(wordlist)/2
-
-    while i < limit:
-
-        if wordlist[i + 1] > 0:
-            wordlist_new[wordlist[i]] = wordlist[i + 1]
-        else:
-            return wordlist_new
-
-        i = i + 2
+    wordlist_new = {word["term"]: word["scores"]["tf"] for word in wordlist}
 
     return wordlist_new
 
