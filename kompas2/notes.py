@@ -60,8 +60,8 @@ def makeSimilarities(people_ballots_sorted_list):
     return np.array(similarities)
 
 def enrichData(vT1, vT2, people, date_of):
-
-    enriched = [{'person': requests.get(BASE_URL+'/utils/getPersonData/' + str(speaker) + "/" + date_of.strftime(API_DATE_FORMAT)).json(), 'score': {'vT1': vT1[i], 'vT2': vT2[i]}} for i, speaker in enumerate(people)]
+    
+    enriched = [{'person_id': str(speaker), 'score': {'vT1': vT1[i], 'vT2': vT2[i]}} for i, speaker in enumerate(people)]
 
     return enriched
 
