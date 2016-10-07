@@ -1347,7 +1347,11 @@ def getCompass(request, date_=None): # TODO make propper setters and getters
     else:
         date_of = datetime.now().date()
         date_=""
-    data = Compass.objects.all().order_by('created_for')[0].data
+    compas = Compass.objects.all().order_by('created_for')[0]
+    data = compas.data
+    for person in data:
+        person.update({"person": getPersonData(person["person_id"], compas.created_for.strftime(API_DATE_FORMAT))})
+        person.pop('person_id', None)
 
     return JsonResponse(data, safe=False)
 
