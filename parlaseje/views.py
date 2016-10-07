@@ -66,7 +66,7 @@ def setMotionOfSession(request, id_se):
                                                                     against=no,
                                                                     abstain=kvorum,
                                                                     not_present=not_present,
-                                                                    result=resultOfMotion(yes, no, kvorum,not_present),
+                                                                    result=resultOfMotion(yes, no, kvorum, not_present),
                                                                     id_parladata=mot['vote_id'],
                                                                     )
         else:
@@ -79,7 +79,7 @@ def setMotionOfSession(request, id_se):
                                        against=no,
                                        abstain=kvorum,
                                        not_present=not_present,
-                                       result=resultOfMotion(yes, no, kvorum,not_present),
+                                       result=resultOfMotion(yes, no, kvorum, not_present),
                                        id_parladata=mot['vote_id'],
                                        )
 
@@ -131,7 +131,8 @@ def setMotionOfSessionGraph(request, id_se):
                 tabnp.append(vote['mp_id'])
 
         vg = saveOrAbortNew(model=Vote_graph,
-                         session=Session.objects.get(id_parladata=int(id_se)),
+                         session=session,
+                         vote=Vote.objects.get(id_parladata=mot['vote_id']),
                          created_for=session.start_time,
                          motion=mot['text'],
                          votes_for=yes,
@@ -139,7 +140,6 @@ def setMotionOfSessionGraph(request, id_se):
                          abstain=kvorum,
                          not_present=not_present,
                          result=resultOfMotion(yes, no, kvorum,not_present),
-                         id_parladata=mot['id'],
                          pgs_yes=yesdic,
                          pgs_no=nodic,
                          pgs_np=npdic,
@@ -194,11 +194,11 @@ def getMotionOfSession(request, id_se, date=False):
 
 def getMotionGraph(request, id_mo, date=False):
     out = []
-    if Vote_graph.objects.filter(id_parladata=id_mo):
+    if Vote_graph.objects.filter(vote__id_parladata=id_mo):
         if date:
-            model = Vote_graph.objects.filter(id_parladata=id_mo, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
+            model = Vote_graph.objects.filter(vote__id_parladata=id_mo, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
         else:
-            model = Vote_graph.objects.filter(id_parladata=id_mo)
+            model = Vote_graph.objects.filter(vote__id_parladata=id_mo)
 
 
         option_for = []
