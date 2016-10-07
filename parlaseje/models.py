@@ -172,6 +172,11 @@ class Vote_graph(Timestampable, models.Model):
                                related_name='in_session_for_VG',
                                help_text=_('Session '))
 
+    vote = models.ForeignKey('Vote',
+                               blank=True, null=True,
+                               related_name='vote_of_graph',
+                               help_text=_('Vote'))
+
     created_for = models.DateField(_('date of vote'),
                                     blank=True,
                                     null=True,
@@ -192,9 +197,6 @@ class Vote_graph(Timestampable, models.Model):
     result = models.CharField(blank=True, null=True,
                               max_length=255,
                               help_text='The result of the vote')
-
-    id_parladata = models.IntegerField(_('parladata id'),
-                            blank=True, null=True,help_text=_('id parladata'))
 
     pgs_yes = JSONField(blank=True, null=True)
     pgs_no = JSONField(blank=True, null=True)
