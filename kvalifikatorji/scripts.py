@@ -66,6 +66,15 @@ def getCountList(speaker_id, date_):
 
     return wordlist_new
 
+def getCountListPG(party_id, date_):
+    data = requests.get('https://isci.parlameter.si/tfidfALL/ps/' + str(party_id) + "/" + date_).json()
+
+    wordlist = data['results']
+
+    wordlist_new = {word["term"]: word["scores"]["tf"] for word in wordlist}
+
+    return wordlist_new
+
 def getScore(words, counter, total):
 
     print 'Getting style scores'
