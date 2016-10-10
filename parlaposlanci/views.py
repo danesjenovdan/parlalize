@@ -974,7 +974,7 @@ def setVocabularySizeAndSpokenWords(request, date_=None):
     date_of = sw.getDate()
     maxMP = Person.objects.get(id_parladata=maxMPid)
 
-    print "[INFO] saving vocabulary size"
+    print "[INFO] saving unique words"
     for p in all_score:
         saveOrAbortNew(model=VocabularySizeUniqueWords,
                        person=Person.objects.get(id_parladata=int(p['counter_id'])),
@@ -1160,7 +1160,7 @@ def getVocabolarySizeUniqueWordsLanding(request, date_=None):
         date_of = VocabularySizeUniqueWords.objects.all().order_by("-created_for")[0].created_for
         date_ = date_of.strftime(API_DATE_FORMAT)
     mps = requests.get(API_URL+'/getMPs/'+date_).json()
-    datas = [getPersonCardModelNew(VocabularySize, mp["id"], date_) for mp in mps]
+    datas = [getPersonCardModelNew(VocabularySizeUniqueWords, mp["id"], date_) for mp in mps]
     print datas
     return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
 
