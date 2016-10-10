@@ -946,3 +946,4 @@ def getStyleScoresPG(request, pg_id, date_=None):
             }
         }
     }
+    return JsonResponse(out, safe=False)
