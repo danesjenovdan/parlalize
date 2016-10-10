@@ -427,7 +427,7 @@ class NumberOfSpeechesPerSession(Timestampable, models.Model): #Card for Average
 class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of MP
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               related_name='childrenVS',
+                               related_name='VocabularySizes',
                                help_text=_('MP'))
 
     created_for = models.DateField(_('date of activity'),
@@ -441,7 +441,36 @@ class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of
 
     maxMP = models.ForeignKey('Person',
                                blank=True, null=True,
-                               related_name='childrenVacSiz',
+                               related_name='maxVocabulary',
+                               help_text=_('Person who has max vacabularty size'))
+
+    average = models.FloatField(_('average'),
+                                   blank=True, null=True,
+                                   help_text=_('Vacabularty size of MP'))
+
+    maximum = models.FloatField(_('max'),
+                                   blank=True, null=True,
+                                   help_text=_('Max of MP vacabularty size '))
+
+
+class VocabularySizeUniqueWords(Timestampable, models.Model): #Card for Vacabularty size of MP
+    person = models.ForeignKey('Person',
+                               blank=True, null=True,
+                               related_name='uniqueWords',
+                               help_text=_('MP'))
+
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    score = models.FloatField(_('Vacabularty size of this MP'),
+                                   blank=True, null=True,
+                                   help_text=_('Vacabularty size of this MP'))
+
+    maxMP = models.ForeignKey('Person',
+                               blank=True, null=True,
+                               related_name='maxUniqueWords',
                                help_text=_('Person who has max vacabularty size'))
 
     average = models.FloatField(_('average'),

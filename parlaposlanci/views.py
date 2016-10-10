@@ -746,77 +746,6 @@ def getCutVotes(request, person_id, date=None):
     return JsonResponse(out)
 
 
-#   conflicting change, in here for backup, remove after 14th of July 2015
-#
-#   for i in content.keys():
-#       data[i] = [len(speech.split()) for speech in content[i]]
-#
-#   for i in data.keys():
-#       allMPs[i] = sum(data[i])
-#
-#   thisMP = allMPs[id]
-#   average = sum(allMPs.values()) / 90
-#   maximumMP = max(allMPs.iterkeys(), key=(lambda key: allMPs[key]))
-#   maximum = allMPs[maximumMP]
-#
-#   toDB = SpokenWords(person = Person.objects.get(id_parladata=id),
-#                   maxMP = Person.objects.get(id_parladata=maximumMP),
-#                   average = average,
-#                   maximum = maximum
-#                   )
-#   #toDB.save()
-#
-#   return JsonResponse(allMPs)
-
-def setStyleScoresALLShell():
-
-    mps = requests.get(API_URL+'/getMPs/').json()
-    print 'Starting average scores'
-    average_scores = makeAverageStyleScores()
-
-    print 'Ending average scores'
-
-    print 'Starting MPs'
-    for mp in mps:
-
-        person_id = mp['id']
-
-        print 'MP id: ' + str(person_id)
-
-#        # get speeches of MP
-#        speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
-#        speeches_content = [speech['content'] for speech in speeches]
-#        speeches_megastring = string.join(speeches_content)
-#
-#        # count total words
-#        counter = Counter()
-#        counter = countWords(speeches_megastring, counter)
-#        total = sum(counter.values())
-
-        # get word counts with solr
-        counter = Counter(getCountList(int(person_id)))
-        total = sum(counter.values())
-
-        scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
-
-        average = average_scores
-
-        print scores_local, average
-
-        saveOrAbort(
-            model=StyleScores,
-            person=Person.objects.get(id_parladata=int(person_id)),
-            problematicno=scores_local['problematicno'],
-            privzdignjeno=scores_local['privzdignjeno'],
-            preprosto=scores_local['preprosto'],
-            problematicno_average=average['problematicno'],
-            privzdignjeno_average=average['privzdignjeno'],
-            preprosto_average=average['preprosto']
-        )
-
-    return HttpResponse('All MPs updated');
-
-
 def setStyleScoresALL(request, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -837,16 +766,6 @@ def setStyleScoresALL(request, date_=None):
         person_id = mp['id']
 
         print 'MP id: ' + str(person_id)
-
-#        # get speeches of MP
-#        speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
-#        speeches_content = [speech['content'] for speech in speeches]
-#        speeches_megastring = string.join(speeches_content)
-#
-#        # count total words
-#        counter = Counter()
-#        counter = countWords(speeches_megastring, counter)
-#        total = sum(counter.values())
 
         # get word counts with solr
         counter = Counter(getCountList(int(person_id), date_))
@@ -1047,6 +966,24 @@ def setVocabularySizeAndSpokenWords(request, date_=None):
                        maxMP=maxMP,
                        average=avg_score,
                        maximum=max_score)
+
+    #Unique words
+    all_score = sw.getUniqueWords()
+    max_score, maxMPid = sw.getMaxUniqueWords()
+    avg_score = sw.getAvgUniqueWords()
+    date_of = sw.getDate()
+    maxMP = Person.objects.get(id_parladata=maxMPid)
+
+    print "[INFO] saving vocabulary size"
+    for p in all_score:
+        saveOrAbortNew(model=VocabularySizeUniqueWords,
+                       person=Person.objects.get(id_parladata=int(p['counter_id'])),
+                       created_for=date_of,
+                       score=int(p['unique']),
+                       maxMP=maxMP,
+                       average=avg_score,
+                       maximum=max_score)
+
     #Spoken words
     all_words = sw.getSpokenWords()
     max_words, maxWordsMPid = sw.getMaxSpokenWords()
@@ -1208,6 +1145,19 @@ def getVocabolarySizeLanding(request, date_=None):
     else:
         person_id=None
         date_of = VocabularySize.objects.all().order_by("-created_for")[0].created_for
+        date_ = date_of.strftime(API_DATE_FORMAT)
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    datas = [getPersonCardModelNew(VocabularySize, mp["id"], date_) for mp in mps]
+    print datas
+    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
+
+
+def getVocabolarySizeUniqueWordsLanding(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        person_id=None
+        date_of = VocabularySizeUniqueWords.objects.all().order_by("-created_for")[0].created_for
         date_ = date_of.strftime(API_DATE_FORMAT)
     mps = requests.get(API_URL+'/getMPs/'+date_).json()
     datas = [getPersonCardModelNew(VocabularySize, mp["id"], date_) for mp in mps]
