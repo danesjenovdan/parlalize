@@ -940,9 +940,9 @@ def getStyleScoresPG(request, pg_id, date_=None):
             'problematicno': card.problematicno*10000,
             'preprosto': card.preprosto*10000,
             'average': {
-                'privzdignjeno_average': card.privzdignjeno_average*10000,
-                'problematicno_average': card.problematicno_average*10000,
-                'preprosto_average': card.preprosto_average*10000
+                'privzdignjeno': card.privzdignjeno_average*10000,
+                'problematicno': card.problematicno_average*10000,
+                'preprosto': card.preprosto_average*10000
             }
         }
     }
