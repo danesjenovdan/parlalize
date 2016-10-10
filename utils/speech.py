@@ -78,7 +78,7 @@ class WordAnalysis(object):
             
             #unique words
             unique = countWords(words, Counter())
-            self.unique_words.append({'counter_id': counted_obj, 'vocabulary_size': len(unique)})
+            self.unique_words.append({'counter_id': counted_obj, 'unique': len(unique)})
             
             #words count
             all_words_of_this = numberOfWords(words)
@@ -104,6 +104,19 @@ class WordAnalysis(object):
 
     def getAvgVocabularySize(self):
         scores = [person['coef'] for person in self.swizec_coef]
+        return float(sum(scores))/float(len(scores))
+
+    #Unique words
+    def getUniqueWords(self):
+        return self.unique_words
+
+    def getMaxUniqueWords(self):
+        unique_sorted = sorted(self.unique_words, key=lambda k: k['unique'])
+        maxMP = unique_sorted[-1]['counter_id']
+        return unique_sorted[-1]['unique'], maxMP
+
+    def getAvgUniqueWords(self):
+        scores = [person['unique'] for person in self.unique_words]
         return float(sum(scores))/float(len(scores))
 
     #Spoken words

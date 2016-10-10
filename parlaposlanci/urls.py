@@ -82,6 +82,8 @@ urlpatterns = patterns(
     url(r'^getVocabularySize/(?P<person_id>\d+)', getVocabularySize),
     url(r'^getVocabularySizeLanding/(?P<date_>[\w].+)', getVocabolarySizeLanding),
     url(r'^getVocabularySizeLanding', getVocabolarySizeLanding),
+    url(r'^getVocabularySizeLanding2/(?P<date_>[\w].+)', getVocabolarySizeUniqueWordsLanding),
+    url(r'^getVocabularySizeLanding2', getVocabolarySizeUniqueWordsLanding),
 
     url(r'^getCutVotes/(?P<person_id>\d+)/(?P<date>[\w].+)', getCutVotes),
     url(r'^getCutVotes/(?P<person_id>\d+)', getCutVotes),

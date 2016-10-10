@@ -13,7 +13,7 @@ from scipy.stats.stats import pearsonr
 from parlaposlanci.models import Person
 from parlaposlanci.views import getMPsList
 import math
-from kvalifikatorji.scripts import countWords
+from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
 
 # Create your views here.
 
@@ -660,8 +660,8 @@ def setWorkingBodies(request, org_id, date_=None):
     members = requests.get(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
     if not len(members["president"]) or not len(members["members"]) or not len(members["vice_president"]):
         return JsonResponse({'alliswell': False, "status": {"president_count": len(members["president"]),
-                                                            "vice_president": len(members["members"]),
-                                                            "mambers": len(members["vice_president"])}})
+                                                            "vice_president": len(members["vice_president"]),
+                                                            "members": len(members["members"])}})
     out = {}
     name = members.pop("name")
     all_members = [member for role in members.values() for member in role]
@@ -883,3 +883,48 @@ def getPGsIDs(request):
     output = {"list": [i for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
 
     return JsonResponse(output, safe=False)
+
+
+def setStyleScoresPGsALL(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=date_of.strftime(API_DATE_FORMAT)
+
+    membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "/")).json()
+    pgs = membersOfPGsRanges[-1]["members"].keys()
+
+    print 'Starting PGs'
+    scores = {}
+    for pg in pgs:
+        print 'PG id: ' + str(pg)
+
+        # get word counts with solr
+        counter = Counter(getCountListPG(int(pg), date_))
+        total = sum(counter.values())
+
+        scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
+
+        #average = average_scores
+
+        print scores_local, #average
+        scores[pg] = scores_local
+
+
+    print scores
+    average = {"problematicno": sum([score['problematicno'] for score in scores.values()])/len(scores), "privzdignjeno": sum([score['privzdignjeno'] for score in scores.values()])/len(scores), "preprosto": sum([score['preprosto'] for score in scores.values()])/len(scores)}
+    for pg, score in scores.items():
+        saveOrAbortNew(
+            model=StyleScores,
+            created_for=date_of,
+            organization=Organization.objects.get(id_parladata=int(pg)),
+            problematicno=score['problematicno'],
+            privzdignjeno=score['privzdignjeno'],
+            preprosto=score['preprosto'],
+            problematicno_average=average['problematicno'],
+            privzdignjeno_average=average['privzdignjeno'],
+            preprosto_average=average['preprosto']
+        )
+
+    return HttpResponse('All MPs updated');
