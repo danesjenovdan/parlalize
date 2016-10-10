@@ -77,6 +77,9 @@ urlpatterns = patterns('',
     url(r'^getWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies),
     url(r'^getWorkingBodies/(?P<org_id>\d+)', getWorkingBodies),
 
+    url(r'^getStyleScores/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getStyleScoresPG),
+    url(r'^getStyleScores/(?P<pg_id>\d+)', getStyleScoresPG),
+
     url(r'^getPGsIDs', getPGsIDs),
 
     ####################################################################################
