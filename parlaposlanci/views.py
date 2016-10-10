@@ -911,7 +911,7 @@ def getStyleScores(request, person_id, date_=None):
     card = getPersonCardModelNew(StyleScores, int(person_id), date_)
 
     out = {
-        'person': getPersonData(person_id, card.created_for),
+        'person': getPersonData(person_id, card.created_for.strftime(API_DATE_FORMAT)),
         'results': {
             'privzdignjeno': card.privzdignjeno*10000,
             'problematicno': card.problematicno*10000,
