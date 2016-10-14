@@ -13,7 +13,7 @@ from parlaposlanci.models import Person, CutVotes, MPStaticPL, MembershipsOfMemb
 from parlaskupine.views import setCutVotes as setCutVotesPG, setDeviationInOrg, setLessMatchingThem, setMostMatchingThem, setPercentOFAttendedSessionPG, setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL
 from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic
 
-from parlaseje.models import Session, Vote, Ballot
+from parlaseje.models import Session, Vote, Ballot, Speech
 
 ## parlalize initial runner methods ##
 
