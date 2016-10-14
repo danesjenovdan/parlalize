@@ -166,11 +166,12 @@ def runSettersMP(date_to):
     setters_models = {
         # model: setter,
 
-        # CutVotes: setCutVotes,
-        # MembershipsOfMember: setMembershipsOfMember,
-        # LessEqualVoters: setLessEqualVoters,
-        # EqualVoters: setMostEqualVoters,
-        # Presence: setPercentOFAttendedSession,
+        CutVotes: setCutVotes,
+        MembershipsOfMember: setMembershipsOfMember,
+        LessEqualVoters: setLessEqualVoters,
+        EqualVoters: setMostEqualVoters,
+        Presence: setPercentOFAttendedSession,
+
     }
     memberships = requests.get(API_URL + '/getAllTimeMemberships').json()
 
@@ -199,13 +200,13 @@ def runSettersMP(date_to):
                 print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
                 setter(None, str(membership["id"]), date.strftime('%d.%m.%Y'))
         # setLastActivity allways runs without date
-        #setLastActivity(request, str(membership["id"]))
+        setLastActivity(request, str(membership["id"]))
 
     # Runner for setters ALL
     all_in_one_setters_models = {
-        # AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
-        # VocabularySize: setVocabularySizeAndSpokenWords,
-        # Compass: setCompass,
+        AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
+        VocabularySize: setVocabularySizeAndSpokenWords,
+        Compass: setCompass,
     }
 
     zero = datetime(day=2, month=8, year=2014).date()
@@ -231,7 +232,6 @@ def onDateMPCardRunner(date_=None):
         date_ = date_of.strftime(API_DATE_FORMAT)
     setters = [
         setCutVotes,
-        setMPStaticPL,
         setMembershipsOfMember,
         setLessEqualVoters,
         setMostEqualVoters,
@@ -270,13 +270,13 @@ def onDateMPCardRunner(date_=None):
 def runSettersPG(request, date_to):
     toDate = datetime.strptime(date_to, '%d.%m.%Y').date()
     setters_models = {
-        # CutVotesPG: setCutVotes,#BASE_URL+'/p/setCutVotes/',
-        # DeviationInOrganization: setDeviationInOrg,
-        # LessMatchingThem: setLessMatchingThem,
-        # MostMatchingThem: setMostMatchingThem
-        # PercentOFAttendedSession: "/setPercentOFAttendedSessionPG/"
-        # MPOfPg: setMPsOfPG
-        # PGStatic: setBasicInfOfPG
+        CutVotesPG: setCutVotesPG,#BASE_URL+'/p/setCutVotes/',
+        DeviationInOrganization: setDeviationInOrg,
+        LessMatchingThem: setLessMatchingThem,
+        MostMatchingThem: setMostMatchingThem
+        PercentOFAttendedSession: setPercentOFAttendedSessionPG,
+        MPOfPg: setMPsOfPG
+        PGStatic: setBasicInfOfPG
     }
 
     IDs = getPGIDs()
@@ -307,7 +307,7 @@ def runSettersPG(request, date_to):
 
     # Runner for setters ALL
     all_in_one_setters_models = {
-        # VocabularySize: setVocabularySizeALL,
+        VocabularySize: setVocabularySizeALL,
     }
 
     zero = datetime(day=2, month=8, year=2014).date()
@@ -406,6 +406,8 @@ def update():
     print "ballots"
 
     updateDistricts()
+
+    updateMPStatic()
 
     onDateMPCardRunner()
 
