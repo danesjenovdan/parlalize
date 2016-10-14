@@ -1407,9 +1407,10 @@ def getListOfMembers(request, date_=None):
         person_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, person_id, date_).content)["results"]["score"]
         person_obj["results"]["spoken_words"] = json.loads(getNumberOfSpokenWords(None, person_id, date_).content)["results"]["score"]
         person_obj["results"]["speeches_per_session"] = json.loads(getAverageNumberOfSpeechesPerSession(None, person_id, date_).content)["results"]["score"]
-        person_obj["results"]["privzdignjeno"] = 0
-        person_obj["results"]["preprosto"] = 0
-        person_obj["results"]["problematicno"] = 0
+        styleScores = json.loads(getStyleScores(None, person_id, date_).content)
+        person_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"]
+        person_obj["results"]["preprosto"] = styleScores["results"]["preprosto"]
+        person_obj["results"]["problematicno"] = styleScores["results"]["problematicno"]
 
         data.append(person_obj)
     data = sorted(data, key=lambda k: k['person']["name"])
