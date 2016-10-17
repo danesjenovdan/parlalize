@@ -369,7 +369,7 @@ class MPStaticPL(Timestampable, models.Model):
 
     name = models.TextField(blank=True, null=True, help_text=_('Name'))
 
-    district = models.TextField(blank=True, null=True, help_text=_('Voting district name.'))
+    district = JSONField(blank=True, null=True, help_text=_('Voting district name.'))
 
     facebook = models.TextField(blank=True, null=True, default=None, help_text=_('Facebook profile URL'))
     twitter = models.TextField(blank=True, null=True, default=None, help_text=_('Twitter profile URL'))
