@@ -5,6 +5,7 @@ from parlalize.utils import getPGIDs, findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
 from parlaposlanci.models import District
+from raven.contrib.django.raven_compat.models import client
 
 
 from parlaposlanci.views import setCutVotes, setMPStaticPL, setMembershipsOfMember, setLessEqualVoters, setMostEqualVoters, setPercentOFAttendedSession, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass
@@ -200,7 +201,10 @@ def runSettersMP(date_to):
             for date in dates:
                 print date.strftime('%d.%m.%Y')
                 print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
-                setter(None, str(membership["id"]), date.strftime('%d.%m.%Y'))
+                try:
+                    setter(None, str(membership["id"]), date.strftime('%d.%m.%Y'))
+                except:
+                    client.captureException()
         # setLastActivity allways runs without date
         setLastActivity(request, str(membership["id"]))
 
@@ -216,7 +220,10 @@ def runSettersMP(date_to):
         print(toDate - datetime(day=2, month=8, year=2014).date()).days
         for i in range((toDate - datetime(day=2, month=8, year=2014).date()).days):
             print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
-            setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+            try:
+                setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+            except:
+                client.captureException()
 
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 
