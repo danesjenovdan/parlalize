@@ -15,6 +15,8 @@ from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVote
 
 from parlaseje.models import Session, Vote, Ballot, Speech
 
+from multiprocessing import Pool
+
 ## parlalize initial runner methods ##
 
 def updatePeople():
@@ -218,6 +220,87 @@ def runSettersMP(date_to):
 
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 
+#for membership in memberships:
+def doMembersRunner(data):
+    membership = data["membership"]
+    toDate = data["toDate"]
+    setters_models = data["setters_models"]
+    if membership["end_time"]:
+        end_time = datetime.strptime(
+            membership["end_time"].split("T")[0], "%Y-%m-%d").date()
+        if end_time > toDate:
+            end_time = toDate
+    else:
+        end_time = toDate
+
+    for model, setter in setters_models.items():
+        print setter, toDate
+        if membership["start_time"]:
+            #print "START", membership["start_time"]
+            start_time = datetime.strptime(
+                membership["start_time"].split("T")[0], "%Y-%m-%d")
+            dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(
+                API_DATE_FORMAT), start_time.strftime(API_DATE_FORMAT))
+        else:
+            dates = findDatesFromLastCard(
+                model, membership["id"], end_time.strftime(API_DATE_FORMAT))
+        for date in dates:
+            #print date.strftime('%d.%m.%Y')
+            print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
+            setter(None, str(membership["id"]), date.strftime('%d.%m.%Y'))
+    # setLastActivity allways runs without date
+        setLastActivity(request, str(membership["id"]))
+
+
+#for model, setter in all_in_one_setters_models.items():
+def doAllMembersRunner(data):
+    setter = data["setters"]
+    model = data["model"]
+    toDate = data["toDate"]
+    zero = data["zero"]
+    #print(toDate - datetime(day=2, month=8, year=2014).date()).days
+    print "start "+str(setter)
+    for i in range((toDate - datetime(day=2, month=8, year=2014).date()).days):
+        #print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
+        setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+
+def runSettersMPMultiprocess(date_to):
+    toDate = datetime.strptime(date_to, API_DATE_FORMAT).date()
+    zero = datetime(day=2, month=8, year=2014).date()
+    setters_models = {
+        # model: setter,
+
+        CutVotes: setCutVotes,
+        MembershipsOfMember: setMembershipsOfMember,
+        LessEqualVoters: setLessEqualVoters,
+        EqualVoters: setMostEqualVoters,
+        Presence: setPercentOFAttendedSession,
+
+    }
+
+    # Runner for setters ALL
+    all_in_one_setters_models = {
+        AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
+        VocabularySize: setVocabularySizeAndSpokenWords,
+        Compass: setCompass,
+    }
+
+    memberships = requests.get(API_URL + '/getAllTimeMemberships').json()
+
+
+
+    pool = Pool(processes=4)
+    pool.map(doMembersRunner, [{"membership": membership, "toDate": toDate, "setters_models": setters_models} for membership in memberships])
+
+    pool = Pool(processes=4)
+    pool.map(doAllMembersRunner, [{"setters": setter, "model": model, "toDate": toDate, "zero": zero} for model, setter in all_in_one_setters_models.items()])
+
+    
+
+    
+
+    return JsonResponse({"status": "all is fine :D"}, safe=False)
+
 
 # Create all cards for data_ date. If date_ is None set for run setters
 # for today.
@@ -273,10 +356,10 @@ def runSettersPG(request, date_to):
         CutVotesPG: setCutVotesPG,#BASE_URL+'/p/setCutVotes/',
         DeviationInOrganization: setDeviationInOrg,
         LessMatchingThem: setLessMatchingThem,
-        MostMatchingThem: setMostMatchingThem
+        MostMatchingThem: setMostMatchingThem,
         PercentOFAttendedSession: setPercentOFAttendedSessionPG,
-        MPOfPg: setMPsOfPG
-        PGStatic: setBasicInfOfPG
+        MPOfPg: setMPsOfPG,
+        PGStatic: setBasicInfOfPG,
     }
 
     IDs = getPGIDs()
@@ -409,9 +492,9 @@ def update():
 
     updateMPStatic()
 
-    onDateMPCardRunner()
+    #onDateMPCardRunner()
 
-    onDatePGCardRunner()
+    #onDatePGCardRunner()
 
 
 def deleteAppModels(appName):
