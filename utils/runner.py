@@ -63,9 +63,10 @@ def updateOrganizations():
 
 def updateSpeeches():
     data = requests.get(API_URL + '/getAllSpeeches').json()
-    existingISs = Speech.objects.all().values_list("id_parladata", flat=True)
+    existingISs = list(Speech.objects.all().values_list("id_parladata", flat=True))
+    print existingISs
     for dic in data:
-        if int(dic["id"]) not in existingISs:
+        if int(dic["id"]) not in existingISs and str(dic["id"]) not in existingISs:
             print "adding speech"
             speech = Speech(person=Person.objects.get(id_parladata=int(dic['speaker'])),
                             organization=Organization.objects.get(
@@ -296,10 +297,10 @@ def runSettersMPMultiprocess(date_to):
 
 
 
-    pool = Pool(processes=4)
+    pool = Pool(processes=16)
     pool.map(doMembersRunner, [{"membership": membership, "toDate": toDate, "setters_models": setters_models} for membership in memberships])
 
-    pool = Pool(processes=4)
+    pool = Pool(processes=16)
     pool.map(doAllMembersRunner, [{"setters": setter, "model": model, "toDate": toDate, "zero": zero} for model, setter in all_in_one_setters_models.items()])
 
     
@@ -505,7 +506,7 @@ def update():
 
 
 def deleteAppModels(appName):
-    my_app = apps.get_app_config('appName')
+    my_app = apps.get_app_config(appName)
     my_models = my_app.get_models()
     for model in my_models:
         print "delete model: ", model
