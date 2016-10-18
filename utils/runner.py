@@ -254,8 +254,11 @@ def doMembersRunner(data):
                 model, membership["id"], end_time.strftime(API_DATE_FORMAT))
         for date in dates:
             #print date.strftime('%d.%m.%Y')
-            print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
-            setter(None, str(membership["id"]), date.strftime('%d.%m.%Y'))
+            #print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
+            try:
+                setter(None, str(membership["id"]), date.strftime('%d.%m.%Y'))
+            except:
+                client.captureException()
     # setLastActivity allways runs without date
         setLastActivity(request, str(membership["id"]))
 
@@ -267,10 +270,13 @@ def doAllMembersRunner(data):
     toDate = data["toDate"]
     zero = data["zero"]
     #print(toDate - datetime(day=2, month=8, year=2014).date()).days
-    print "start "+str(setter)
+    print "start all members"+str(setter)
     for i in range((toDate - datetime(day=2, month=8, year=2014).date()).days):
         #print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
-        setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+        try:
+            setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+        except:
+            client.captureException()
 
 def runSettersMPMultiprocess(date_to):
     toDate = datetime.strptime(date_to, API_DATE_FORMAT).date()
