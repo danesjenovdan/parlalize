@@ -1300,7 +1300,10 @@ def getCompass(request, date_=None): # TODO make propper setters and getters
     else:
         date_of = datetime.now().date()
         date_=""
-    compas = Compass.objects.all().order_by('-created_for'))[0]
+    try:
+        compas = Compass.objects.filter(created_for__lte=date_of).order_by('-created_for')[0]
+    except:
+        raise Http404("Nismo našli kartice")
     data = compas.data
     for person in data:
         person.update({"person": getPersonData(person["person_id"], compas.created_for.strftime(API_DATE_FORMAT))})
