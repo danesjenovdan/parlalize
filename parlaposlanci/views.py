@@ -1300,7 +1300,7 @@ def getCompass(request, date_=None): # TODO make propper setters and getters
     else:
         date_of = datetime.now().date()
         date_=""
-    compas = Compass.objects.all().order_by('created_for')[0]
+    compas = Compass.objects.all().order_by('-created_for'))[0]
     data = compas.data
     for person in data:
         person.update({"person": getPersonData(person["person_id"], compas.created_for.strftime(API_DATE_FORMAT))})
