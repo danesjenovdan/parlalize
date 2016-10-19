@@ -9,7 +9,7 @@ from raven.contrib.django.raven_compat.models import client
 
 
 from parlaposlanci.views import setCutVotes, setMPStaticPL, setMembershipsOfMember, setLessEqualVoters, setMostEqualVoters, setPercentOFAttendedSession, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass
-from parlaposlanci.models import Person, CutVotes, MPStaticPL, MembershipsOfMember, LessEqualVoters, EqualVoters, Presence, AverageNumberOfSpeechesPerSession, VocabularySize, Compass
+from parlaposlanci.models import Person, CutVotes, VocabularySize, MPStaticPL, MembershipsOfMember, LessEqualVoters, EqualVoters, Presence, AverageNumberOfSpeechesPerSession, VocabularySize, Compass
 
 from parlaskupine.views import setCutVotes as setCutVotesPG, setDeviationInOrg, setLessMatchingThem, setMostMatchingThem, setPercentOFAttendedSessionPG, setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL
 from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic
@@ -260,7 +260,7 @@ def doMembersRunner(data):
             except:
                 client.captureException()
     # setLastActivity allways runs without date
-        setLastActivity(request, str(membership["id"]))
+        setLastActivity(None, str(membership["id"]))
 
 
 #for model, setter in all_in_one_setters_models.items():
@@ -270,9 +270,20 @@ def doAllMembersRunner(data):
     toDate = data["toDate"]
     zero = data["zero"]
     #print(toDate - datetime(day=2, month=8, year=2014).date()).days
+
+    members = requests.get(API_URL + '/getMPs/' + toDate.strftime(API_DATE_FORMAT)).json()
+    dates = []
+    for member in members:
+        members_cards = model.objects.filter(person__id_parladata=member["id"]).order_by("created_for")
+        if members_cards:
+            dates.append(list(members_cards)[-1].created_for)
+    print dates
+    if dates:
+        zero = min(dates).date()
+    print zero
     print "start all members"+str(setter)
-    for i in range((toDate - datetime(day=2, month=8, year=2014).date()).days):
-        #print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
+    for i in range((toDate - zero).days):
+        print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
         try:
             setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
         except:
