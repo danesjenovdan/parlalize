@@ -273,10 +273,15 @@ def doAllMembersRunner(data):
 
     members = requests.get(API_URL + '/getMPs/' + toDate.strftime(API_DATE_FORMAT)).json()
     dates = []
-    for member in members:
-        members_cards = model.objects.filter(person__id_parladata=member["id"]).order_by("created_for")
-        if members_cards:
-            dates.append(list(members_cards)[-1].created_for)
+    if model == Compass:
+        cards = model.objects.all().order_by("created_for")
+        if cards:
+            dates.append(list(cards)[-1].created_for)
+    else:
+        for member in members:
+            members_cards = model.objects.filter(person__id_parladata=member["id"]).order_by("created_for")
+            if members_cards:
+                dates.append(list(members_cards)[-1].created_for)
     print dates
     if dates:
         zero = min(dates).date()
