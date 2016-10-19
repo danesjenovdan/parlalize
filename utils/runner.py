@@ -284,7 +284,7 @@ def doAllMembersRunner(data):
                 dates.append(list(members_cards)[-1].created_for)
     print dates
     if dates:
-        zero = min(dates).date()
+        zero = min(dates)
     print zero
     print "start all members"+str(setter)
     for i in range((toDate - zero).days):
