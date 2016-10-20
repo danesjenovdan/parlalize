@@ -9,7 +9,7 @@ from itertools import groupby
 
 
 class WordAnalysis(object):
-    date_ = None
+    date_ = ""
     api_url = None
     date_of = None
     members = None
@@ -43,12 +43,14 @@ class WordAnalysis(object):
     def prepereSpeeches(self):
         #prepare data for members
         if self.count_of == "members":
+            print "[INFO] [INFO] prepering data of members"
             for mp in self.members:
-                print "[INFO] prepering data of member: " + str(mp['id'])
-                speeches = requests.get(self.api_url +'/getSpeeches/' + str(mp['id']) + (("/"+self.date_) if self.date_ else "")).json()
+                #print "[INFO] prepering data of member: " + str(mp['id'])
+                url = self.api_url +'/getSpeeches/' + str(mp['id']) + (("/"+self.date_) if self.date_ else "")
+                speeches = requests.get(url).json()
                 self.text[str(mp['id'])] = ''.join([speech['content'] for speech in speeches])
             print "[INFO] counting avg words of members"
-            all_speeches = requests.get(API_URL+'/getAllSpeechesOfMPs/'+self.date_).json()
+            all_speeches = requests.get(API_URL+'/getAllMPsSpeeches/'+self.date_).json()
             text = ''.join([speech['content'] for speech in all_speeches])
             total_words = numberOfWords(text)
             self.average_words = total_words/len(self.allTimeMembers)
@@ -58,7 +60,7 @@ class WordAnalysis(object):
             self.membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+self.date_ if self.date_ else "/")).json()
             print "[INFO] prepering data for groups: "
             for pgMembersRange in self.membersOfPGsRanges:
-                print "___" + pgMembersRange["start_date"]
+                #print "___" + pgMembersRange["start_date"]
                 for pg in pgMembersRange["members"].keys():
                     for member in pgMembersRange["members"][pg]: 
                         speeches = requests.get(API_URL+'/getSpeechesInRange/' + str(member) + "/" + pgMembersRange["start_date"] + "/" + pgMembersRange["end_date"]).json()
@@ -73,8 +75,9 @@ class WordAnalysis(object):
 
         
     def wordCounter(self):
+        print "[INFO] counting words"
         for counted_obj, words in self.text.items():
-            print "[INFO] counting "+ self.count_of + ": " + str(counted_obj)
+            #print "[INFO] counting "+ self.count_of + ": " + str(counted_obj), "words: ", len(words)
             
             #unique words
             unique = countWords(words, Counter())
@@ -87,7 +90,11 @@ class WordAnalysis(object):
             #swizec coeficient
             M1 = float(all_words_of_this)
             M2 = sum([len(list(g))*(freq**2) for freq,g in groupby(sorted(dict(unique).values()))])
-            self.swizec_coef.append({'counter_id': counted_obj, 'coef': (M1*M1)/(M2-M1)})
+            #print M1, M2, "m1 pa m2"
+            try:
+                self.swizec_coef.append({'counter_id': counted_obj, 'coef': (M1*M1)/(M2-M1)})
+            except:
+                self.swizec_coef.append({'counter_id': counted_obj, 'coef': 0})
 
         
     def getDate(self):
@@ -176,7 +183,7 @@ class Utils(object):
             mp_results = {}
 
             for mp in mps:
-                print '[INFO] Pasting speeches for MP ' + str(mp['id'])
+                #print '[INFO] Pasting speeches for MP ' + str(mp['id'])
                 speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id']) + "/" + date_).json()
 
                 text = ''.join([speech['content'] for speech in speeches])
