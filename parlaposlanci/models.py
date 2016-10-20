@@ -579,6 +579,11 @@ class MembershipsOfMember(Timestampable, models.Model):
 
 
 class District(models.Model):
+    id_parladata = models.IntegerField(_('parladata id'),
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))
+
     name =  models.CharField(_('name of district'),
                             null=True, max_length=128,
                             help_text=_('District name'))

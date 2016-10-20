@@ -14,7 +14,7 @@ from parlaposlanci.models import Person, StyleScores, CutVotes, VocabularySize, 
 from parlaskupine.views import setCutVotes as setCutVotesPG, setDeviationInOrg, setLessMatchingThem, setMostMatchingThem, setPercentOFAttendedSessionPG, setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL
 from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic
 
-from parlaseje.models import Session, Vote, Ballot, Speech
+from parlaseje.models import Session, Vote, Ballot, Speech, Tag
 
 from multiprocessing import Pool
 
@@ -521,6 +521,9 @@ def update():
 
     updateDistricts()
 
+    updateTags()
+
+    print "mp static"
     updateMPStatic()
 
     #onDateMPCardRunner()
@@ -538,7 +541,19 @@ def deleteAppModels(appName):
 
 def updateDistricts():
     districts = requests.get(API_URL + "/getDistricts").json()
+    existing_districts = District.objects.all().values_list("id_parladata", flat=True)
     for district in districts:
-        if not District.objects.filter(name=district):
-            District(name=district).save()
+        if district["id"] not in existing_districts:
+            District(name=district["name"], id_parladata=district["id"]).save()
+    return 1
+
+
+def updateTags():
+    tags = requests.get(API_URL+'/getTags').json()
+    existing_tags = Tag.objects.all().values_list("id_parladata", flat=True)
+    count = 0
+    for tag in tags:
+        if tag["id"] not in existing_tags:
+            Tag(name=tag["name"], id_parladata=tag["id"]).save()
+            count += 1
     return 1
