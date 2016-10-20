@@ -447,18 +447,6 @@ def getMaxSpeechesOnSession(request, date=False):
     return JsonResponse(results[:5], safe=False)
 
 
-
-def updateTags(request):
-    tags = requests.get(API_URL+'/getTags').json()
-    existing_tags = Tag.objects.all().values_list("name", flat=True)
-    count = 0
-    for tag in tags:
-        if tag not in existing_tags:
-            Tag(name=tag).save()
-            count += 1
-    return JsonResponse({'alliswell': True, "add_tags": count})
-
-
 def setQuote(request, speech_id, start_pos, end_pos):
     speech = get_object_or_404(Speech, id_parladata=speech_id)
     quote = Quote(speech=speech, first_char=start_pos, last_char=end_pos, quoted_text=speech.content[int(start_pos):int(end_pos)])
