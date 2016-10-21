@@ -409,20 +409,17 @@ def getPersonData(id_parladata, date_=None):
         data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
     except:
         votes  = requests.get(API_URL + '/getPersonData/'+str(id_parladata)+'/').json()
-        if votes:
-            return votes
-        else:
-            return {
-                    'party': {
-                              'acronym': 'unknown', 
-                              'id': 'unknown', 
-                              'name': 'unknown'}, 
-                    'name': 'unknown', 
-                    'gov_id': 'unknown', 
-                    'id': id_parladata,
-                    'district': 'unknown',
-                    'gender': 'unknown',
-                    }
+        return {
+                'party': {
+                          'acronym': 'unknown', 
+                          'id': 'unknown', 
+                          'name': 'unknown'}, 
+                'name': votes["name"]if votes else 'unknown', 
+                'gov_id': 'unknown', 
+                'id': id_parladata,
+                'district': 'unknown',
+                'gender': votes["gender"]if votes else 'unknown',
+                }
     return {
             'name': data.person.name,
             'id': int(data.person.id_parladata),
