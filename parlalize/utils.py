@@ -414,11 +414,11 @@ def getPersonData(id_parladata, date_=None):
                           'acronym': None, 
                           'id': None, 
                           'name': None}, 
-                'name': votes["name"]if guest else None, 
+                'name': guest["name"] if guest else None, 
                 'gov_id': None, 
                 'id': id_parladata,
                 'district': None,
-                'gender': votes["gender"]if guest else None,
+                'gender': None,
                 }
     return {
             'type': "mp",
