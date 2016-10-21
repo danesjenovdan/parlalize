@@ -261,6 +261,11 @@ class AverageSpeeches(Timestampable, models.Model):
 
 
 class Tag(models.Model):
+    id_parladata = models.IntegerField(_('parladata id'),
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))
+
     name = models.TextField(blank=True,
                             null=True,
                             help_text=_('tag name'))
