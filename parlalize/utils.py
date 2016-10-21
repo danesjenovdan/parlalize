@@ -408,14 +408,18 @@ def getPersonData(id_parladata, date_=None):
     try:
         data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
     except:
+        votes  = requests.get(API_URL + '/getPersonData/'+str(id_parladata)+'/').json()
         return {
                 'party': {
                           'acronym': 'unknown', 
                           'id': 'unknown', 
                           'name': 'unknown'}, 
-                'name': 'unknown_'+str(id_parladata), 
-                'gov_id': 'unknown_'+str(id_parladata), 
-                'id': id_parladata}
+                'name': votes["name"]if votes else 'unknown', 
+                'gov_id': 'unknown', 
+                'id': id_parladata,
+                'district': 'unknown',
+                'gender': votes["gender"]if votes else 'unknown',
+                }
     return {
             'name': data.person.name,
             'id': int(data.person.id_parladata),
@@ -427,16 +431,8 @@ def getPersonData(id_parladata, date_=None):
 
 
 def getPersonDataAPI(request, id_parladata, date_=None):
-    if not date_:
-        date_ = datetime.now().strftime(API_DATE_FORMAT)
-    data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
-    return JsonResponse({
-            'name': data.person.name,
-            'id': int(data.person.id_parladata),
-            'gov_id': data.gov_id,
-            'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData(),
-            'gender':data.gender
-        })
+    data = getPersonData(id_parladata, date_)
+    return JsonResponse(data)
 
 
 def modelsData(request):
