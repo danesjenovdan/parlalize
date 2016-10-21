@@ -81,7 +81,8 @@ def getMPStaticPL(request, person_id, date_=None):
     if card.twitter == 'False': print card.twitter
 
     data = {
-        'date_of_card':card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': {
             'voters': card.voters,
@@ -138,6 +139,8 @@ def getPercentOFAttendedSession(request, person_id, date=None):
 
     out  = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             "sessions":{
                 "score": equalVoters.person_value_sessions,
@@ -212,6 +215,8 @@ def getNumberOfSpokenWords(request, person_id, date=None):
 
     results = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'score': card.score,
             'average': card.average,
@@ -311,7 +316,8 @@ def getLastActivity(request, person_id, date_=None):
     static = getPersonCardModelNew(MPStaticPL, person_id, date_)
 
     result = {
-        'date_of_card':lastDay,
+        'created_at': lastDay,
+        'created_for': lastDay,
         'person': getPersonData(person_id, date_),
         'results': out
         }
@@ -398,7 +404,8 @@ def getMostEqualVoters(request, person_id, date_=None):
     print equalVoters.person1.id_parladata
 
     out = {
-        'date_of_card':equalVoters.created_for.strftime(API_OUT_DATE_FORMAT),
+        'created_at': equalVoters.created_at.strftime(API_DATE_FORMAT),
+        'created_for': equalVoters.created_for.strftime(API_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -455,7 +462,8 @@ def setLessEqualVoters(request, person_id, date_=None):
 def getLessEqualVoters(request, person_id, date_=None):
     equalVoters = getPersonCardModelNew(LessEqualVoters, person_id, date_)
     out = {
-        'date_of_card':equalVoters.created_for.strftime(API_OUT_DATE_FORMAT),
+        'created_at': equalVoters.created_at.strftime(API_DATE_FORMAT),
+        'created_for': equalVoters.created_for.strftime(API_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -688,6 +696,8 @@ def getCutVotes(request, person_id, date=None):
 
     out = {
         'person': getPersonData(person_id, date),
+        'created_at': cutVotes.created_at.strftime(API_DATE_FORMAT),
+        'created_for': cutVotes.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'abstain': {
                 'score': cutVotes.this_abstain,
@@ -796,6 +806,7 @@ def setStyleScoresALL(request, date_=None):
 
     return HttpResponse('All MPs updated');
 
+
 def setStyleScores(request, person_id):
     speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
     speeches_content = [speech['content'] for speech in speeches]
@@ -830,6 +841,8 @@ def getStyleScores(request, person_id, date_=None):
     card = getPersonCardModelNew(StyleScores, int(person_id), date_)
 
     out = {
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'person': getPersonData(person_id, card.created_for.strftime(API_DATE_FORMAT)),
         'results': {
             'privzdignjeno': card.privzdignjeno*10000,
@@ -1126,6 +1139,8 @@ def getVocabularySize(request, person_id, date_=None):
 
     out = {
         'person': getPersonData(person_id, date_),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -1249,6 +1264,8 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
     out = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -1328,6 +1345,8 @@ def getTaggedBallots_(request, person_id, date=None):
 
     out = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'ballots': card.data
     }
 
@@ -1357,6 +1376,8 @@ def getMembershipsOfMember(request, person_id, date=None):
 
     out = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'memberships': card.data
     }
 

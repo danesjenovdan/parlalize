@@ -166,7 +166,7 @@ def updateMPStatic():
 
 
 def runSettersMP(date_to):
-    toDate = datetime.strptime(date_to, API_DATE_FORMAT).date()
+    toDate = (datetime.strptime(date_to, API_DATE_FORMAT) - timedelta(days=1)).date()
     setters_models = {
         # model: setter,
 
@@ -228,7 +228,8 @@ def runSettersMP(date_to):
 
     return JsonResponse({"status": "all is fine :D"}, safe=False)
 
-#for membership in memberships:
+
+# using for multiprocess runner
 def doMembersRunner(data):
     membership = data["membership"]
     toDate = data["toDate"]
@@ -263,7 +264,7 @@ def doMembersRunner(data):
         setLastActivity(None, str(membership["id"]))
 
 
-#for model, setter in all_in_one_setters_models.items():
+# using for multiprocess runner
 def doAllMembersRunner(data):
     setter = data["setters"]
     model = data["model"]
@@ -340,7 +341,7 @@ def onDateMPCardRunner(date_=None):
     ENDC = '\033[0m'
 
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = (datetime.strptime(date_, API_DATE_FORMAT) - timedelta(days=1)).date()
     else:
         date_of = (datetime.now()-timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
@@ -382,7 +383,7 @@ def onDateMPCardRunner(date_=None):
 ## parlaseje runners methods ##
 
 def runSettersPG(request, date_to):
-    toDate = datetime.strptime(date_to, '%d.%m.%Y').date()
+    toDate = (datetime.strptime(date_to, '%d.%m.%Y') - timedelta(days=1)).date()
     setters_models = {
         CutVotesPG: setCutVotesPG,#BASE_URL+'/p/setCutVotes/',
         DeviationInOrganization: setDeviationInOrg,
@@ -448,7 +449,7 @@ def onDatePGCardRunner(date_=None):
     ENDC = '\033[0m'
 
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = (datetime.strptime(date_, API_DATE_FORMAT) - timedelta(days=1)).date()
     else:
         date_of = (datetime.now()-timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
