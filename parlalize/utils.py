@@ -211,7 +211,6 @@ def getPersonCardModelNew(model, id, date=None):
                 modelObject = modelObject.latest('created_for')
         else:
             modelObject = modelObject.latest('created_for')
-            print "get object BUBU", modelObject.created_for
     return modelObject
 
 
@@ -408,19 +407,21 @@ def getPersonData(id_parladata, date_=None):
     try:
         data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
     except:
-        votes  = requests.get(API_URL + '/getPersonData/'+str(id_parladata)+'/').json()
+        guest  = requests.get(API_URL + '/getPersonData/'+str(id_parladata)+'/').json()
         return {
+                'type': "visitor" if guest else "unknown",
                 'party': {
-                          'acronym': 'unknown', 
-                          'id': 'unknown', 
-                          'name': 'unknown'}, 
-                'name': votes["name"]if votes else 'unknown', 
-                'gov_id': 'unknown', 
+                          'acronym': None, 
+                          'id': None, 
+                          'name': None}, 
+                'name': guest["name"] if guest else None, 
+                'gov_id': None, 
                 'id': id_parladata,
-                'district': 'unknown',
-                'gender': votes["gender"]if votes else 'unknown',
+                'district': None,
+                'gender': None,
                 }
     return {
+            'type': "mp",
             'name': data.person.name,
             'id': int(data.person.id_parladata),
             'gov_id': data.gov_id,
