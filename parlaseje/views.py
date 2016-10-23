@@ -66,7 +66,7 @@ def setMotionOfSession(request, id_se):
                                                                     against=no,
                                                                     abstain=kvorum,
                                                                     not_present=not_present,
-                                                                    result=resultOfMotion(yes, no, kvorum, not_present),
+                                                                    result=resultOfMotion(yes, no, kvorum,not_present, session.start_time),
                                                                     id_parladata=mot['vote_id'],
                                                                     )
         else:
@@ -79,7 +79,7 @@ def setMotionOfSession(request, id_se):
                                        against=no,
                                        abstain=kvorum,
                                        not_present=not_present,
-                                       result=resultOfMotion(yes, no, kvorum, not_present),
+                                       result=resultOfMotion(yes, no, kvorum,not_present, session.start_time),
                                        id_parladata=mot['vote_id'],
                                        )
 
@@ -139,7 +139,8 @@ def setMotionOfSessionGraph(request, id_se):
                          against=no,
                          abstain=kvorum,
                          not_present=not_present,
-                         result=resultOfMotion(yes, no, kvorum,not_present),
+                         result=resultOfMotion(yes, no, kvorum,not_present, session.start_time),
+                         id_parladata=mot['id'],
                          pgs_yes=yesdic,
                          pgs_no=nodic,
                          pgs_np=npdic,
