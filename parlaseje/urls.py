@@ -39,8 +39,6 @@ urlpatterns = patterns(
     url(r'^getMinSpeechesOnSession/', getMinSpeechesOnSession),
     url(r'^getMaxSpeechesOnSession/', getMaxSpeechesOnSession),
 
-    url(r'^updateTags/', updateTags),
-
     url(r'^setQuote/(?P<speech_id>\d+)/(?P<start_pos>\d+)/(?P<end_pos>\d+)', setQuote),
     url(r'^getQuote/(?P<quote_id>\d+)', getQuote),
 

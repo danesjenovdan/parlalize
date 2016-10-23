@@ -369,7 +369,7 @@ class MPStaticPL(Timestampable, models.Model):
 
     name = models.TextField(blank=True, null=True, help_text=_('Name'))
 
-    district = models.TextField(blank=True, null=True, help_text=_('Voting district name.'))
+    district = JSONField(blank=True, null=True, help_text=_('Voting district name.'))
 
     facebook = models.TextField(blank=True, null=True, default=None, help_text=_('Facebook profile URL'))
     twitter = models.TextField(blank=True, null=True, default=None, help_text=_('Twitter profile URL'))
@@ -427,7 +427,7 @@ class NumberOfSpeechesPerSession(Timestampable, models.Model): #Card for Average
 class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of MP
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               related_name='childrenVS',
+                               related_name='VocabularySizes',
                                help_text=_('MP'))
 
     created_for = models.DateField(_('date of activity'),
@@ -441,7 +441,36 @@ class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of
 
     maxMP = models.ForeignKey('Person',
                                blank=True, null=True,
-                               related_name='childrenVacSiz',
+                               related_name='maxVocabulary',
+                               help_text=_('Person who has max vacabularty size'))
+
+    average = models.FloatField(_('average'),
+                                   blank=True, null=True,
+                                   help_text=_('Vacabularty size of MP'))
+
+    maximum = models.FloatField(_('max'),
+                                   blank=True, null=True,
+                                   help_text=_('Max of MP vacabularty size '))
+
+
+class VocabularySizeUniqueWords(Timestampable, models.Model): #Card for Vacabularty size of MP
+    person = models.ForeignKey('Person',
+                               blank=True, null=True,
+                               related_name='uniqueWords',
+                               help_text=_('MP'))
+
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    score = models.FloatField(_('Vacabularty size of this MP'),
+                                   blank=True, null=True,
+                                   help_text=_('Vacabularty size of this MP'))
+
+    maxMP = models.ForeignKey('Person',
+                               blank=True, null=True,
+                               related_name='maxUniqueWords',
                                help_text=_('Person who has max vacabularty size'))
 
     average = models.FloatField(_('average'),
@@ -459,7 +488,10 @@ class StyleScores(Timestampable, models.Model): #Card for Style Scores of MP
                                blank=True, null=True,
                                related_name='childrenStSc',
                                help_text=_('MP'))
-
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
     problematicno = models.FloatField(_('Problematicno style score of this MP'),
                                    blank=True, null=True,
                                    help_text=_('Problematicno score of this MP'))
@@ -544,3 +576,14 @@ class MembershipsOfMember(Timestampable, models.Model):
                                    help_text=_('date of analize'))
 
     data = JSONField(blank=True, null=True)
+
+
+class District(models.Model):
+    id_parladata = models.IntegerField(_('parladata id'),
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))
+
+    name =  models.CharField(_('name of district'),
+                            null=True, max_length=128,
+                            help_text=_('District name'))

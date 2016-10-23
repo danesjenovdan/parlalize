@@ -211,7 +211,6 @@ def getPersonCardModelNew(model, id, date=None):
                 modelObject = modelObject.latest('created_for')
         else:
             modelObject = modelObject.latest('created_for')
-            print "get object BUBU", modelObject.created_for
     return modelObject
 
 
@@ -237,27 +236,6 @@ def getPersonCardModel(model, id, date=None):
         else:
             modelObject = modelObject.latest('created_at')
     return modelObject
-
-
-def updatePeople():
-    data = requests.get(API_URL+'/getAllPeople/').json()
-    mps = requests.get(API_URL+'/getMPs/').json()
-    mps_ids = [mp['id'] for mp in mps]
-    for mp in data:
-        if Person.objects.filter(id_parladata=mp['id']):
-            person = Person.objects.get(id_parladata=mp['id'])
-            person.name = mp['name']
-            person.pg = mp['membership']
-            person.id_parladata = int(mp['id'])
-            person.image = mp['image']
-            person.actived = True if int(mp['id']) in mps_ids else False
-            person.gov_id = mp['gov_id']
-            person.save()
-        else:
-            person = Person(name=mp['name'], pg=mp['membership'], id_parladata=int(mp['id']), image=mp['image'], actived=True if int(mp['id']) in mps_ids else False, gov_id=mp['gov_id'])
-            person.save()
-
-    return 1
 
 
 def getPGCardModel(model, id, date=None):
@@ -304,6 +282,7 @@ def getSCardModel(model, id_se, date=None):
         modelObject = modelObject.latest('created_at')
     return modelObject
 
+<<<<<<< HEAD
 def updateOrganizations():
     data = requests.get(API_URL+'/getAllOrganizations').json()
     for pg in data:
@@ -414,41 +393,6 @@ def getPGIDs():
 
     return [pg for pg in data]
 
-def setAllSessions():
-    data  = requests.get(API_URL + '/getSessions/').json()
-    session_ids = list(Session.objects.all().values_list("id_parladata", flat=True))
-    for sessions in data:
-        if sessions['id'] not in session_ids:
-            result = Session(name=sessions['name'],
-                             gov_id=sessions['gov_id'],
-                             start_time=sessions['start_time'],
-                             end_time=sessions['end_time'],
-                             classification=sessions['classification'],
-                             id_parladata=sessions['id'],
-                             organization=Organization.objects.get(id_parladata=sessions['organization_id']),
-                             ).save()
-        else:
-            if not Session.objects.filter(name=sessions['name'],
-                                          gov_id=sessions['gov_id'],
-                                          start_time=sessions['start_time'],
-                                          end_time=sessions['end_time'],
-                                          classification=sessions['classification'],
-                                          id_parladata=sessions['id'],
-                                          organization=Organization.objects.get(id_parladata=sessions['organization_id']),):
-                #save changes
-                session = Session.objects.get(id_parladata=sessions['id'])
-                session.name = sessions['name']
-                session.gov_id = sessions['gov_id']
-                session.start_time = sessions['start_time']
-                session.end_time = sessions['end_time']
-                session.classification = sessions['classification']
-                session.id_parladata = sessions['id']
-                session.organization = Organization.objects.get(id_parladata=sessions['organization_id'])
-                session.save()
-
-
-
-    return 1
 
 def getRangeVotes(pgs, date_, votes_type="logic"):
     print date_
@@ -524,7 +468,13 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
                                     axis=0)
         else:
             members = [member for pg_id in pgs for member in membersInRange["members"][pg_id]]
-        
+
+            #print member, votes[str(member)].keys()
+            # Print member and vote id where is fail in data for cutVotes
+            for member in members:
+                for b in votes_ids:
+                    if str(b) not in votes[str(member)].keys():
+                        print member, b, "FAIL"
             pg_score_temp =[votes[str(member)][str(b)] for member in members for b in votes_ids]
 
         if votes_type=="logic":
@@ -548,34 +498,33 @@ def getPersonData(id_parladata, date_=None):
     try:
         data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
     except:
+        guest  = requests.get(API_URL + '/getPersonData/'+str(id_parladata)+'/').json()
         return {
+                'type': "visitor" if guest else "unknown",
                 'party': {
-                          'acronym': 'unknown', 
-                          'id': 'unknown', 
-                          'name': 'unknown'}, 
-                'name': 'unknown_'+str(id_parladata), 
-                'gov_id': 'unknown_'+str(id_parladata), 
-                'id': id_parladata}
+                          'acronym': None, 
+                          'id': None, 
+                          'name': None}, 
+                'name': guest["name"] if guest else None, 
+                'gov_id': None, 
+                'id': id_parladata,
+                'district': None,
+                'gender': None,
+                }
     return {
+            'type': "mp",
             'name': data.person.name,
             'id': int(data.person.id_parladata),
             'gov_id': data.gov_id,
             'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData(),
-            'gender':data.gender
+            'gender':data.gender,
+            'district': data.district
         }
 
 
 def getPersonDataAPI(request, id_parladata, date_=None):
-    if not date_:
-        date_ = datetime.now().strftime(API_DATE_FORMAT)
-    data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
-    return JsonResponse({
-            'name': data.person.name,
-            'id': int(data.person.id_parladata),
-            'gov_id': data.gov_id,
-            'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData(),
-            'gender':data.gender
-        })
+    data = getPersonData(id_parladata, date_)
+    return JsonResponse(data)
 
 
 def modelsData(request):

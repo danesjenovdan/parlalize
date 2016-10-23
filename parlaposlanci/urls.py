@@ -21,6 +21,7 @@ urlpatterns = patterns(
     url(r'^setPresence/(?P<person_id>\d+)', setPercentOFAttendedSession),
 
     url(r'^setStyleScores/(?P<person_id>\d+)', setStyleScores),
+    url(r'^setStyleScoresALL/(?P<date_>[\w].+)', setStyleScoresALL),
     url(r'^setStyleScoresALL/', setStyleScoresALL),
 
     url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
@@ -65,7 +66,7 @@ urlpatterns = patterns(
     url(r'^getPresence/(?P<person_id>\d+)/(?P<date>[\w].+)', getPercentOFAttendedSession),
     url(r'^getPresence/(?P<person_id>\d+)', getPercentOFAttendedSession),
 
-    url(r'^getStyleScores/(?P<person_id>\d+)/(?P<date>[\w].+)', getStyleScores),
+    url(r'^getStyleScores/(?P<person_id>\d+)/(?P<date_>[\w].+)', getStyleScores),
     url(r'^getStyleScores/(?P<person_id>\d+)', getStyleScores),
 
     url(r'^getAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)/(?P<date>[\w].+)', getAverageNumberOfSpeechesPerSession),
@@ -81,6 +82,8 @@ urlpatterns = patterns(
     url(r'^getVocabularySize/(?P<person_id>\d+)', getVocabularySize),
     url(r'^getVocabularySizeLanding/(?P<date_>[\w].+)', getVocabolarySizeLanding),
     url(r'^getVocabularySizeLanding', getVocabolarySizeLanding),
+    url(r'^getUniqueWordsLanding/(?P<date_>[\w].+)', getVocabolarySizeUniqueWordsLanding),
+    url(r'^getUniqueWordsLanding/', getVocabolarySizeUniqueWordsLanding),
 
     url(r'^getCutVotes/(?P<person_id>\d+)/(?P<date>[\w].+)', getCutVotes),
     url(r'^getCutVotes/(?P<person_id>\d+)', getCutVotes),
@@ -98,6 +101,9 @@ urlpatterns = patterns(
 
     url(r'^getMembershipsOfMember/(?P<person_id>\d+)/(?P<date>[\w].+)', getMembershipsOfMember),
     url(r'^getMembershipsOfMember/(?P<person_id>\d+)', getMembershipsOfMember),
+
+    url(r'^getListOfMembers/(?P<date>[\w].+)', getListOfMembers),
+    url(r'^getListOfMembers/', getListOfMembers),
 
     ####################################################################################
 

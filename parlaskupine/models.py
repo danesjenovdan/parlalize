@@ -405,7 +405,7 @@ class WorkingBodies(Timestampable, models.Model):
 class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of Org
     organization = models.ForeignKey('Organization',
                                      blank=True, null=True,
-                                     related_name='childrenVS',
+                                     related_name='vocabularySizes',
                                      help_text=_('Org'))
 
     created_for = models.DateField(_('date of activity'),
@@ -429,3 +429,32 @@ class VocabularySize(Timestampable, models.Model): #Card for Vacabularty size of
     maximum = models.FloatField(_('max'),
                                    blank=True, null=True,
                                    help_text=_('Max of Org vacabularty size '))
+
+
+class StyleScores(Timestampable, models.Model): #Card for Style Scores of MP
+    organization = models.ForeignKey('Organization',
+                                     blank=True, null=True,
+                                     related_name='styleScores',
+                                     help_text=_('Org'))
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+    problematicno = models.FloatField(_('Problematicno style score of this PG'),
+                                   blank=True, null=True,
+                                   help_text=_('Problematicno score of this PG'))
+    privzdignjeno = models.FloatField(_('Privzdignjeno style score of this PG'),
+                                   blank=True, null=True,
+                                   help_text=_('Privzdignjeno style score of this PG'))
+    preprosto = models.FloatField(_('Preprosto style score of this PG'),
+                                   blank=True, null=True,
+                                   help_text=_('Preprosto style score of this PG'))
+    problematicno_average = models.FloatField(_('Problematicno average style score'),
+                                   blank=True, null=True,
+                                   help_text=_('Problematicno average style score'))
+    privzdignjeno_average = models.FloatField(_('Privzdignjeno average style score'),
+                                   blank=True, null=True,
+                                   help_text=_('Privzdignjeno average style score'))
+    preprosto_average = models.FloatField(_('Preprosto average style score'),
+                                   blank=True, null=True,
+                                   help_text=_('Preprosto average style score'))

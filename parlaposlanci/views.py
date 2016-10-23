@@ -81,7 +81,8 @@ def getMPStaticPL(request, person_id, date_=None):
     if card.twitter == 'False': print card.twitter
 
     data = {
-        'date_of_card':card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': {
             'voters': card.voters,
@@ -138,6 +139,8 @@ def getPercentOFAttendedSession(request, person_id, date=None):
 
     out  = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             "sessions":{
                 "score": equalVoters.person_value_sessions,
@@ -212,6 +215,8 @@ def getNumberOfSpokenWords(request, person_id, date=None):
 
     results = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'score': card.score,
             'average': card.average,
@@ -245,7 +250,7 @@ def setLastActivity(request, person_id):
                 vote_name.append(acti.session.name)
                 result.append("None")
                 options.append("None")
-                sessions.append(str(acti.session.id))
+                sessions.append(str(acti.session.id_parladata))
             else:
                 #print "Ballot"
                 avtivity_ids.append(acti.vote.id_parladata)
@@ -292,8 +297,7 @@ def getLastActivity(request, person_id, date_=None):
                 data.append({
                     "speech_id": int(activity_ids[i]),
                     "type": types[i],
-                    "session_name": vote_names[i],
-                    "session_id": sessions_ids[i]
+                    "session": Session.objects.get(id_parladata=sessions_ids[i]).getSessionData(),
                     })
         return {"date": day_activites.created_for.strftime(API_OUT_DATE_FORMAT), "events": data}
 
@@ -312,7 +316,8 @@ def getLastActivity(request, person_id, date_=None):
     static = getPersonCardModelNew(MPStaticPL, person_id, date_)
 
     result = {
-        'date_of_card':lastDay,
+        'created_at': lastDay,
+        'created_for': lastDay,
         'person': getPersonData(person_id, date_),
         'results': out
         }
@@ -399,7 +404,8 @@ def getMostEqualVoters(request, person_id, date_=None):
     print equalVoters.person1.id_parladata
 
     out = {
-        'date_of_card':equalVoters.created_for.strftime(API_OUT_DATE_FORMAT),
+        'created_at': equalVoters.created_at.strftime(API_DATE_FORMAT),
+        'created_for': equalVoters.created_for.strftime(API_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -456,7 +462,8 @@ def setLessEqualVoters(request, person_id, date_=None):
 def getLessEqualVoters(request, person_id, date_=None):
     equalVoters = getPersonCardModelNew(LessEqualVoters, person_id, date_)
     out = {
-        'date_of_card':equalVoters.created_for.strftime(API_OUT_DATE_FORMAT),
+        'created_at': equalVoters.created_at.strftime(API_DATE_FORMAT),
+        'created_for': equalVoters.created_for.strftime(API_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -689,6 +696,8 @@ def getCutVotes(request, person_id, date=None):
 
     out = {
         'person': getPersonData(person_id, date),
+        'created_at': cutVotes.created_at.strftime(API_DATE_FORMAT),
+        'created_for': cutVotes.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'abstain': {
                 'score': cutVotes.this_abstain,
@@ -747,69 +756,49 @@ def getCutVotes(request, person_id, date=None):
     return JsonResponse(out)
 
 
-#   conflicting change, in here for backup, remove after 14th of July 2015
-#
-#   for i in content.keys():
-#       data[i] = [len(speech.split()) for speech in content[i]]
-#
-#   for i in data.keys():
-#       allMPs[i] = sum(data[i])
-#
-#   thisMP = allMPs[id]
-#   average = sum(allMPs.values()) / 90
-#   maximumMP = max(allMPs.iterkeys(), key=(lambda key: allMPs[key]))
-#   maximum = allMPs[maximumMP]
-#
-#   toDB = SpokenWords(person = Person.objects.get(id_parladata=id),
-#                   maxMP = Person.objects.get(id_parladata=maximumMP),
-#                   average = average,
-#                   maximum = maximum
-#                   )
-#   #toDB.save()
-#
-#   return JsonResponse(allMPs)
+def setStyleScoresALL(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=date_of.strftime(API_DATE_FORMAT)
 
-def setStyleScoresALLShell():
-
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
     print 'Starting average scores'
-    average_scores = makeAverageStyleScores()
+    #average_scores = makeAverageStyleScores(date_)
 
     print 'Ending average scores'
 
     print 'Starting MPs'
+    scores = {}
     for mp in mps:
 
         person_id = mp['id']
 
         print 'MP id: ' + str(person_id)
 
-#        # get speeches of MP
-#        speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
-#        speeches_content = [speech['content'] for speech in speeches]
-#        speeches_megastring = string.join(speeches_content)
-#
-#        # count total words
-#        counter = Counter()
-#        counter = countWords(speeches_megastring, counter)
-#        total = sum(counter.values())
-
         # get word counts with solr
-        counter = Counter(getCountList(int(person_id)))
+        counter = Counter(getCountList(int(person_id), date_))
         total = sum(counter.values())
 
         scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
 
-        average = average_scores
+        #average = average_scores
 
-        print scores_local, average
+        print scores_local, #average
+        scores[person_id] = scores_local
 
-        saveOrAbort(
+
+    print scores
+    average = {"problematicno": sum([score['problematicno'] for score in scores.values()])/len(scores), "privzdignjeno": sum([score['privzdignjeno'] for score in scores.values()])/len(scores), "preprosto": sum([score['preprosto'] for score in scores.values()])/len(scores)}
+    for person, score in scores.items():
+        saveOrAbortNew(
             model=StyleScores,
-            person=Person.objects.get(id_parladata=int(person_id)),
-            problematicno=scores_local['problematicno'],
-            privzdignjeno=scores_local['privzdignjeno'],
-            preprosto=scores_local['preprosto'],
+            created_for=date_of,
+            person=Person.objects.get(id_parladata=int(person)),
+            problematicno=score['problematicno'],
+            privzdignjeno=score['privzdignjeno'],
+            preprosto=score['preprosto'],
             problematicno_average=average['problematicno'],
             privzdignjeno_average=average['privzdignjeno'],
             preprosto_average=average['preprosto']
@@ -817,54 +806,6 @@ def setStyleScoresALLShell():
 
     return HttpResponse('All MPs updated');
 
-
-def setStyleScoresALL(request):
-
-    mps = requests.get(API_URL+'/getMPs/').json()
-    print 'Starting average scores'
-    average_scores = makeAverageStyleScores()
-
-    print 'Ending average scores'
-
-    print 'Starting MPs'
-    for mp in mps:
-
-        person_id = mp['id']
-
-        print 'MP id: ' + str(person_id)
-
-#        # get speeches of MP
-#        speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
-#        speeches_content = [speech['content'] for speech in speeches]
-#        speeches_megastring = string.join(speeches_content)
-#
-#        # count total words
-#        counter = Counter()
-#        counter = countWords(speeches_megastring, counter)
-#        total = sum(counter.values())
-
-        # get word counts with solr
-        counter = Counter(getCountList(int(person_id)))
-        total = sum(counter.values())
-
-        scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
-
-        average = average_scores
-
-        print scores_local, average
-
-        saveOrAbort(
-            model=StyleScores,
-            person=Person.objects.get(id_parladata=int(person_id)),
-            problematicno=scores_local['problematicno'],
-            privzdignjeno=scores_local['privzdignjeno'],
-            preprosto=scores_local['preprosto'],
-            problematicno_average=average['problematicno'],
-            privzdignjeno_average=average['privzdignjeno'],
-            preprosto_average=average['preprosto']
-        )
-
-    return HttpResponse('All MPs updated');
 
 def setStyleScores(request, person_id):
     speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
@@ -896,19 +837,21 @@ def setStyleScores(request, person_id):
 
     return JsonResponse(output, safe=False)
 
-def getStyleScores(request, person_id, date=None):
-    card = getPersonCardModel(StyleScores, int(person_id), date)
+def getStyleScores(request, person_id, date_=None):
+    card = getPersonCardModelNew(StyleScores, int(person_id), date_)
 
     out = {
-        'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'person': getPersonData(person_id, card.created_for.strftime(API_DATE_FORMAT)),
         'results': {
-            'privzdignjeno': card.privzdignjeno,
-            'problematicno': card.problematicno,
-            'preprosto': card.preprosto,
+            'privzdignjeno': card.privzdignjeno*10000,
+            'problematicno': card.problematicno*10000,
+            'preprosto': card.preprosto*10000,
             'average': {
-                'privzdignjeno_average': card.privzdignjeno_average,
-                'problematicno_average': card.problematicno_average,
-                'preprosto_average': card.preprosto_average
+                'privzdignjeno': card.privzdignjeno_average*10000,
+                'problematicno': card.problematicno_average*10000,
+                'preprosto': card.preprosto_average*10000
             }
         }
     }
@@ -953,27 +896,18 @@ def getTotalStyleScores(request):
 
     return JsonResponse(output, safe=False)
 
-def makeAverageStyleScores():
+def makeAverageStyleScores(date_):
 #    speeches = requests.get(API_URL+'/getAllSpeeches/').json()
 #    speeches_content = [speech['content'] for speech in speeches]
 #    speeches_megastring = string.join(speeches_content)
 
-    data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
+    #data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
+    data = requests.get('https://isci.parlameter.si/dfall/'+date_).json()
 
-    wordlist = data['fields']['content_t']['topTerms']
+    #wordlist = data['fields']['content_t']['topTerms']
 
-    wordlist_new = {}
-    i = 0
-    limit = len(wordlist)/2
+    wordlist_new = {word["term"]: word["df"] for word in data}
 
-    while i < limit:
-
-        if wordlist[i + 1] > 0:
-            wordlist_new[wordlist[i]] = wordlist[i + 1]
-        else:
-            break
-
-        i = i + 2
 
     counter = Counter(wordlist_new)
 #    counter = countWords(speeches_megastring, counter)
@@ -1027,7 +961,7 @@ def getTFIDF(request, person_id, date=None):
     return JsonResponse(out)
 
 def setVocabularySizeAndSpokenWords(request, date_=None):
-    sw = WordAnalysis(API_URL, date_)
+    sw = WordAnalysis(API_URL, count_of="members", date_=date_)
 
     #Vocabolary size
     all_score = sw.getVocabularySize()
@@ -1039,12 +973,30 @@ def setVocabularySizeAndSpokenWords(request, date_=None):
     print "[INFO] saving vocabulary size"
     for p in all_score:
         saveOrAbortNew(model=VocabularySize,
-                       person=Person.objects.get(id_parladata=int(p['person_id'])),
+                       person=Person.objects.get(id_parladata=int(p['counter_id'])),
                        created_for=date_of,
                        score=int(p['coef']),
                        maxMP=maxMP,
                        average=avg_score,
                        maximum=max_score)
+
+    #Unique words
+    all_score = sw.getUniqueWords()
+    max_score, maxMPid = sw.getMaxUniqueWords()
+    avg_score = sw.getAvgUniqueWords()
+    date_of = sw.getDate()
+    maxMP = Person.objects.get(id_parladata=maxMPid)
+
+    print "[INFO] saving unique words"
+    for p in all_score:
+        saveOrAbortNew(model=VocabularySizeUniqueWords,
+                       person=Person.objects.get(id_parladata=int(p['counter_id'])),
+                       created_for=date_of,
+                       score=int(p['unique']),
+                       maxMP=maxMP,
+                       average=avg_score,
+                       maximum=max_score)
+
     #Spoken words
     all_words = sw.getSpokenWords()
     max_words, maxWordsMPid = sw.getMaxSpokenWords()
@@ -1056,7 +1008,7 @@ def setVocabularySizeAndSpokenWords(request, date_=None):
     for p in all_words:
         saveOrAbortNew(model=SpokenWords,
                        created_for=date_of,
-                       person=Person.objects.get(id_parladata=int(p['person_id'])),
+                       person=Person.objects.get(id_parladata=int(p['counter_id'])),
                        score=int(p['wordcount']),
                        maxMP=maxMP,
                        average=avgSpokenWords,
@@ -1187,6 +1139,8 @@ def getVocabularySize(request, person_id, date_=None):
 
     out = {
         'person': getPersonData(person_id, date_),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -1209,6 +1163,19 @@ def getVocabolarySizeLanding(request, date_=None):
         date_ = date_of.strftime(API_DATE_FORMAT)
     mps = requests.get(API_URL+'/getMPs/'+date_).json()
     datas = [getPersonCardModelNew(VocabularySize, mp["id"], date_) for mp in mps]
+    print datas
+    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
+
+
+def getVocabolarySizeUniqueWordsLanding(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        person_id=None
+        date_of = VocabularySizeUniqueWords.objects.all().order_by("-created_for")[0].created_for
+        date_ = date_of.strftime(API_DATE_FORMAT)
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    datas = [getPersonCardModelNew(VocabularySizeUniqueWords, mp["id"], date_) for mp in mps]
     print datas
     return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
 
@@ -1297,6 +1264,8 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
     out = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -1348,7 +1317,14 @@ def getCompass(request, date_=None): # TODO make propper setters and getters
     else:
         date_of = datetime.now().date()
         date_=""
-    data = Compass.objects.all().order_by('created_for')[0].data
+    try:
+        compas = Compass.objects.filter(created_for__lte=date_of).order_by('-created_for')[0]
+    except:
+        raise Http404("Nismo našli kartice")
+    data = compas.data
+    for person in data:
+        person.update({"person": getPersonData(person["person_id"], compas.created_for.strftime(API_DATE_FORMAT))})
+        person.pop('person_id', None)
 
     return JsonResponse(data, safe=False)
 
@@ -1369,6 +1345,8 @@ def getTaggedBallots_(request, person_id, date=None):
 
     out = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'ballots': card.data
     }
 
@@ -1398,6 +1376,8 @@ def getMembershipsOfMember(request, person_id, date=None):
 
     out = {
         'person': getPersonData(person_id, date),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'memberships': card.data
     }
 
@@ -1431,3 +1411,32 @@ def getTaggedBallots(request, person_id, date_=None):
         'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
+
+def getListOfMembers(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=date_of.strftime(API_DATE_FORMAT)
+
+    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    data = []
+    for mp in mps: 
+        person_obj = {}
+        person_obj["results"] = {}
+        person_id = mp["id"]
+        person_obj["person"] = getPersonData(person_id, date_)
+        person_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["sessions"]["score"]
+        person_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["votes"]["score"]
+        person_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, person_id, date_).content)["results"]["score"]
+        person_obj["results"]["spoken_words"] = json.loads(getNumberOfSpokenWords(None, person_id, date_).content)["results"]["score"]
+        person_obj["results"]["speeches_per_session"] = json.loads(getAverageNumberOfSpeechesPerSession(None, person_id, date_).content)["results"]["score"]
+        styleScores = json.loads(getStyleScores(None, person_id, date_).content)
+        person_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"]
+        person_obj["results"]["preprosto"] = styleScores["results"]["preprosto"]
+        person_obj["results"]["problematicno"] = styleScores["results"]["problematicno"]
+
+        data.append(person_obj)
+    data = sorted(data, key=lambda k: k['person']["name"])
+
+    return JsonResponse({"districts": list(District.objects.all().values_list("name", flat=True)), "data": data})
