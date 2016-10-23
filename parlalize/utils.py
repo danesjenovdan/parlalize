@@ -326,6 +326,7 @@ def updateOrganizations():
 def updateSpeeches():
     data = requests.get(API_URL+'/getAllSpeeches').json()
     existingISs = Speech.objects.all().values_list("id_parladata", flat=True)
+    
     for dic in data:
         if int(dic["id"]) not in existingISs:
             print "adding speech"
@@ -703,10 +704,10 @@ def checkMP():
     else:
         print "ni SpeakingStyle sploh"
 
-    if len(CutVotes.objects.all()) > 0:
-        print "CutVotes: za te MP ni kartice: ", list(set(mps) - set(CutVotes.objects.values_list('person__id_parladata', flat=True)))
-    else:
-        print "ni CutVotes sploh"
+    #if len(CutVotes.objects.all()) > 0:
+    #    print "CutVotes: za te MP ni kartice: ", list(set(mps) - set(CutVotes.objects.values_list('person__id_parladata', flat=True)))
+    #else:
+    #    print "ni CutVotes sploh"
 
     if len(LastActivity.objects.all()) > 0:
         print "LastActivity: za te MP ni kartice: ", list(set(mps) - set(LastActivity.objects.values_list('person__id_parladata', flat=True)))
@@ -732,30 +733,30 @@ def checkMP():
         print "MPStaticPL: za te MP ni kartice: ", list(set(mps) - set(MPStaticPL.objects.values_list('person__id_parladata', flat=True)))
     else:
         print "ni MPStaticPL sploh"
-    if len(MPStaticGroup.objects.all()) > 0:
-        print "MPStaticGroup: za te MP ni kartice: ", list(set(mps) - set(MPStaticGroup.objects.values_list('person__id_parladata', flat=True)))
-    else:
-        print "ni MPStaticGroup sploh"
+    #if len(MPStaticGroup.objects.all()) > 0:
+    #    print "MPStaticGroup: za te MP ni kartice: ", list(set(mps) - set(MPStaticGroup.objects.values_list('person__id_parladata', flat=True)))
+    #else:
+    #    print "ni MPStaticGroup sploh"
 
     if len(NumberOfSpeechesPerSession.objects.all()) > 0:
         print "NumberOfSpeechesPerSession: za te MP ni kartice: ", list(set(mps) - set(NumberOfSpeechesPerSession.objects.values_list('person__id_parladata', flat=True)))
     else:
         print "ni NumberOfSpeechesPerSession sploh"
 
-    if len(VocabularySize.objects.all()) > 0:
-        print "VocabularySize: za te MP ni kartice: ", list(set(mps) - set(VocabularySize.objects.values_list('person__id_parladata', flat=True)))
-    else:
-        print "ni VocabularySize sploh"
+    #if len(VocabularySize.objects.all()) > 0:
+    #    print "VocabularySize: za te MP ni kartice: ", list(set(mps) - set(VocabularySize.objects.values_list('person__id_parladata', flat=True)))
+    #else:
+    #    print "ni VocabularySize sploh"
 
     if len(AverageNumberOfSpeechesPerSession.objects.all()) > 0:
         print "AverageNumberOfSpeechesPerSession: za te MP ni kartice: ", list(set(mps) - set(AverageNumberOfSpeechesPerSession.objects.values_list('person__id_parladata', flat=True)))
     else:
         print "ni AverageNumberOfSpeechesPerSession sploh"
 
-    if len(Compass.objects.all()) > 0:
-        print "Compass: za te MP ni kartice: ", list(set(mps) - set(Compass.objects.values_list('person__id_parladata', flat=True)))
-    else:
-        print "ni Compass sploh"
+    #if len(Compass.objects.all()) > 0:
+    #    print "Compass: za te MP ni kartice: ", list(set(mps) - set(Compass.objects.values_list('person__id_parladata', flat=True)))
+    #else:
+    #    print "ni Compass sploh"
 
     if len(TaggedBallots.objects.all()) > 0:
         print "TaggedBallots: za te MP ni kartice: ", list(set(mps) - set(TaggedBallots.objects.values_list('person__id_parladata', flat=True)))
