@@ -131,7 +131,8 @@ def setMotionOfSessionGraph(request, id_se):
                 tabnp.append(vote['mp_id'])
 
         vg = saveOrAbortNew(model=Vote_graph,
-                         session=Session.objects.get(id_parladata=int(id_se)),
+                         session=session,
+                         vote=Vote.objects.get(id_parladata=mot['vote_id']),
                          created_for=session.start_time,
                          motion=mot['text'],
                          votes_for=yes,
@@ -194,11 +195,11 @@ def getMotionOfSession(request, id_se, date=False):
 
 def getMotionGraph(request, id_mo, date=False):
     out = []
-    if Vote_graph.objects.filter(id_parladata=id_mo):
+    if Vote_graph.objects.filter(vote__id_parladata=id_mo):
         if date:
-            model = Vote_graph.objects.filter(id_parladata=id_mo, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
+            model = Vote_graph.objects.filter(vote__id_parladata=id_mo, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
         else:
-            model = Vote_graph.objects.filter(id_parladata=id_mo)
+            model = Vote_graph.objects.filter(vote__id_parladata=id_mo)
 
 
         option_for = []
@@ -447,18 +448,6 @@ def getMaxSpeechesOnSession(request, date=False):
     return JsonResponse(results[:5], safe=False)
 
 
-
-def updateTags(request):
-    tags = requests.get(API_URL+'/getTags').json()
-    existing_tags = Tag.objects.all().values_list("name", flat=True)
-    count = 0
-    for tag in tags:
-        if tag not in existing_tags:
-            Tag(name=tag).save()
-            count += 1
-    return JsonResponse({'alliswell': True, "add_tags": count})
-
-
 def setQuote(request, speech_id, start_pos, end_pos):
     speech = get_object_or_404(Speech, id_parladata=speech_id)
     quote = Quote(speech=speech, first_char=start_pos, last_char=end_pos, quoted_text=speech.content[int(start_pos):int(end_pos)])
@@ -491,9 +480,9 @@ def getLastSessionLanding(request, date_=None):
 
     while not ready:
         presence = presences[presence_intex]
-        motions = json.loads(getMotionOfSession(None, presence.id_parladata).content)
+        motions = json.loads(getMotionOfSession(None, presence.session.id_parladata).content)
         if type(motions)==list:
-            tfidf = requests.get("https://isci.parlameter.si/tfidf/s/"+str(presence.id_parladata))
+            tfidf = requests.get("https://isci.parlameter.si/tfidf/s/"+str(presence.session.id_parladata))
             if tfidf.status_code == 200:
                 ready = True
             else:
@@ -502,9 +491,11 @@ def getLastSessionLanding(request, date_=None):
             presence_intex += 1
 
     result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
+    results = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
                                 "percent":presence.presence[0][p],} for p in presence.presence[0]]
+    result = sorted(results, key=lambda k: k['percent'], reverse=True)
 
-    return JsonResponse({'session': Session.objects.get(id_parladata=int(presence.id_parladata)).getSessionData(), 
+    return JsonResponse({'session': Session.objects.get(id_parladata=int(presence.session.id_parladata)).getSessionData(), 
                          "presence": result, 
                          "motions": motions, 
                          "tfidf": tfidf.json()}, safe=False)

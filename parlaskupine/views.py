@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from utils.speech import WordAnalysis
 from parlalize.utils import *
 import requests
 import json
@@ -12,7 +13,7 @@ from scipy.stats.stats import pearsonr
 from parlaposlanci.models import Person
 from parlaposlanci.views import getMPsList
 import math
-from kvalifikatorji.scripts import countWords
+from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
 
 # Create your views here.
 
@@ -228,6 +229,10 @@ def getSpeechesOfPG(request, pg_id, date_=False):
                     dayData["sessions"].append({"session_name": speech.session.name,"session_id": speech.session.id_parladata, "speakers":[{"speeches":[speech.id_parladata],
                                                 "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))}]})
             out.append(dayData)
+            if len(out)>14:
+                break
+        if len(out)>14:
+            break
 
     result  = {
         'results': out
@@ -655,8 +660,8 @@ def setWorkingBodies(request, org_id, date_=None):
     members = requests.get(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
     if not len(members["president"]) or not len(members["members"]) or not len(members["vice_president"]):
         return JsonResponse({'alliswell': False, "status": {"president_count": len(members["president"]),
-                                                            "vice_president": len(members["members"]),
-                                                            "mambers": len(members["vice_president"])}})
+                                                            "vice_president": len(members["vice_president"]),
+                                                            "members": len(members["members"])}})
     out = {}
     name = members.pop("name")
     all_members = [member for role in members.values() for member in role]
@@ -771,7 +776,8 @@ def getTaggedBallots(request, pg_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
-def setVocabularySizeALL(request, date_):
+#Depricated
+def setVocabularySizeALL_(request, date_):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -826,6 +832,30 @@ def setVocabularySizeALL(request, date_):
     return JsonResponse({'alliswell': True})
 
 
+def setVocabularySizeALL(request, date_=None):
+    sw = WordAnalysis(API_URL, count_of="groups", date_=date_)
+
+    #Vocabolary size
+    all_score = sw.getVocabularySize()
+    max_score, maxPGid = sw.getMaxVocabularySize()
+    avg_score = sw.getAvgVocabularySize()
+    date_of = sw.getDate()
+    maxPG = Organization.objects.get(id_parladata=maxPGid)
+
+    print "[INFO] saving vocabulary size"
+    for p in all_score:
+        saveOrAbortNew(model=VocabularySize,
+                       organization=Organization.objects.get(id_parladata=int(p['counter_id'])),
+                       created_for=date_of,
+                       score=int(p['coef']),
+                       maxOrg=maxPG,
+                       average=avg_score,
+                       maximum=max_score)
+
+
+    return JsonResponse({'alliswell': True})
+
+
 def getVocabularySize(request, pg_id, date_=None):
 
     card = getPGCardModelNew(VocabularySize, pg_id, date_)
@@ -853,3 +883,67 @@ def getPGsIDs(request):
     output = {"list": [i for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
 
     return JsonResponse(output, safe=False)
+
+
+def setStyleScoresPGsALL(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=date_of.strftime(API_DATE_FORMAT)
+
+    membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "/")).json()
+    pgs = membersOfPGsRanges[-1]["members"].keys()
+
+    print 'Starting PGs'
+    scores = {}
+    for pg in pgs:
+        print 'PG id: ' + str(pg)
+
+        # get word counts with solr
+        counter = Counter(getCountListPG(int(pg), date_))
+        total = sum(counter.values())
+
+        scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
+
+        #average = average_scores
+
+        print scores_local, #average
+        scores[pg] = scores_local
+
+
+    print scores
+    average = {"problematicno": sum([score['problematicno'] for score in scores.values()])/len(scores), "privzdignjeno": sum([score['privzdignjeno'] for score in scores.values()])/len(scores), "preprosto": sum([score['preprosto'] for score in scores.values()])/len(scores)}
+    for pg, score in scores.items():
+        saveOrAbortNew(
+            model=StyleScores,
+            created_for=date_of,
+            organization=Organization.objects.get(id_parladata=int(pg)),
+            problematicno=score['problematicno'],
+            privzdignjeno=score['privzdignjeno'],
+            preprosto=score['preprosto'],
+            problematicno_average=average['problematicno'],
+            privzdignjeno_average=average['privzdignjeno'],
+            preprosto_average=average['preprosto']
+        )
+
+    return JsonResponse({'alliswell': True})
+
+
+def getStyleScoresPG(request, pg_id, date_=None):
+    card = getPGCardModelNew(StyleScores, int(pg_id), date_)
+
+    out = {
+        'party': card.organization.getOrganizationData(),
+        'results': {
+            'privzdignjeno': card.privzdignjeno*10000,
+            'problematicno': card.problematicno*10000,
+            'preprosto': card.preprosto*10000,
+            'average': {
+                'privzdignjeno': card.privzdignjeno_average*10000,
+                'problematicno': card.problematicno_average*10000,
+                'preprosto': card.preprosto_average*10000
+            }
+        }
+    }
+    return JsonResponse(out, safe=False)
