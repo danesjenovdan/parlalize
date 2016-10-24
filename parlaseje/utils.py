@@ -161,7 +161,7 @@ def getSesCardModelNew(model, id, date=None):
     return modelObject
 
 def resultOfMotion(votes_for, against, abstain, not_present, date_):
-	allMPs = (int(len(requests.get(API_URL+'/getMPs/'+date_).json())) * 2) / 3
+	allMPs = (int(len(requests.get(API_URL+'/getMPs/'+date_.strftime(API_DATE_FORMAT)).json())) * 2) / 3
 	if votes_for >= allMPs:
 		allMPs = 0
 		return True
