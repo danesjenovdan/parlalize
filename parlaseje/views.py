@@ -488,8 +488,7 @@ def getLastSessionLanding(request, date_=None):
                 presence_intex += 1                
         else:
             presence_intex += 1
-
-    result = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
+ 
     results = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
                                 "percent":presence.presence[0][p],} for p in presence.presence[0]]
     result = sorted(results, key=lambda k: k['percent'], reverse=True)
