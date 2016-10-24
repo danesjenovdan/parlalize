@@ -282,7 +282,6 @@ def getSCardModel(model, id_se, date=None):
         modelObject = modelObject.latest('created_at')
     return modelObject
 
-<<<<<<< HEAD
 def updateOrganizations():
     data = requests.get(API_URL+'/getAllOrganizations').json()
     for pg in data:
