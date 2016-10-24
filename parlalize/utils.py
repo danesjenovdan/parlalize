@@ -282,6 +282,97 @@ def getSCardModel(model, id_se, date=None):
         modelObject = modelObject.latest('created_at')
     return modelObject
 
+<<<<<<< HEAD
+def updateOrganizations():
+    data = requests.get(API_URL+'/getAllOrganizations').json()
+    for pg in data:
+        if Organization.objects.filter(id_parladata=pg):
+            org = Organization.objects.get(id_parladata=pg)
+            org.name = data[pg]['name']
+            org.classification = data[pg]['classification']
+            org.acronym = data[pg]['acronym']
+            print data[pg]['acronym']
+            org.save()
+        else:
+            org = Organization(name=data[pg]['name'],
+                               classification=data[pg]['classification'],
+                               id_parladata=pg,
+                               acronym=data[pg]['acronym'])
+            org.save()
+    return 1
+
+
+def updateSpeeches():
+    data = requests.get(API_URL+'/getAllSpeeches').json()
+    existingISs = Speech.objects.all().values_list("id_parladata", flat=True)
+    
+    for dic in data:
+        if int(dic["id"]) not in existingISs:
+            print "adding speech"
+            speech = Speech(person=Person.objects.get(id_parladata=int(dic['speaker'])),
+                            organization=Organization.objects.get(id_parladata=int(dic['party'])),
+                            content=dic['content'], order=dic['order'],
+                            session=Session.objects.get(id_parladata=int(dic['session'])),
+                            start_time=dic['start_time'],
+                            end_time=dic['end_time'],
+                            id_parladata=dic['id'])
+            speech.save()
+    return 1
+
+#treba pofixsat
+def updateMotionOfSession():
+    ses = Session.objects.all()
+    for s in ses:
+        print s.id_parladata
+        requests.get(BASE_URL+'/s/setMotionOfSession/'+str(s.id_parladata))
+
+#treba pofixsat
+def updateBallots():
+    data = requests.get(API_URL+'/getAllBallots').json()
+    existingISs = Ballot.objects.all().values_list("id_parladata", flat=True)
+    for dic in data:
+        if int(dic["id"]) not in existingISs:#Ballot.objects.filter(id_parladata=dic['id']):
+            print "adding ballot " + str(dic['vote'])
+            vote = Vote.objects.get(id_parladata=dic['vote'])
+            ballots = Ballot(person=Person.objects.get(id_parladata=int(dic['voter'])),
+                             option=dic['option'],
+                             vote=vote,
+                             start_time=vote.session.start_time,
+                             end_time=None,
+                             id_parladata=dic['id'])
+            ballots.save()
+    return 1
+
+
+#def updateVotes():
+#    data = requests.get(API_URL+'/getAllVotes').json()
+#    for dic in data:
+#        print dic['session'], dic['motion']
+#        speeches = saveOrAbort(Vote, session=Session.objects.get(id_parladata=int(dic['session'])), motion=dic['motion'], organization=Organization.objects.get(id_parladata=int(dic['party'])), id_parladata=dic['id'], result=dic['result'], start_time=dic['start_time'])
+#    return 1
+
+
+def update():
+
+    updateOrganizations()
+    print "org"
+
+    updatePeople()
+    print "pep"
+
+    setAllSessions()
+    print "Sessions"
+
+    updateSpeeches()
+    print "speeches"
+
+    updateMotionOfSession()
+    print "votes"
+
+    updateBallots()
+    print "ballots"
+
+
 # get all parliament member ID's
 def getIDs():
     # create persons
@@ -562,10 +653,10 @@ def checkMP():
     else:
         print "ni SpeakingStyle sploh"
 
-    if len(CutVotes.objects.all()) > 0:
-        print "CutVotes: za te MP ni kartice: ", list(set(mps) - set(CutVotes.objects.values_list('person__id_parladata', flat=True)))
-    else:
-        print "ni CutVotes sploh"
+    #if len(CutVotes.objects.all()) > 0:
+    #    print "CutVotes: za te MP ni kartice: ", list(set(mps) - set(CutVotes.objects.values_list('person__id_parladata', flat=True)))
+    #else:
+    #    print "ni CutVotes sploh"
 
     if len(LastActivity.objects.all()) > 0:
         print "LastActivity: za te MP ni kartice: ", list(set(mps) - set(LastActivity.objects.values_list('person__id_parladata', flat=True)))
@@ -591,30 +682,30 @@ def checkMP():
         print "MPStaticPL: za te MP ni kartice: ", list(set(mps) - set(MPStaticPL.objects.values_list('person__id_parladata', flat=True)))
     else:
         print "ni MPStaticPL sploh"
-    if len(MPStaticGroup.objects.all()) > 0:
-        print "MPStaticGroup: za te MP ni kartice: ", list(set(mps) - set(MPStaticGroup.objects.values_list('person__id_parladata', flat=True)))
-    else:
-        print "ni MPStaticGroup sploh"
+    #if len(MPStaticGroup.objects.all()) > 0:
+    #    print "MPStaticGroup: za te MP ni kartice: ", list(set(mps) - set(MPStaticGroup.objects.values_list('person__id_parladata', flat=True)))
+    #else:
+    #    print "ni MPStaticGroup sploh"
 
     if len(NumberOfSpeechesPerSession.objects.all()) > 0:
         print "NumberOfSpeechesPerSession: za te MP ni kartice: ", list(set(mps) - set(NumberOfSpeechesPerSession.objects.values_list('person__id_parladata', flat=True)))
     else:
         print "ni NumberOfSpeechesPerSession sploh"
 
-    if len(VocabularySize.objects.all()) > 0:
-        print "VocabularySize: za te MP ni kartice: ", list(set(mps) - set(VocabularySize.objects.values_list('person__id_parladata', flat=True)))
-    else:
-        print "ni VocabularySize sploh"
+    #if len(VocabularySize.objects.all()) > 0:
+    #    print "VocabularySize: za te MP ni kartice: ", list(set(mps) - set(VocabularySize.objects.values_list('person__id_parladata', flat=True)))
+    #else:
+    #    print "ni VocabularySize sploh"
 
     if len(AverageNumberOfSpeechesPerSession.objects.all()) > 0:
         print "AverageNumberOfSpeechesPerSession: za te MP ni kartice: ", list(set(mps) - set(AverageNumberOfSpeechesPerSession.objects.values_list('person__id_parladata', flat=True)))
     else:
         print "ni AverageNumberOfSpeechesPerSession sploh"
 
-    if len(Compass.objects.all()) > 0:
-        print "Compass: za te MP ni kartice: ", list(set(mps) - set(Compass.objects.values_list('person__id_parladata', flat=True)))
-    else:
-        print "ni Compass sploh"
+    #if len(Compass.objects.all()) > 0:
+    #    print "Compass: za te MP ni kartice: ", list(set(mps) - set(Compass.objects.values_list('person__id_parladata', flat=True)))
+    #else:
+    #    print "ni Compass sploh"
 
     if len(TaggedBallots.objects.all()) > 0:
         print "TaggedBallots: za te MP ni kartice: ", list(set(mps) - set(TaggedBallots.objects.values_list('person__id_parladata', flat=True)))
