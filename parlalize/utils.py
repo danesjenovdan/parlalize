@@ -558,7 +558,7 @@ def checkSessions():
         print "ni votov sploh"
 
     if len(Vote_graph.objects.all()) > 0:
-        print "Vote graph katerih ni v parlalizah: ", list(set(motionIDs) - set(Vote_graph.objects.all().values_list('id_parladata', flat=True)))
+        print "Vote graph katerih ni v parlalizah: ", list(set(motionIDs) - set(Vote_graph.objects.all().values_list('vote__id_parladata', flat=True)))
     else:
         print "ni votov grafov sploh"
 
