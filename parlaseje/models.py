@@ -154,8 +154,7 @@ class Vote(Timestampable, models.Model):
     not_present = models.IntegerField(blank=True, null=True,
                                    help_text='Number of MPs that warent on the session')
 
-    result = models.CharField(blank=True, null=True,
-                              max_length=255,
+    result = models.BooleanField(blank=True, null=True,
                               help_text='The result of the vote')
 
     id_parladata = models.IntegerField(_('parladata id'),
@@ -194,8 +193,7 @@ class Vote_graph(Timestampable, models.Model):
     not_present = models.IntegerField(blank=True, null=True,
                                    help_text='Number of MPs that warent on the session')
 
-    result = models.CharField(blank=True, null=True,
-                              max_length=255,
+    result = models.BooleanField(blank=True, null=True,
                               help_text='The result of the vote')
 
     pgs_yes = JSONField(blank=True, null=True)
