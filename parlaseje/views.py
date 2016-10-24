@@ -140,7 +140,6 @@ def setMotionOfSessionGraph(request, id_se):
                          abstain=kvorum,
                          not_present=not_present,
                          result=resultOfMotion(yes, no, kvorum,not_present, session.start_time),
-                         id_parladata=mot['id'],
                          pgs_yes=yesdic,
                          pgs_no=nodic,
                          pgs_np=npdic,
