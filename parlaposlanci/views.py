@@ -148,8 +148,8 @@ def getPercentOFAttendedSession(request, person_id, date=None):
 
     out  = {
         'person': getPersonData(person_id, date),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': equalVoters.created_at.strftime(API_DATE_FORMAT),
+        'created_for': equalVoters.created_for.strftime(API_DATE_FORMAT),
         'results': {
             "sessions":{
                 "score": equalVoters.person_value_sessions,
