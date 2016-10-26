@@ -169,6 +169,10 @@ def saveOrAbortNew(model, **kwargs):
 
 def findDatesFromLastCard(model, id, lastParsedDate, minDate=None):
     toDate = datetime.strptime(lastParsedDate, '%d.%m.%Y').date()
+    if minDate:
+        od = datetime.strptime(minDate, '%d.%m.%Y').date()
+        if od > toDate:
+            return []
     print model._meta.app_label
     try:
         if model._meta.app_label == "parlaposlanci":
