@@ -17,6 +17,7 @@ from .models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT
 from parlaseje.models import Session, Tag
 from utils.speech import WordAnalysis
+from raven.contrib.django.raven_compat.models import client
 
 from kompas2 import notes
 
@@ -573,28 +574,28 @@ def setCutVotes(request, person_id, date_=None):
     coal_avg["absent"] = (float(sum(map(voteAbsent, pg_score_C)))/float(len(pg_score_C)))*100
     oppo_avg["absent"] = (float(sum(map(voteAbsent, pg_score_O)))/float(len(pg_score_O)))*100
 
-    memList = getMPsList(request, date_)
-    members = {str(mp['id']):mp for mp in json.loads(memList.content)}
-
     out = dict()
     out["for"] = dict()
     out["against"] = dict()
     out["abstain"] = dict()
     out["absent"] = dict()
     #Calculations for this member
-    out["for"]["this"]=float(sum(map(voteFor, votes[person_id].values())))/float(len(votes[person_id].values()))*100
-    out["against"]["this"]=float(sum(map(voteAgainst, votes[person_id].values())))/float(len(votes[person_id].values()))*100
-    out["abstain"]["this"]=float(sum(map(voteAbstain, votes[person_id].values())))/float(len(votes[person_id].values()))*100
-    out["absent"]["this"]=float(sum(map(voteAbsent, votes[person_id].values())))/float(len(votes[person_id].values()))*100
-    memReq = getMPStaticPL(request, person_id)
-    memberData = json.loads(memReq.content)
-    out["thisName"]=memberData['person']['name']
+    try:
+        out["for"]["this"]=float(sum(map(voteFor, votes[person_id].values())))/float(len(votes[person_id].values()))*100
+        out["against"]["this"]=float(sum(map(voteAgainst, votes[person_id].values())))/float(len(votes[person_id].values()))*100
+        out["abstain"]["this"]=float(sum(map(voteAbstain, votes[person_id].values())))/float(len(votes[person_id].values()))*100
+        out["absent"]["this"]=float(sum(map(voteAbsent, votes[person_id].values())))/float(len(votes[person_id].values()))*100
+    except:
+        client.captureException()
 
     #Calculations for coalition
-    idsForCoal, coalFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-    idsCoalAgainst, coalAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-    idsCoalAbstain, coalAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-    idsCoalAbsent, coalAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    try:
+        idsForCoal, coalFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsCoalAgainst, coalAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsCoalAbstain, coalAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsCoalAbsent, coalAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    except:
+        client.captureException()
 
     coalMaxPercentFor = max(coalFor)
     coalMaxPercentAgainst = max(coalAgainst)
@@ -620,10 +621,14 @@ def setCutVotes(request, person_id, date_=None):
     #Calculations for opozition
     #delete coalition groups from members in PGs
     map(membersInPGs.__delitem__, [str(coalitionIds) for coalitionIds in coalition['coalition']])
-    idsForOpp, oppFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-    idsOppAgainst, oppAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-    idsOppAbstain, oppAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-    idsOppAbsent, oppAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    try:
+        idsForOpp, oppFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsOppAgainst, oppAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsOppAbstain, oppAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsOppAbsent, oppAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+    except:
+        client.captureException()
+
     oppMaxPercentFor = max(oppFor)
     oppMaxPercentAgainst = max(oppAgainst)
     oppMaxPercentAbstain = max(oppAbstain)
@@ -631,21 +636,14 @@ def setCutVotes(request, person_id, date_=None):
 
     out["for"]["maxOpp"]=oppMaxPercentFor
 
-    memReq = getMPStaticPL(request, idsForOpp[oppFor.index(oppMaxPercentFor)])
-    memberData = json.loads(memReq.content)
     idsMaxForOppo = numpy.array(idsForOpp)[numpy.where(numpy.array(oppFor) == oppMaxPercentFor)[0]]
     out["for"]["maxOppID"] = list(idsMaxForOppo)
 
     out["against"]["maxOpp"]=oppMaxPercentAgainst
-    memReq = getMPStaticPL(request, idsOppAgainst[oppAgainst.index(oppMaxPercentAgainst)])
-    memberData = json.loads(memReq.content)
     idsMaxAgainstOppo = numpy.array(idsOppAgainst)[numpy.where(numpy.array(oppAgainst) == oppMaxPercentAgainst)[0]]
     out["against"]["maxOppID"] = list(idsMaxAgainstOppo)
 
     out["abstain"]["maxOpp"]=oppMaxPercentAbstain
-
-    memReq = getMPStaticPL(request, idsOppAbstain[oppAbstain.index(oppMaxPercentAbstain)])
-    memberData = json.loads(memReq.content)
     idsMaxAbstainOppo = numpy.array(idsOppAbstain)[numpy.where(numpy.array(oppAbstain) == oppMaxPercentAbstain)[0]]
     out["abstain"]["maxOppID"] = list(idsMaxAbstainOppo)
 
