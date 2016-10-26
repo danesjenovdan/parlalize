@@ -240,6 +240,9 @@ def doMembersRunner(data):
         if end_time > toDate:
             end_time = toDate
     else:
+        if membership["start_time"]:
+            if membership["start_time"].split("T")[0], "%Y-%m-%d").date() > toDate:
+                return
         end_time = toDate
 
     for model, setter in setters_models.items():
