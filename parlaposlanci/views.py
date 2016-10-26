@@ -586,7 +586,8 @@ def setCutVotes(request, person_id, date_=None):
         out["abstain"]["this"]=float(sum(map(voteAbstain, votes[person_id].values())))/float(len(votes[person_id].values()))*100
         out["absent"]["this"]=float(sum(map(voteAbsent, votes[person_id].values())))/float(len(votes[person_id].values()))*100
     except:
-        client.captureException()
+        client.captureException("Ujel smo ga")
+        return JsonResponse({'alliswell': result})
 
     #Calculations for coalition
     try:
