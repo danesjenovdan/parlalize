@@ -111,14 +111,22 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     else:
         date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
     data = requests.get(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
-    thisMP = data["sessions"][person_id]
+    try:
+        thisMP = data["sessions"][person_id]
+    except:
+        client.captureException("Ta poslanc se ni glasoval")
+        return JsonResponse({'alliswell': False})
     maximum = max(data["sessions"].values())
     maximumMP = [pId for pId in data["sessions"] if data["sessions"][pId]==maximum]
     average = sum(data["sessions"].values()) / len(data["sessions"])
 
-    thisMPVotes = data["votes"][person_id]
-    maximumVotes = max(data["votes"].values())
-    maximumMPVotes = [pId for pId in data["votes"] if data["votes"][pId]==maximumVotes]
+    try:
+        thisMPVotes = data["votes"][person_id]
+        maximumVotes = max(data["votes"].values())
+        maximumMPVotes = [pId for pId in data["votes"] if data["votes"][pId]==maximumVotes]
+    except:
+        client.captureException("Nekdo je brez glasov :/")
+        return JsonResponse({'alliswell': False})
     averageVotes = sum(data["votes"].values()) / len(data["votes"])
 
     result = saveOrAbortNew(model=Presence,
