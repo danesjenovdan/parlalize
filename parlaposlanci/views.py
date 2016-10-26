@@ -573,9 +573,6 @@ def setCutVotes(request, person_id, date_=None):
     coal_avg["absent"] = (float(sum(map(voteAbsent, pg_score_C)))/float(len(pg_score_C)))*100
     oppo_avg["absent"] = (float(sum(map(voteAbsent, pg_score_O)))/float(len(pg_score_O)))*100
 
-    memList = getMPsList(request, date_)
-    members = {str(mp['id']):mp for mp in json.loads(memList.content)}
-
     out = dict()
     out["for"] = dict()
     out["against"] = dict()
@@ -586,9 +583,6 @@ def setCutVotes(request, person_id, date_=None):
     out["against"]["this"]=float(sum(map(voteAgainst, votes[person_id].values())))/float(len(votes[person_id].values()))*100
     out["abstain"]["this"]=float(sum(map(voteAbstain, votes[person_id].values())))/float(len(votes[person_id].values()))*100
     out["absent"]["this"]=float(sum(map(voteAbsent, votes[person_id].values())))/float(len(votes[person_id].values()))*100
-    memReq = getMPStaticPL(request, person_id)
-    memberData = json.loads(memReq.content)
-    out["thisName"]=memberData['person']['name']
 
     #Calculations for coalition
     idsForCoal, coalFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
@@ -631,21 +625,14 @@ def setCutVotes(request, person_id, date_=None):
 
     out["for"]["maxOpp"]=oppMaxPercentFor
 
-    memReq = getMPStaticPL(request, idsForOpp[oppFor.index(oppMaxPercentFor)])
-    memberData = json.loads(memReq.content)
     idsMaxForOppo = numpy.array(idsForOpp)[numpy.where(numpy.array(oppFor) == oppMaxPercentFor)[0]]
     out["for"]["maxOppID"] = list(idsMaxForOppo)
 
     out["against"]["maxOpp"]=oppMaxPercentAgainst
-    memReq = getMPStaticPL(request, idsOppAgainst[oppAgainst.index(oppMaxPercentAgainst)])
-    memberData = json.loads(memReq.content)
     idsMaxAgainstOppo = numpy.array(idsOppAgainst)[numpy.where(numpy.array(oppAgainst) == oppMaxPercentAgainst)[0]]
     out["against"]["maxOppID"] = list(idsMaxAgainstOppo)
 
     out["abstain"]["maxOpp"]=oppMaxPercentAbstain
-
-    memReq = getMPStaticPL(request, idsOppAbstain[oppAbstain.index(oppMaxPercentAbstain)])
-    memberData = json.loads(memReq.content)
     idsMaxAbstainOppo = numpy.array(idsOppAbstain)[numpy.where(numpy.array(oppAbstain) == oppMaxPercentAbstain)[0]]
     out["abstain"]["maxOppID"] = list(idsMaxAbstainOppo)
 
