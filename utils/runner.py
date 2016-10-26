@@ -327,11 +327,8 @@ def runSettersMPMultiprocess(date_to):
     pool = Pool(processes=16)
     pool.map(doAllMembersRunner, [{"setters": setter, "model": model, "toDate": toDate, "zero": zero} for model, setter in all_in_one_setters_models.items()])
 
-    
 
-    
-
-    return JsonResponse({"status": "all is fine :D"}, safe=False)
+    return "all is fine :D"
 
 
 # Create all cards for data_ date. If date_ is None set for run setters
