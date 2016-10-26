@@ -234,6 +234,9 @@ def doMembersRunner(data):
     membership = data["membership"]
     toDate = data["toDate"]
     setters_models = data["setters_models"]
+    print "todate", toDate
+    print "mems_start_time", membership["start_time"]
+    print "mems_end_time", membership["end_time"]
     if membership["end_time"]:
         end_time = datetime.strptime(
             membership["end_time"].split("T")[0], "%Y-%m-%d").date()
@@ -256,6 +259,9 @@ def doMembersRunner(data):
         else:
             dates = findDatesFromLastCard(
                 model, membership["id"], end_time.strftime(API_DATE_FORMAT))
+            print "start", start_time
+            print "end", end_time
+            print dates
         for date in dates:
             #print date.strftime('%d.%m.%Y')
             #print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
