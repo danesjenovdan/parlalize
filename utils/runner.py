@@ -231,9 +231,10 @@ def runSettersMP(date_to):
 
 # using for multiprocess runner
 def doMembersRunner(data):
-    membership = data["membership"]
-    toDate = data["toDate"]
-    setters_models = data["setters_models"]
+    temp_data = data.copy()
+    membership = temp_data["membership"]
+    toDate = temp_data["toDate"]
+    setters_models = temp_data["setters_models"]
     print "todate", toDate
     print "mems_start_time", membership["start_time"]
     print "mems_end_time", membership["end_time"]
@@ -275,10 +276,11 @@ def doMembersRunner(data):
 
 # using for multiprocess runner
 def doAllMembersRunner(data):
-    setter = data["setters"]
-    model = data["model"]
-    toDate = data["toDate"]
-    zero = data["zero"]
+    temp_data = data.copy()
+    setter = temp_data["setters"]
+    model = temp_data["model"]
+    toDate = temp_data["toDate"]
+    zero = temp_data["zero"]
     #print(toDate - datetime(day=2, month=8, year=2014).date()).days
 
     members = requests.get(API_URL + '/getMPs/' + toDate.strftime(API_DATE_FORMAT)).json()
