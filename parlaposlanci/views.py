@@ -114,7 +114,7 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     try:
         thisMP = data["sessions"][person_id]
     except:
-        client.captureMessage("Ta poslanc se ni glasoval presence id: " + str(person_id))
+        client.captureException()
         return JsonResponse({'alliswell': False})
     maximum = max(data["sessions"].values())
     maximumMP = [pId for pId in data["sessions"] if data["sessions"][pId]==maximum]
@@ -125,7 +125,7 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
         maximumVotes = max(data["votes"].values())
         maximumMPVotes = [pId for pId in data["votes"] if data["votes"][pId]==maximumVotes]
     except:
-        client.captureMessage("Nekdo je brez glasov :/")
+        client.captureException()
         return JsonResponse({'alliswell': False})
     averageVotes = sum(data["votes"].values()) / len(data["votes"])
 
@@ -376,7 +376,7 @@ def getEqualVoters(request, id, date_=None):
     try:
         out = {vote:pearsonr(votes[str(id)].values(), votes[str(vote)].values())[0] for vote in sorted(votes.keys())}
     except:
-        client.captureMessage("Nekdo je brez glasov :/ (equalVoters)")
+        client.captureException()
         return JsonResponse({'alliswell': False})
 
     keys = sorted(out, key=out.get)
@@ -599,8 +599,8 @@ def setCutVotes(request, person_id, date_=None):
         out["abstain"]["this"]=float(sum(map(voteAbstain, votes[person_id].values())))/float(len(votes[person_id].values()))*100
         out["absent"]["this"]=float(sum(map(voteAbsent, votes[person_id].values())))/float(len(votes[person_id].values()))*100
     except:
-        client.captureMessage("Ujel smo ga (cutVotes) id :" + str(person_id))
-        return JsonResponse({'alliswell': result})
+        client.captureException()
+        return JsonResponse({'alliswell': False})
 
     #Calculations for coalition
     try:
@@ -609,8 +609,8 @@ def setCutVotes(request, person_id, date_=None):
         idsCoalAbstain, coalAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
         idsCoalAbsent, coalAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
     except:
-        client.captureMessage("Ujel smo ga (cutVotes)")
-        return JsonResponse({'alliswell': result})
+        client.captureException()
+        return JsonResponse({'alliswell': False})
 
     coalMaxPercentFor = max(coalFor)
     coalMaxPercentAgainst = max(coalAgainst)
@@ -642,8 +642,8 @@ def setCutVotes(request, person_id, date_=None):
         idsOppAbstain, oppAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
         idsOppAbsent, oppAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
     except:
-        client.captureMessage("Ujel smo ga (cutVotes)")
-        return JsonResponse({'alliswell': result})
+        client.captureException()
+        return JsonResponse({'alliswell': False})
 
     oppMaxPercentFor = max(oppFor)
     oppMaxPercentAgainst = max(oppAgainst)
