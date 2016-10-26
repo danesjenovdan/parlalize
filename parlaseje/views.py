@@ -498,6 +498,18 @@ def getLastSessionLanding(request, date_=None):
                          "presence": result, 
                          "motions": motions, 
                          "tfidf": tfidf.json()}, safe=False)
+
+
+def getSessionsByClassification(request):
+    COUNCIL_ID = 9
+    DZ = 95
+    working_bodies = ["odbor", "komisija", "preiskovalna komisija"]
+    out = {"kolegij": [ session.getSessionData() for session in Session.objects.filter(organization__id_parladata=COUNCIL_ID).order_by("-start_time")],
+           "dz": [ session.getSessionData() for session in Session.objects.filter(organization__id_parladata=ZBOR).order_by("-start_time")],
+           "dt": [ org.getOrganizationData() for org in Organization.objects.filter(classification__in=working_bodies)],}
+
+    return JsonResponse(out)
+
                
 def runSetters(request, date_to):
  
