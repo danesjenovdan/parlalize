@@ -114,8 +114,8 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     try:
         thisMP = data["sessions"][person_id]
     except:
-        client.captureException()
-        return JsonResponse({'alliswell': False})
+        #ta member se ni glasoval
+        thisMP = 0
     maximum = max(data["sessions"].values())
     maximumMP = [pId for pId in data["sessions"] if data["sessions"][pId]==maximum]
     average = sum(data["sessions"].values()) / len(data["sessions"])
