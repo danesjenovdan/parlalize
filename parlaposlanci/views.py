@@ -115,9 +115,9 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     if not data["votes"].values():
         return JsonResponse({'alliswell': False})
 
-    try:
+    if person_id in data["sessions"].keys():
         thisMP = data["sessions"][person_id]
-    except:
+    else:
         #ta member se ni glasoval
         thisMP = 0
 
@@ -125,13 +125,14 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     maximumMP = [pId for pId in data["sessions"] if data["sessions"][pId]==maximum]
     average = sum(data["sessions"].values()) / len(data["sessions"])
 
-    try:
+    if person_id in data["votes"].keys():
         thisMPVotes = data["votes"][person_id]
-        maximumVotes = max(data["votes"].values())
-        maximumMPVotes = [pId for pId in data["votes"] if data["votes"][pId]==maximumVotes]
-    except:
-        client.captureException()
-        return JsonResponse({'alliswell': False})
+    else:
+        thisMPVotes = 0
+
+    maximumVotes = max(data["votes"].values())
+    maximumMPVotes = [pId for pId in data["votes"] if data["votes"][pId]==maximumVotes]
+
     averageVotes = sum(data["votes"].values()) / len(data["votes"])
 
     result = saveOrAbortNew(model=Presence,
