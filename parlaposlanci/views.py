@@ -594,20 +594,20 @@ def setCutVotes(request, person_id, date_=None):
     out["absent"] = dict()
     #Calculations for this member
     try:
-        out["for"]["this"]=float(sum(map(voteFor, votes[person_id].values())))/float(len(votes[person_id].values()))*100
-        out["against"]["this"]=float(sum(map(voteAgainst, votes[person_id].values())))/float(len(votes[person_id].values()))*100
-        out["abstain"]["this"]=float(sum(map(voteAbstain, votes[person_id].values())))/float(len(votes[person_id].values()))*100
-        out["absent"]["this"]=float(sum(map(voteAbsent, votes[person_id].values())))/float(len(votes[person_id].values()))*100
+        out["for"]["this"]=float(sum(map(voteFor, votes[person_id].values())))/float(len(votes[person_id].values())) * 100 if len(votes[person_id].values()) != 0 else 0
+        out["against"]["this"]=float(sum(map(voteAgainst, votes[person_id].values())))/float(len(votes[person_id].values())) * 100 if len(votes[person_id].values()) != 0 else 0
+        out["abstain"]["this"]=float(sum(map(voteAbstain, votes[person_id].values())))/float(len(votes[person_id].values())) * 100 if len(votes[person_id].values()) != 0 else 0
+        out["absent"]["this"]=float(sum(map(voteAbsent, votes[person_id].values())))/float(len(votes[person_id].values())) * 100 if len(votes[person_id].values()) != 0 else 0
     except:
         client.captureException()
         return JsonResponse({'alliswell': False})
 
     #Calculations for coalition
     try:
-        idsForCoal, coalFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-        idsCoalAgainst, coalAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-        idsCoalAbstain, coalAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-        idsCoalAbsent, coalAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsForCoal, coalFor = zip(*[(member, float(sum(map(voteFor,votes[str(member)].values()))) / (float(len(votes[str(member)].values())) * 100) if len(votes[str(member)].values()) != 0 else 0 ) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsCoalAgainst, coalAgainst = zip(*[(member, float(sum(map(voteAgainst,votes[str(member)].values()))) / (float(len(votes[str(member)].values())) * 100) if len(votes[str(member)].values()) != 0 else 0 ) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsCoalAbstain, coalAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values()))) / (float(len(votes[str(member)].values())) * 100) if len(votes[str(member)].values()) != 0 else 0 ) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsCoalAbsent, coalAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values()))) / (float(len(votes[str(member)].values())) * 100) if len(votes[str(member)].values()) != 0 else 0 ) for i in coalition['coalition'] for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
     except:
         client.captureException()
         return JsonResponse({'alliswell': False})
@@ -637,10 +637,10 @@ def setCutVotes(request, person_id, date_=None):
     #delete coalition groups from members in PGs
     map(membersInPGs.__delitem__, [str(coalitionIds) for coalitionIds in coalition['coalition']])
     try:
-        idsForOpp, oppFor = zip(*[(member,float(sum(map(voteFor,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-        idsOppAgainst, oppAgainst = zip(*[(member,float(sum(map(voteAgainst,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-        idsOppAbstain, oppAbstain = zip(*[(member,float(sum(map(voteAbstain,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
-        idsOppAbsent, oppAbsent = zip(*[(member,float(sum(map(voteAbsent,votes[str(member)].values())))/float(len(votes[str(member)].values()))*100) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsForOpp, oppFor = zip(*[(member, float(sum(map(voteFor, votes[str(member)].values()))) / float(len(votes[str(member)].values())) * 100 if len(votes[str(member)].values()) != 0 else 0 ) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsOppAgainst, oppAgainst = zip(*[(member, float(sum(map(voteAgainst, votes[str(member)].values()))) / float(len(votes[str(member)].values())) * 100 if len(votes[str(member)].values()) != 0 else 0 ) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsOppAbstain, oppAbstain = zip(*[(member, float(sum(map(voteAbstain, votes[str(member)].values()))) / float(len(votes[str(member)].values())) * 100 if len(votes[str(member)].values()) != 0 else 0 ) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
+        idsOppAbsent, oppAbsent = zip(*[(member, float(sum(map(voteAbsent, votes[str(member)].values()))) / float(len(votes[str(member)].values())) * 100 if len(votes[str(member)].values()) != 0 else 0 ) for i in membersInPGs.keys() for member in membersInPGs[str(i)] if len(votes[str(member)].values()) > 0])
     except:
         client.captureException()
         return JsonResponse({'alliswell': False})
