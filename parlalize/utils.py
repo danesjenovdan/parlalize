@@ -169,10 +169,7 @@ def saveOrAbortNew(model, **kwargs):
 
 def findDatesFromLastCard(model, id, lastParsedDate, minDate=None):
     toDate = datetime.strptime(lastParsedDate, '%d.%m.%Y').date()
-    if minDate:
-        od = datetime.strptime(minDate, '%d.%m.%Y').date()
-        if od > toDate:
-            return []
+
     print model._meta.app_label
     try:
         if model._meta.app_label == "parlaposlanci":
@@ -184,11 +181,12 @@ def findDatesFromLastCard(model, id, lastParsedDate, minDate=None):
     except:
         lastCardDate = datetime.strptime("02.08.2014", '%d.%m.%Y').date()
     #lastCardDate = lastCardDate.replace(tzinfo=None)
-    if not lastCardDate:
-        if minDate:
-            lastCardDate = datetime.strptime(minDate, '%d.%m.%Y').date()
-        else:
-            lastCardDate = datetime.strptime("02.08.2014", '%d.%m.%Y').date()
+    if minDate:
+        od = datetime.strptime(minDate, '%d.%m.%Y').date()
+        lastCardDate = datetime.strptime(minDate, '%d.%m.%Y').date()
+        if od > lastCardDate:
+            lastCardDate = od
+
     return [(lastCardDate+timedelta(days=days)) for days in range((toDate-lastCardDate).days)]
 
 
