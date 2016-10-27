@@ -239,13 +239,12 @@ def doMembersRunner(data):
     print "mems_start_time", membership["start_time"]
     print "mems_end_time", membership["end_time"]
     if membership["end_time"]:
-        end_time = datetime.strptime(
-            membership["end_time"].split("T")[0], "%Y-%m-%d").date()
+        end_time = datetime.strptime(membership["end_time"].split("T")[0], "%Y-%m-%d").date()
         if end_time > toDate:
             end_time = toDate
     else:
         if membership["start_time"]:
-            if membership["start_time"].split("T")[0], "%Y-%m-%d").date() > toDate:
+            if datetime.strptime(membership["start_time"].split("T")[0], "%Y-%m-%d").date() > toDate:
                 return
         end_time = toDate
 
@@ -332,11 +331,11 @@ def runSettersMPMultiprocess(date_to):
 
 
 
-    pool = Pool(processes=16)
+    pool = Pool(processes=1)
     pool.map(doMembersRunner, [{"membership": membership, "toDate": toDate, "setters_models": setters_models} for membership in memberships])
 
-    pool = Pool(processes=16)
-    pool.map(doAllMembersRunner, [{"setters": setter, "model": model, "toDate": toDate, "zero": zero} for model, setter in all_in_one_setters_models.items()])
+    #pool = Pool(processes=16)
+    #pool.map(doAllMembersRunner, [{"setters": setter, "model": model, "toDate": toDate, "zero": zero} for model, setter in all_in_one_setters_models.items()])
 
 
     return "all is fine :D"
