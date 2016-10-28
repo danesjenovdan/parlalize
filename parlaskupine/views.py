@@ -107,7 +107,7 @@ def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
         if not membersOfPG[pg]:
             continue
         for member in membersOfPG[pg]:
-            if str(member) in data["sessions"].keys()
+            if str(member) in data["sessions"].keys():
                 sessions[pg].append(data["sessions"][str(member)])
                 votes[pg].append(data["votes"][str(member)])
         sessions[pg] = sum(sessions[pg])/len(sessions[pg])
