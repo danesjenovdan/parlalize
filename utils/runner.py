@@ -423,7 +423,10 @@ def runSettersPG(request, date_to):
                     break
                 print date.strftime(API_DATE_FORMAT)
                 # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
-                setter(request, str(ID), date.strftime(API_DATE_FORMAT))
+                try:
+                    setter(request, str(ID), date.strftime(API_DATE_FORMAT))
+                except:
+                    client.captureException()
         curentId += 1
         # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
 
