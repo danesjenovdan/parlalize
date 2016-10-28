@@ -389,7 +389,7 @@ def onDateMPCardRunner(date_=None):
 
 ## parlaseje runners methods ##
 
-def runSettersPG(request, date_to):
+def runSettersPG(date_to):
     toDate = (datetime.strptime(date_to, '%d.%m.%Y') - timedelta(days=1)).date()
     setters_models = {
         CutVotesPG: setCutVotesPG,#BASE_URL+'/p/setCutVotes/',
@@ -406,19 +406,32 @@ def runSettersPG(request, date_to):
     # print IDs
     allIds = len(IDs)
     curentId = 0
-
+    start_time = None
+    end_time = None
     for model, setter in setters_models.items():
         for ID in IDs:
             print setter
+            start_time = None
+            end_time = None
             membersOfPGsRanges = requests.get(
                 API_URL + '/getMembersOfPGRanges/' + str(ID) + ("/" + date_to if date_to else "/")).json()
-            if not membersOfPGsRanges["members"]:
+
+            #find if pg exist
+            for pgRange in membersOfPGsRanges
+                if not pgRange["members"]:
+                    continue
+                else:
+                    if not start_time
+                        start_time = datetime.strptime(
+                            pgRange["start_date"], '%d.%m.%Y').date()
+
+                    end_time = datetime.strptime(
+                        pgRange["end_date"], '%d.%m.%Y').date()
+
+            if not start_time:
                 continue
-            start_time = datetime.strptime(
-                membersOfPGsRanges[0]["start_date"], '%d.%m.%Y').date()
-            end_time = datetime.strptime(
-                membersOfPGsRanges[-1]["end_date"], '%d.%m.%Y').date()
-            dates = findDatesFromLastCard(model, ID, date_to)
+
+            dates = findDatesFromLastCard(model, ID, end_time, start_time)
             print dates
             for date in dates:
                 if date < start_time or date > end_time:
@@ -453,7 +466,7 @@ def runSettersPG(request, date_to):
         for date in dates:
             print setWorkingBodies(request, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
 
-    return JsonResponse({"status": "all is fine :D"}, safe=False)
+    return "all is fine :D PG ji so settani"
 
 
 def onDatePGCardRunner(date_=None):
