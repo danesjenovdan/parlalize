@@ -73,6 +73,8 @@ def getBasicInfOfPG(request, pg_id, date=None):
 
     data = {
            'organization':card.organization.getOrganizationData(),
+           'created_at': card.created_at.strftime(API_DATE_FORMAT),
+           'created_for': card.created_for.strftime(API_DATE_FORMAT),
            'headOfPG':headOfPG,
            'viceOfPG':viceOfPG,
            'numberOfSeats':card.numberOfSeats,
@@ -142,6 +144,8 @@ def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
     # uprasi ce isto kot pri personu razdelimo
     data = {
            'organization': card.organization.getOrganizationData(),
+           'created_at': card.created_at.strftime(API_DATE_FORMAT),
+           'created_for': card.created_for.strftime(API_DATE_FORMAT),
            "sessions":{
                 'organization_value': card.organization_value_sessions,
                 'maxPG': [Organization.objects.get(id_parladata=pg).getOrganizationData() for pg in card.maxPG_sessions],
@@ -388,6 +392,8 @@ def getMostMatchingThem(request, pg_id, date_=None):
         date_=""
     out = {
         'organization': Organization.objects.get(id_parladata=int(pg_id)).getOrganizationData(),
+        'created_at': mostMatching.created_at.strftime(API_DATE_FORMAT),
+        'created_for': mostMatching.created_for.strftime(API_DATE_FORMAT),
         'results': [
             {
                 "ratio": mostMatching.votes1,
@@ -421,6 +427,8 @@ def getLessMatchingThem(request, pg_id, date_=None):
         date_=""
     out = {
         'organization': Organization.objects.get(id_parladata=int(pg_id)).getOrganizationData(),
+        'created_at': mostMatching.created_at.strftime(API_DATE_FORMAT),
+        'created_for': mostMatching.created_for.strftime(API_DATE_FORMAT),
         'results': [
             {
                 "ratio": mostMatching.votes1,
@@ -453,6 +461,8 @@ def getDeviationInOrg(request, pg_id, date_=None):
         date_=""
     out = {
         'organization': Organization.objects.get(id_parladata=int(pg_id)).getOrganizationData(),
+        'created_at': mostMatching.created_at.strftime(API_DATE_FORMAT),
+        'created_for': mostMatching.created_for.strftime(API_DATE_FORMAT),
         'results': [
             {
                 "ratio": mostMatching.votes1,
@@ -593,6 +603,8 @@ def getCutVotes(request, pg_id, date=None):
     this_org = Organization.objects.get(id_parladata=int(pg_id))
     out = {
         'organization': this_org.getOrganizationData(),
+        'created_at': cutVotes.created_at.strftime(API_DATE_FORMAT),
+        'created_for': cutVotes.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'abstain': {
                 'score': cutVotes.this_abstain,
@@ -705,6 +717,8 @@ def getWorkingBodies(request, org_id, date_=None):
         date_of = datetime.now().date()
     sessions = [session.getSessionData() for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
     return JsonResponse({"organization": workingBodies.organization.getOrganizationData(),
+                         'created_at': workingBodies.created_at.strftime(API_DATE_FORMAT),
+                         'created_for': workingBodies.created_for.strftime(API_DATE_FORMAT),
                          "info": {"president": getPersonData(workingBodies.president.id_parladata),
                                   "vice_president": [getPersonData(person) for person in workingBodies.vice_president],
                                   "members": [getPersonData(person) for person in workingBodies.members],},
@@ -862,6 +876,8 @@ def getVocabularySize(request, pg_id, date_=None):
 
     out = {
         'party': card.organization.getOrganizationData(),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -935,6 +951,8 @@ def getStyleScoresPG(request, pg_id, date_=None):
 
     out = {
         'party': card.organization.getOrganizationData(),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'results': {
             'privzdignjeno': card.privzdignjeno*10000,
             'problematicno': card.problematicno*10000,
