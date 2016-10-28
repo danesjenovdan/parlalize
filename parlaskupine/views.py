@@ -189,7 +189,8 @@ def getMPsOfPG(request, pg_id, date_=None):
         date_of = datetime.now().date()
         date_ = ""
 
-    ids = MPOfPg.objects.get(id_parladata=int(pg_id), created_for=date_of).MPs
+    card = getPGCardModelNew(MPOfPg, pg_id, date_)
+    ids = card.MPs
     result = [getPersonData(MP, date_) for MP in ids]
     return JsonResponse(result, safe=False)
 

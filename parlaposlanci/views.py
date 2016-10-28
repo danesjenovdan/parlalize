@@ -1179,6 +1179,8 @@ def getVocabolarySizeLanding(request, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         person_id=None
+        if not VocabularySize.objects.all():
+            raise Http404("Nismo našli kartice")
         date_of = VocabularySize.objects.all().order_by("-created_for")[0].created_for
         date_ = date_of.strftime(API_DATE_FORMAT)
     mps = requests.get(API_URL+'/getMPs/'+date_).json()
