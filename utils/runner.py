@@ -412,6 +412,8 @@ def runSettersPG(request, date_to):
             print setter
             membersOfPGsRanges = requests.get(
                 API_URL + '/getMembersOfPGRanges/' + str(ID) + ("/" + date_to if date_to else "/")).json()
+            if not membersOfPGsRanges["members"]:
+                continue
             start_time = datetime.strptime(
                 membersOfPGsRanges[0]["start_date"], '%d.%m.%Y').date()
             end_time = datetime.strptime(
