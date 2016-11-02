@@ -12,7 +12,7 @@ from parlaposlanci.views import setCutVotes, setStyleScoresALL, setMPStaticPL, s
 from parlaposlanci.models import Person, StyleScores, CutVotes, VocabularySize, MPStaticPL, MembershipsOfMember, LessEqualVoters, EqualVoters, Presence, AverageNumberOfSpeechesPerSession, VocabularySize, Compass
 
 from parlaskupine.views import setCutVotes as setCutVotesPG, setDeviationInOrg, setLessMatchingThem, setMostMatchingThem, setPercentOFAttendedSessionPG, setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL
-from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic
+from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic, VocabularySize as VocabularySizePG
 
 from parlaseje.models import Session, Vote, Ballot, Speech, Tag
 
@@ -409,7 +409,7 @@ def runSettersPG(date_to):
     start_time = None
     end_time = None
     for model, setter in setters_models.items():
-        for ID in IDs.keys():
+        for ID in IDs:
             print setter
             start_time = None
             end_time = None
@@ -417,11 +417,11 @@ def runSettersPG(date_to):
                 API_URL + '/getMembersOfPGRanges/' + str(ID) + ("/" + date_to if date_to else "/")).json()
 
             #find if pg exist
-            for pgRange in membersOfPGsRanges
+            for pgRange in membersOfPGsRanges:
                 if not pgRange["members"]:
                     continue
                 else:
-                    if not start_time
+                    if not start_time:
                         start_time = datetime.strptime(
                             pgRange["start_date"], '%d.%m.%Y').date()
 
@@ -431,7 +431,7 @@ def runSettersPG(date_to):
             if not start_time:
                 continue
 
-            dates = findDatesFromLastCard(model, ID, end_time, start_time)
+            dates = findDatesFromLastCard(model, ID, end_time.strftime(API_DATE_FORMAT), start_time.strftime(API_DATE_FORMAT))
             print dates
             for date in dates:
                 if date < start_time or date > end_time:
@@ -439,7 +439,7 @@ def runSettersPG(date_to):
                 print date.strftime(API_DATE_FORMAT)
                 # print setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)
                 try:
-                    setter(request, str(ID), date.strftime(API_DATE_FORMAT))
+                    setter(None, str(ID), date.strftime(API_DATE_FORMAT))
                 except:
                     client.captureException()
         curentId += 1
@@ -447,7 +447,7 @@ def runSettersPG(date_to):
 
     # Runner for setters ALL
     all_in_one_setters_models = {
-        VocabularySize: setVocabularySizeALL,
+        VocabularySizePG: setVocabularySizeALL,
     }
 
     zero = datetime(day=2, month=8, year=2014).date()
@@ -455,7 +455,7 @@ def runSettersPG(date_to):
         print(toDate - datetime(day=2, month=8, year=2014).date()).days
         for i in range((toDate - datetime(day=2, month=8, year=2014).date()).days):
             print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
-            setter(request, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+            setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
 
     organizations = requests.get(
         API_URL + "/getOrganizatonByClassification").json()
@@ -464,7 +464,7 @@ def runSettersPG(date_to):
         print org
         dates = findDatesFromLastCard(WorkingBodies, org["id"], date_to)
         for date in dates:
-            print setWorkingBodies(request, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
+            print setWorkingBodies(None, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
 
     return "all is fine :D PG ji so settani"
 
