@@ -390,7 +390,7 @@ def getIDs():
 
 # get all PG ID's
 def getPGIDs():
-    data = requests.get(API_URL+'/getMembersOfPGs/').json()
+    data = requests.get(API_URL+'/getAllPGsExt/').json()
 
     return [pg for pg in data]
 
