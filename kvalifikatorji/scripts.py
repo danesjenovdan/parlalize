@@ -58,7 +58,14 @@ def countWords(text, counter):
     return counter
 
 def getCountList(speaker_id, date_):
-    data = requests.get('https://isci.parlameter.si/tfidfALL/p/' + str(speaker_id) + "/" + date_).json()
+    data = None
+    while data is None:
+        try:
+            data = requests.get('https://isci.parlameter.si/tfidfALL/p/' + str(speaker_id) + "/" + date_)
+        except:
+            pass
+
+    data = data.json()
 
     wordlist = data['results']
 

@@ -26,10 +26,20 @@ from kompas2 import notes
 #get List of MPs
 def getMPsList(request, date_=None):
     output = []
+    data = None
     if date_:
-        data = requests.get(API_URL+'/getMPs/'+date_)
+        while data is None:
+            try:
+                data = requests.get(API_URL+'/getMPs/'+date_)
+            except:
+                pass
     else:
-        data = requests.get(API_URL+'/getMPs/')
+        while data is None:
+            try:
+                data = requests.get(API_URL+'/getMPs/')
+            except:
+                pass
+
     data = data.json()
 
     output = [{'id': i['id'], 'image': i['image'], 'name': i['name'], 'membership': i['membership'], 'acronym': i['acronym'], 'district': i['district']} for i in data]
