@@ -510,33 +510,3 @@ def getSessionsByClassification(request):
            "dt": [ org.getOrganizationData() for org in Organization.objects.filter(classification__in=working_bodies)],}
 
     return JsonResponse(out)
-
-               
-def runSetters(request, date_to):
- 
-    setters_models = {
-        #Vote: setMotionOfSession,
-        #PresenceOfPG: setPresenceOfPG,
-        #AbsentMPs: setAbsentMPs,
-        #AverageSpeeches: setSpeechesOnSession,
-        #Vote_graph: setMotionOfSessionGraph
-    }
-    for model, setter in setters_models.items():
-        if model != AverageSpeeches:
-            #IDs = getSesIDs(dates[1],dates[-1])
-            last = idsOfSession(model)
-            print last
-            print model
-            for ID in last:
-                print ID
-                setter(request, str(ID))
-        else:
-            dates = findDatesFromLastCard(model, None, date_to)
-            print model      
-            if dates==[]:
-                continue
-            datesSes = getSesDates(dates[-1])
-            for date in datesSes:
-                print date
-                setter(request, date.strftime(API_DATE_FORMAT))
-    return JsonResponse({"status": "all is fine :D"}, safe=False)
