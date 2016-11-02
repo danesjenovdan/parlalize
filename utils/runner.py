@@ -14,7 +14,9 @@ from parlaposlanci.models import Person, StyleScores, CutVotes, VocabularySize, 
 from parlaskupine.views import setCutVotes as setCutVotesPG, setDeviationInOrg, setLessMatchingThem, setMostMatchingThem, setPercentOFAttendedSessionPG, setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL
 from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic, VocabularySize as VocabularySizePG
 
-from parlaseje.models import Session, Vote, Ballot, Speech, Tag
+from parlaseje.models import Session, Vote, Ballot, Speech, Tag, PresenceOfPG, AbsentMPs, AverageSpeeches, Vote_graph
+from parlaseje.views import setPresenceOfPG, setAbsentMPs, setSpeechesOnSession, setMotionOfSessionGraph
+from parlaseje.utils import idsOfSession, getSesDates
 
 from multiprocessing import Pool
 
@@ -259,9 +261,6 @@ def doMembersRunner(data):
         else:
             dates = findDatesFromLastCard(
                 model, membership["id"], end_time.strftime(API_DATE_FORMAT))
-            print "start", start_time
-            print "end", end_time
-            print dates
         for date in dates:
             #print date.strftime('%d.%m.%Y')
             #print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
@@ -340,6 +339,43 @@ def runSettersMPMultiprocess(date_to):
 
     return "all is fine :D"
 
+def runSettersMPSinglePerson(date_to=None):
+    if not date_to:
+        date_to=datetime.today().strftime(API_DATE_FORMAT)
+
+    toDate = datetime.strptime(date_to, API_DATE_FORMAT).date()
+    zero = datetime(day=2, month=8, year=2014).date()
+    memberships = requests.get(API_URL + '/getAllTimeMemberships').json()
+
+    setters_models = {
+        # model: setter,
+        CutVotes: setCutVotes,
+        MembershipsOfMember: setMembershipsOfMember,
+        LessEqualVoters: setLessEqualVoters,
+        EqualVoters: setMostEqualVoters,
+        Presence: setPercentOFAttendedSession,
+    }
+    for membership in memberships:
+        doMembersRunner({"membership": membership, "toDate": toDate, "setters_models": setters_models})
+
+    return 1
+
+def runSettersMPAllPerson(date_to=None):
+    if not date_to:
+        date_to=datetime.today().strftime(API_DATE_FORMAT)
+
+    toDate = datetime.strptime(date_to, API_DATE_FORMAT).date()
+    zero = datetime(day=2, month=8, year=2014).date()
+    all_in_one_setters_models = {
+        AverageNumberOfSpeechesPerSession: setAverageNumberOfSpeechesPerSessionAll,
+        VocabularySize: setVocabularySizeAndSpokenWords,
+        Compass: setCompass,
+        StyleScores: setStyleScoresALL,
+    }
+    for model, setter in all_in_one_setters_models.items():
+        doAllMembersRunner({"setters": setter, "model": model, "toDate": toDate, "zero": zero})
+
+    return 1
 
 # Create all cards for data_ date. If date_ is None set for run setters
 # for today.
@@ -389,7 +425,10 @@ def onDateMPCardRunner(date_=None):
 
 ## parlaseje runners methods ##
 
-def runSettersPG(date_to):
+def runSettersPG(date_to=None):
+    if not date_to:
+        date_to=datetime.today().strftime(API_DATE_FORMAT)
+
     toDate = (datetime.strptime(date_to, '%d.%m.%Y') - timedelta(days=1)).date()
     setters_models = {
         CutVotesPG: setCutVotesPG,#BASE_URL+'/p/setCutVotes/',
@@ -526,6 +565,43 @@ def onDatePGCardRunner(date_=None):
     return True
 
 
+def runSettersSessions(date_to=None):
+    if not date_to:
+        date_to=datetime.today().strftime(API_DATE_FORMAT)
+ 
+    setters_models = {
+        PresenceOfPG: setPresenceOfPG,
+        AbsentMPs: setAbsentMPs,
+        AverageSpeeches: setSpeechesOnSession,
+        Vote_graph: setMotionOfSessionGraph
+    }
+    for model, setter in setters_models.items():
+        if model != AverageSpeeches:
+            #IDs = getSesIDs(dates[1],dates[-1])
+            last = idsOfSession(model)
+            print last
+            print model
+            for ID in last:
+                print ID
+                try:
+                    setter(None, str(ID))
+                except:
+                    client.captureException()
+        else:
+            dates = findDatesFromLastCard(model, None, date_to)
+            print model      
+            if dates==[]:
+                continue
+            datesSes = getSesDates(dates[-1])
+            for date in datesSes:
+                print date
+                try:
+                    setter(None, date.strftime(API_DATE_FORMAT))
+                except:
+                    client.captureException()
+    return JsonResponse({"status": "all is fine :D"}, safe=False)
+
+
 def update():
     updateOrganizations()
     print "org"
@@ -552,9 +628,7 @@ def update():
     print "mp static"
     updateMPStatic()
 
-    #onDateMPCardRunner()
-
-    #onDatePGCardRunner()
+    return 1
 
 
 def deleteAppModels(appName):
