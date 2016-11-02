@@ -454,6 +454,8 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
     counter = 0
     all_votes = []
     for membersInRange in membersInPGsRanges:
+        if len(pgs)==1 and not membersInRange["members"][str(pgs[0])]:
+            continue
         start_date = datetime.strptime(membersInRange["start_date"], API_DATE_FORMAT).date()
         end_date = datetime.strptime(membersInRange["end_date"], API_DATE_FORMAT).date()
         days = (end_date - start_date).days
