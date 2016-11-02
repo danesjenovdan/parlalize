@@ -406,7 +406,7 @@ def getMinSpeechesOnSession(request, date=False):
             date_ = datetime.strptime(date, API_DATE_FORMAT)
             averageSpeeches = AverageSpeeches.objects.get(created_for=date_).speechesOnSession
         else:
-            averageSpeeches = AverageSpeeches.objects.get().speechesOnSession
+            averageSpeeches = AverageSpeeches.objects.latest("created_for").speechesOnSession
             date_ = datetime.now().date()
             date = date_.strftime(API_DATE_FORMAT)
         sort = sorted(averageSpeeches.items(), key=lambda x:x[1])
