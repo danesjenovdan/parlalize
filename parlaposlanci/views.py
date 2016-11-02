@@ -722,7 +722,6 @@ def setCutVotes(request, person_id, date_=None):
 
 def getCutVotes(request, person_id, date=None):
     cutVotes = getPersonCardModelNew(CutVotes, person_id, date)
-    static = getPersonCardModelNew(MPStaticPL, person_id, date)
 
     out = {
         'person': getPersonData(person_id, date),
