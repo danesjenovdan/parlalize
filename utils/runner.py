@@ -409,7 +409,7 @@ def runSettersPG(date_to):
     start_time = None
     end_time = None
     for model, setter in setters_models.items():
-        for ID in IDs:
+        for ID in IDs.keys():
             print setter
             start_time = None
             end_time = None
