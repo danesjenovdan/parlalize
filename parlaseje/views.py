@@ -18,8 +18,14 @@ from parlalize.utils import tryHard
 # Create your views here.
 
 def getSpeech(request, speech_id):
-    speech = Speech.objects.get(id_parladata=speech_id)
-    out={"speech_id":speech.id_parladata, "content":speech.content}
+    speech = get_object_or_404(Speech, id_parladata=speech_id)
+    out={"speech_id":speech.id_parladata, 
+         "content":speech.content, 
+         "session": speech.session.getSessionData(), 
+         "quoted_text": None, 
+         "end_idx": None, 
+         "start_idx": None}
+
     result = {
         'person': getPersonData(speech.person.id_parladata, speech.session.start_time.strftime(API_DATE_FORMAT)),
         'results': out
@@ -460,12 +466,12 @@ def setQuote(request, speech_id, start_pos, end_pos):
 def getQuote(request, quote_id):
     quote = get_object_or_404(Quote, id=quote_id)
     return JsonResponse({"person": getPersonData(quote.speech.person.id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
-                         "quoted_text": quote.quoted_text, 
-                         "start_idx": quote.first_char, 
-                         "end_idx": quote.last_char, 
-                         "speech_id": quote.speech.id_parladata,
-                         "content": quote.speech.content,
-                         'session': quote.speech.session.getSessionData()})
+                         "results": {"quoted_text": quote.quoted_text, 
+                                     "start_idx": quote.first_char, 
+                                     "end_idx": quote.last_char, 
+                                     "speech_id": quote.speech.id_parladata,
+                                     "content": quote.speech.content,
+                                     'session': quote.speech.session.getSessionData()}})
 
 
 def getLastSessionLanding(request, date_=None):

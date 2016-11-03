@@ -994,6 +994,9 @@ def getTFIDF(request, person_id, date=None):
 def setVocabularySizeAndSpokenWords(request, date_=None):
     sw = WordAnalysis(API_URL, count_of="members", date_=date_)
 
+    if not sw.isNewSpeech:
+        return JsonResponse({'alliswell': False})
+
     #Vocabolary size
     all_score = sw.getVocabularySize()
     max_score, maxMPid = sw.getMaxVocabularySize()

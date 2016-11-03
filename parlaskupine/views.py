@@ -853,6 +853,9 @@ def setVocabularySizeALL_(request, date_):
 def setVocabularySizeALL(request, date_=None):
     sw = WordAnalysis(API_URL, count_of="groups", date_=date_)
 
+    if not sw.isNewSpeech:
+        return JsonResponse({'alliswell': True, 'msg': 'Na ta dan ni bilo govorov'})
+
     #Vocabolary size
     all_score = sw.getVocabularySize()
     max_score, maxPGid = sw.getMaxVocabularySize()
@@ -871,7 +874,7 @@ def setVocabularySizeALL(request, date_=None):
                        maximum=max_score)
 
 
-    return JsonResponse({'alliswell': True})
+    return JsonResponse({'alliswell': True, 'msg': 'shranjeno'})
 
 
 def getVocabularySize(request, pg_id, date_=None):
