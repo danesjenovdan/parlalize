@@ -87,7 +87,8 @@ urlpatterns = patterns('',
     # runenr
     #url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
 
-
+    url(r'^getListOfPGs/(?P<date_>[\w].+)/', getListOfPGs),
+    url(r'^getListOfPGs/', getListOfPGs),
 
     url(r'^getWorkingBodiesLive/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies_live),
 )
