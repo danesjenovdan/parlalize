@@ -969,3 +969,34 @@ def getStyleScoresPG(request, pg_id, date_=None):
         }
     }
     return JsonResponse(out, safe=False)
+
+
+
+def getListOfPGs(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_=date_of.strftime(API_DATE_FORMAT)
+
+    allPGs = tryHard(API_URL+'/getAllPGsExt/').json().keys()
+    pgs = tryHard(API_URL+'/getMembersOfPGsRanges/'+date_).json()[-1]["members"]
+    data = []
+    for pg, members in pgs.items():
+        if pg in allPGs and members:
+            pg_obj = {}
+            pg_obj["results"] = {}
+            pg_id = pg
+            pg_obj["party"] = Organization.objects.get(id_parladata=pg).getOrganizationData()
+            pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
+            pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
+            pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
+            styleScores = json.loads(getStyleScoresPG(None, pg_id, date_).content)
+            pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"]
+            pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"]
+            pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"]
+
+            data.append(pg_obj)
+    data = sorted(data, key=lambda k: k['party']["name"])
+
+    return JsonResponse({"data": data})
