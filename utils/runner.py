@@ -497,7 +497,11 @@ def runSettersPG(date_to=None):
         print(toDate - datetime(day=2, month=8, year=2014).date()).days
         for i in range((toDate - datetime(day=2, month=8, year=2014).date()).days):
             print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
-            setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+            print setter
+            try:
+                setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+            except:
+                client.captureException()
 
     organizations = tryHard(
         API_URL + "/getOrganizatonByClassification").json()
@@ -506,7 +510,10 @@ def runSettersPG(date_to=None):
         print org
         dates = findDatesFromLastCard(WorkingBodies, org["id"], date_to)
         for date in dates:
-            print setWorkingBodies(None, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
+            try:
+                print setWorkingBodies(None, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
+            except:
+                client.captureException()
 
     return "all is fine :D PG ji so settani"
 
