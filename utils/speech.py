@@ -32,13 +32,16 @@ class WordAnalysis(object):
             self.date_of = datetime.now().date()
             self.date_=""
 
-        self.count_of = count_of
+        self.isNewSpeech = tryHard(self.api_url +'/isSpeechOnDay/'+self.date_).json()["isSpeech"]
+        print self.isNewSpeech
+        if self.isNewSpeech:
+            self.count_of = count_of
 
-        #get members for this day
-        self.members = tryHard(self.api_url +'/getMPs/'+self.date_).json()
-        self.allTimeMembers = tryHard(self.api_url +'/getAllTimeMemberships').json()
-        self.prepereSpeeches()
-        self.wordCounter()
+            #get members for this day
+            self.members = tryHard(self.api_url +'/getMPs/'+self.date_).json()
+            self.allTimeMembers = tryHard(self.api_url +'/getAllTimeMemberships').json()
+            self.prepereSpeeches()
+            self.wordCounter()
 
 
     def prepereSpeeches(self):
