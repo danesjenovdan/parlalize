@@ -11,6 +11,8 @@ from django.contrib.contenttypes.models import ContentType
 import requests
 import json
 import numpy as np
+import time
+
 
 
 
@@ -345,35 +347,6 @@ def updateBallots():
     return 1
 
 
-#def updateVotes():
-#    data = requests.get(API_URL+'/getAllVotes').json()
-#    for dic in data:
-#        print dic['session'], dic['motion']
-#        speeches = saveOrAbort(Vote, session=Session.objects.get(id_parladata=int(dic['session'])), motion=dic['motion'], organization=Organization.objects.get(id_parladata=int(dic['party'])), id_parladata=dic['id'], result=dic['result'], start_time=dic['start_time'])
-#    return 1
-
-
-def update():
-
-    updateOrganizations()
-    print "org"
-
-    updatePeople()
-    print "pep"
-
-    setAllSessions()
-    print "Sessions"
-
-    updateSpeeches()
-    print "speeches"
-
-    updateMotionOfSession()
-    print "votes"
-
-    updateBallots()
-    print "ballots"
-
-
 # get all parliament member ID's
 def getIDs():
     # create persons
@@ -523,6 +496,22 @@ def getPersonData(id_parladata, date_=None):
             'gender':data.gender,
             'district': data.district
         }
+
+
+def tryHard(url):
+    data = None
+    counter = 0
+    while data is None:
+        try:
+            if counter > 10:
+                client.captureMessage(url+" je zahinavu več ko 10x.")
+            data = requests.get(url)
+        except:
+            counter += 1
+            time.sleep(30)
+            pass
+    return data
+
 
 
 def getPersonDataAPI(request, id_parladata, date_=None):
