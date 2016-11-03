@@ -1359,7 +1359,10 @@ def getCompass(request, date_=None): # TODO make propper setters and getters
         person.update({"person": getPersonData(person["person_id"], compas.created_for.strftime(API_DATE_FORMAT))})
         person.pop('person_id', None)
 
-    return JsonResponse(data, safe=False)
+    return JsonResponse({"created_for": compas.created_for.strftime(API_DATE_FORMAT), 
+                         "created_at": compas.created_at.strftime(API_DATE_FORMAT), 
+                         "data": data}, 
+                        safe=False)
 
 def setTaggedBallots(request, person_id):
 

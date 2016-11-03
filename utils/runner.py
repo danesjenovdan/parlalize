@@ -11,8 +11,8 @@ from raven.contrib.django.raven_compat.models import client
 from parlaposlanci.views import setCutVotes, setStyleScoresALL, setMPStaticPL, setMembershipsOfMember, setLessEqualVoters, setMostEqualVoters, setPercentOFAttendedSession, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass
 from parlaposlanci.models import Person, StyleScores, CutVotes, VocabularySize, MPStaticPL, MembershipsOfMember, LessEqualVoters, EqualVoters, Presence, AverageNumberOfSpeechesPerSession, VocabularySize, Compass
 
-from parlaskupine.views import setCutVotes as setCutVotesPG, setDeviationInOrg, setLessMatchingThem, setMostMatchingThem, setPercentOFAttendedSessionPG, setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL
-from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic, VocabularySize as VocabularySizePG
+from parlaskupine.views import setCutVotes as setCutVotesPG, setDeviationInOrg, setLessMatchingThem, setMostMatchingThem, setPercentOFAttendedSessionPG, setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, setStyleScoresPGsALL
+from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic, VocabularySize as VocabularySizePG, StyleScores as StyleScoresPG
 
 from parlaseje.models import Session, Vote, Ballot, Speech, Tag, PresenceOfPG, AbsentMPs, AverageSpeeches, Vote_graph
 from parlaseje.views import setPresenceOfPG, setAbsentMPs, setSpeechesOnSession, setMotionOfSessionGraph
@@ -489,6 +489,7 @@ def runSettersPG(date_to=None):
     # Runner for setters ALL
     all_in_one_setters_models = {
         VocabularySizePG: setVocabularySizeALL,
+        StyleScoresPG: setStyleScoresPGsALL,
     }
 
     zero = datetime(day=2, month=8, year=2014).date()
@@ -496,7 +497,11 @@ def runSettersPG(date_to=None):
         print(toDate - datetime(day=2, month=8, year=2014).date()).days
         for i in range((toDate - datetime(day=2, month=8, year=2014).date()).days):
             print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
-            setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+            print setter
+            try:
+                setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
+            except:
+                client.captureException()
 
     organizations = tryHard(
         API_URL + "/getOrganizatonByClassification").json()
@@ -505,7 +510,10 @@ def runSettersPG(date_to=None):
         print org
         dates = findDatesFromLastCard(WorkingBodies, org["id"], date_to)
         for date in dates:
-            print setWorkingBodies(None, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
+            try:
+                print setWorkingBodies(None, str(org["id"]), date.strftime(API_DATE_FORMAT)).content
+            except:
+                client.captureException()
 
     return "all is fine :D PG ji so settani"
 
