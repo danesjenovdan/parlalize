@@ -21,6 +21,8 @@ from raven.contrib.django.raven_compat.models import client
 
 from kompas2 import notes
 
+from parlalize.utils import tryHard
+
 # Create your views here.
 
 #get List of MPs
@@ -30,13 +32,13 @@ def getMPsList(request, date_=None):
     if date_:
         while data is None:
             try:
-                data = requests.get(API_URL+'/getMPs/'+date_)
+                data = tryHard(API_URL+'/getMPs/'+date_)
             except:
                 pass
     else:
         while data is None:
             try:
-                data = requests.get(API_URL+'/getMPs/')
+                data = tryHard(API_URL+'/getMPs/')
             except:
                 pass
 
@@ -51,10 +53,10 @@ def getMPsList(request, date_=None):
 def setMPStaticPL(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        data = requests.get(API_URL+'/getMPStatic/' + person_id + "/" + date_).json()
+        data = tryHard(API_URL+'/getMPStatic/' + person_id + "/" + date_).json()
     else:
         date_of = datetime.now().date()
-        data = requests.get(API_URL+'/getMPStatic/'+ person_id).json()
+        data = tryHard(API_URL+'/getMPStatic/'+ person_id).json()
 
     if not data:
         return JsonResponse({"status":'Nothing iz well', "saved": False})
@@ -120,7 +122,7 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
-    data = requests.get(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
+    data = tryHard(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
 
     if not data["votes"].values():
         return JsonResponse({'alliswell': False})
@@ -197,13 +199,13 @@ def setNumberOfSpokenWordsALL(request, date_=None):
         date_of = datetime.now().date()
         date_=""
     print '[INFO] Getting MPs'
-    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
 
     mp_results = []
 
     for mp in mps:
         print '[INFO] Pasting speeches for MP ' + str(mp['id'])
-        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id']) + "/" + date_).json()
+        speeches = tryHard(API_URL+'/getSpeeches/' + str(mp['id']) + "/" + date_).json()
 
         text = ''.join([speech['content'] for speech in speeches])
 
@@ -213,7 +215,7 @@ def setNumberOfSpokenWordsALL(request, date_=None):
     mps_sorted = sorted(mp_results, key=lambda k: k['wordcount'])
 
     print '[INFO] Getting all speeches'
-    all_speeches = requests.get(API_URL+'/getAllSpeeches/'+date_).json()
+    all_speeches = tryHard(API_URL+'/getAllSpeeches/'+date_).json()
     print '[INFO] Joining all speeches'
     text = ''.join([speech['content'] for speech in all_speeches])
 
@@ -524,7 +526,7 @@ def getLessEqualVoters(request, person_id, date_=None):
 
 #get speech and data of speaker
 def getSpeech(request, id):
-    speech=requests.get(API_URL+'/getSpeech/'+id+'/')
+    speech=tryHard(API_URL+'/getSpeech/'+id+'/')
     speech = speech.json()
     memList = getMPsList(request)
     members = json.loads(memList.content)
@@ -536,9 +538,9 @@ def getSpeech(request, id):
 #/id/percent/prisotniAliVsi
 #/34/66/1
 def getMPsWhichFitsToPG(request, id):
-    r=requests.get(API_URL+'/getVotes/')
+    r=tryHard(API_URL+'/getVotes/')
     votes = r.json()
-    r=requests.get(API_URL+'/getMembersOfPGs/')
+    r=tryHard(API_URL+'/getMembersOfPGs/')
     membersInPGs = r.json()
 
     votesToLogical(votes, len(Vote.objects.all()))
@@ -580,7 +582,7 @@ def setCutVotes(request, person_id, date_=None):
     else:
         date_of = datetime.now().date()
 
-    r=requests.get(API_URL+'/getCoalitionPGs/')
+    r=tryHard(API_URL+'/getCoalitionPGs/')
     coalition = r.json()
 
     coal_pgs = [str(pg) for pg in coalition["coalition"]]
@@ -792,7 +794,7 @@ def setStyleScoresALL(request, date_=None):
         date_of = datetime.now().date()
         date_=date_of.strftime(API_DATE_FORMAT)
 
-    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
     print 'Starting average scores'
     #average_scores = makeAverageStyleScores(date_)
 
@@ -837,7 +839,7 @@ def setStyleScoresALL(request, date_=None):
 
 
 def setStyleScores(request, person_id):
-    speeches = requests.get(API_URL+'/getSpeeches/' + person_id).json()
+    speeches = tryHard(API_URL+'/getSpeeches/' + person_id).json()
     speeches_content = [speech['content'] for speech in speeches]
     speeches_megastring = string.join(speeches_content)
 
@@ -888,7 +890,7 @@ def getStyleScores(request, person_id, date_=None):
     return JsonResponse(out, safe=False)
 
 def getTotalStyleScores(request):
-#    speeches = requests.get(API_URL+'/getAllSpeeches/').json()
+#    speeches = tryHard(API_URL+'/getAllSpeeches/').json()
 #    speeches_content = [speech['content'] for speech in speeches]
 #    speeches_megastring = string.join(speeches_content)
 #
@@ -896,7 +898,7 @@ def getTotalStyleScores(request):
 #    counter = countWords(speeches_megastring, counter)
 #    total = sum(counter.values())
 
-    data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
+    data = tryHard('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
 
     wordlist = data['fields']['content_t']['topTerms']
 
@@ -926,12 +928,12 @@ def getTotalStyleScores(request):
     return JsonResponse(output, safe=False)
 
 def makeAverageStyleScores(date_):
-#    speeches = requests.get(API_URL+'/getAllSpeeches/').json()
+#    speeches = tryHard(API_URL+'/getAllSpeeches/').json()
 #    speeches_content = [speech['content'] for speech in speeches]
 #    speeches_megastring = string.join(speeches_content)
 
-    #data = requests.get('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
-    data = requests.get('https://isci.parlameter.si/dfall/'+date_).json()
+    #data = tryHard('http://parlameter.si:8983/solr/knedl/admin/luke?fl=content_t&numTerms=200000&wt=json').json()
+    data = tryHard('https://isci.parlameter.si/dfall/'+date_).json()
 
     #wordlist = data['fields']['content_t']['topTerms']
 
@@ -954,13 +956,13 @@ def makeAverageStyleScores(date_):
 
 def setTFIDF(request, person_id):
 
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = tryHard(API_URL+'/getMPs/').json()
 
     person = Person.objects.get(id_parladata=int(person_id))
 
     mp_ids = [mp['id'] for mp in mps]
 
-    speeches_grouped = [{'person_id': mp, 'speeches': requests.get(API_URL+'/getSpeeches/' + str(mp)).json()} for mp in mp_ids]
+    speeches_grouped = [{'person_id': mp, 'speeches': tryHard(API_URL+'/getSpeeches/' + str(mp)).json()} for mp in mp_ids]
 
     tfidf = TFIDF(speeches_grouped, person_id)
 
@@ -1055,14 +1057,14 @@ def setVocabularySizeALL(request, date_):
 
 #    thisperson = Person.objects.get(id_parladata=int(person_id))
 
-    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
 
     vocabulary_sizes = []
     result = {}
 
     for mp in mps:
 
-        speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").json()
+        speeches = tryHard(API_URL+'/getSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").json()
 
         text = ''.join([speech['content'] for speech in speeches])
 
@@ -1112,14 +1114,14 @@ def setVocabularySize(request, person_id, date_=None):
 
     thisperson = Person.objects.get(id_parladata=int(person_id))
 
-    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
 
     vocabulary_sizes = []
     result = {}
 
     for mp in mps:
 
-        speeches = requests.get(API_URL+'/getSpeeches/'+date_ + str(mp['id'])).json()
+        speeches = tryHard(API_URL+'/getSpeeches/'+date_ + str(mp['id'])).json()
 
         text = ''.join([speech['content'] for speech in speeches])
 
@@ -1192,7 +1194,7 @@ def getVocabolarySizeLanding(request, date_=None):
             raise Http404("Nismo našli kartice")
         date_of = VocabularySize.objects.all().order_by("-created_for")[0].created_for
         date_ = date_of.strftime(API_DATE_FORMAT)
-    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
     datas = [getPersonCardModelNew(VocabularySize, mp["id"], date_) for mp in mps]
     print datas
     return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
@@ -1205,7 +1207,7 @@ def getVocabolarySizeUniqueWordsLanding(request, date_=None):
         person_id=None
         date_of = VocabularySizeUniqueWords.objects.all().order_by("-created_for")[0].created_for
         date_ = date_of.strftime(API_DATE_FORMAT)
-    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
     datas = [getPersonCardModelNew(VocabularySizeUniqueWords, mp["id"], date_) for mp in mps]
     print datas
     return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
@@ -1215,23 +1217,23 @@ def getVocabolarySizeUniqueWordsLanding(request, date_=None):
 def setAverageNumberOfSpeechesPerSession(request, person_id):
 
     person = Person.objects.get(id_parladata=int(person_id))
-    speeches = requests.get(API_URL+'/getSpeechesOfMP/' + person_id).json()
+    speeches = tryHard(API_URL+'/getSpeechesOfMP/' + person_id).json()
     no_of_speeches = len(speeches)
 
     # fix for "Dajem besedo"
-    #no_of_speeches = no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + person_id))
+    #no_of_speeches = no_of_speeches - int(tryHard(API_URL + '/getNumberOfFormalSpeeches/' + person_id))
 
-    no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + person_id).json()['sessions_with_speech']
+    no_of_sessions = tryHard(API_URL+ '/getNumberOfPersonsSessions/' + person_id).json()['sessions_with_speech']
 
     score = no_of_speeches/no_of_sessions
 
-    mps = requests.get(API_URL+'/getMPs/').json()
+    mps = tryHard(API_URL+'/getMPs/').json()
     mp_scores = []
 
     for mp in mps:
-        mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
+        mp_no_of_speeches = len(tryHard(API_URL+'/getSpeechesOfMP/' + str(mp['id'])).json())
 
-        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
+        mp_no_of_sessions = tryHard(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id'])).json()['sessions_with_speech']
 
         mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
 
@@ -1251,16 +1253,16 @@ def setAverageNumberOfSpeechesPerSessionAll(request, date_=None):
         date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
         date_=""
 
-    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
     mp_scores = []
 
     for mp in mps:
-        mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])  + ("/"+date_) if date_ else "").json())
+        mp_no_of_speeches = len(tryHard(API_URL+'/getSpeechesOfMP/' + str(mp['id'])  + ("/"+date_) if date_ else "").json())
 
         # fix for "Dajem besedo"
-        #mp_no_of_speeches = mp_no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").text)
+        #mp_no_of_speeches = mp_no_of_speeches - int(tryHard(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").text)
 
-        mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id']) + ("/"+date_) if date_ else "").json()['sessions_with_speech']
+        mp_no_of_sessions = tryHard(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id']) + ("/"+date_) if date_ else "").json()['sessions_with_speech']
 
         if mp_no_of_sessions > 0:
             mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
@@ -1313,7 +1315,7 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 # get MPs IDs
 def getMPsIDs(request):
     output = []
-    data = requests.get(API_URL+'/getMPs/')
+    data = tryHard(API_URL+'/getMPs/')
     data = data.json()
 
     output = {"list": [i['id'] for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
@@ -1362,7 +1364,7 @@ def getCompass(request, date_=None): # TODO make propper setters and getters
 def setTaggedBallots(request, person_id):
 
     person = Person.objects.get(id_parladata=int(person_id))
-    data = requests.get(API_URL + '/getTaggedVotes/' + str(person_id)).json()
+    data = tryHard(API_URL + '/getTaggedVotes/' + str(person_id)).json()
 
     tagged_ballots = TaggedBallots(person=person, data=data)
     tagged_ballots.save()
@@ -1387,11 +1389,11 @@ def getTaggedBallots_(request, person_id, date=None):
 def setMembershipsOfMember(request, person_id, date=None):
     if date:
         #call parladata api with date, maybe you will need to fix parladata api call
-        data = requests.get(API_URL+'/getMembershipsOfMember/' + person_id + "/" + date).json()
+        data = tryHard(API_URL+'/getMembershipsOfMember/' + person_id + "/" + date).json()
         #date_of is date for created_for which is atribute of model (you also need to add created_for in model)
         date_of = datetime.strptime(date, API_DATE_FORMAT)
     else:
-        data = requests.get(API_URL+'/getMembershipsOfMember/'+ person_id).json()
+        data = tryHard(API_URL+'/getMembershipsOfMember/'+ person_id).json()
         date_of = datetime.now().date()
 
     person = Person.objects.get(id_parladata=int(person_id))
@@ -1450,7 +1452,7 @@ def getListOfMembers(request, date_=None):
         date_of = datetime.now().date()
         date_=date_of.strftime(API_DATE_FORMAT)
 
-    mps = requests.get(API_URL+'/getMPs/'+date_).json()
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
     data = []
     for mp in mps: 
         person_obj = {}

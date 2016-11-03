@@ -15,16 +15,18 @@ from parlaposlanci.views import getMPsList
 import math
 from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
 
+from parlalize.utils import tryHard
+
 # Create your views here.
 
 
 def setBasicInfOfPG(request, pg_id, date_):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_).json()
+        data = tryHard(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_).json()
     else:
         date_of = datetime.now().date()
-        data = requests.get(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_of).json()
+        data = tryHard(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_of).json()
 
     headOfPG = 0
     viceOfPG = []
@@ -98,8 +100,8 @@ def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
     allSum = {}
     data = {}
 
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
-    data = requests.get(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
+    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
+    data = tryHard(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
 
     sessions = {pg:[] for pg in membersOfPG if membersOfPG[pg]}
     votes = {pg:[] for pg in membersOfPG if membersOfPG[pg]}
@@ -171,7 +173,7 @@ def setMPsOfPG(request, pg_id, date_=None):
         date_of = datetime.now().date()
         date_ = datetime.now().date()
 
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ date_).json()
+    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+ date_).json()
 
     result = saveOrAbortNew(model=MPOfPg,
                         organization=Organization.objects.get(id_parladata=pg_id),
@@ -203,7 +205,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
         date_of = datetime.now().date()
         date_ = ""
 
-    membersOfPGRanges = reversed(requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "")).json())
+    membersOfPGRanges = reversed(tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "")).json())
     out = []
     for pgMembersRange in membersOfPGRanges:
         startTime = datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT)
@@ -383,7 +385,7 @@ def setDeviationInOrg(request, pg_id, date_=None):
 
 def getMPStaticPersonData(id_, date_):
     try:
-        return requests.get(BASE_URL+'/p/getMPStatic/'+str(id_)+"/"+date_).json()["person"]
+        return tryHard(BASE_URL+'/p/getMPStatic/'+str(id_)+"/"+date_).json()["person"]
     except:
         return {"id": id_}
 
@@ -507,7 +509,7 @@ def setCutVotes(request, pg_id, date_=None):
     else:
         date_of = datetime.now().date()
 
-    r = requests.get(API_URL+'/getCoalitionPGs/')
+    r = tryHard(API_URL+'/getCoalitionPGs/')
     coalition = r.json()
 
     pgs_for = {}
@@ -671,7 +673,7 @@ def setWorkingBodies(request, org_id, date_=None):
     else:
         date_of = datetime.now().date()
     print "set "+org_id+" "+date_
-    members = requests.get(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
+    members = tryHard(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
     if not len(members["president"]) or not len(members["members"]) or not len(members["vice_president"]):
         return JsonResponse({'alliswell': False, "status": {"president_count": len(members["president"]),
                                                             "vice_president": len(members["vice_president"]),
@@ -679,9 +681,9 @@ def setWorkingBodies(request, org_id, date_=None):
     out = {}
     name = members.pop("name")
     all_members = [member for role in members.values() for member in role]
-    coalitionPGs = requests.get(API_URL+'/getCoalitionPGs/').json()
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
-    sessions = requests.get(API_URL+'/getSessionsOfOrg/'+org_id+(("/"+date_) if date_ else "")).json()
+    coalitionPGs = tryHard(API_URL+'/getCoalitionPGs/').json()
+    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
+    sessions = tryHard(API_URL+'/getSessionsOfOrg/'+org_id+(("/"+date_) if date_ else "")).json()
     coal_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["coalition"]}
     oppo_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["opposition"]}
 
@@ -735,13 +737,13 @@ def getWorkingBodies_live(request, org_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-    members = requests.get(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
+    members = tryHard(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
     out = {}
     name = members.pop("name")
     all_members = [member for role in members.values() for member in role]
-    coalitionPGs = requests.get(API_URL+'/getCoalitionPGs/').json()
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
-    sessions = requests.get(API_URL+'/getSessionsOfOrg/'+org_id+(("/"+date_) if date_ else "")).json()
+    coalitionPGs = tryHard(API_URL+'/getCoalitionPGs/').json()
+    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
+    sessions = tryHard(API_URL+'/getSessionsOfOrg/'+org_id+(("/"+date_) if date_ else "")).json()
     coal_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["coalition"]}
     oppo_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["opposition"]}
 
@@ -763,7 +765,7 @@ def getTaggedBallots(request, pg_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
         date_of = datetime.now().date()
-    membersOfPGRanges = requests.get(API_URL+'/getMembersOfPGRanges/'+ pg_id + ("/"+date_ if date_ else "/")).json()
+    membersOfPGRanges = tryHard(API_URL+'/getMembersOfPGRanges/'+ pg_id + ("/"+date_ if date_ else "/")).json()
     out = []
     for pgMembersRange in membersOfPGRanges:
         ballots = Ballot.objects.filter(person__id_parladata__in=pgMembersRange["members"], start_time__lte=datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT), start_time__gte=datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT))
@@ -802,8 +804,8 @@ def setVocabularySizeALL_(request, date_):
 
 #    thisperson = Person.objects.get(id_parladata=int(person_id))
 
-    mps = requests.get(API_URL+'/getMPs/'+date_).json()
-    membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "/")).json()
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
+    membersOfPGsRanges = tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "/")).json()
     print "setVocabularySizeALL " + date_
     text = {}
     vocabulary_sizes = []
@@ -812,7 +814,7 @@ def setVocabularySizeALL_(request, date_):
         print "___" + pgMembersRange["start_date"]
         for pg in pgMembersRange["members"].keys():
             for member in pgMembersRange["members"][pg]: 
-                speeches = requests.get(API_URL+'/getSpeechesInRange/' + str(member) + "/" + pgMembersRange["start_date"] + "/" + pgMembersRange["end_date"]).json()
+                speeches = tryHard(API_URL+'/getSpeechesInRange/' + str(member) + "/" + pgMembersRange["start_date"] + "/" + pgMembersRange["end_date"]).json()
                 if pg in text.keys():
                     text[pg] += ''.join([speech['content'] for speech in speeches])
                 else:
@@ -895,7 +897,7 @@ def getVocabularySize(request, pg_id, date_=None):
 # get PGs IDs
 def getPGsIDs(request):
     output = []
-    data = requests.get(API_URL+'/getAllPGs/')
+    data = tryHard(API_URL+'/getAllPGs/')
     data = data.json()
 
     output = {"list": [i for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
@@ -910,7 +912,7 @@ def setStyleScoresPGsALL(request, date_=None):
         date_of = datetime.now().date()
         date_=date_of.strftime(API_DATE_FORMAT)
 
-    membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "/")).json()
+    membersOfPGsRanges = tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "/")).json()
     pgs = membersOfPGsRanges[-1]["members"].keys()
 
     print 'Starting PGs'

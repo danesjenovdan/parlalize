@@ -4,6 +4,8 @@ from parlalize.utils import getLogicVotes
 from parlalize.settings import API_URL, API_DATE_FORMAT
 import numpy as np
 
+from parlalize.utils import tryHard
+
 class RangeVotes(object):
 
     membersInPGs = None
@@ -28,24 +30,24 @@ class RangeVotes(object):
 
     def loadData(self, date_):
         #get data
-        r = requests.get(self.api_url+'/getMembersOfPGsOnDate/'+date_)
+        r = tryHard(self.api_url+'/getMembersOfPGsOnDate/'+date_)
         self.membersInPGs = r.json()
 
-        r = requests.get(self.api_url+'/getMembersOfPGsRanges/'+date_)
+        r = tryHard(self.api_url+'/getMembersOfPGsRanges/'+date_)
         self.membersInPGsRanges = r.json()
 
         #create dict votesPerDay
-        r = requests.get(self.api_url+'/getAllVotes/'+date_)
+        r = tryHard(self.api_url+'/getAllVotes/'+date_)
         self.allVotesData = r.json()
 
         if date_:
             self.votesLogic = getLogicVotes(date_)
-            r = requests.get(self.api_url+'/getVotes/'+date_)
+            r = tryHard(self.api_url+'/getVotes/'+date_)
             self.votesPlain = r.json()
             self.date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
         else:
             self.votesLogic = getLogicVotes()
-            r = requests.get(self.api_url+'/getVotes/'+date_)
+            r = tryHard(self.api_url+'/getVotes/'+date_)
             self.votesPlain = r.json()
             self.date_of = datetime.now().date()
 

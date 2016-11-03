@@ -13,6 +13,19 @@ import json
 import numpy as np
 import time
 
+def tryHard(url):
+    data = None
+    counter = 0
+    while data is None:
+        try:
+            if counter > 10:
+                client.captureMessage(url+" je zahinavu več ko 10x.")
+            data = requests.get(url)
+        except:
+            counter += 1
+            time.sleep(30)
+            pass
+    return data
 
 
 
@@ -28,11 +41,11 @@ def voteToLogical(vote):
 # Return dictionary of votes results by user ids.
 def getLogicVotes(date_=None):
     if date_:
-        r = requests.get(API_URL+'/getVotes/'+date_)
-        v = requests.get(API_URL+'/getAllVotes/'+date_)
+        r = tryHard(API_URL+'/getVotes/'+date_)
+        v = tryHard(API_URL+'/getAllVotes/'+date_)
     else:
-        r = requests.get(API_URL+'/getVotes/')
-        v = requests.get(API_URL+'/getAllVotes/')
+        r = tryHard(API_URL+'/getVotes/')
+        v = tryHard(API_URL+'/getAllVotes/')
     pl_votes = v.json()
     votes = r.json()
 
@@ -49,7 +62,7 @@ def getLogicVotes(date_=None):
 
 
 def getVotes():
-    r = requests.get(API_URL+'/getVotes/')
+    r = tryHard(API_URL+'/getVotes/')
     pl_votes = Vote.objects.all()
     votes = r.json()
     for person_id in votes.keys():
@@ -287,7 +300,7 @@ def getSCardModel(model, id_se, date=None):
     return modelObject
 
 def updateOrganizations():
-    data = requests.get(API_URL+'/getAllOrganizations').json()
+    data = tryHard(API_URL+'/getAllOrganizations').json()
     for pg in data:
         if Organization.objects.filter(id_parladata=pg):
             org = Organization.objects.get(id_parladata=pg)
@@ -306,7 +319,7 @@ def updateOrganizations():
 
 
 def updateSpeeches():
-    data = requests.get(API_URL+'/getAllSpeeches').json()
+    data = tryHard(API_URL+'/getAllSpeeches').json()
     existingISs = Speech.objects.all().values_list("id_parladata", flat=True)
     
     for dic in data:
@@ -327,11 +340,11 @@ def updateMotionOfSession():
     ses = Session.objects.all()
     for s in ses:
         print s.id_parladata
-        requests.get(BASE_URL+'/s/setMotionOfSession/'+str(s.id_parladata))
+        tryHard(BASE_URL+'/s/setMotionOfSession/'+str(s.id_parladata))
 
 #treba pofixsat
 def updateBallots():
-    data = requests.get(API_URL+'/getAllBallots').json()
+    data = tryHard(API_URL+'/getAllBallots').json()
     existingISs = Ballot.objects.all().values_list("id_parladata", flat=True)
     for dic in data:
         if int(dic["id"]) not in existingISs:#Ballot.objects.filter(id_parladata=dic['id']):
@@ -352,8 +365,8 @@ def getIDs():
     # create persons
     result = []
     #getAllPeople
-    data = requests.get(API_URL+'/getAllPeople').json()
-    #data = requests.get(API_URL+'/getMPs').json()
+    data = tryHard(API_URL+'/getAllPeople').json()
+    #data = tryHard(API_URL+'/getMPs').json()
 
     for mp in data:
         result.append(mp['id'])
@@ -363,7 +376,7 @@ def getIDs():
 
 # get all PG ID's
 def getPGIDs():
-    data = requests.get(API_URL+'/getAllPGsExt/').json()
+    data = tryHard(API_URL+'/getAllPGsExt/').json()
 
     return [pg for pg in data]
 
@@ -383,21 +396,21 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
             return []
 
     #get data
-    r = requests.get(API_URL+'/getMembersOfPGsOnDate/'+date_)
+    r = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_)
     membersInPGs = r.json()
 
-    r = requests.get(API_URL+'/getMembersOfPGsRanges/'+date_)
+    r = tryHard(API_URL+'/getMembersOfPGsRanges/'+date_)
     membersInPGsRanges = r.json()
 
     #create dict votesPerDay
-    r = requests.get(API_URL+'/getAllVotes/'+date_)
+    r = tryHard(API_URL+'/getAllVotes/'+date_)
     allVotesData = r.json()
 
     if date_:
         if votes_type=="logic":
             votes = getLogicVotes(date_)
         else:
-            r = requests.get(API_URL+'/getVotes/'+date_)
+            r = tryHard(API_URL+'/getVotes/'+date_)
             votes = r.json()
 
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -405,7 +418,7 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
         if votes_type=="logic":
             votes = getLogicVotes()
         else:
-            r = requests.get(API_URL+'/getVotes/'+date_)
+            r = tryHard(API_URL+'/getVotes/'+date_)
             votes = r.json()
         date_of = datetime.now().date()
 
@@ -474,7 +487,7 @@ def getPersonData(id_parladata, date_=None):
     try:
         data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
     except:
-        guest  = requests.get(API_URL + '/getPersonData/'+str(id_parladata)+'/').json()
+        guest  = tryHard(API_URL + '/getPersonData/'+str(id_parladata)+'/').json()
         return {
                 'type': "visitor" if guest else "unknown",
                 'party': {
@@ -498,21 +511,6 @@ def getPersonData(id_parladata, date_=None):
         }
 
 
-def tryHard(url):
-    data = None
-    counter = 0
-    while data is None:
-        try:
-            if counter > 10:
-                client.captureMessage(url+" je zahinavu več ko 10x.")
-            data = requests.get(url)
-        except:
-            counter += 1
-            time.sleep(30)
-            pass
-    return data
-
-
 
 def getPersonDataAPI(request, id_parladata, date_=None):
     data = getPersonData(id_parladata, date_)
@@ -531,12 +529,12 @@ def modelsData(request):
 
 
 def checkSessions():
-    ses = requests.get(API_URL + '/getSessions/').json()
+    ses = tryHard(API_URL + '/getSessions/').json()
     sessions  = [s['id'] for s in ses]
     ballots = [s.vote.id_parladata for s in Ballot.objects.all()]
     motionIDs = []
     for id_se in sessions:
-        if len(requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()) > 0:
+        if len(tryHard(API_URL + '/motionOfSession/'+str(id_se)+'/').json()) > 0:
             motionIDs.append(id_se)
     print "Vsa glasovanja: ", len(motionIDs)
     
@@ -572,8 +570,8 @@ def checkSessions():
 
 
 def checkPG():
-    org = [int(i) for i in (requests.get(API_URL+'/getAllOrganizations').json()).keys()]
-    pg = [int(i) for i in (requests.get(API_URL+'/getAllPGs').json()).keys()]
+    org = [int(i) for i in (tryHard(API_URL+'/getAllOrganizations').json()).keys()]
+    pg = [int(i) for i in (tryHard(API_URL+'/getAllPGs').json()).keys()]
 
     if len(Organization.objects.all()) > 0:
         print "Organizacij katerih ni v parlalizah: ", list(set(org) - set(Organization.objects.values_list('id_parladata', flat=True)))
@@ -621,7 +619,7 @@ def checkPG():
         print "ni VocabularySize sploh"
 
 def checkMP():
-    mps = [i['id'] for i in requests.get(API_URL+'/getMPs').json()]
+    mps = [i['id'] for i in tryHard(API_URL+'/getMPs').json()]
 
     print mps
 

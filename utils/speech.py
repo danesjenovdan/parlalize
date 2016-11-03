@@ -7,6 +7,7 @@ from collections import Counter
 from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from itertools import groupby
 
+from parlalize.utils import tryHard
 
 class WordAnalysis(object):
     date_ = ""
@@ -34,8 +35,8 @@ class WordAnalysis(object):
         self.count_of = count_of
 
         #get members for this day
-        self.members = requests.get(self.api_url +'/getMPs/'+self.date_).json()
-        self.allTimeMembers = requests.get(self.api_url +'/getAllTimeMemberships').json()
+        self.members = tryHard(self.api_url +'/getMPs/'+self.date_).json()
+        self.allTimeMembers = tryHard(self.api_url +'/getAllTimeMemberships').json()
         self.prepereSpeeches()
         self.wordCounter()
 
@@ -47,23 +48,23 @@ class WordAnalysis(object):
             for mp in self.members:
                 #print "[INFO] prepering data of member: " + str(mp['id'])
                 url = self.api_url +'/getSpeeches/' + str(mp['id']) + (("/"+self.date_) if self.date_ else "")
-                speeches = requests.get(url).json()
+                speeches = tryHard(url).json()
                 self.text[str(mp['id'])] = ''.join([speech['content'] for speech in speeches])
             print "[INFO] counting avg words of members"
-            all_speeches = requests.get(API_URL+'/getAllMPsSpeeches/'+self.date_).json()
+            all_speeches = tryHard(API_URL+'/getAllMPsSpeeches/'+self.date_).json()
             text = ''.join([speech['content'] for speech in all_speeches])
             total_words = numberOfWords(text)
             self.average_words = total_words/len(self.allTimeMembers)
 
         #prepare data for groups
         elif self.count_of == "groups":
-            self.membersOfPGsRanges = requests.get(API_URL+'/getMembersOfPGsRanges' + ("/"+self.date_ if self.date_ else "/")).json()
+            self.membersOfPGsRanges = tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+self.date_ if self.date_ else "/")).json()
             print "[INFO] prepering data for groups: "
             for pgMembersRange in self.membersOfPGsRanges:
                 #print "___" + pgMembersRange["start_date"]
                 for pg in pgMembersRange["members"].keys():
                     for member in pgMembersRange["members"][pg]: 
-                        speeches = requests.get(API_URL+'/getSpeechesInRange/' + str(member) + "/" + pgMembersRange["start_date"] + "/" + pgMembersRange["end_date"]).json()
+                        speeches = tryHard(API_URL+'/getSpeechesInRange/' + str(member) + "/" + pgMembersRange["start_date"] + "/" + pgMembersRange["end_date"]).json()
                         if pg in self.text.keys():
                             self.text[pg] += ''.join([speech['content'] for speech in speeches])
                         else:
@@ -147,18 +148,18 @@ class Utils(object):
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
             date_ = "15.7.2016"
-            mps = requests.get(API_URL+'/getMPs/'+date_).json()
+            mps = tryHard(API_URL+'/getMPs/'+date_).json()
 
             #NumberOfSpeechesPerSession
             mp_scores = {}
 
             for mp in mps:
-                mp_no_of_speeches = len(requests.get(API_URL+'/getSpeechesOfMP/' + str(mp['id'])  + ("/"+date_) if date_ else "").json())
+                mp_no_of_speeches = len(tryHard(API_URL+'/getSpeechesOfMP/' + str(mp['id'])  + ("/"+date_) if date_ else "").json())
 
                 # fix for "Dajem besedo"
-                #mp_no_of_speeches = mp_no_of_speeches - int(requests.get(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").text)
+                #mp_no_of_speeches = mp_no_of_speeches - int(tryHard(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").text)
 
-                mp_no_of_sessions = requests.get(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id']) + ("/"+date_) if date_ else "").json()['sessions_with_speech']
+                mp_no_of_sessions = tryHard(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id']) + ("/"+date_) if date_ else "").json()['sessions_with_speech']
 
                 if mp_no_of_sessions > 0:
                     mp_scores[mp['id']] = mp_no_of_speeches/mp_no_of_sessions
@@ -171,7 +172,7 @@ class Utils(object):
 
             for mp in mps:
 
-                speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").json()
+                speeches = tryHard(API_URL+'/getSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").json()
 
                 text = ''.join([speech['content'] for speech in speeches])
 
@@ -184,7 +185,7 @@ class Utils(object):
 
             for mp in mps:
                 #print '[INFO] Pasting speeches for MP ' + str(mp['id'])
-                speeches = requests.get(API_URL+'/getSpeeches/' + str(mp['id']) + "/" + date_).json()
+                speeches = tryHard(API_URL+'/getSpeeches/' + str(mp['id']) + "/" + date_).json()
 
                 text = ''.join([speech['content'] for speech in speeches])
 

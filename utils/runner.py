@@ -20,11 +20,13 @@ from parlaseje.utils import idsOfSession, getSesDates
 
 from multiprocessing import Pool
 
+from parlalize.utils import tryHard
+
 ## parlalize initial runner methods ##
 
 def updatePeople():
-    data = requests.get(API_URL + '/getAllPeople/').json()
-    mps = requests.get(API_URL + '/getMPs/').json()
+    data = tryHard(API_URL + '/getAllPeople/').json()
+    mps = tryHard(API_URL + '/getMPs/').json()
     mps_ids = [mp['id'] for mp in mps]
     for mp in data:
         if Person.objects.filter(id_parladata=mp['id']):
@@ -45,7 +47,7 @@ def updatePeople():
 
 
 def updateOrganizations():
-    data = requests.get(API_URL + '/getAllOrganizations').json()
+    data = tryHard(API_URL + '/getAllOrganizations').json()
     for pg in data:
         if Organization.objects.filter(id_parladata=pg):
             org = Organization.objects.get(id_parladata=pg)
@@ -64,7 +66,7 @@ def updateOrganizations():
 
 
 def updateSpeeches():
-    data = requests.get(API_URL + '/getAllSpeeches').json()
+    data = tryHard(API_URL + '/getAllSpeeches').json()
     existingISs = list(Speech.objects.all().values_list("id_parladata", flat=True))
     print existingISs
     for dic in data:
@@ -89,13 +91,13 @@ def updateMotionOfSession():
     ses = Session.objects.all()
     for s in ses:
         print s.id_parladata
-        requests.get(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata))
+        tryHard(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata))
 
 # treba pofixsat
 
 
 def updateBallots():
-    data = requests.get(API_URL + '/getAllBallots').json()
+    data = tryHard(API_URL + '/getAllBallots').json()
     existingISs = Ballot.objects.all().values_list("id_parladata", flat=True)
     for dic in data:
         # Ballot.objects.filter(id_parladata=dic['id']):
@@ -113,7 +115,7 @@ def updateBallots():
 
 
 def setAllSessions():
-    data  = requests.get(API_URL + '/getSessions/').json()
+    data  = tryHard(API_URL + '/getSessions/').json()
     session_ids = list(Session.objects.all().values_list("id_parladata", flat=True))
     for sessions in data:
         if sessions['id'] not in session_ids:
@@ -150,7 +152,7 @@ def setAllSessions():
 
 
 def updateMPStatic():
-    memberships = requests.get(API_URL + '/getMembersOfPGsRanges/').json()
+    memberships = tryHard(API_URL + '/getMembersOfPGsRanges/').json()
     lastObject = {"members": {}}
     print "[info] update MP static"
     for change in memberships:
@@ -179,7 +181,7 @@ def runSettersMP(date_to):
         Presence: setPercentOFAttendedSession,
 
     }
-    memberships = requests.get(API_URL + '/getAllTimeMemberships').json()
+    memberships = tryHard(API_URL + '/getAllTimeMemberships').json()
 
     for membership in memberships:
         if membership["end_time"]:
@@ -281,7 +283,7 @@ def doAllMembersRunner(data):
     zero = temp_data["zero"]
     #print(toDate - datetime(day=2, month=8, year=2014).date()).days
 
-    members = requests.get(API_URL + '/getMPs/' + toDate.strftime(API_DATE_FORMAT)).json()
+    members = tryHard(API_URL + '/getMPs/' + toDate.strftime(API_DATE_FORMAT)).json()
     dates = []
     if model == Compass:
         cards = model.objects.all().order_by("created_for")
@@ -326,7 +328,7 @@ def runSettersMPMultiprocess(date_to):
         StyleScores: setStyleScoresALL,
     }
 
-    memberships = requests.get(API_URL + '/getAllTimeMemberships').json()
+    memberships = tryHard(API_URL + '/getAllTimeMemberships').json()
 
 
 
@@ -345,7 +347,7 @@ def runSettersMPSinglePerson(date_to=None):
 
     toDate = datetime.strptime(date_to, API_DATE_FORMAT).date()
     zero = datetime(day=2, month=8, year=2014).date()
-    memberships = requests.get(API_URL + '/getAllTimeMemberships').json()
+    memberships = tryHard(API_URL + '/getAllTimeMemberships').json()
 
     setters_models = {
         # model: setter,
@@ -396,7 +398,7 @@ def onDateMPCardRunner(date_=None):
         setPercentOFAttendedSession,
     ]
 
-    memberships = requests.get(API_URL + '/getMPs/' + date_).json()
+    memberships = tryHard(API_URL + '/getMPs/' + date_).json()
 
     for membership in memberships:
         for setter in setters:
@@ -452,7 +454,7 @@ def runSettersPG(date_to=None):
             print setter
             start_time = None
             end_time = None
-            membersOfPGsRanges = requests.get(
+            membersOfPGsRanges = tryHard(
                 API_URL + '/getMembersOfPGRanges/' + str(ID) + ("/" + date_to if date_to else "/")).json()
 
             #find if pg exist
@@ -482,7 +484,7 @@ def runSettersPG(date_to=None):
                 except:
                     client.captureException()
         curentId += 1
-        # result = requests.get(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
+        # result = tryHard(setter + str(ID) + "/" + date.strftime(API_DATE_FORMAT)).status_code
 
     # Runner for setters ALL
     all_in_one_setters_models = {
@@ -496,7 +498,7 @@ def runSettersPG(date_to=None):
             print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
             setter(None, (zero + timedelta(days=i)).strftime('%d.%m.%Y'))
 
-    organizations = requests.get(
+    organizations = tryHard(
         API_URL + "/getOrganizatonByClassification").json()
     print organizations
     for org in organizations["working_bodies"] + organizations["council"]:
@@ -528,7 +530,7 @@ def onDatePGCardRunner(date_=None):
         setBasicInfOfPG,
     ]
 
-    membersOfPGsRanges = requests.get(
+    membersOfPGsRanges = tryHard(
         API_URL + '/getMembersOfPGsRanges/' + date_).json()
     IDs = [key for key, value in membersOfPGsRanges[-1]["members"].items()
            if value]
@@ -553,7 +555,7 @@ def onDatePGCardRunner(date_=None):
         except:
             print FAIL + "FAIL on: " + str(setter) + ENDC
 
-    organizations = requests.get(
+    organizations = tryHard(
         API_URL + "/getOrganizatonByClassification").json()
     for org in organizations["working_bodies"] + organizations["council"]:
         print "set working_bodie: " + str(org["id"])
@@ -640,7 +642,7 @@ def deleteAppModels(appName):
 
 
 def updateDistricts():
-    districts = requests.get(API_URL + "/getDistricts").json()
+    districts = tryHard(API_URL + "/getDistricts").json()
     existing_districts = District.objects.all().values_list("id_parladata", flat=True)
     for district in districts:
         if district["id"] not in existing_districts:
@@ -649,7 +651,7 @@ def updateDistricts():
 
 
 def updateTags():
-    tags = requests.get(API_URL+'/getTags').json()
+    tags = tryHard(API_URL+'/getTags').json()
     existing_tags = Tag.objects.all().values_list("id_parladata", flat=True)
     count = 0
     for tag in tags:

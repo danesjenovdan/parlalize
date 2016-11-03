@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
+from parlalize.utils import tryHard
 
 def showCompass():
 
@@ -30,7 +31,7 @@ def assignValueToOption(option):
 def getPeoplesNames(ids, date_of):
     names_list = []
     for person_id in ids:
-        data = requests.get(BASE_URL+'/p/getMPStatic/' + str(person_id) + '/' + date_of.strftime(API_DATE_FORMAT)).json()
+        data = tryHard(BASE_URL+'/p/getMPStatic/' + str(person_id) + '/' + date_of.strftime(API_DATE_FORMAT)).json()
         name = data['person']['name']
 
         names_list.append(data['person']['name'].encode('ascii', errors='xmlcharrefreplace'))
@@ -68,8 +69,8 @@ def enrichData(vT1, vT2, people, date_of):
 
 def getData(date_of):
     # getting all the necessary data
-    allballots = requests.get(API_URL+'/getAllBallots/'+date_of.strftime(API_DATE_FORMAT)).json()
-    people = requests.get(API_URL+'/getMPs/'+date_of.strftime(API_DATE_FORMAT)).json()
+    allballots = tryHard(API_URL+'/getAllBallots/'+date_of.strftime(API_DATE_FORMAT)).json()
+    people = tryHard(API_URL+'/getMPs/'+date_of.strftime(API_DATE_FORMAT)).json()
 
     # sort people's ids
     people_ids = sorted([person['id'] for person in people])
