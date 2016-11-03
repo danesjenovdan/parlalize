@@ -11,6 +11,8 @@ from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT
 import requests
 from django.http import JsonResponse
 
+from parlalize.utils import tryHard
+
 
 def getGraphCardModel(model, id, date=None):
     if date:
@@ -128,7 +130,7 @@ def updateVotes():
 
 def getSesIDs(start_date, end_date):
 	result = []
-	data = requests.get(API_URL + '/getSessions/').json()
+	data = tryHard(API_URL + '/getSessions/').json()
 	#session = Session.objects.filter(start_time__gte=start_date, start_time__lte=end_date)
 	session = Session.objects.all()
 	for ids in session:
@@ -137,7 +139,7 @@ def getSesIDs(start_date, end_date):
 
 def getSesDates(end_date):
 	result = []
-	data = requests.get(API_URL + '/getSessions/').json()
+	data = tryHard(API_URL + '/getSessions/').json()
 	session = Session.objects.filter(start_time__lte=end_date)
 	for ids in session:
 		result.append(ids.start_time)
@@ -161,7 +163,7 @@ def getSesCardModelNew(model, id, date=None):
     return modelObject
 
 def resultOfMotion(votes_for, against, abstain, not_present, date_):
-	allMPs = (int(len(requests.get(API_URL+'/getMPs/'+date_.strftime(API_DATE_FORMAT)).json())) * 2) / 3
+	allMPs = (int(len(tryHard(API_URL+'/getMPs/'+date_.strftime(API_DATE_FORMAT)).json())) * 2) / 3
 	if votes_for >= allMPs:
 		allMPs = 0
 		return True
@@ -183,7 +185,7 @@ def getSessionDataAPI(requests, session_id):
 
 def idsOfSession(model):
 	mod = model.objects.all().values_list('session__id_parladata', flat=True)
-	ses = data = requests.get(API_URL + '/getSessions/').json()
+	ses = data = tryHard(API_URL + '/getSessions/').json()
 	ids = [session['id'] for session in ses]
 	if len(mod) == 0:
 		return ids

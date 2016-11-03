@@ -13,6 +13,8 @@ from math import fabs
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 
+from parlalize.utils import tryHard
+
 # Create your views here.
 
 def getSpeech(request, speech_id):
@@ -36,7 +38,7 @@ def getSessionSpeeches(request, session_id):
     return JsonResponse(result, safe=False)
 
 def setMotionOfSession(request, id_se):
-    motion  = requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
+    motion  = tryHard(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
     tab = []
     yes = 0
@@ -46,7 +48,7 @@ def setMotionOfSession(request, id_se):
     option = ""
     tyes = []
     for mot in motion:
-        votes  = requests.get(API_URL + '/getVotesOfMotion/'+str(mot['vote_id'])+'/').json()
+        votes  = tryHard(API_URL + '/getVotesOfMotion/'+str(mot['vote_id'])+'/').json()
         for vote in votes:
             if vote['option'] == str('za'):
                 yes = yes + 1
@@ -92,7 +94,7 @@ def setMotionOfSession(request, id_se):
     return JsonResponse({'alliswell': True})
 
 def setMotionOfSessionGraph(request, id_se):
-    motion  = requests.get(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
+    motion  = tryHard(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
     tab = []
     yes = 0
@@ -110,7 +112,7 @@ def setMotionOfSessionGraph(request, id_se):
     npdic = defaultdict(int)
     tyes = []
     for mot in motion:
-        votes  = requests.get(API_URL + '/getVotesOfMotion/'+str(mot['vote_id'])+'/').json()
+        votes  = tryHard(API_URL + '/getVotesOfMotion/'+str(mot['vote_id'])+'/').json()
         for vote in votes:
             if vote['option'] == str('za'):
                 yes = yes + 1
@@ -273,9 +275,9 @@ def getMotionGraph(request, id_mo, date=False):
         raise Http404("Nismo našli kartice")
 
 def setAbsentMPs(request, id_se):
-    votes = requests.get(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
+    votes = tryHard(API_URL + '/getVotesOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
-    mps = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
+    mps = tryHard(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
 
 
     mpsID = []
@@ -318,10 +320,10 @@ def getAbsentMPs(request, id_se, date=False):
     return JsonResponse(results, safe=False)
 
 def setPresenceOfPG(request, id_se):
-    votes = requests.get(API_URL+'/getVotesOfSession/'+str(id_se)+'/').json()
-    motions = requests.get(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
+    votes = tryHard(API_URL+'/getVotesOfSession/'+str(id_se)+'/').json()
+    motions = tryHard(API_URL+'/motionOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
-    membersOfPG = requests.get(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
+    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
 
     onSession = {}
     yesdic = defaultdict(int)
@@ -380,15 +382,15 @@ def getPresenceOfPG(request, id_se, date=False):
 def setSpeechesOnSession(request, date=False):
     if date:
         numberOfSessions = len(Session.objects.filter(start_time__lte=datetime.strptime(date, '%d.%m.%Y')))
-        mps = requests.get(API_URL+'/getMPs/'+ date).json()
+        mps = tryHard(API_URL+'/getMPs/'+ date).json()
     else:
         numberOfSessions = len(Session.objects.filter(start_time__lte=datetime.now().date()).json())
-        mps = requests.get(API_URL+'/getMPs/'+  str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
+        mps = tryHard(API_URL+'/getMPs/'+  str(datetime.now().date().strftime(API_DATE_FORMAT))).json()
         date = datetime.now().date()
 
     mpsID = {}
     for mp in mps:
-        speech = len(requests.get(API_URL+'/getSpeechesOfMP/'+ str(mp['id'])+'/'+ date).json())
+        speech = len(tryHard(API_URL+'/getSpeechesOfMP/'+ str(mp['id'])+'/'+ date).json())
         if numberOfSessions !=0:
             mpsID.update({mp['id']:float(float(speech)/float(numberOfSessions))})
     date = datetime.strptime(date, '%d.%m.%Y')
@@ -483,7 +485,7 @@ def getLastSessionLanding(request, date_=None):
         presence = presences[presence_intex]
         motions = json.loads(getMotionOfSession(None, presence.session.id_parladata).content)
         if type(motions)==list:
-            tfidf = requests.get("https://isci.parlameter.si/tfidf/s/"+str(presence.session.id_parladata))
+            tfidf = tryHard("https://isci.parlameter.si/tfidf/s/"+str(presence.session.id_parladata))
             if tfidf.status_code == 200:
                 ready = True
             else:

@@ -6,6 +6,8 @@ from sklearn.manifold import MDS as sklearnMDS
 
 from parlaseje.models import Vote
 
+from parlalize.utils import tryHard
+
 def showCompass():
 
     fig, ax = plt.subplots()
@@ -31,7 +33,7 @@ def assignValueToOption(option):
 def getPeoplesNames(ids):
     names_list = []
     for person_id in ids:
-        data = requests.get('https://analize.parlameter.si/v1/p/getMPStatic/' + str(person_id) + '/').json()
+        data = tryHard('https://analize.parlameter.si/v1/p/getMPStatic/' + str(person_id) + '/').json()
         name = data['person']['name']
 
         names_list.append(data['person']['name'].encode('ascii', errors='xmlcharrefreplace'))
@@ -92,7 +94,7 @@ def getAttendanceData(people_ids):
     for person_id in people_ids:
         print person_id
         try:
-            data = requests.get('https://analize.parlameter.si/v1/p/getPresence/' + str(person_id)).json()
+            data = tryHard('https://analize.parlameter.si/v1/p/getPresence/' + str(person_id)).json()
             attendance_list.append(data['results']['value'])
         except requests.exceptions.RequestException as e:
             print e
@@ -106,7 +108,7 @@ def getVocabularySizeData(people_ids):
     for person_id in people_ids:
         print person_id
         try:
-            data = requests.get('https://analize.parlameter.si/v1/p/getVocabularySize/' + str(person_id)).json()
+            data = tryHard('https://analize.parlameter.si/v1/p/getVocabularySize/' + str(person_id)).json()
             vocabularysize_list.append(data['results']['score'])
         except requests.exceptions.RequestException as e:
             print e
@@ -119,7 +121,7 @@ def getNumberOfSpokenWordsData(people_ids):
     for person_id in people_ids:
         print person_id
         try:
-            data = requests.get('https://analize.parlameter.si/v1/p/getNumberOfSpokenWords/' + str(person_id)).json()
+            data = tryHard('https://analize.parlameter.si/v1/p/getNumberOfSpokenWords/' + str(person_id)).json()
             numberofspokenwords_list.append(data['results']['score'])
         except requests.exceptions.RequestException as e:
             print e
@@ -134,7 +136,7 @@ def getStyleScoresData(people_ids):
     for person_id in people_ids:
         print person_id
         try:
-            data = requests.get('https://analize.parlameter.si/v1/p/getStyleScores/' + str(person_id)).json()
+            data = tryHard('https://analize.parlameter.si/v1/p/getStyleScores/' + str(person_id)).json()
             problematicno_list.append(data['results']['problematicno'])
             privzdignjeno_list.append(data['results']['privzdignjeno'])
             preprosto_list.append(data['results']['preprosto'])
@@ -147,8 +149,8 @@ def getStyleScoresData(people_ids):
     return problematicno_list, privzdignjeno_list, preprosto_list
 
 def getData():
-    allballots = requests.get('https://data.parlameter.si/v1/getAllBallots/').json()
-    people = requests.get('https://data.parlameter.si/v1/getMPs/').json()
+    allballots = tryHard('https://data.parlameter.si/v1/getAllBallots/').json()
+    people = tryHard('https://data.parlameter.si/v1/getMPs/').json()
     people_ids = sorted([person['id'] for person in people])
     people_ballots = []
     for voter in people_ids:

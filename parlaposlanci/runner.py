@@ -3,6 +3,8 @@ import logging
 from parlalize.settings import BASE_URL, API_URL
 from parlalize.utils import update
 
+from parlalize.utils import tryHard
+
 logger = logging.getLogger(__name__)
 
 setters = (
@@ -29,7 +31,7 @@ def getIDs():
     #create persons
     result = []
 
-    data = requests.get(API_URL+'/getMPs/').json()
+    data = tryHard(API_URL+'/getMPs/').json()
 
     for mp in data:
         result.append(mp['id'])
@@ -40,7 +42,7 @@ def getIDs():
 def runMPs():
     for setter in allsetters:
         print setter
-        result = requests.get(setter)
+        result = tryHard(setter)
 
         if result.status_code == 200:
            logger.info(setter + ' ALL OK')
@@ -53,14 +55,14 @@ def runMPs():
     for ID in IDs:
         for setter in setters:
             print setter + str(ID)
-            result = requests.get(setter + str(ID))
+            result = tryHard(setter + str(ID))
 
             if result.status_code == 200:
                logger.info(setter + str(ID) + ' ALL OK')
             else:
                logger.error(setter + str(ID) + ' ERROR: ' + str(result.status_code))
 
-#    result = requests.get(BASE_URL+'/p/setNumberOfSpokenWordsALL/',).status_code
+#    result = tryHard(BASE_URL+'/p/setNumberOfSpokenWordsALL/',).status_code
 
     #if result == 200:
     #    logger.info(setter + str(ID) + ' ALL OK')

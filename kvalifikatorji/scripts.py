@@ -11,6 +11,8 @@ from math import log
 import tfidf
 from itertools import repeat
 
+from parlalize.utils import tryHard
+
 import requests
 
 def getWords(filename):
@@ -61,7 +63,7 @@ def getCountList(speaker_id, date_):
     data = None
     while data is None:
         try:
-            data = requests.get('https://isci.parlameter.si/tfidfALL/p/' + str(speaker_id) + "/" + date_)
+            data = tryHard('https://isci.parlameter.si/tfidfALL/p/' + str(speaker_id) + "/" + date_)
         except:
             pass
 
@@ -74,7 +76,7 @@ def getCountList(speaker_id, date_):
     return wordlist_new
 
 def getCountListPG(party_id, date_):
-    data = requests.get('https://isci.parlameter.si/tfidfALL/ps/' + str(party_id) + "/" + date_).json()
+    data = tryHard('https://isci.parlameter.si/tfidfALL/ps/' + str(party_id) + "/" + date_).json()
 
     wordlist = data['results']
 

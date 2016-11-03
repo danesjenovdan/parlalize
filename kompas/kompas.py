@@ -1,5 +1,6 @@
 from parlalize.models import Person, Ballot, Vote, Session
 import ast, operator
+from parlalize.utils import tryHard
 
 def readResults():
     with open('results.dict', 'r') as f:
@@ -7,7 +8,7 @@ def readResults():
         return ast.literal_eval(s)
 
 def getMPs():
-    mps = requests.get('http://localhost:8000/api/getMPs/').json()
+    mps = tryHard('http://localhost:8000/api/getMPs/').json()
 
     mp_parladata_ids = [mp['id'] for mp in mps]
 
