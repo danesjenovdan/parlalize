@@ -638,6 +638,9 @@ def update():
     print "mp static"
     updateMPStatic()
 
+    print "update person status"
+    updatePersonStatus()
+
     return 1
 
 
@@ -667,3 +670,16 @@ def updateTags():
             Tag(name=tag["name"], id_parladata=tag["id"]).save()
             count += 1
     return 1
+
+def updatePersonStatus():
+    mps = tryHard(API_URL + '/getMPs').json()
+    mps_ids = [mp["id"] for mp in mps]
+    for person in Person.objects.all():
+        if person.actived == "Yes":
+            if person.id_parladata not in mps_ids:
+                person.actived = "No"
+                person.save()
+        else:
+            if person.id_parladata in mps_ids:
+                person.actived = "Yes"
+                person.save()
