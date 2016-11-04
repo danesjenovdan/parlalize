@@ -1,17 +1,18 @@
 # -*- coding: UTF-8 -*-
 import numpy
 from datetime import datetime, timedelta
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, HttpResponse
 import requests
-from parlaposlanci.models import *
-from parlaskupine.models import *
-from parlaseje.models import *
+from parlaposlanci.models import Person, StyleScores, CutVotes, MPStaticPL, MembershipsOfMember, LessEqualVoters, EqualVoters, Presence, AverageNumberOfSpeechesPerSession, VocabularySize, Compass, SpokenWords, LastActivity
+from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic, VocabularySize as VocabularySizePG, StyleScores as StyleScoresPG
+from parlaseje.models import Session, Vote, Ballot, Speech, Tag, PresenceOfPG, AbsentMPs, AverageSpeeches, Vote_graph
 from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT, DEBUG
 from django.contrib.contenttypes.models import ContentType
 import requests
 import json
 import numpy as np
 import time
+import csv
 
 def tryHard(url):
     data = None
@@ -706,3 +707,56 @@ def checkMP():
         print "MembershipsOfMember: za te MP ni kartice: ", list(set(mps) - set(MembershipsOfMember.objects.values_list('person__id_parladata', flat=True)))
     else:
         print "ni MembershipsOfMember sploh"
+
+
+def getPersonsCardDates(request, person_id):
+    #mems = tryHard(API_URL + '/getAllTimeMembers/').json()
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="'+str(person_id)+'.csv"'
+
+    mems = tryHard(API_URL + '/getAllTimeMemberships').json()
+    member_dates = [mem for mem in mems if str(mem["id"]) == person_id]
+
+    dates = {}
+    dates["is_member"] = []
+    for d in member_dates:
+        if d["start_time"]:
+            start = datetime.strptime(d["start_time"].split("T")[0], "%Y-%m-%d")
+        else:
+            start = datetime(day=1, month=8, year=2014)
+        if d["end_time"]:
+            end = datetime.strptime(d["end_time"].split("T")[0], "%Y-%m-%d")
+        else:
+            end = datetime.today()
+        while end > start:
+            dates["is_member"].append(start.strftime(API_DATE_FORMAT))
+            start = start+timedelta(days=1)
+
+    dates["presence"] = [day.strftime(API_DATE_FORMAT) for day in Presence.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "presence done"
+    dates["spoken"] = [day.strftime(API_DATE_FORMAT) for day in SpokenWords.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "spoken done"
+    dates["style"] = [day.strftime(API_DATE_FORMAT) for day in StyleScores.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "style done"
+    dates["equal"] = [day.strftime(API_DATE_FORMAT) for day in EqualVoters.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "equal done"
+    dates["less_equal"] = [day.strftime(API_DATE_FORMAT) for day in  LessEqualVoters.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "less_equal done"
+    dates["static"] = [day.strftime(API_DATE_FORMAT) for day in MPStaticPL.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "static done"
+    dates["number_of_speeches"] = [day.strftime(API_DATE_FORMAT) for day in  AverageNumberOfSpeechesPerSession.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "number_of_speeches done"
+    dates["memberships"] = [day.strftime(API_DATE_FORMAT) for day in MembershipsOfMember.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "memberships done"
+
+    writer = csv.writer(response)
+    keys = dates.keys()
+    writer.writerow(['Date']+keys)
+    date = datetime(day=1, month=8, year=2014)
+    while date < datetime.today():
+        print date
+        strDate = date.strftime(API_DATE_FORMAT)
+        writer.writerow([strDate]+["Yes" if strDate in dates[key] else "" for key in keys])
+        date = date + timedelta(days=1)
+
+    return response
