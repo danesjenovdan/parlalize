@@ -500,6 +500,7 @@ def getPersonData(id_parladata, date_=None):
                 'id': id_parladata,
                 'district': None,
                 'gender': None,
+                'is_active': None,
                 }
     return {
             'type': "mp",
@@ -508,7 +509,8 @@ def getPersonData(id_parladata, date_=None):
             'gov_id': data.gov_id,
             'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData(),
             'gender':data.gender,
-            'district': data.district
+            'district': data.district,
+            'is_active': True if data.person.actived == "Yes" else False,
         }
 
 
