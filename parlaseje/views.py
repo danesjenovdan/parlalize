@@ -412,7 +412,7 @@ def getMinSpeechesOnSession(request, date=False):
     try:
         if date:
             date_ = datetime.strptime(date, API_DATE_FORMAT)
-            averageSpeeches = AverageSpeeches.objects.get(created_for=date_).speechesOnSession
+            averageSpeeches = AverageSpeeches.objects.filter(created_for__lte=date_).latest("created_for").speechesOnSession
         else:
             averageSpeeches = AverageSpeeches.objects.latest("created_for").speechesOnSession
             date_ = datetime.now().date()
@@ -435,7 +435,7 @@ def getMaxSpeechesOnSession(request, date=False):
     try:
         if date:
             date_ = datetime.strptime(date, API_DATE_FORMAT)
-            averageSpeeches = AverageSpeeches.objects.get(created_for=date_).speechesOnSession
+            averageSpeeches = AverageSpeeches.objects.filter(created_for__lte=date_).latest("created_for").speechesOnSession
         else:
             averageSpeeches = AverageSpeeches.objects.latest("created_for").speechesOnSession
             date_ = datetime.now().date()
