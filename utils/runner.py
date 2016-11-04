@@ -609,7 +609,7 @@ def runSettersSessions(date_to=None):
                     setter(None, date.strftime(API_DATE_FORMAT))
                 except:
                     client.captureException()
-    return JsonResponse({"status": "all is fine :D"}, safe=False)
+    return "all is fine :D"
 
 
 def update():
