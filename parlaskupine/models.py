@@ -40,6 +40,9 @@ class Organization(Timestampable, models.Model):
                                max_length = 128,
                                help_text=_('Organization acronym'))
 
+    is_coalition = models.BooleanField(_('coalition'),
+                                      default=False)
+
 
     def __str__(self):
         return self.name
@@ -49,6 +52,7 @@ class Organization(Timestampable, models.Model):
                   'id': self.id_parladata,
                   'name': self.name,
                   'acronym': self.acronym,
+                  'is_coalition': self.is_coalition,
                }
 
 class PGStatic(Timestampable, models.Model):
