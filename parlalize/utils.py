@@ -494,7 +494,8 @@ def getPersonData(id_parladata, date_=None):
                 'party': {
                           'acronym': None, 
                           'id': None, 
-                          'name': None}, 
+                          'name': None,
+                          'is_coalition': None}, 
                 'name': guest["name"] if guest else None, 
                 'gov_id': None, 
                 'id': id_parladata,
