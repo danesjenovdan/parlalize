@@ -54,13 +54,15 @@ def updateOrganizations():
             org.name = data[pg]['name']
             org.classification = data[pg]['classification']
             org.acronym = data[pg]['acronym']
+            org.is_coalition = data[pg]['is_coalition']
             print data[pg]['acronym']
             org.save()
         else:
             org = Organization(name=data[pg]['name'],
                                classification=data[pg]['classification'],
                                id_parladata=pg,
-                               acronym=data[pg]['acronym'])
+                               acronym=data[pg]['acronym'],
+                               is_coalition=data[pg]['is_coalition'])
             org.save()
     return 1
 
