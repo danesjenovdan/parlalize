@@ -751,6 +751,13 @@ def getPersonsCardDates(request, person_id):
     print "number_of_speeches done"
     dates["memberships"] = [day.strftime(API_DATE_FORMAT) for day in MembershipsOfMember.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
     print "memberships done"
+    dates["cut_votes"] = [day.strftime(API_DATE_FORMAT) for day in CutVotes.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "cutvotes done"
+    dates["last_activity"] = [day.strftime(API_DATE_FORMAT) for day in LastActivity.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "last_activity done"
+    dates["vocabolary_size"] = [day.strftime(API_DATE_FORMAT) for day in VocabularySize.objects.filter(person__id_parladata=person_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "vocabolary size done"
+
 
     writer = csv.writer(response)
     keys = dates.keys()
