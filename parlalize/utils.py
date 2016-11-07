@@ -770,3 +770,43 @@ def getPersonsCardDates(request, person_id):
         date = date + timedelta(days=1)
 
     return response
+
+
+def getOrgsCardDates(request, org_id):
+    #mems = tryHard(API_URL + '/getAllTimeMembers/').json()
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="'+str(org_id)+'.csv"'
+
+    dates = {}
+
+    dates["PGStatic"] = [day.strftime(API_DATE_FORMAT) for day in PGStatic.objects.filter(organization__id_parladata=org_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "PGStatic done"
+    dates["PercentOFAttendedSession"] = [day.strftime(API_DATE_FORMAT) for day in PercentOFAttendedSession.objects.filter(organization__id_parladata=org_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "PercentOFAttendedSession done"
+    dates["MPOfPg"] = [day.strftime(API_DATE_FORMAT) for day in MPOfPg.objects.filter(organization__id_parladata=org_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "MPOfPg done"
+    dates["MostMatchingThem"] = [day.strftime(API_DATE_FORMAT) for day in MostMatchingThem.objects.filter(organization__id_parladata=org_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "MostMatchingThem done"
+    dates["LessMatchingThem"] = [day.strftime(API_DATE_FORMAT) for day in  LessMatchingThem.objects.filter(organization__id_parladata=org_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "LessMatchingThem done"
+    dates["DeviationInOrganization"] = [day.strftime(API_DATE_FORMAT) for day in DeviationInOrganization.objects.filter(organization__id_parladata=org_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "DeviationInOrganization done"
+    dates["CutVotesPG"] = [day.strftime(API_DATE_FORMAT) for day in  CutVotesPG.objects.filter(organization__id_parladata=org_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "CutVotesPG done"
+    dates["vocabulary_size"] = [day.strftime(API_DATE_FORMAT) for day in VocabularySizePG.objects.filter(organization__id_parladata=org_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "vocabulary_size done"
+    dates["style_scores"] = [day.strftime(API_DATE_FORMAT) for day in StyleScoresPG.objects.filter(organization__id_parladata=org_id).order_by("created_for").values_list("created_for", flat=True)]
+    print "style_scores done"
+
+
+    writer = csv.writer(response)
+    keys = dates.keys()
+    writer.writerow(['Date']+keys)
+    date = datetime(day=1, month=8, year=2014)
+    while date < datetime.today():
+        print date
+        strDate = date.strftime(API_DATE_FORMAT)
+        writer.writerow([strDate]+["Yes" if strDate in dates[key] else "" for key in keys])
+        date = date + timedelta(days=1)
+
+    return response
