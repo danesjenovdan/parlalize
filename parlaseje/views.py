@@ -196,7 +196,8 @@ def getMotionOfSession(request, id_se, date=False):
             }
         })
     else:
-        raise Http404("Nismo našli kartice")
+        session = get_object_or_404(Session, id_parladata=id_se)
+        return JsonResponse([{"status": "Seja brez glasov"}], safe=False)
     return JsonResponse(out, safe=False)
 
 
@@ -516,5 +517,13 @@ def getSessionsByClassification(request):
     out = {"kolegij": [ session.getSessionData() for session in Session.objects.filter(organization__id_parladata=COUNCIL_ID).order_by("-start_time")],
            "dz": [ session.getSessionData() for session in Session.objects.filter(organization__id_parladata=DZ).order_by("-start_time")],
            "dt": [ org.getOrganizationData() for org in Organization.objects.filter(classification__in=working_bodies)],}
+
+    for session in out["kolegij"]:
+        session.update({"votes": True if Vote.objects.filter(session__id_parladata=session["id"]) else False, 
+                        "speeches": True if Speech.objects.filter(session__id_parladata=session["id"]) else False})
+
+    for session in out["dz"]:
+        session.update({"votes": True if Vote.objects.filter(session__id_parladata=session["id"]) else False, 
+                        "speeches": True if Speech.objects.filter(session__id_parladata=session["id"]) else False})
 
     return JsonResponse(out)
