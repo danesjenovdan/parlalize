@@ -976,11 +976,6 @@ def getStyleScoresPG(request, pg_id, date_=None):
 
 
 def getListOfPGs(request, date_=None):
-    def tryOrNone(data):
-        if data.status_code == 404:
-            return None
-        else:
-            return data
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -996,13 +991,27 @@ def getListOfPGs(request, date_=None):
             pg_obj["results"] = {}
             pg_id = pg
             pg_obj["party"] = Organization.objects.get(id_parladata=pg).getOrganizationData()
-            pg_obj["results"]["presence_sessions"] = tryOrNone(json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"])
-            pg_obj["results"]["presence_votes"] = tryOrNone(json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"])
-            pg_obj["results"]["vocabulary_size"] = tryOrNone(json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"])
-            styleScores = tryOrNone(json.loads(getStyleScoresPG(None, pg_id, date_).content))
-            pg_obj["results"]["privzdignjeno"] = tryOrNone(styleScores["results"]["privzdignjeno"])
-            pg_obj["results"]["preprosto"] = tryOrNone(styleScores["results"]["preprosto"])
-            pg_obj["results"]["problematicno"] = tryOrNone(styleScores["results"]["problematicno"])
+            try:
+                pg_obj["results"]["presence_sessions"] = json.loads(tryOrNone(getPercentOFAttendedSessionPG(None, pg_id, date_)).content)["sessions"]["organization_value"]
+                pg_obj["results"]["presence_votes"] = json.loads(tryOrNone(getPercentOFAttendedSessionPG(None, pg_id, date_)).content)["votes"]["organization_value"]
+            except:
+                pg_obj["results"]["presence_sessions"] = None
+                pg_obj["results"]["presence_votes"] = None
+
+            try:
+                pg_obj["results"]["vocabulary_size"] = json.loads(tryOrNone(getVocabularySize(None, pg_id, date_)).content)["results"]["score"]
+            except:
+                pg_obj["results"]["vocabulary_size"] = None
+
+            try:
+                styleScores = json.loads(tryOrNone(getStyleScoresPG(None, pg_id, date_)).content)
+            except:
+                styleScores = None
+                pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
+                pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
+                pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
+            
+
 
             data.append(pg_obj)
     data = sorted(data, key=lambda k: k['party']["name"])
