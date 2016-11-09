@@ -353,15 +353,17 @@ def setPresenceOfPG(request, id_se):
     else:
         return JsonResponse({'alliswell': True, "status": "nothin to add"})
 
-
+    counters = dict(Counter([item for sublist in onSession.values() for item in sublist]))
 
     for i in membersOfPG:
         allPgs[i] = len(membersOfPG[i]) * len(motions)
         print type(i), type(allTimePGs[1])
         if allPgs[i] == 0 or i not in allTimePGs:
             continue
-        counters = dict(Counter([item for sublist in onSession.values() for item in sublist]))
-        final[i] = int((float(counters[int(i)]) / float(allPgs[str(i)])) * 100)
+        if int(i) in counters.keys():
+            final[i] = int((float(counters[int(i)]) / float(allPgs[str(i)])) * 100)
+        else:
+            final[i] = 0
 
 
 
