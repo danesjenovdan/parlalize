@@ -362,6 +362,8 @@ def setPresenceOfPG(request, id_se):
         for i in temp:
             if allPgs[str(i)] != 0:
                 final[i] = int((float(temp[i]) / float(allPgs[str(i)])) * 100)
+            else:
+                final[i] = 0
 
 
         result = saveOrAbortNew(model=PresenceOfPG,
