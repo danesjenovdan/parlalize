@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from parlaseje.models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT
 from parlaseje.utils import *
-from collections import defaultdict
+from collections import defaultdict, Counter
 from math import fabs
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
@@ -333,6 +333,8 @@ def setPresenceOfPG(request, id_se):
     session = Session.objects.get(id_parladata=id_se)
     membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+ session.start_time.strftime(API_DATE_FORMAT)).json()
 
+    allTimePGs = tryHard(API_URL+'/getAllPGsExt/').json().keys()
+
     onSession = {}
     yesdic = defaultdict(int)
     allsessionsinone = defaultdict(list)
@@ -348,11 +350,22 @@ def setPresenceOfPG(request, id_se):
                     onSession[vote['mo_id']].append(vote['pg_id'])
                 else:
                     onSession.update({vote['mo_id'] : [vote['pg_id']]})
+    else:
+        return JsonResponse({'alliswell': True, "status": "nothin to add"})
+
+
 
     for i in membersOfPG:
         allPgs[i] = len(membersOfPG[i]) * len(motions)
+        print type(i), type(allTimePGs[1])
+        if allPgs[i] == 0 or i not in allTimePGs:
+            continue
+        counters = dict(Counter([item for sublist in onSession.values() for item in sublist]))
+        final[i] = int((float(counters[int(i)]) / float(allPgs[str(i)])) * 100)
 
-    for b in onSession:
+
+
+    """for b in onSession:
         for i in onSession[b]:
             yesdic[i] += 1
         results[b] = yesdic
@@ -365,12 +378,18 @@ def setPresenceOfPG(request, id_se):
             else:
                 final[i] = 0
 
+        for pg in allPgs.keys():
+            for result in results:"""
 
-        result = saveOrAbortNew(model=PresenceOfPG,
-                                created_for=session.start_time,
-                                presence=[final],
-                                session = session
-                                )
+
+
+
+
+    result = saveOrAbortNew(model=PresenceOfPG,
+                            created_for=session.start_time,
+                            presence=[final],
+                            session = session
+                            )
 
     return JsonResponse({'alliswell': True})
 
