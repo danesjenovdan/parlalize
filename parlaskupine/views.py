@@ -74,7 +74,7 @@ def getBasicInfOfPG(request, pg_id, date=None):
             viceOfPG.append(0)
 
     data = {
-           'organization':card.organization.getOrganizationData(),
+           'party':card.organization.getOrganizationData(),
            'created_at': card.created_at.strftime(API_DATE_FORMAT),
            'created_for': card.created_for.strftime(API_DATE_FORMAT),
            'headOfPG':headOfPG,
@@ -976,6 +976,11 @@ def getStyleScoresPG(request, pg_id, date_=None):
 
 
 def getListOfPGs(request, date_=None):
+    def tryOrNone(data):
+        try:
+            return data
+        except:
+            return None
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -991,13 +996,13 @@ def getListOfPGs(request, date_=None):
             pg_obj["results"] = {}
             pg_id = pg
             pg_obj["party"] = Organization.objects.get(id_parladata=pg).getOrganizationData()
-            pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
-            pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
-            pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
-            styleScores = json.loads(getStyleScoresPG(None, pg_id, date_).content)
-            pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"]
-            pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"]
-            pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"]
+            pg_obj["results"]["presence_sessions"] = tryOrNone(json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"])
+            pg_obj["results"]["presence_votes"] = tryOrNone(json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"])
+            pg_obj["results"]["vocabulary_size"] = tryOrNone(json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"])
+            styleScores = tryOrNone(json.loads(getStyleScoresPG(None, pg_id, date_).content))
+            pg_obj["results"]["privzdignjeno"] = tryOrNone(styleScores["results"]["privzdignjeno"])
+            pg_obj["results"]["preprosto"] = tryOrNone(styleScores["results"]["preprosto"])
+            pg_obj["results"]["problematicno"] = tryOrNone(styleScores["results"]["problematicno"])
 
             data.append(pg_obj)
     data = sorted(data, key=lambda k: k['party']["name"])
