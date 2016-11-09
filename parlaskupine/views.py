@@ -992,24 +992,24 @@ def getListOfPGs(request, date_=None):
             pg_id = pg
             pg_obj["party"] = Organization.objects.get(id_parladata=pg).getOrganizationData()
             try:
-                pg_obj["results"]["presence_sessions"] = json.loads(tryOrNone(getPercentOFAttendedSessionPG(None, pg_id, date_)).content)["sessions"]["organization_value"]
-                pg_obj["results"]["presence_votes"] = json.loads(tryOrNone(getPercentOFAttendedSessionPG(None, pg_id, date_)).content)["votes"]["organization_value"]
+                pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
+                pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
             except:
                 pg_obj["results"]["presence_sessions"] = None
                 pg_obj["results"]["presence_votes"] = None
 
             try:
-                pg_obj["results"]["vocabulary_size"] = json.loads(tryOrNone(getVocabularySize(None, pg_id, date_)).content)["results"]["score"]
+                pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
             except:
                 pg_obj["results"]["vocabulary_size"] = None
 
             try:
-                styleScores = json.loads(tryOrNone(getStyleScoresPG(None, pg_id, date_)).content)
+                styleScores = json.loads(getStyleScoresPG(None, pg_id, date_).content)
             except:
                 styleScores = None
-                pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
-                pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
-                pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
+            pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
+            pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
+            pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
             
 
 
