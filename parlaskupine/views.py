@@ -977,10 +977,10 @@ def getStyleScoresPG(request, pg_id, date_=None):
 
 def getListOfPGs(request, date_=None):
     def tryOrNone(data):
-        try:
-            return data
-        except:
+        if data.status_code == 404:
             return None
+        else:
+            return data
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
