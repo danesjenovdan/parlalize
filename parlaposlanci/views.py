@@ -1465,15 +1465,33 @@ def getListOfMembers(request, date_=None):
         person_obj["results"] = {}
         person_id = mp["id"]
         person_obj["person"] = getPersonData(person_id, date_)
-        person_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["sessions"]["score"]
-        person_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["votes"]["score"]
-        person_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, person_id, date_).content)["results"]["score"]
-        person_obj["results"]["spoken_words"] = json.loads(getNumberOfSpokenWords(None, person_id, date_).content)["results"]["score"]
-        person_obj["results"]["speeches_per_session"] = json.loads(getAverageNumberOfSpeechesPerSession(None, person_id, date_).content)["results"]["score"]
-        styleScores = json.loads(getStyleScores(None, person_id, date_).content)
-        person_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"]
-        person_obj["results"]["preprosto"] = styleScores["results"]["preprosto"]
-        person_obj["results"]["problematicno"] = styleScores["results"]["problematicno"]
+        try:
+            person_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["sessions"]["score"]
+        except:
+            person_obj["results"]["presence_sessions"] = None
+        try:
+            person_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSession(None, person_id, date_).content)["results"]["votes"]["score"]
+        except:
+            person_obj["results"]["presence_votes"] = None
+        try:
+            person_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, person_id, date_).content)["results"]["score"]
+        except:
+            person_obj["results"]["vocabulary_size"] = None
+        try:
+            person_obj["results"]["spoken_words"] = json.loads(getNumberOfSpokenWords(None, person_id, date_).content)["results"]["score"]
+        except:
+            person_obj["results"]["spoken_words"] = None
+        try:
+            person_obj["results"]["speeches_per_session"] = json.loads(getAverageNumberOfSpeechesPerSession(None, person_id, date_).content)["results"]["score"]
+        except:
+            person_obj["results"]["speeches_per_session"] = None
+        try:
+            styleScores = json.loads(getStyleScores(None, person_id, date_).content)
+        except:
+            styleScores = None
+        person_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
+        person_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
+        person_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
 
         data.append(person_obj)
     data = sorted(data, key=lambda k: k['person']["name"])
