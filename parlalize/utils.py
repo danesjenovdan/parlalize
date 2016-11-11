@@ -205,6 +205,9 @@ def findDatesFromLastCard(model, id, lastParsedDate, minDate=None):
 
     return [(lastCardDate+timedelta(days=days)) for days in range((toDate-lastCardDate).days)]
 
+def datesGenerator(stDate, toDate):    
+    dates = [(stDate + timedelta(days=x)) for x in range(0, (toDate-stDate).days)]
+    return dates
 
 def getPersonCardModelNew(model, id, date=None):
     if date:
