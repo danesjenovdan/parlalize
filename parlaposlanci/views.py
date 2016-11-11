@@ -106,7 +106,7 @@ def getMPStaticPL(request, person_id, date_=None):
             'education': card.education,
             'previous_occupation': card.previous_occupation,
             'name': card.name,
-            'district': card.district,
+            'district': [District.objects.get(id_parladata=dist).name for dist in card.district] if card.district else None,
             'party': card.party_name,
             'social': [{'facebook': card.facebook if card.facebook != 'False' else None, 'twitter': card.twitter if card.twitter != 'False' else None, 'linkedin': card.linkedin if card.linkedin != 'False' else None}],
             'groups': [{'group_id': group.groupid, 'group_name': group.groupname} for group in card.mpstaticgroup_set.all()]
