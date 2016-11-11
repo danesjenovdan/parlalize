@@ -1496,4 +1496,4 @@ def getListOfMembers(request, date_=None):
         data.append(person_obj)
     data = sorted(data, key=lambda k: k['person']["name"])
 
-    return JsonResponse({"districts": list(District.objects.all().values_list("name", flat=True)), "data": data})
+    return JsonResponse({"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data})
