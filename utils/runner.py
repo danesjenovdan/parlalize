@@ -20,7 +20,7 @@ from parlaseje.utils import idsOfSession, getSesDates
 
 from multiprocessing import Pool
 
-from parlalize.utils import tryHard
+from parlalize.utils import tryHard, datesGenerator
 
 ## parlalize initial runner methods ##
 
@@ -240,7 +240,9 @@ def doMembersRunner(data):
     temp_data = data.copy()
     membership = temp_data["membership"]
     toDate = temp_data["toDate"]
+    stDate = temp_data["stDate"]
     setters_models = temp_data["setters_models"]
+    print "start Date", stDate
     print "todate", toDate
     print "mems_start_time", membership["start_time"]
     print "mems_end_time", membership["end_time"]
@@ -260,11 +262,17 @@ def doMembersRunner(data):
             #print "START", membership["start_time"]
             start_time = datetime.strptime(
                 membership["start_time"].split("T")[0], "%Y-%m-%d")
-            dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(
-                API_DATE_FORMAT), start_time.strftime(API_DATE_FORMAT))
+            if stDate == None:
+                dates = findDatesFromLastCard(model, membership["id"], end_time.strftime(
+                    API_DATE_FORMAT), start_time.strftime(API_DATE_FORMAT))
+            else:
+                dates = datesGenerator(stDate, toDate)
         else:
-            dates = findDatesFromLastCard(
-                model, membership["id"], end_time.strftime(API_DATE_FORMAT))
+            if stDate == None:
+                dates = findDatesFromLastCard(
+                    model, membership["id"], end_time.strftime(API_DATE_FORMAT))
+            else:
+                dates = datesGenerator(stDate, toDate)
         for date in dates:
             #print date.strftime('%d.%m.%Y')
             #print str(membership["id"]) + "/" + date.strftime('%d.%m.%Y')
@@ -308,7 +316,8 @@ def doAllMembersRunner(data):
         except:
             client.captureException()
 
-def runSettersMPMultiprocess(date_to):
+#stDate uporabljamo takrat ko hocemo pofixati luknje v analizah
+def runSettersMPMultiprocess(date_to): 
     toDate = datetime.strptime(date_to, API_DATE_FORMAT).date()
     zero = datetime(day=2, month=8, year=2014).date()
     setters_models = {
@@ -335,13 +344,30 @@ def runSettersMPMultiprocess(date_to):
 
 
     pool = Pool(processes=1)
-    pool.map(doMembersRunner, [{"membership": membership, "toDate": toDate, "setters_models": setters_models} for membership in memberships])
+    pool.map(doMembersRunner, [{"membership": membership, "stDate": None, "toDate": toDate, "setters_models": setters_models} for membership in memberships])
 
     #pool = Pool(processes=16)
     #pool.map(doAllMembersRunner, [{"setters": setter, "model": model, "toDate": toDate, "zero": zero} for model, setter in all_in_one_setters_models.items()])
 
 
     return "all is fine :D"
+
+def runSetterOnDates(setter, stDate, toDate):
+    stDate = datetime.strptime(stDate, API_DATE_FORMAT).date()
+    toDate = datetime.strptime(toDate, API_DATE_FORMAT).date()
+
+    setters_models = {
+    None: setter
+    }
+
+    memberships = tryHard(API_URL + '/getAllTimeMemberships').json()
+
+    pool = Pool(processes=1)
+    pool.map(doMembersRunner, [{"membership": membership, "stDate": stDate, "toDate": toDate, "setters_models": setters_models} for membership in memberships])
+
+    return "all is fine :D"
+    
+
 
 def runSettersMPSinglePerson(date_to=None):
     if not date_to:
