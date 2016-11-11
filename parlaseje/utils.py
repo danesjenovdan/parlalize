@@ -162,18 +162,25 @@ def getSesCardModelNew(model, id, date=None):
         print "get object BUBU", modelObject.created_for
     return modelObject
 
-def resultOfMotion(votes_for, against, abstain, not_present, date_):
+def resultOfMotion(yes, no, kvorum, not_presen, vote_id, date_=None):
+	result = tryHard('http://127.0.0.1:8000/v1/getResultOfMotion/'+str(vote_id)).json()
 	allMPs = (int(len(tryHard(API_URL+'/getMPs/'+date_.strftime(API_DATE_FORMAT)).json())) * 2) / 3
-	if votes_for >= allMPs:
-		allMPs = 0
+	if result == 1:
 		return True
-	else:
-		allMPs = 0
+	elif result == 0:
 		return False
+	else:
+		if votes_for >= allMPs:
+			allMPs = 0
+			return True
+		else:
+			allMPs = 0
+			return False
 
 
 def getSessionDataAPI(requests, session_id):
 	session = Session.objects.filter(id_parladata=session_id)
+
 	if session:
 		return JsonResponse(session[0].getSessionData())
 	else:
