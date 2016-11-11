@@ -496,8 +496,10 @@ def runSettersPG(date_to=None):
 
     zero = datetime(day=2, month=8, year=2014).date()
     for model, setter in all_in_one_setters_models.items():
+        if model.objects.all():
+            zero = model.objects.all().latest("created_for").created_for
         print(toDate - datetime(day=2, month=8, year=2014).date()).days
-        for i in range((toDate - datetime(day=2, month=8, year=2014).date()).days):
+        for i in range((toDate - zero.date()).days):
             print(zero + timedelta(days=i)).strftime('%d.%m.%Y')
             print setter
             try:
@@ -660,6 +662,11 @@ def updateDistricts():
     for district in districts:
         if district["id"] not in existing_districts:
             District(name=district["name"], id_parladata=district["id"]).save()
+        else:
+            dist = District.objects.get(id_parladata=district["id"])
+            if dist.name != district["name"]:
+                dist.name = district["name"]
+                dist.save()
     return 1
 
 
