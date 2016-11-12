@@ -94,7 +94,6 @@ def getData(date_of):
 
     # pad votes and write in "ni obstajal" for people who didn't exist yet
     for person in people_ballots:
-        print "person", person
         if len(person) < max(lengths):
             for vote_id in all_vote_ids:
                 if len(person) == 0:
@@ -109,16 +108,27 @@ def getData(date_of):
     people_ballots_sorted = sorted([sorted(person, key=lambda k: k['vote']) for person in people_ballots], key=lambda j: j[0]['voter'])
     people_ballots_sorted_list = [person for person in people_ballots_sorted]
 
+    hijene = []
     # assign numerical values to ballots
     for i, person in enumerate(people_ballots_sorted_list):
+        #print person
         for j, ballot in enumerate(person):
             people_ballots_sorted_list[i][j] = assignValueToOption(ballot['option'])
+        #print len(people_ballots_sorted_list[i]), people_ids[i], people_ballots_sorted_list[i].count(4), (len(people_ballots_sorted_list[i]) - people_ballots_sorted_list[i].count(4))
+        #print people_ballots_sorted_list[i]
+        if (len(people_ballots_sorted_list[i]) - people_ballots_sorted_list[i].count(4)) < 5:
+            hijene.append(i)
 
+    hijene.sort()
+    for i in reversed(hijene):
+        print "delete ", people_ids[i]
+        del people_ballots_sorted_list[i]
+        del people_ids[i]
     # transform numerical ballot values to numpy array
     thearray = np.array(people_ballots_sorted_list)
 
     # get people's names
-    people_names = getPeoplesNames(people_ids, date_of)
+    #people_names = getPeoplesNames(people_ids, date_of)
 
     # sklearn_pca = sklearnPCA(n_components=2)
     # sklearn_transf = sklearn_pca.fit_transform(thearray)
