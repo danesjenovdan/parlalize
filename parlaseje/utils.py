@@ -162,15 +162,17 @@ def getSesCardModelNew(model, id, date=None):
         print "get object BUBU", modelObject.created_for
     return modelObject
 
-def resultOfMotion(yes, no, kvorum, not_presen, vote_id, date_=None):
-	result = tryHard('http://127.0.0.1:8000/v1/getResultOfMotion/'+str(vote_id)).json()
+def resultOfMotion(yes, no, kvorum, not_present, vote_id, date_=None):
+	result = tryHard(API_URL+'/getResultOfMotion/' + str(vote_id)).json()
+	print result['result']
+	
 	allMPs = (int(len(tryHard(API_URL+'/getMPs/'+date_.strftime(API_DATE_FORMAT)).json())) * 2) / 3
-	if result == 1:
+	if result['result'] == "1":
 		return True
-	elif result == 0:
+	elif result['result'] == "0":
 		return False
 	else:
-		if votes_for >= allMPs:
+		if yes >= allMPs:
 			allMPs = 0
 			return True
 		else:
