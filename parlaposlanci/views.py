@@ -1453,7 +1453,6 @@ def getTaggedBallots(request, person_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
-@cache_page(60 * 30)
 def getListOfMembers(request, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
