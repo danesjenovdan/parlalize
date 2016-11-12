@@ -2,6 +2,7 @@
 from django.http import JsonResponse
 from scipy.stats.stats import pearsonr
 from datetime import date, datetime, timedelta
+from django.core.cache import cache
 
 import numpy
 from parlalize.utils import *
@@ -1336,7 +1337,7 @@ def setCompass(request, date_=None):
     data = notes.getData(date_of)
     if data == []:
         return JsonResponse({"status": "no data"})
-    print data
+    #print data
     existing_compas = Compass.objects.filter(created_for=date_of)
     if existing_compas:
         existing_compas[0].data = data
