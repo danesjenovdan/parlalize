@@ -1497,8 +1497,10 @@ def getListOfMembers(request, date_=None):
 
             data.append(person_obj)
         data = sorted(data, key=lambda k: k['person']["name"])
-        cache.set(date_, {"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data}, 900)
+        data = {"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data}
+        cache.set(date_, data, 9000)
+        
     else:
         data = temp_data
 
-    return JsonResponse({"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data})
+    return JsonResponse(data)
