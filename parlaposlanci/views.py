@@ -2,7 +2,7 @@
 from django.http import JsonResponse
 from scipy.stats.stats import pearsonr
 from datetime import date, datetime, timedelta
-from django.core.cache import cache
+from django.views.decorators.cache import cache_page
 
 import numpy
 from parlalize.utils import *
@@ -1452,6 +1452,8 @@ def getTaggedBallots(request, person_id, date_=None):
         }
     return JsonResponse(result, safe=False)
 
+
+@cache_page(60 * 30)
 def getListOfMembers(request, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -1459,49 +1461,42 @@ def getListOfMembers(request, date_=None):
         date_of = datetime.now().date()
         date_=date_of.strftime(API_DATE_FORMAT)
 
-    temp_data = cache.get(date_)
-    if not temp_data:
-        mps = tryHard(API_URL+'/getMPs/'+date_).json()
-        data = []
-        for mp in mps: 
-            person_obj = {}
-            person_obj["results"] = {}
-            person_id = mp["id"]
-            person_obj["person"] = getPersonData(person_id, date_)
-            try:
-                person_obj["results"]["presence_sessions"] = getPersonCardModelNew(Presence, person_id, date_).person_value_sessions
-            except:
-                person_obj["results"]["presence_sessions"] = None
-            try:
-                person_obj["results"]["presence_votes"] = getPersonCardModelNew(Presence, person_id, date_).person_value_votes
-            except:
-                person_obj["results"]["presence_votes"] = None
-            try:
-                person_obj["results"]["vocabulary_size"] = getPersonCardModelNew(VocabularySize, person_id, date_).score
-            except:
-                person_obj["results"]["vocabulary_size"] = None
-            try:
-                person_obj["results"]["spoken_words"] = getPersonCardModelNew(SpokenWords, person_id, date_).score
-            except:
-                person_obj["results"]["spoken_words"] = None
-            try:
-                person_obj["results"]["speeches_per_session"] = getPersonCardModelNew(AverageNumberOfSpeechesPerSession, person_id, date_).score
-            except:
-                person_obj["results"]["speeches_per_session"] = None
-            try:
-                styleScores = getPersonCardModelNew(StyleScores, int(person_id), date_)
-            except:
-                styleScores = None
-            person_obj["results"]["privzdignjeno"] = styleScores.privzdignjeno*10000 if styleScores else None
-            person_obj["results"]["preprosto"] = styleScores.preprosto*10000 if styleScores else None
-            person_obj["results"]["problematicno"] = styleScores.problematicno*10000 if styleScores else None
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
+    data = []
+    for mp in mps: 
+        person_obj = {}
+        person_obj["results"] = {}
+        person_id = mp["id"]
+        person_obj["person"] = getPersonData(person_id, date_)
+        try:
+            person_obj["results"]["presence_sessions"] = getPersonCardModelNew(Presence, person_id, date_).person_value_sessions
+        except:
+            person_obj["results"]["presence_sessions"] = None
+        try:
+            person_obj["results"]["presence_votes"] = getPersonCardModelNew(Presence, person_id, date_).person_value_votes
+        except:
+            person_obj["results"]["presence_votes"] = None
+        try:
+            person_obj["results"]["vocabulary_size"] = getPersonCardModelNew(VocabularySize, person_id, date_).score
+        except:
+            person_obj["results"]["vocabulary_size"] = None
+        try:
+            person_obj["results"]["spoken_words"] = getPersonCardModelNew(SpokenWords, person_id, date_).score
+        except:
+            person_obj["results"]["spoken_words"] = None
+        try:
+            person_obj["results"]["speeches_per_session"] = getPersonCardModelNew(AverageNumberOfSpeechesPerSession, person_id, date_).score
+        except:
+            person_obj["results"]["speeches_per_session"] = None
+        try:
+            styleScores = getPersonCardModelNew(StyleScores, int(person_id), date_)
+        except:
+            styleScores = None
+        person_obj["results"]["privzdignjeno"] = styleScores.privzdignjeno*10000 if styleScores else None
+        person_obj["results"]["preprosto"] = styleScores.preprosto*10000 if styleScores else None
+        person_obj["results"]["problematicno"] = styleScores.problematicno*10000 if styleScores else None
 
-            data.append(person_obj)
-        data = sorted(data, key=lambda k: k['person']["name"])
-        data = {"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data}
-        cache.set(date_, data, 9000)
-        
-    else:
-        data = temp_data
+        data.append(person_obj)
+    data = sorted(data, key=lambda k: k['person']["name"])
 
-    return JsonResponse(data)
+    return JsonResponse({"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data})
