@@ -21,6 +21,7 @@ def tryHard(url):
         try:
             if counter > 10:
                 client.captureMessage(url+" je zahinavu več ko 10x.")
+                return
             data = requests.get(url)
         except:
             counter += 1
