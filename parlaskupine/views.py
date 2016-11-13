@@ -677,7 +677,9 @@ def setWorkingBodies(request, org_id, date_=None):
     if not len(members["president"]) or not len(members["members"]) or not len(members["vice_president"]):
         return JsonResponse({'alliswell': False, "status": {"president_count": len(members["president"]),
                                                             "vice_president": len(members["vice_president"]),
-                                                            "members": len(members["members"])}})
+                                                            "members": len(members["members"]),
+                                                            "viceMember": len(members['viceMember'])
+                                                            }})
     out = {}
     name = members.pop("name")
     all_members = [member for role in members.values() for member in role]
@@ -705,6 +707,7 @@ def setWorkingBodies(request, org_id, date_=None):
         president = Person.objects.get(id_parladata=out["info"]["president"][0]),
         vice_president = out["info"]["vice_president"],
         members = out["info"]["members"],
+        viceMember = out["info"]["viceMember"],
         coal_ratio = coal_members*kol,
         oppo_ratio = oppo_members*kol,
         seats = list(reversed(sorted(seats, key=lambda s: s["seats"]))),
@@ -725,7 +728,8 @@ def getWorkingBodies(request, org_id, date_=None):
                          'created_for': workingBodies.created_for.strftime(API_DATE_FORMAT),
                          "info": {"president": getPersonData(workingBodies.president.id_parladata),
                                   "vice_president": [getPersonData(person) for person in workingBodies.vice_president],
-                                  "members": [getPersonData(person) for person in workingBodies.members],},
+                                  "members": [getPersonData(person) for person in workingBodies.members],
+                                  "viceMember": [getPersonData(person) for person in workingBodies.viceMember]},
                          "ratio":{"coalition": workingBodies.coal_ratio,
                                   "opposition": workingBodies.oppo_ratio},
                          "seats_per_pg": workingBodies.seats,
