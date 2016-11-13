@@ -105,6 +105,8 @@ urlpatterns = patterns(
     url(r'^getListOfMembers/(?P<date>[\w].+)', getListOfMembers),
     url(r'^getListOfMembers/', getListOfMembers),
 
+    url(r'^getAllActiveMembers/', getAllActiveMembers),
+
     ####################################################################################
 
     #runenr
