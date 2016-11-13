@@ -171,3 +171,10 @@ API_DATE_FORMAT = '%d.%m.%Y'
 # CORS config
 CORS_ORIGIN_ALLOW_ALL = True
 API_OUT_DATE_FORMAT = '%-d. %-m. %Y'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
