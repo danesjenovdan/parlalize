@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 from parlaseje.models import Session
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, ISCI_URL
 import requests
 from collections import Counter
 from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
@@ -10,21 +10,20 @@ from itertools import groupby
 from parlalize.utils import tryHard
 
 class WordAnalysis(object):
-    date_ = ""
-    api_url = None
-    date_of = None
-    members = None
-    membersOfPGsRanges = None
-    count_of = "members"
-    text = {}
-    unique_words = []
-    all_words = []
-    swizec_coef = []
-    average_words = None
-
-
-    def __init__(self, api_url, count_of="members", date_=None):
-        self.api_url = api_url
+    def __init__(self, count_of="members", date_=None):
+        self.date_ = ""
+        self.api_url = None
+        self.date_of = None
+        self.members = None
+        self.membersOfPGsRanges = None
+        self.membersOfPGs = None
+        self.count_of = "members"
+        self.text = {}
+        self.unique_words = []
+        self.all_words = []
+        self.swizec_coef = []
+        self.average_words = None
+        #API_URL = api_url
         if date_:
             self.date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
             self.date_ = date_
@@ -32,17 +31,58 @@ class WordAnalysis(object):
             self.date_of = datetime.now().date()
             self.date_=""
 
-        self.isNewSpeech = tryHard(self.api_url +'/isSpeechOnDay/'+self.date_).json()["isSpeech"]
+        self.isNewSpeech = tryHard(API_URL +'/isSpeechOnDay/'+self.date_).json()["isSpeech"]
         print self.isNewSpeech
         if self.isNewSpeech:
             self.count_of = count_of
 
             #get members for this day
-            self.members = tryHard(self.api_url +'/getMPs/'+self.date_).json()
-            self.allTimeMembers = tryHard(self.api_url +'/getAllTimeMemberships').json()
-            self.prepereSpeeches()
-            self.wordCounter()
+            self.members = tryHard(API_URL +'/getMPs/'+self.date_).json()
+            self.allTimeMembers = tryHard(API_URL +'/getAllTimeMemberships').json()
+            self.prepereSpeechesFromSearch()
+            #self.wordCounter()
 
+    def prepereSpeechesFromSearch(self):
+        if self.count_of == "members":
+            print "[INFO] [INFO] prepering data of members"
+            for mp in self.members:
+                print mp["id"]
+                #unique words
+                tfidf = tryHard(ISCI_URL + "/tfidfALL/p/" + str(mp['id']) + (("/"+self.date_) if self.date_ else "")).json()
+                self.unique_words.append({'counter_id': tfidf["person"], 'unique': len(tfidf["results"])})
+
+                #allWords
+                all_words_of_this = sum([word["scores"]["tf"] for word in tfidf["results"]])
+                self.all_words.append({'counter_id': str(mp['id']), 'wordcount': all_words_of_this})
+
+                #swizec coeficient
+                M1 = float(all_words_of_this)
+                M2 = sum([freq ** 2 for freq in [tf["scores"]["tf"] for tf in tfidf["results"]]])
+                #print M1, M2, "m1 pa m2"
+                try:
+                    self.swizec_coef.append({'counter_id': str(mp['id']), 'coef': (M1*M1)/(M2-M1)})
+                except:
+                    self.swizec_coef.append({'counter_id': str(mp['id']), 'coef': 0})
+
+        elif self.count_of == "groups":
+            print "[INFO] prepering data for groups: "
+            self.membersOfPGs = tryHard(API_URL+'/getMembersOfPGsOnDate' + ("/"+self.date_ if self.date_ else "/")).json()
+            allTimePGs = tryHard(API_URL+'/getAllPGsExt/').json().keys()
+            for pg in self.membersOfPGs:
+                if pg in allTimePGs and membersOfPGs[pg].members:
+                    tfidf = tryHard(ISCI_URL+ "/tfidfALL/pg/" + str(pg) + (("/"+self.date_) if self.date_ else "")).json()
+                    self.unique_words.append({'counter_id': str(mp['id']), 'unique': len(tfidf["results"])})
+                    all_words_of_this = sum([word["scores"]["tf"] for word in tfidf["results"]])
+                    self.all_words.append({'counter_id': counted_obj, 'wordcount': all_words_of_this})
+
+                    #swizec coeficient
+                    M1 = float(all_words_of_this)
+                    M2 = sum([len(list(g))*(freq**2) for freq,g in groupby(sorted([tf["score"]["tf"] for tf in tfidf["results"]]))])
+                    #print M1, M2, "m1 pa m2"
+                    try:
+                        self.swizec_coef.append({'counter_id': counted_obj, 'coef': (M1*M1)/(M2-M1)})
+                    except:
+                        self.swizec_coef.append({'counter_id': counted_obj, 'coef': 0})
 
     def prepereSpeeches(self):
         #prepare data for members
@@ -50,7 +90,7 @@ class WordAnalysis(object):
             print "[INFO] [INFO] prepering data of members"
             for mp in self.members:
                 #print "[INFO] prepering data of member: " + str(mp['id'])
-                url = self.api_url +'/getSpeeches/' + str(mp['id']) + (("/"+self.date_) if self.date_ else "")
+                url = API_URL +'/getSpeeches/' + str(mp['id']) + (("/"+self.date_) if self.date_ else "")
                 speeches = tryHard(url).json()
                 self.text[str(mp['id'])] = ''.join([speech['content'] for speech in speeches])
             print "[INFO] counting avg words of members"
