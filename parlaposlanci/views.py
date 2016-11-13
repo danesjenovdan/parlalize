@@ -1196,10 +1196,15 @@ def getVocabolarySizeLanding(request, date_=None):
         person_id=None
         if not VocabularySize.objects.all():
             raise Http404("Nismo našli kartice")
-        date_of = VocabularySize.objects.all().order_by("-created_for")[0].created_for
+        date_of = VocabularySize.objects.latest("created_for")
         date_ = date_of.strftime(API_DATE_FORMAT)
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
-    datas = [getPersonCardModelNew(VocabularySize, mp["id"], date_) for mp in mps]
+    data = []
+    for mp in mps: 
+        try:
+            data.apend(getPersonCardModelNew(VocabularySize, mp["id"], date_))
+        except:
+            print "ni se goborila"
     print datas
     return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
 
