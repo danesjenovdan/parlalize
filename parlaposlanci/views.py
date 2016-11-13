@@ -1206,7 +1206,7 @@ def getVocabolarySizeLanding(request, date_=None):
         except:
             print "ni se goborila"
     print datas
-    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
+    return JsonResponse({"created_for": date_, "created_at": datas[0].created_at.strftime(API_DATE_FORMAT) if datas else date_, "data": sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score'])}, safe=False)
 
 
 def getVocabolarySizeUniqueWordsLanding(request, date_=None):
