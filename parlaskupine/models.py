@@ -397,6 +397,8 @@ class WorkingBodies(Timestampable, models.Model):
 
     members = JSONField()
 
+    viceMember = JSONField()
+
     coal_ratio = models.FloatField()
 
     oppo_ratio = models.FloatField()
