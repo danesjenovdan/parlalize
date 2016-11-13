@@ -515,7 +515,7 @@ def getPersonData(id_parladata, date_=None):
             'party': Organization.objects.get(id_parladata=data.party_id).getOrganizationData(),
             'gender':data.gender,
             'district': data.district,
-            'is_active': True if data.person.actived == "Yes" else False,
+            'is_active': True if data.person.actived == "True" else False,
         }
 
 

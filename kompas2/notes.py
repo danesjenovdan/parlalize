@@ -99,7 +99,7 @@ def getData(date_of):
                 if len(person) == 0:
                     if vote_id not in [ballot['vote'] for ballot in person]:
                         person.append({'vote': vote_id, 'voter': people_without_ballots[0], 'option': 'ni obstajal', 'id': -1})
-			people_without_ballots.remove(people_without_ballots[0])
+                        people_without_ballots.remove(people_without_ballots[0])
                 else:
                     if vote_id not in [ballot['vote'] for ballot in person]:
                         person.append({'vote': vote_id, 'voter': person[0]['id'], 'option': 'ni obstajal', 'id': -1})
@@ -118,10 +118,12 @@ def getData(date_of):
         #print people_ballots_sorted_list[i]
         if (len(people_ballots_sorted_list[i]) - people_ballots_sorted_list[i].count(4)) < 5:
             hijene.append(i)
-
+	    print "brisem", i
+	print i
+    print people_ids
     hijene.sort()
     for i in reversed(hijene):
-        print "delete ", people_ids[i]
+        print "delete ", people_ids[i], i
         del people_ballots_sorted_list[i]
         del people_ids[i]
     # transform numerical ballot values to numpy array
