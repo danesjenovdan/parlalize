@@ -1199,10 +1199,10 @@ def getVocabolarySizeLanding(request, date_=None):
         date_of = VocabularySize.objects.latest("created_for")
         date_ = date_of.strftime(API_DATE_FORMAT)
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
-    data = []
+    datas = []
     for mp in mps: 
         try:
-            data.apend(getPersonCardModelNew(VocabularySize, mp["id"], date_))
+            datas.append(getPersonCardModelNew(VocabularySize, mp["id"], date_))
         except:
             print "ni se goborila"
     print datas
