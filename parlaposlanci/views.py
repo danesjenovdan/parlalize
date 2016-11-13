@@ -597,14 +597,14 @@ def setCutVotes(request, person_id, date_=None):
 
 
     # Calculate coalition and opposition average
-    coal_avg["for"] = float(sum(map(voteFor, pg_score_C))) / ((float(len(pg_score_C))) * 100) if len(pg_score_C) != 0 else 0
-    oppo_avg["for"] = float(sum(map(voteFor, pg_score_O))) / ((float(len(pg_score_O)))*100) if len(pg_score_O) != 0 else 0
-    coal_avg["against"] = float(sum(map(voteAgainst, pg_score_C))) / ((float(len(pg_score_C))) * 100) if len(pg_score_C) != 0 else 0
-    oppo_avg["against"] = float(sum(map(voteAgainst, pg_score_O))) / ((float(len(pg_score_O))) * 100) if len(pg_score_O) != 0 else 0
-    coal_avg["abstain"] = float(sum(map(voteAbstain, pg_score_C))) / ((float(len(pg_score_C))) * 100) if len(pg_score_C) != 0 else 0
-    oppo_avg["abstain"] = float(sum(map(voteAbstain, pg_score_O))) / ((float(len(pg_score_O))) * 100) if len(pg_score_O) != 0 else 0
-    coal_avg["absent"] = float(sum(map(voteAbsent, pg_score_C))) / ((float(len(pg_score_C))) * 100) if len(pg_score_C) != 0 else 0
-    oppo_avg["absent"] = float(sum(map(voteAbsent, pg_score_O))) / ((float(len(pg_score_O))) * 100) if len(pg_score_O) != 0 else 0
+    coal_avg["for"] = float(sum(map(voteFor, pg_score_C))) / (float(len(pg_score_C))) * 100 if len(pg_score_C) != 0 else 0
+    oppo_avg["for"] = float(sum(map(voteFor, pg_score_O))) / (float(len(pg_score_O)))*100 if len(pg_score_O) != 0 else 0
+    coal_avg["against"] = float(sum(map(voteAgainst, pg_score_C))) / (float(len(pg_score_C))) * 100 if len(pg_score_C) != 0 else 0
+    oppo_avg["against"] = float(sum(map(voteAgainst, pg_score_O))) / (float(len(pg_score_O))) * 100 if len(pg_score_O) != 0 else 0
+    coal_avg["abstain"] = float(sum(map(voteAbstain, pg_score_C))) / (float(len(pg_score_C))) * 100 if len(pg_score_C) != 0 else 0
+    oppo_avg["abstain"] = float(sum(map(voteAbstain, pg_score_O))) / (float(len(pg_score_O))) * 100 if len(pg_score_O) != 0 else 0
+    coal_avg["absent"] = float(sum(map(voteAbsent, pg_score_C))) / (float(len(pg_score_C))) * 100 if len(pg_score_C) != 0 else 0
+    oppo_avg["absent"] = float(sum(map(voteAbsent, pg_score_O))) / (float(len(pg_score_O))) * 100 if len(pg_score_O) != 0 else 0
 
     out = dict()
     out["for"] = dict()
