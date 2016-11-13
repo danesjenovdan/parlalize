@@ -1510,3 +1510,7 @@ def getListOfMembers(request, date_=None):
         cache.set("mp_list_" + date_, data, 900)    
 
     return JsonResponse(data)
+
+
+def getAllActiveMembers(request):
+    return JsonResponse([getPersonData(person.id_parladata) for person in Person.objects.filter(actived="Yes")], safe=False)
