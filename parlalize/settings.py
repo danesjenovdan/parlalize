@@ -134,8 +134,11 @@ VOTE_MAP = {
 
 if DEVELOPMENT:
     API_URL = "http://localhost:8000/v1"
+    ISCI_URL = "http://localhost:8888"
+
 else:
     API_URL = "https://data.parlameter.si/v1"
+    ISCI_URL = "https://isci.parlameter.si"
 
 BASE_URL = 'https://analize.parlameter.si/v1'
 
