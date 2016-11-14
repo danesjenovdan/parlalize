@@ -93,6 +93,10 @@ def getBasicInfOfPG(request, pg_id, date=None):
 
 def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
     if date_:
+        isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+        print isNewVote
+        if not isNewVote:
+            return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = findDatesFromLastCard(PercentOFAttendedSession, pg_id, datetime.now().date())[0]
@@ -299,6 +303,10 @@ def howMatchingThem(request, pg_id, type_of, date_=None):
 
 def setMostMatchingThem(request, pg_id, date_=None):
     if date_:
+        isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+        print isNewVote
+        if not isNewVote:
+            return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
         members, keys, date_of = howMatchingThem(request, pg_id, date_=date_, type_of="match")
     else:
         members, keys, date_of = howMatchingThem(request, pg_id, type_of="match")
@@ -326,6 +334,10 @@ def setMostMatchingThem(request, pg_id, date_=None):
 
 def setLessMatchingThem(request, pg_id, date_=None):
     if date_:
+        isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+        print isNewVote
+        if not isNewVote:
+            return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
         members, keys, date_of = howMatchingThem(request, pg_id, date_=date_, type_of="match")
     else:
         members, keys, date_of = howMatchingThem(request, pg_id, type_of="match")
@@ -352,6 +364,10 @@ def setLessMatchingThem(request, pg_id, date_=None):
 
 def setDeviationInOrg(request, pg_id, date_=None):
     if date_:
+        isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+        print isNewVote
+        if not isNewVote:
+            return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
         members, keys, date_of = howMatchingThem(request, pg_id, date_=date_, type_of="deviation")
     else:
         members, keys, date_of = howMatchingThem(request, pg_id, type_of="deviation")
@@ -378,7 +394,7 @@ def setDeviationInOrg(request, pg_id, date_=None):
                                 votes6=out[6]['ratio'] if numOfKeys > 5 else None,
                                 )
 
-        return JsonResponse({'alliswell': True})
+        return JsonResponse({'alliswell': True, "status":'OK', "saved": result})
     except:
         return JsonResponse({'alliswell': False})
 
@@ -508,6 +524,12 @@ def setCutVotes(request, pg_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+    print isNewVote
+    if not isNewVote:
+        return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
 
     r = tryHard(API_URL+'/getCoalitionPGs/')
     coalition = r.json()
@@ -599,7 +621,7 @@ def setCutVotes(request, pg_id, date_=None):
         opposition_absent_max_org=getMaxOrgData(pgs_absent, oppo_pgs)[0]
     )
 
-    return JsonResponse({'alliswell': True})
+    return JsonResponse({'alliswell': True, "status":'OK', "saved": final_response})
 
 
 def getCutVotes(request, pg_id, date=None):

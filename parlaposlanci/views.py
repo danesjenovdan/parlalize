@@ -123,6 +123,13 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = findDatesFromLastCard(Presence, person_id, datetime.now().date())[0]
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+    print isNewVote
+    if not isNewVote:
+        return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
+
     data = tryHard(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
 
     if not data["votes"].values():
@@ -131,8 +138,9 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     if person_id in data["sessions"].keys():
         thisMP = data["sessions"][person_id]
     else:
-        #ta member se ni glasoval
+        #ta member se ni obstajal
         thisMP = 0
+        return JsonResponse({'alliswell': False, "status":'ta member se ni obstajal', "saved": False})
 
     maximum = max(data["sessions"].values())
     maximumMP = [pId for pId in data["sessions"] if data["sessions"][pId]==maximum]
@@ -160,7 +168,7 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
                          average_votes=averageVotes,
                          maximum_votes=maximumVotes)
 
-    return JsonResponse({'alliswell': result})
+    return JsonResponse({'alliswell': True, "status":'OK', "saved": result})
 
 def getPercentOFAttendedSession(request, person_id, date=None):
     equalVoters = getPersonCardModelNew(Presence, person_id, date)
@@ -409,6 +417,11 @@ def getEqualVoters(request, id, date_=None):
 # Method return json with most similar voters to this voter
 def setMostEqualVoters(request, person_id, date_=None):
     if date_:
+        #if run setter for date check if exist vote on this day
+        isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+        print isNewVote
+        if not isNewVote:
+            return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
         members, keys, date_of = getEqualVoters(request, person_id, date_)
     else:
         members, keys, date_of = getEqualVoters(request, person_id)
@@ -428,7 +441,7 @@ def setMostEqualVoters(request, person_id, date_=None):
                             votes4=out[4]['ratio'],
                             person5=Person.objects.get(id_parladata=int(out[5]['id'])),
                             votes5=out[5]['ratio'])
-    return HttpResponse('All iz well')
+    return JsonResponse({'alliswell': True, "status":'OK', "saved": result})
 
 
 def getMostEqualVoters(request, person_id, date_=None):
@@ -471,6 +484,11 @@ def getMostEqualVoters(request, person_id, date_=None):
 # Method return json with less similar voters to this voter
 def setLessEqualVoters(request, person_id, date_=None):
     if date_:
+        #if run setter for date check if exist vote on this day
+        isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+        print isNewVote
+        if not isNewVote:
+            return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
         members, keys, date_of = getEqualVoters(request, person_id, date_)
     else:
         members, keys, date_of = getEqualVoters(request, person_id)
@@ -489,7 +507,7 @@ def setLessEqualVoters(request, person_id, date_=None):
                             votes4=out[4]['ratio'],
                             person5=Person.objects.get(id_parladata=int(out[5]['id'])),
                             votes5=out[5]['ratio'])
-    return HttpResponse('All iz well')
+    return JsonResponse({'alliswell': True, "status":'OK', "saved": result})
 
 
 def getLessEqualVoters(request, person_id, date_=None):
@@ -582,6 +600,12 @@ def setCutVotes(request, person_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
         date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+    print isNewVote
+    if not isNewVote:
+        return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
 
     r=tryHard(API_URL+'/getCoalitionPGs/')
     coalition = r.json()
@@ -720,7 +744,7 @@ def setCutVotes(request, person_id, date_=None):
         opposition_absent_max_person = ','.join(map(str, out["absent"]["maxOppID"]))
     )
 
-    return JsonResponse(out)
+    return JsonResponse({'alliswell': True, "status":'OK', "saved": final_response})
 
 
 def getCutVotes(request, person_id, date=None):
@@ -1337,7 +1361,12 @@ def setCompass(request, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-        date_=""
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+    print isNewVote
+    if not isNewVote:
+        return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
 
     data = notes.getData(date_of)
     if data == []:
@@ -1351,7 +1380,7 @@ def setCompass(request, date_=None):
         Compass(created_for=date_of,
                 data=data).save()
 
-    JsonResponse({"status": 'All iz well'})
+    return JsonResponse({'alliswell': True, "status":'OK', "saved": True})
 
 def getCompass(request, date_=None): # TODO make propper setters and getters
     if date_:
