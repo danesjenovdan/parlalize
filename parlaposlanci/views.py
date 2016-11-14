@@ -1017,7 +1017,7 @@ def getTFIDF(request, person_id, date=None):
     return JsonResponse(out)
 
 def setVocabularySizeAndSpokenWords(request, date_=None):
-    sw = WordAnalysis(API_URL, count_of="members", date_=date_)
+    sw = WordAnalysis(count_of="members", date_=date_)
 
     if not sw.isNewSpeech:
         return JsonResponse({'alliswell': False})
