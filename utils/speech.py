@@ -40,6 +40,7 @@ class WordAnalysis(object):
             self.members = tryHard(API_URL +'/getMPs/'+self.date_).json()
             self.allTimeMembers = tryHard(API_URL +'/getAllTimeMemberships').json()
             self.prepereSpeechesFromSearch()
+            #self.prepereSpeeches()
             #self.wordCounter()
 
     def prepereSpeechesFromSearch(self):
@@ -49,7 +50,7 @@ class WordAnalysis(object):
                 print mp["id"]
                 #unique words
                 tfidf = tryHard(ISCI_URL + "/tfidfALL/p/" + str(mp['id']) + (("/"+self.date_) if self.date_ else "")).json()
-                self.unique_words.append({'counter_id': tfidf["person"], 'unique': len(tfidf["results"])})
+                self.unique_words.append({'counter_id': str(mp['id']), 'unique': len(tfidf["results"])})
 
                 #allWords
                 all_words_of_this = sum([word["scores"]["tf"] for word in tfidf["results"]])
@@ -80,7 +81,7 @@ class WordAnalysis(object):
                     M2 = sum([len(list(g))*(freq**2) for freq,g in groupby(sorted([tf["score"]["tf"] for tf in tfidf["results"]]))])
                     #print M1, M2, "m1 pa m2"
                     try:
-                        self.swizec_coef.append({'counter_id': counted_obj, 'coef': (M1*M1)/(M2-M1)})
+                        self.swizec_coef.append({'counter_id': counted_obj, 'coef': 10000/(M1*M1)/(M2-M1)})
                     except:
                         self.swizec_coef.append({'counter_id': counted_obj, 'coef': 0})
 
