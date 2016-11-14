@@ -352,7 +352,7 @@ def runSettersMPMultiprocess(date_to):
 
     return "all is fine :D"
 
-def runSetterOnDates(setter, stDate, toDate):
+def runMembersSetterOnDates(setter, stDate, toDate):
     stDate = datetime.strptime(stDate, API_DATE_FORMAT).date()
     toDate = datetime.strptime(toDate, API_DATE_FORMAT).date()
 
@@ -366,7 +366,21 @@ def runSetterOnDates(setter, stDate, toDate):
     pool.map(doMembersRunner, [{"membership": membership, "stDate": stDate, "toDate": toDate, "setters_models": setters_models} for membership in memberships])
 
     return "all is fine :D"
-    
+
+
+def runSetterOnDates(setter, stDate, toDate):
+    stDate = datetime.strptime(stDate, API_DATE_FORMAT).date()
+    toDate = datetime.strptime(toDate, API_DATE_FORMAT).date()
+
+    dates = datesGenerator(stDate, toDate)
+
+    for date in dates:
+        print "Setting", date, setter
+        setter(None, date.strftime(API_DATE_FORMAT))
+
+    print "END ", setter
+
+    return 1    
 
 
 def runSettersMPSinglePerson(date_to=None):
