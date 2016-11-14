@@ -1010,6 +1010,7 @@ def getListOfPGs(request, date_=None):
             pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
             pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
             pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
+            pg_obj["results"]["seat_count"] = len(members)
             
 
 
