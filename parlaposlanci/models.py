@@ -49,6 +49,9 @@ class Person(Timestampable, models.Model): # poslanec, minister, predsednik dz e
                             help_text=_('The ID of the official on the government website.')
                             )
 
+    has_function = models.BooleanField(default=False,
+                                       help_text=_('True if is president or something special.'))
+
 
 
     def __str__(self):
