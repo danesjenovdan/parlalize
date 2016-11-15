@@ -506,6 +506,7 @@ def getPersonData(id_parladata, date_=None):
                 'district': None,
                 'gender': None,
                 'is_active': None,
+                'has_function': False,
                 }
     return {
             'type': "mp",
@@ -516,6 +517,7 @@ def getPersonData(id_parladata, date_=None):
             'gender':data.gender,
             'district': data.district,
             'is_active': True if data.person.actived == "True" else False,
+            'has_function': data.person.has_function,
         }
 
 
