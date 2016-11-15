@@ -685,6 +685,9 @@ def update():
     print "update person status"
     updatePersonStatus()
 
+    print "update person has_function"
+    updatePersonFunctions()
+
     return 1
 
 
@@ -731,4 +734,18 @@ def updatePersonStatus():
         else:
             if person.id_parladata in mps_ids:
                 person.actived = "Yes"
+                person.save()
+
+
+def updatePersonFunctions():
+    mps = tryHard(API_URL + '/getMembersWithFuction').json()
+
+    for person in Person.objects.all():
+        if person.has_function:
+            if person.id_parladata not in mps["members_with_function"]:
+                person.has_function = False
+                person.save()
+        else:
+            if person.id_parladata in mps["members_with_function"]:
+                person.has_function = True
                 person.save()
