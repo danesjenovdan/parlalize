@@ -33,6 +33,29 @@ def getSpeech(request, speech_id):
     }
     return JsonResponse(result)
 
+
+def getSpeechesOfSession(request, session_id):
+    session = get_object_or_404(Session, id_parladata=session_id)
+    speeches = Speech.objects.filter(session=session).order_by("start_time")
+
+    data = []
+    for speech in speeches:
+        out={"speech_id":speech.id_parladata,
+             "content":speech.content,
+             "session": speech.session.getSessionData(),
+             "quoted_text": None,
+             "end_idx": None,
+             "start_idx": None}
+
+        result = {
+            'person': getPersonData(speech.person.id_parladata, speech.session.start_time.strftime(API_DATE_FORMAT)),
+            'results': out
+        }
+        data.append(result)
+
+    return JsonResponse({"session": session.getSessionData(),"data": data})
+
+
 def getSessionSpeeches(request, session_id):
     out = []
     session = Session.objects.get(id_parladata=session_id)
