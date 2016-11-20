@@ -6,6 +6,7 @@ urlpatterns = patterns(
     #wtf fix (first url was ignored)
     (),
     url(r'^getSpeech/(?P<speech_id>\d+)', getSpeech),
+    url(r'^getSpeechesOfSession/(?P<session_id>\d+)', getSpeechesOfSession),
     #url(r'^setAllSessions/', setAllSessions),
 
     
