@@ -56,6 +56,13 @@ def getSpeechesOfSession(request, session_id):
     return JsonResponse({"session": session.getSessionData(),"data": data})
 
 
+def getSpeechesIDsOfSession(request, session_id):
+    session = get_object_or_404(Session, id_parladata=session_id)
+    speeches_ids = list(Speech.objects.filter(session=session).order_by("start_time").values_list("id_parladata", flat=True))
+
+    return JsonResponse({"session": session.getSessionData(),"data": speeches_ids})
+
+
 def getSessionSpeeches(request, session_id):
     out = []
     session = Session.objects.get(id_parladata=session_id)
