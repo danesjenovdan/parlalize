@@ -199,7 +199,10 @@ def getMPsOfPG(request, pg_id, date_=None):
     card = getPGCardModelNew(MPOfPg, pg_id, date_)
     ids = card.MPs
     result = [getPersonData(MP, date_) for MP in ids]
-    return JsonResponse(result, safe=False)
+    return JsonResponse({"results": result,
+                         "party": card.organization.getOrganizationData(),
+                         "created_at": card.created_at.strftime(API_DATE_FORMAT),
+                         "created_for": card.created_for.strftime(API_DATE_FORMAT)})
 
 
 def getSpeechesOfPG(request, pg_id, date_=False):
@@ -207,7 +210,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-        date_ = ""
+        date_ = date_of.strftime(API_DATE_FORMAT)
 
     membersOfPGRanges = reversed(tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "")).json())
     out = []
@@ -246,8 +249,12 @@ def getSpeechesOfPG(request, pg_id, date_=False):
         if len(out)>14:
             break
 
+    #WORKAROUND: created_at is today.
     result  = {
-        'results': out
+        'results': out,
+        "created_for": out[-1]["date"],
+        "created_at": date_,
+        "party": Organization.objects.get(id_parladata=pg_id).getOrganizationData()
         }
     return JsonResponse(result, safe=False)
 
@@ -793,8 +800,11 @@ def getTaggedBallots(request, pg_id, date_=None):
         date_of = datetime.now().date()
     membersOfPGRanges = tryHard(API_URL+'/getMembersOfPGRanges/'+ pg_id + ("/"+date_ if date_ else "/")).json()
     out = []
+    latest = []
     for pgMembersRange in membersOfPGRanges:
         ballots = Ballot.objects.filter(person__id_parladata__in=pgMembersRange["members"], start_time__lte=datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT), start_time__gte=datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT))
+        if ballots:
+            latest.append(ballots.latest("created_at").created_at)
         ballots = [ballots.filter(start_time__range=[t_date, t_date+timedelta(days=1)])for t_date in ballots.order_by("start_time").datetimes('start_time', 'day')]
         for day in ballots:
             dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "ballots":[]}
@@ -814,6 +824,8 @@ def getTaggedBallots(request, pg_id, date_=None):
     tags = list(Tag.objects.all().values_list("name", flat=True))
     result  = {
         'party':Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
+        'created_at': max(latest).strftime(API_DATE_FORMAT) if latest else None,
+        'created_for': out[-1]["date"] if out else None,
         'all_tags': tags,
         'results': list(reversed(out))
         }
@@ -877,7 +889,7 @@ def setVocabularySizeALL_(request, date_):
 
 
 def setVocabularySizeALL(request, date_=None):
-    sw = WordAnalysis(API_URL, count_of="groups", date_=date_)
+    sw = WordAnalysis(count_of="groups", date_=date_)
 
     if not sw.isNewSpeech:
         return JsonResponse({'alliswell': True, 'msg': 'Na ta dan ni bilo govorov'})
