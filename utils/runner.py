@@ -547,8 +547,7 @@ def runSettersPG(date_to=None):
             except:
                 client.captureException()
 
-    organizations = tryHard(
-        API_URL + "/getOrganizatonByClassification").json()
+    organizations = tryHard(API_URL + "/getOrganizatonByClassification").json()
     print organizations
     for org in organizations["working_bodies"] + organizations["council"]:
         print org
@@ -755,3 +754,13 @@ def updatePersonFunctions():
             if person.id_parladata in mps["members_with_function"]:
                 person.has_function = True
                 person.save()
+
+def updateWB():
+    organizations = tryHard(API_URL + "/getOrganizatonByClassification").json()
+    for wb in organizations["working_bodies"] + organizations["council"]:
+        pg = tryHard(API_URL + '/getMembersOfPGRanges/'+ str(wb['id']) +'/' + datetime.now().date().strftime(API_DATE_FORMAT)).json()
+        for mem in pg:
+            print "set working_bodie: " + str(wb["id"])
+            setWorkingBodies(None, str(wb["id"]), mem['start_date'])  
+
+    return "all is fine :D WB so settani"
