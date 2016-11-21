@@ -81,7 +81,7 @@ class WordAnalysis(object):
                     M2 = sum([len(list(g))*(freq**2) for freq,g in groupby(sorted([tf["score"]["tf"] for tf in tfidf["results"]]))])
                     #print M1, M2, "m1 pa m2"
                     try:
-                        self.swizec_coef.append({'counter_id': counted_obj, 'coef': 10000/(M1*M1)/(M2-M1)})
+                        self.swizec_coef.append({'counter_id': counted_obj, 'coef': (M1*M1)/(M2-M1)})
                     except:
                         self.swizec_coef.append({'counter_id': counted_obj, 'coef': 0})
 
