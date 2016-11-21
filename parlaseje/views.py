@@ -29,6 +29,8 @@ def getSpeech(request, speech_id):
 
     result = {
         'person': getPersonData(speech.person.id_parladata, speech.session.start_time.strftime(API_DATE_FORMAT)),
+        'created_for': speech.start_time.strftime(API_DATE_FORMAT),
+        'created_at': speech.created_at.strftime(API_DATE_FORMAT),
         'results': out
     }
     return JsonResponse(result)
@@ -53,14 +55,20 @@ def getSpeechesOfSession(request, session_id):
         }
         data.append(result)
 
-    return JsonResponse({"session": session.getSessionData(),"data": data})
+    return JsonResponse({"session": session.getSessionData(),
+                         "created_for": session.start_time.strftime(API_DATE_FORMAT),
+                         "created_at": datetime.today().strftime(API_DATE_FORMAT),
+                         "data": data})
 
 
 def getSpeechesIDsOfSession(request, session_id):
     session = get_object_or_404(Session, id_parladata=session_id)
     speeches_ids = list(Speech.objects.filter(session=session).order_by("start_time").values_list("id_parladata", flat=True))
 
-    return JsonResponse({"session": session.getSessionData(),"data": speeches_ids})
+    return JsonResponse({"session": session.getSessionData(),
+                         "created_for": session.start_time.strftime(API_DATE_FORMAT),
+                         "created_at": datetime.today().strftime(API_DATE_FORMAT),
+                         "data": speeches_ids})
 
 
 def getSessionSpeeches(request, session_id):
@@ -70,6 +78,8 @@ def getSessionSpeeches(request, session_id):
         out.append({"speech_id": speech.id_parladata, "content": speech.content, "person_id": speech.person.id_parladata})
     result = {
         'session': session.getSessionData(),
+        'created_for': session.start_time.strftime(API_DATE_FORMAT),
+        'created_at': datetime.today().strftime(API_DATE_FORMAT),
         'results': out
     }
     return JsonResponse(result, safe=False)
@@ -205,16 +215,16 @@ def setMotionOfSessionGraph(request, id_se):
 
 def getMotionOfSession(request, id_se, date=False):
     out = []
-
+    session = Session.objects.get(id_parladata=int(id_se))
     if Vote.objects.filter(session__id_parladata=id_se):
         if date:
             model = Vote.objects.filter(session__id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
         else:
             model = Vote.objects.filter(session__id_parladata=id_se)
-
+        dates = []
         for card in model:
             out.append({
-            'session': Session.objects.get(id_parladata=int(id_se)).getSessionData(),
+            'session': session.getSessionData(),
             'results': {
 
                     'motion_id': card.id_parladata,
@@ -223,13 +233,16 @@ def getMotionOfSession(request, id_se, date=False):
                     'against': card.against,
                     'abstain': card.abstain,
                     'not_present':card.not_present,
-                    'result':card.result
-            }
-        })
+                    'result':card.result}
+            })
+            dates.append(card.created_at)
     else:
         session = get_object_or_404(Session, id_parladata=id_se)
         return JsonResponse([{"status": "Seja brez glasov"}], safe=False)
-    return JsonResponse(out, safe=False)
+    return JsonResponse({"results": out,
+                         "session": session.getSessionData(),
+                         "created_for": session.start_time.strftime(API_DATE_FORMAT),
+                         "created_at": max(dates).strftime(API_DATE_FORMAT),}, safe=False)
 
 
 def getMotionGraph(request, id_mo, date=False):
@@ -307,7 +320,16 @@ def getMotionGraph(request, id_mo, date=False):
 
         out_np = {'option':'not_present','total_votes': model[0].not_present, 'breakdown':option_np}
 
-        out = {'id':id_mo, 'name': model[0].motion, 'result':model[0].result, 'required':'62', 'all': {'kvorum': out_kvor, 'for': out_for, 'against': out_against, 'not_present': out_np}}
+        out = {'id':id_mo,
+               'created_for': model[0].vote.created_for.strftime(API_DATE_FORMAT),
+               'created_at': model[0].created_at.strftime(API_DATE_FORMAT),
+               'name': model[0].motion, 
+               'result':model[0].result, 
+               'required':'62', #TODO: naji pravo stvar za ta 62 :D
+               'all': {'kvorum': out_kvor, 
+                       'for': out_for, 
+                       'against': out_against, 
+                       'not_present': out_np}}
         return JsonResponse(out, safe=False)
     else:
         raise Http404("Nismo našli kartice")
@@ -337,17 +359,18 @@ def setAbsentMPs(request, id_se):
 
 
 def getAbsentMPs(request, id_se, date=False):
+    session = get_object_or_404(Session, id_parladata=id_se)
     try:
         if date:
             date_ = datetime.strptime(date, API_DATE_FORMAT)
-            ids = AbsentMPs.objects.get(session__id_parladata=int(id_se), start_time__lte=data_).absentMPs
+            absentMembers = AbsentMPs.objects.get(session=session, start_time__lte=data_)
         else:
-            ids = AbsentMPs.objects.get(session__id_parladata=int(id_se)).absentMPs
+            absentMembers = AbsentMPs.objects.get(session=session)
             date_ = datetime.now().date()
             date = date_.strftime(API_DATE_FORMAT)
         results = []
 
-        for abMP in ids:
+        for abMP in absentMembers.absentMPs:
             result = {
             "person": getPersonData(abMP, date)
             }
@@ -355,7 +378,10 @@ def getAbsentMPs(request, id_se, date=False):
 
     except ObjectDoesNotExist:
         raise Http404("Nismo našli kartice")
-    return JsonResponse(results, safe=False)
+    return JsonResponse({"results": results,
+                         "session": session.getSessionData(),
+                         "created_at": absentMembers.created_at.strftime(API_DATE_FORMAT),
+                         "created_for": absentMembers.created_for.strftime(API_DATE_FORMAT)}, safe=False)
 
 def setPresenceOfPG(request, id_se):
     votes = tryHard(API_URL+'/getVotesOfSession/'+str(id_se)+'/').json()
@@ -438,7 +464,11 @@ def getPresenceOfPG(request, id_se, date=False):
             results = sorted(results, key=lambda k: k['percent'], reverse=True)
     except ObjectDoesNotExist:
         raise Http404("Nismo našli kartice")
-    return JsonResponse(results, safe=False)
+    return JsonResponse({"results": results,
+                         "created_for": presence.start_time.strftime(API_DATE_FORMAT),
+                         "created_at": presence.created_at.strftime(API_DATE_FORMAT),
+                         "session": presence.session.getSessionData()}, 
+                        safe=False)
 
 def setSpeechesOnSession(request, date=False):
     if date:
@@ -521,6 +551,8 @@ def setQuote(request, speech_id, start_pos, end_pos):
 def getQuote(request, quote_id):
     quote = get_object_or_404(Quote, id=quote_id)
     return JsonResponse({"person": getPersonData(quote.speech.person.id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
+                         "created_for": quote.created_at.strftime(API_DATE_FORMAT),
+                         "created_at": quote.created_at.strftime(API_DATE_FORMAT),
                          "results": {"quoted_text": quote.quoted_text, 
                                      "start_idx": quote.first_char, 
                                      "end_idx": quote.last_char, 
@@ -557,8 +589,10 @@ def getLastSessionLanding(request, date_=None):
     results = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
                                 "percent":presence.presence[0][p],} for p in presence.presence[0]]
     result = sorted(results, key=lambda k: k['percent'], reverse=True)
-
-    return JsonResponse({'session': Session.objects.get(id_parladata=int(presence.session.id_parladata)).getSessionData(), 
+    session = Session.objects.get(id_parladata=int(presence.session.id_parladata))
+    return JsonResponse({"session": session.getSessionData(),
+                         "created_for": session.start_time.created_at.strftime(API_DATE_FORMAT),
+                         "created_at": datetime.today().created_at.strftime(API_DATE_FORMAT),
                          "presence": result, 
                          "motions": motions, 
                          "tfidf": tfidf.json()}, safe=False)
