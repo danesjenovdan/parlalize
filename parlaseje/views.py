@@ -68,7 +68,7 @@ def getSpeechesIDsOfSession(request, session_id):
     return JsonResponse({"session": session.getSessionData(),
                          "created_for": session.start_time.strftime(API_DATE_FORMAT),
                          "created_at": datetime.today().strftime(API_DATE_FORMAT),
-                         "data": speeches_ids})
+                         "results": speeches_ids})
 
 
 def getSessionSpeeches(request, session_id):

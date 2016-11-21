@@ -368,9 +368,13 @@ def getAllSpeeches(request, person_id, date_=None):
     else:
         speeches = [[speech for speech in speeches.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in speeches.order_by("start_time").datetimes('start_time', 'day')]
     out = []
+    lastDay = None
+    created_at = []
     for day in speeches:
         dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "speeches":[]}
+        lastDay = day[0].start_time.strftime(API_OUT_DATE_FORMAT)
         for speech in day:
+            created_at.append(speech.created_at)
             dayData["speeches"].append({
                 "session_name": speech.session.name,
                 "speech_id": speech.id_parladata,
@@ -381,6 +385,8 @@ def getAllSpeeches(request, person_id, date_=None):
 
     result  = {
         'person': getPersonData(person_id, date_),
+        'created_at': max(created_at).strftime(API_OUT_DATE_FORMAT),
+        'created_for': lastDay,
         'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
@@ -1230,7 +1236,11 @@ def getVocabolarySizeLanding(request, date_=None):
         except:
             print "ni se goborila"
     print datas
-    return JsonResponse({"created_for": date_, "created_at": datas[0].created_at.strftime(API_DATE_FORMAT) if datas else date_, "data": sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score'])}, safe=False)
+    return JsonResponse({"created_for": date_, 
+                         "created_at": datas[0].created_at.strftime(API_DATE_FORMAT) if datas else date_, 
+                         "data": sorted([{"person": getPersonData(data.person.id_parladata, date_), 
+                            "score": data.score} for data in datas], key=lambda k: k['score'])}, 
+                         safe=False)
 
 
 def getVocabolarySizeUniqueWordsLanding(request, date_=None):
@@ -1243,7 +1253,8 @@ def getVocabolarySizeUniqueWordsLanding(request, date_=None):
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
     datas = [getPersonCardModelNew(VocabularySizeUniqueWords, mp["id"], date_) for mp in mps]
     print datas
-    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
+    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), 
+                                 "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
 
 
 #just method ALL is edited for date
@@ -1465,9 +1476,13 @@ def getTaggedBallots(request, person_id, date_=None):
         date_of = datetime.now().date()
     out = []
     ballots = Ballot.objects.filter(person__id_parladata=person_id, start_time__lte=date_of)
+    created_at = ballots.latest("created_at").created_at
     ballots = [[ballot for ballot in ballots.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in ballots.order_by("start_time").datetimes('start_time', 'day')]
+    
+    lastDay = None
     for day in ballots:
         dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "ballots":[]}
+        lastDay = day[0].start_time.strftime(API_OUT_DATE_FORMAT)
         for ballot in day:
             dayData["ballots"].append({
                 "motion": ballot.vote.motion,
@@ -1482,6 +1497,8 @@ def getTaggedBallots(request, person_id, date_=None):
     result  = {
         'person': getPersonData(person_id, date_),
         'all_tags': tags,
+        'created_at': created_at.strftime(API_OUT_DATE_FORMAT),
+        'created_for': lastDay,
         'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
