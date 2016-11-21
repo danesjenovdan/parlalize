@@ -1507,11 +1507,13 @@ def getTaggedBallots(request, person_id, date_=None):
 def getListOfMembers(request, date_=None, force_render=False):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        key = date_
     else:
         date_of = datetime.now().date()
         date_=date_of.strftime(API_DATE_FORMAT)
+        key = "last"
 
-    c_data = cache.get("mp_list_" + date_)
+    c_data = cache.get("mp_list_" + key)
     if c_data and not force_render:
         data = c_data
     else:
@@ -1553,7 +1555,7 @@ def getListOfMembers(request, date_=None, force_render=False):
             data.append(person_obj)
         data = sorted(data, key=lambda k: k['person']["name"])
         data = {"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data}
-        cache.set("mp_list_" + date_, data, 60 * 60 * 48)    
+        cache.set("mp_list_" + key, data, 60 * 60 * 48)    
 
     return JsonResponse(data)
 
