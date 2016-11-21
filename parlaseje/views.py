@@ -465,7 +465,7 @@ def getPresenceOfPG(request, id_se, date=False):
     except ObjectDoesNotExist:
         raise Http404("Nismo našli kartice")
     return JsonResponse({"results": results,
-                         "created_for": presence.start_time.strftime(API_DATE_FORMAT),
+                         "created_for": presence.created_for.strftime(API_DATE_FORMAT),
                          "created_at": presence.created_at.strftime(API_DATE_FORMAT),
                          "session": presence.session.getSessionData()}, 
                         safe=False)
