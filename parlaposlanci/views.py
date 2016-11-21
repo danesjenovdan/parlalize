@@ -1023,7 +1023,7 @@ def getTFIDF(request, person_id, date=None):
     return JsonResponse(out)
 
 def setVocabularySizeAndSpokenWords(request, date_=None):
-    sw = WordAnalysis(API_URL, count_of="members", date_=date_)
+    sw = WordAnalysis(count_of="members", date_=date_)
 
     if not sw.isNewSpeech:
         return JsonResponse({'alliswell': False})
@@ -1504,7 +1504,7 @@ def getTaggedBallots(request, person_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
-def getListOfMembers(request, date_=None):
+def getListOfMembers(request, date_=None, force_render=False):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
         key = date_
@@ -1513,8 +1513,8 @@ def getListOfMembers(request, date_=None):
         date_=date_of.strftime(API_DATE_FORMAT)
         key = "last"
 
+    if c_data and not force_render:
     c_data = cache.get("mp_list_" + key)
-    if c_data:
         data = c_data
     else:
         mps = tryHard(API_URL+'/getMPs/'+date_).json()
@@ -1555,7 +1555,7 @@ def getListOfMembers(request, date_=None):
             data.append(person_obj)
         data = sorted(data, key=lambda k: k['person']["name"])
         data = {"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data}
-        cache.set("mp_list_" + key, data, 900)    
+        cache.set("mp_list_" + key, data, 60 * 60 * 48)    
 
     return JsonResponse(data)
 
