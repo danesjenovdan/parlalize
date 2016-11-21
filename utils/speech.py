@@ -181,7 +181,8 @@ class WordAnalysis(object):
         return spoken_words_sorted[-1]['wordcount'], maxMP
 
     def getAvgSpokenWords(self):
-        return self.average_words
+        scores = [person['wordcount'] for person in self.all_words]
+        return float(sum(scores))/float(len(scores))
 
 
 class Utils(object):
