@@ -1504,7 +1504,7 @@ def getTaggedBallots(request, person_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
-def getListOfMembers(request, date_=None):
+def getListOfMembers(request, date_=None, force_render=False):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -1512,7 +1512,7 @@ def getListOfMembers(request, date_=None):
         date_=date_of.strftime(API_DATE_FORMAT)
 
     c_data = cache.get("mp_list_" + date_)
-    if c_data:
+    if c_data and not force_render:
         data = c_data
     else:
         mps = tryHard(API_URL+'/getMPs/'+date_).json()
@@ -1553,7 +1553,7 @@ def getListOfMembers(request, date_=None):
             data.append(person_obj)
         data = sorted(data, key=lambda k: k['person']["name"])
         data = {"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data}
-        cache.set("mp_list_" + date_, data, 900)    
+        cache.set("mp_list_" + date_, data, 60 * 60 * 48)    
 
     return JsonResponse(data)
 
