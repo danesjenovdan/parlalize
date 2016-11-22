@@ -606,17 +606,7 @@ def onDatePGCardRunner(date_=None):
         except:
             print FAIL + "FAIL on: " + str(setter) + ENDC
 
-    organizations = tryHard(
-        API_URL + "/getOrganizatonByClassification").json()
-    for org in organizations["working_bodies"] + organizations["council"]:
-        print "set working_bodie: " + str(org["id"])
-        try:
-            setWorkingBodies(None, str(org["id"]), date_)
-        except:
-            print FAIL + "FAIL on: " + "setWorkingBodies" + " and with id: " + str(org["id"]) + ENDC
-
-    return True
-
+    updateWB()
 
 def runSettersSessions(date_to=None):
     if not date_to:
@@ -760,7 +750,10 @@ def updateWB():
     for wb in organizations["working_bodies"] + organizations["council"]:
         pg = tryHard(API_URL + '/getMembersOfPGRanges/'+ str(wb['id']) +'/' + datetime.now().date().strftime(API_DATE_FORMAT)).json()
         for mem in pg:
-            print "set working_bodie: " + str(wb["id"])
-            setWorkingBodies(None, str(wb["id"]), mem['start_date'])  
-
+            print "setting working_bodie: ",wb['name']
+            try:
+                setWorkingBodies(None, str(wb["id"]), mem['start_date'])  
+            except:
+                client.captureException()
+            
     return "all is fine :D WB so settani"
