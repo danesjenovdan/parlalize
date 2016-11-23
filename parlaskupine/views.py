@@ -1053,6 +1053,6 @@ def getListOfPGs(request, date_=None):
 
 
             data.append(pg_obj)
-    data = sorted(data, key=lambda k: k['party']["name"])
+    data = sorted(data, key=lambda k: k['results']["seat_count"], reverse=True)
 
     return JsonResponse({"data": data})
