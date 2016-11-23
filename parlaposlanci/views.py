@@ -1561,4 +1561,4 @@ def getListOfMembers(request, date_=None, force_render=False):
 
 
 def getAllActiveMembers(request):
-    return JsonResponse([getPersonData(person.id_parladata) for person in Person.objects.filter(actived="True")], safe=False)
+    return JsonResponse([getPersonData(person.id_parladata) for person in Person.objects.filter(actived="Yes")], safe=False)
