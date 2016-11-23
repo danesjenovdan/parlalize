@@ -197,4 +197,5 @@ def idsOfSession(model):
 	if len(mod) == 0:
 		return ids
 	else:
-		return list(set(mod) - set(ids))
+		#return list(set(mod) - set(ids))
+                return list(set(ids) - set(mod))
