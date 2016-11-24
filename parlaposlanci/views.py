@@ -907,14 +907,14 @@ def getStyleScores(request, person_id, date_=None):
         'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'person': getPersonData(person_id, card.created_for.strftime(API_DATE_FORMAT)),
         'results': {
-            'privzdignjeno': card.privzdignjeno*10000,
-            'problematicno': card.problematicno*10000,
-            'preprosto': card.preprosto*10000,
-            'average': {
-                'privzdignjeno': card.privzdignjeno_average*10000,
-                'problematicno': card.problematicno_average*10000,
-                'preprosto': card.preprosto_average*10000
-            }
+            'privzdignjeno': card.privzdignjeno/card.privzdignjeno_average,
+            'problematicno': card.problematicno/card.problematicno_average,
+            'preprosto': card.preprosto/card.preprosto_average,
+            # 'average': {
+            #     'privzdignjeno': card.privzdignjeno_average*10000,
+            #     'problematicno': card.problematicno_average*10000,
+            #     'preprosto': card.preprosto_average*10000
+            # }
         }
     }
 
