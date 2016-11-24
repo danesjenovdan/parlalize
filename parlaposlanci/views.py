@@ -902,14 +902,27 @@ def setStyleScores(request, person_id):
 def getStyleScores(request, person_id, date_=None):
     card = getPersonCardModelNew(StyleScores, int(person_id), date_)
 
+    privzdignjeno = 0
+    problematicno = 0
+    preprosto = 0
+
+    if card.privzdignjeno != 0 and card.privzdignjeno_average != 0:
+        privzdignjeno = card.privzdignjeno/card.privzdignjeno_average
+    
+    if card.problematicno != 0 and card.problematicno_average != 0:
+        privzdignjeno = card.problematicno/card.problematicno_average
+    
+    if card.preprosto != 0 and card.preprosto_average != 0:
+        privzdignjeno = card.preprosto/card.preprosto_average
+
     out = {
         'created_at': card.created_at.strftime(API_DATE_FORMAT),
         'created_for': card.created_for.strftime(API_DATE_FORMAT),
         'person': getPersonData(person_id, card.created_for.strftime(API_DATE_FORMAT)),
         'results': {
-            'privzdignjeno': card.privzdignjeno/card.privzdignjeno_average,
-            'problematicno': card.problematicno/card.problematicno_average,
-            'preprosto': card.preprosto/card.preprosto_average,
+            'privzdignjeno': privzdignjeno,
+            'problematicno': problematicno,
+            'preprosto': preprosto
             # 'average': {
             #     'privzdignjeno': card.privzdignjeno_average*10000,
             #     'problematicno': card.problematicno_average*10000,
