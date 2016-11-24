@@ -1486,6 +1486,7 @@ def getTaggedBallots(request, person_id, date_=None):
         for ballot in day:
             dayData["ballots"].append({
                 "motion": ballot.vote.motion,
+                "motion_id": ballot.vote.id_parladata,
                 "ballot_id": ballot.id_parladata,
                 "session_id": ballot.vote.session.id_parladata if ballot.vote.session else None,
                 "option": ballot.option,
