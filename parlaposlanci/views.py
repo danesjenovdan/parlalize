@@ -408,7 +408,7 @@ def getEqualVoters(request, id, date_=None):
     tempVotes = {voter: votes_ for voter, votes_ in votes.items() if voter in membersDict.keys()}
     votes = tempVotes
     try:
-        out = {vote:euclidean(votes[str(id)].values(), votes[str(vote)].values()) for vote in sorted(votes.keys())}
+        out = {vote:euclidean(votes[str(id)].values(), votes[str(vote)].values()) for vote in sorted(votes.keys()) if str(vote) != str(id)}
     except:
         client.captureException()
         return JsonResponse({'alliswell': False})
@@ -433,7 +433,7 @@ def setMostEqualVoters(request, person_id, date_=None):
     else:
         members, keys, date_of = getEqualVoters(request, person_id)
 
-    out = {index: members[key] for key, index in zip(keys[-6:-1], [5, 4, 3, 2, 1])}
+    out = {index: members[key] for key, index in zip(keys[:5], [1, 2, 3, 4, 5])}
 
     result = saveOrAbortNew(model=EqualVoters,
                             created_for=date_of,
@@ -499,7 +499,7 @@ def setLessEqualVoters(request, person_id, date_=None):
         members, keys, date_of = getEqualVoters(request, person_id, date_)
     else:
         members, keys, date_of = getEqualVoters(request, person_id)
-    out = {index: members[key] for key, index in zip(keys[:5], [1, 2, 3, 4, 5])}
+        out = {index: members[key] for key, index in zip(keys[-6:-1], [5, 4, 3, 2, 1])}
 
     result = saveOrAbortNew(model=LessEqualVoters,
                             created_for=date_of,
