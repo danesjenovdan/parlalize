@@ -469,7 +469,10 @@ def getRangeVotes(pgs, date_, votes_type="logic"):
                 for b in votes_ids:
                     if str(b) not in votes[str(member)].keys():
                         print member, b, "FAIL"
-            pg_score_temp =[votes[str(member)][str(b)] for member in members for b in votes_ids]
+                        #fix for cutVotes for members which isn't member for a half of day 
+                        if votes_type=="plain":
+                            votes[str(member)][str(b)] = "X"
+            pg_score_temp =[votes[str(member)][str(b)] for member in members for b in votes_ids if votes[str(member)][str(b)] != "X"]
 
         if votes_type=="logic":
             pg_score = np.concatenate((pg_score,pg_score_temp), axis=0)
