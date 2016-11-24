@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from django.http import JsonResponse
 from scipy.stats.stats import pearsonr
+from scipy.spatial.distance import euclidean
 from datetime import date, datetime, timedelta
 from django.core.cache import cache
 
@@ -407,7 +408,7 @@ def getEqualVoters(request, id, date_=None):
     tempVotes = {voter: votes_ for voter, votes_ in votes.items() if voter in membersDict.keys()}
     votes = tempVotes
     try:
-        out = {vote:pearsonr(votes[str(id)].values(), votes[str(vote)].values())[0] for vote in sorted(votes.keys())}
+        out = {vote:euclidean(votes[str(id)].values(), votes[str(vote)].values()) for vote in sorted(votes.keys())}
     except:
         client.captureException()
         return JsonResponse({'alliswell': False})
