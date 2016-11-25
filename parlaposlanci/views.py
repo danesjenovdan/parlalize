@@ -499,7 +499,7 @@ def setLessEqualVoters(request, person_id, date_=None):
         members, keys, date_of = getEqualVoters(request, person_id, date_)
     else:
         members, keys, date_of = getEqualVoters(request, person_id)
-        out = {index: members[key] for key, index in zip(keys[-6:-1], [5, 4, 3, 2, 1])}
+    out = {index: members[key] for key, index in zip(keys[-6:-1], [5, 4, 3, 2, 1])}
 
     result = saveOrAbortNew(model=LessEqualVoters,
                             created_for=date_of,
