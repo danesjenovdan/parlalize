@@ -1569,15 +1569,18 @@ def getAllActiveMembers(request):
 def getSlugs(request):
     obj =  {"person": { person.id_parladata: {"slug": slugify(person.name)}for person in Person.objects.all().exclude(pg__isnull=True)},
             "personLink": {
-                    "pregled": "/poslanci/pregled/",
-                    "glasovanja": "/poslanci/glasovanja/",
-                    "govori": "/poslanci/govori/"
+                    "base": "/poslanec/",
+                    "govori": "/govori/",
+                    "glasovanja": "/glasovanja/",
+                    "pregled": "/pregled/"                 
                 },
-            "party": { org.id_parladata: {"slug": slugify(org.name)}for org in  Organization.objects.all()},
+            "party": { org.id_parladata: {"slug": slugify(org.name),
+                                          "acronym": slugify(org.acronym)}for org in  Organization.objects.all()},
             "partyLink": {
-                    "pregled": "/poslanska-skupina/pregled/",
-                    "glasovanja": "/poslanska-skupina/glasovanja/",
-                    "govori": "/poslanska-skupina/govori/"
+                    "base": "/poslanska-skupina/",
+                    "govori": "/govori/",
+                    "glasovanja": "/glasovanja/",
+                    "pregled": "/pregled/"
                 },
             
             "sessionLink": {
