@@ -1598,6 +1598,7 @@ def getSlugs(request):
                     "glasovanja": "/seja/glasovanja/",
                     "prisotnost": "/seja/prisotnost/",
                     "transkript": "/seja/transkript/"
-                }
+                },
+            "base": "https://skoraj.parlameter.si"
             }
     return JsonResponse(obj)
