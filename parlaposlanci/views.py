@@ -1594,7 +1594,7 @@ def getSlugs(request):
                 },
             
             "sessionLink": {
-                    "glasovanje": "/seja/ovanje/",
+                    "glasovanje": "/seja/glasovanje/",
                     "glasovanja": "/seja/glasovanja/",
                     "prisotnost": "/seja/prisotnost/",
                     "transkript": "/seja/transkript/"
