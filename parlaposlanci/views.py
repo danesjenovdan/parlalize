@@ -20,6 +20,7 @@ from parlalize.settings import API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT
 from parlaseje.models import Session, Tag
 from utils.speech import WordAnalysis
 from raven.contrib.django.raven_compat.models import client
+from slugify import slugify
 
 from kompas2 import notes
 
@@ -1577,3 +1578,26 @@ def getListOfMembers(request, date_=None, force_render=False):
 
 def getAllActiveMembers(request):
     return JsonResponse([getPersonData(person.id_parladata) for person in Person.objects.filter(actived="Yes")], safe=False)
+
+def getSlugs(request):
+    obj =  {"person": { person.id_parladata: {"slug": slugify(person.name)}for person in Person.objects.all().exclude(pg__isnull=True)},
+            "personLink": {
+                    "pregled": "/poslanci/pregled/",
+                    "glasovanja": "/poslanci/glasovanja/",
+                    "govori": "/poslanci/govori/"
+                },
+            "party": { org.id_parladata: {"slug": slugify(org.name)}for org in  Organization.objects.all()},
+            "partyLink": {
+                    "pregled": "/poslanska-skupina/pregled/",
+                    "glasovanja": "/poslanska-skupina/glasovanja/",
+                    "govori": "/poslanska-skupina/govori/"
+                },
+            
+            "sessionLink": {
+                    "glasovanje": "/seja/ovanje/",
+                    "glasovanja": "/seja/glasovanja/",
+                    "prisotnost": "/seja/prisotnost/",
+                    "transkript": "/seja/transkript/"
+                }
+            }
+    return JsonResponse(obj)
