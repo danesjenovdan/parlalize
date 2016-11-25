@@ -107,6 +107,8 @@ urlpatterns = patterns(
 
     url(r'^getAllActiveMembers/', getAllActiveMembers),
 
+    url(r'^getSlugs/', getSlugs),
+
     ####################################################################################
 
     #runenr
