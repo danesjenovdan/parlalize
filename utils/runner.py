@@ -688,12 +688,20 @@ def update():
     print "update person has_function"
     updatePersonFunctions()
 
+    updateLastDay()
+
     return 1
 
 def dailyUpdate():
     #refresh cache
     getListOfMembers(None, force_render=True)
 
+    return 1
+
+def updateLastDay():
+    lastVoteDay = Vote.objects.latest("created_for")
+    onDateMPCardRunner(lastVoteDay.strftime(API_DATE_FORMAT))
+    onDatePGCardRunner(lastVoteDay.strftime(API_DATE_FORMAT))
     return 1
 
 
