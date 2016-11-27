@@ -346,9 +346,12 @@ def getLastActivity(request, person_id, date_=None):
     out.append(parseDayActivites(lastActivites))
     for i in range(LAST_ACTIVITY_COUNT - 1):
         startDate = lastActivites.created_for - timedelta(days=1)
-        lastActivites = getPersonCardModelNew(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
+        try:
+            lastActivites = getPersonCardModelNew(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
+        except:
+            break
         if lastActivites == None:
-            break;
+            break
         out.append(parseDayActivites(lastActivites))
 
     static = getPersonCardModelNew(MPStaticPL, person_id, date_)
@@ -387,8 +390,8 @@ def getAllSpeeches(request, person_id, date_=None):
 
     result  = {
         'person': getPersonData(person_id, date_),
-        'created_at': max(created_at).strftime(API_OUT_DATE_FORMAT),
-        'created_for': lastDay,
+        'created_at': max(created_at).strftime(API_OUT_DATE_FORMAT) if created_at else datetime.today().strftime("API_DATE_FORMAT"),
+        'created_for': lastDay if lastDay else datetime.today().strftime("API_DATE_FORMAT"),
         'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
