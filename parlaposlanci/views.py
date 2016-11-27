@@ -1527,7 +1527,7 @@ def getListOfMembers(request, date_=None, force_render=False):
     else:
         date_of = datetime.now().date()
         date_=date_of.strftime(API_DATE_FORMAT)
-        key = "last"
+        key = date_
 
     c_data = cache.get("mp_list_" + key)
     if c_data and not force_render:
