@@ -496,7 +496,9 @@ def getPersonData(id_parladata, date_=None):
         data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
     except:
         guest  = tryHard(API_URL + '/getPersonData/'+str(id_parladata)+'/').json()
-        return {
+        gov_id = None
+        if guest['gov_id']:
+            return {
                 'type': "visitor" if guest else "unknown",
                 'party': {
                           'acronym': None, 
@@ -504,13 +506,29 @@ def getPersonData(id_parladata, date_=None):
                           'name': None,
                           'is_coalition': None}, 
                 'name': guest["name"] if guest else None, 
-                'gov_id': None, 
+                'gov_id': guest['gov_id'], 
                 'id': id_parladata,
                 'district': None,
                 'gender': None,
                 'is_active': None,
                 'has_function': False,
                 }
+        else:
+            return {
+                    'type': "visitor" if guest else "unknown",
+                    'party': {
+                            'acronym': None, 
+                            'id': None, 
+                            'name': None,
+                            'is_coalition': None}, 
+                    'name': guest["name"] if guest else None, 
+                    'gov_id': None, 
+                    'id': id_parladata,
+                    'district': None,
+                    'gender': None,
+                    'is_active': None,
+                    'has_function': False,
+                    }
     return {
             'type': "mp",
             'name': data.person.name,
