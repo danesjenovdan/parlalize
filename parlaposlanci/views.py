@@ -912,10 +912,10 @@ def getStyleScores(request, person_id, date_=None):
         privzdignjeno = card.privzdignjeno/card.privzdignjeno_average
     
     if card.problematicno != 0 and card.problematicno_average != 0:
-        privzdignjeno = card.problematicno/card.problematicno_average
+        problematicno = card.problematicno/card.problematicno_average
     
     if card.preprosto != 0 and card.preprosto_average != 0:
-        privzdignjeno = card.preprosto/card.preprosto_average
+        preprosto = card.preprosto/card.preprosto_average
 
     out = {
         'created_at': card.created_at.strftime(API_DATE_FORMAT),
@@ -1565,14 +1565,18 @@ def getListOfMembers(request, date_=None, force_render=False):
             except:
                 styleScores = None
             
+            privzdignjeno = 0
+            problematicno = 0
+            preprosto = 0
+
             if styleScores.privzdignjeno != 0 and styleScores.privzdignjeno_average != 0:
                 privzdignjeno = styleScores.privzdignjeno/styleScores.privzdignjeno_average
             
             if styleScores.problematicno != 0 and styleScores.problematicno_average != 0:
-                privzdignjeno = styleScores.problematicno/styleScores.problematicno_average
+                problematicno = styleScores.problematicno/styleScores.problematicno_average
             
             if styleScores.preprosto != 0 and styleScores.preprosto_average != 0:
-                privzdignjeno = styleScores.preprosto/styleScores.preprosto_average
+                preprosto = styleScores.preprosto/styleScores.preprosto_average
             
             person_obj["results"]["privzdignjeno"] = privzdignjeno
             person_obj["results"]["preprosto"] = preprosto
