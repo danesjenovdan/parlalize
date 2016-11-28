@@ -994,21 +994,50 @@ def setStyleScoresPGsALL(request, date_=None):
 def getStyleScoresPG(request, pg_id, date_=None):
     card = getPGCardModelNew(StyleScores, int(pg_id), date_)
 
+    privzdignjeno = 0
+    problematicno = 0
+    preprosto = 0
+
+    if card.privzdignjeno != 0 and card.privzdignjeno_average != 0:
+        privzdignjeno = card.privzdignjeno/card.privzdignjeno_average
+    
+    if card.problematicno != 0 and card.problematicno_average != 0:
+        problematicno = card.problematicno/card.problematicno_average
+    
+    if card.preprosto != 0 and card.preprosto_average != 0:
+        preprosto = card.preprosto/card.preprosto_average
+
     out = {
-        'party': card.organization.getOrganizationData(),
         'created_at': card.created_at.strftime(API_DATE_FORMAT),
         'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'person': getPersonData(person_id, card.created_for.strftime(API_DATE_FORMAT)),
         'results': {
-            'privzdignjeno': card.privzdignjeno*10000,
-            'problematicno': card.problematicno*10000,
-            'preprosto': card.preprosto*10000,
-            'average': {
-                'privzdignjeno': card.privzdignjeno_average*10000,
-                'problematicno': card.problematicno_average*10000,
-                'preprosto': card.preprosto_average*10000
-            }
+            'privzdignjeno': privzdignjeno,
+            'problematicno': problematicno,
+            'preprosto': preprosto
+            # 'average': {
+            #     'privzdignjeno': card.privzdignjeno_average*10000,
+            #     'problematicno': card.problematicno_average*10000,
+            #     'preprosto': card.preprosto_average*10000
+            # }
         }
     }
+
+    # out = {
+    #     'party': card.organization.getOrganizationData(),
+    #     'created_at': card.created_at.strftime(API_DATE_FORMAT),
+    #     'created_for': card.created_for.strftime(API_DATE_FORMAT),
+    #     'results': {
+    #         'privzdignjeno': card.privzdignjeno*10000,
+    #         'problematicno': card.problematicno*10000,
+    #         'preprosto': card.preprosto*10000,
+    #         'average': {
+    #             'privzdignjeno': card.privzdignjeno_average*10000,
+    #             'problematicno': card.problematicno_average*10000,
+    #             'preprosto': card.preprosto_average*10000
+    #         }
+    #     }
+    # }
     return JsonResponse(out, safe=False)
 
 
