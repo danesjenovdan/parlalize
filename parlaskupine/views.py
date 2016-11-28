@@ -71,7 +71,7 @@ def getBasicInfOfPG(request, pg_id, date=None):
         if vice:
             viceOfPG.append(getPersonData(vice, date))
         else:
-            viceOfPG.append(0)
+            # viceOfPG.append(0)
 
     data = {
            'party':card.organization.getOrganizationData(),
