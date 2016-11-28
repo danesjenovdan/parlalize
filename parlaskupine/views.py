@@ -1010,7 +1010,7 @@ def getStyleScoresPG(request, pg_id, date_=None):
     out = {
         'created_at': card.created_at.strftime(API_DATE_FORMAT),
         'created_for': card.created_for.strftime(API_DATE_FORMAT),
-        'person': getPersonData(person_id, card.created_for.strftime(API_DATE_FORMAT)),
+        'party': card.organization.getOrganizationData(),
         'results': {
             'privzdignjeno': privzdignjeno,
             'problematicno': problematicno,
