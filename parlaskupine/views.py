@@ -70,7 +70,7 @@ def getBasicInfOfPG(request, pg_id, date=None):
     for vice in card.viceOfPG:
         if vice:
             viceOfPG.append(getPersonData(vice, date))
-        else:
+        # else:
             # viceOfPG.append(0)
 
     data = {
