@@ -1605,7 +1605,8 @@ def getSlugs(request):
                     "pregled": "/pregled/"                 
                 },
             "party": { org.id_parladata: {"slug": slugify(org.name),
-                                          "acronym": slugify(org.acronym)}for org in  Organization.objects.all()},
+                                          "acronym": slugify(org.acronym),
+                                          "realAcronym": org.acronym}for org in  Organization.objects.all()},
             "partyLink": {
                     "base": "/poslanska-skupina/",
                     "govori": "/govori/",

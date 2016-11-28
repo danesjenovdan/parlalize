@@ -278,7 +278,7 @@ def howMatchingThem(request, pg_id, type_of, date_=None):
         for pgs in membersInPGs.keys():
             for voter in membersInPGs[str(pgs)]:
                 #WORKAROUND: if one person is in more then one PG
-                if voter in votes:
+                if str(voter) in votes:
                     votes.pop(str(voter))
 
 
