@@ -570,31 +570,33 @@ def getLastSessionLanding(request, date_=None):
     presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for")
     if not presences:
         raise Http404("Nismo našli kartice")
-    presence_intex = 0
+    presence_index = 0
     motions = None
     presence = None
 
     while not ready:
-        presence = presences[presence_intex]
+        print presence_index
+        presence = presences[presence_index]
         motions = json.loads(getMotionOfSession(None, presence.session.id_parladata).content)
-        if type(motions)==list:
-            tfidf = tryHard("https://isci.parlameter.si/tfidf/s/"+str(presence.session.id_parladata))
-            if tfidf.status_code == 200:
-                ready = True
-            else:
-                presence_intex += 1                
+        if type(motions)==dict:
+            if "results" in motions.keys():
+                tfidf = tryHard("https://isci.parlameter.si/tfidf/s/"+str(presence.session.id_parladata))
+                if tfidf.status_code == 200:
+                    ready = True
+                else:
+                    presence_intex += 1                
         else:
-            presence_intex += 1
+            presence_index += 1
  
     results = [{"org":Organization.objects.get(id_parladata=p).getOrganizationData(), 
                                 "percent":presence.presence[0][p],} for p in presence.presence[0]]
     result = sorted(results, key=lambda k: k['percent'], reverse=True)
     session = Session.objects.get(id_parladata=int(presence.session.id_parladata))
     return JsonResponse({"session": session.getSessionData(),
-                         "created_for": session.start_time.created_at.strftime(API_DATE_FORMAT),
-                         "created_at": datetime.today().created_at.strftime(API_DATE_FORMAT),
+                         "created_for": session.start_time.strftime(API_DATE_FORMAT),
+                         "created_at": datetime.today().strftime(API_DATE_FORMAT),
                          "presence": result, 
-                         "motions": motions, 
+                         "motions": motions["results"], 
                          "tfidf": tfidf.json()}, safe=False)
 
 
