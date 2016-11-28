@@ -232,7 +232,9 @@ def getPersonCardModelNew(model, id, date=None):
             else:
                 modelObject = modelObject.latest('created_for')
         else:
-            modelObject = modelObject.latest('created_for')
+            date = modelObject.latest("created_for").created_for
+            modelObject = modelObject.filter(created_for=date).latest('created_at')
+            #modelObject = modelObject.latest('created_for')
     return modelObject
 
 
@@ -287,7 +289,8 @@ def getPGCardModelNew(model, id, date=None):
             #return None
         raise Http404("Nismo našli kartice")
     else:
-        modelObject = modelObject.latest('created_for')
+        date = modelObject.latest("created_for").created_for
+        modelObject = modelObject.filter(created_for=date).latest('created_at')
         print "get object BUBU", modelObject.created_for
     return modelObject
 
