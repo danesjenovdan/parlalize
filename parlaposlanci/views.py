@@ -1036,7 +1036,8 @@ def setTFIDF(request, person_id, date_=None):
         date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
 
-    data = tryHard("https://isci.parlameter.si/tfidf/p/"+person_id).json()
+    print "TFIDF", person_id
+    data = tryHard("https://isci.parlameter.si/tfidf/nodigrams/p/"+person_id).json()
     is_saved = saveOrAbortNew(Tfidf, person=Person.objects.get(id_parladata=person_id), created_for=date_of, data=data["results"])
 
     return JsonResponse({"alliswell": True,
