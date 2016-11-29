@@ -15,7 +15,7 @@ urlpatterns = patterns(
     url(r'^setLeastEqualVoters/(?P<person_id>\d+)/(?P<date_>[\w].+)', setLessEqualVoters),
     url(r'^setLeastEqualVoters/(?P<person_id>\d+)/', setLessEqualVoters),
 
-    url(r'^setTFIDF/(?P<person_id>\d+)', setTFIDF),
+    url(r'^setTFIDF/(?P<person_id>\d+)/(?P<date_>[\w].+)', setTFIDF),
 
     url(r'^setPresence/(?P<person_id>\d+)/(?P<date_>[\w].+)', setPercentOFAttendedSession),
     url(r'^setPresence/(?P<person_id>\d+)', setPercentOFAttendedSession),
@@ -60,7 +60,7 @@ urlpatterns = patterns(
     url(r'^getLeastEqualVoters/(?P<person_id>\d+)/(?P<date_>[\w].+)', getLessEqualVoters),
     url(r'^getLeastEqualVoters/(?P<person_id>\d+)/', getLessEqualVoters),
 
-    url(r'^getTFIDF/(?P<person_id>\d+)/(?P<date>[\w].+)', getTFIDF),
+    url(r'^getTFIDF/(?P<person_id>\d+)/(?P<date_>[\w].+)', getTFIDF),
     url(r'^getTFIDF/(?P<person_id>\d+)', getTFIDF),
 
     url(r'^getPresence/(?P<person_id>\d+)/(?P<date>[\w].+)', getPercentOFAttendedSession),
