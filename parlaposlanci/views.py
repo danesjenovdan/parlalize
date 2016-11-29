@@ -1049,8 +1049,8 @@ def getTFIDF(request, person_id, date_=None):
     out = {
         'person': getPersonData(person_id, date_),
         'results': card.data,
-        "created_for": card.created_for, 
-        "created_at": card.created_at
+        "created_for": card.created_for.strftime(API_DATE_FORMAT), 
+        "created_at": card.created_at.strftime(API_DATE_FORMAT)
     }
 
     return JsonResponse(out)

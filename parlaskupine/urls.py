@@ -38,6 +38,10 @@ urlpatterns = patterns('',
     url(r'^setVocabularySizeALL/(?P<date_>[\w].+)', setVocabularySizeALL),
     url(r'^setVocabularySizeALL', setVocabularySizeALL),
 
+    url(r'^setTFIDF/(?P<party_id>\d+)/(?P<date_>[\w].+)', setTFIDF),
+    url(r'^setTFIDF/(?P<party_id>\d+)', setTFIDF),
+
+
 
     # getters
     # TJ
@@ -79,6 +83,9 @@ urlpatterns = patterns('',
 
     url(r'^getStyleScores/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getStyleScoresPG),
     url(r'^getStyleScores/(?P<pg_id>\d+)', getStyleScoresPG),
+
+    url(r'^getTFIDF/(?P<party_id>\d+)/(?P<date_>[\w].+)', getTFIDF),
+    url(r'^getTFIDF/(?P<party_id>\d+)', getTFIDF),
 
     url(r'^getPGsIDs', getPGsIDs),
 

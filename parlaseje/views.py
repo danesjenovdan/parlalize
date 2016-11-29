@@ -617,3 +617,52 @@ def getSessionsByClassification(request):
                         "speeches": True if Speech.objects.filter(session__id_parladata=session["id"]) else False})
 
     return JsonResponse(out)
+
+
+def setTFIDF(request, session_id):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    data = tryHard("https://isci.parlameter.si/tfidf/s/"+session_id).json()
+    is_saved = saveOrAbortNew(Tfidf, 
+                              session=Session.objects.get(id_parladata=session_id), 
+                              created_for=date_of, 
+                              data=data["results"])
+
+    return JsonResponse({"alliswell": True,
+                         "saved": is_saved})
+
+
+def getTFIDF(request, session_id):
+
+    card = Tfidf.objects.filter(session__id_parladata=session_id)
+    if card:
+        card = latest("created_at")
+        out = {
+            'person': card.session.getSessionData(),
+            'results': card.data,
+            "created_for": card.created_for.strftime(API_DATE_FORMAT), 
+            "created_at": card.created_at.strftime(API_DATE_FORMAT)
+        }
+    else:
+        date_of = datetime.now().date()
+        out = {
+            'person': Session.objects.get(id_parladata=session_id).getSessionData(),
+            'results': [{
+                        "term": "ni me",
+                        "scores": {
+                            "tf": 0,
+                            "df": 0,
+                            "tf-idf": 0
+                            }
+                        }],
+                                    "created_for": date_of.strftime(API_DATE_FORMAT), 
+            "created_at": date_of.strftime(API_DATE_FORMAT)
+        }
+
+    
+
+    return JsonResponse(out)

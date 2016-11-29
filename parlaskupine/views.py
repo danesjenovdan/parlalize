@@ -5,7 +5,7 @@ import requests
 import json
 from django.http import JsonResponse
 from parlaskupine.models import *
-from parlaseje.models import Activity,Session
+from parlaseje.models import Activity, Session, Vote, Speech
 from collections import Counter
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT
 import numpy as np
@@ -752,6 +752,11 @@ def getWorkingBodies(request, org_id, date_=None):
     else:
         date_of = datetime.now().date()
     sessions = [session.getSessionData() for session in Session.objects.filter(organization__id_parladata=org_id, start_time__lte=date_of).order_by("-start_time")]
+
+    for session in sessions:
+        session.update({"votes": True if Vote.objects.filter(session__id_parladata=session["id"]) else False, 
+                        "speeches": True if Speech.objects.filter(session__id_parladata=session["id"]) else False})
+
     return JsonResponse({"organization": workingBodies.organization.getOrganizationData(),
                          'created_at': workingBodies.created_at.strftime(API_DATE_FORMAT),
                          'created_for': workingBodies.created_for.strftime(API_DATE_FORMAT),
@@ -1040,6 +1045,33 @@ def getStyleScoresPG(request, pg_id, date_=None):
     # }
     return JsonResponse(out, safe=False)
 
+
+def setTFIDF(request, party_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    data = tryHard("https://isci.parlameter.si/tfidf/ps/"+party_id).json()
+    is_saved = saveOrAbortNew(Tfidf, organization=Organization.objects.get(id_parladata=party_id), created_for=date_of, data=data["results"])
+
+    return JsonResponse({"alliswell": True,
+                         "saved": is_saved})
+
+
+def getTFIDF(request, person_id, date_=None):
+
+    card = getPersonCardModelNew(Tfidf, int(person_id), date_)
+
+    out = {
+        'person': card.organization.getOrganizationData(),
+        'results': card.data,
+        "created_for": card.created_for.strftime(API_DATE_FORMAT), 
+        "created_at": card.created_at.strftime(API_DATE_FORMAT)
+    }
+
+    return JsonResponse(out)
 
 
 def getListOfPGs(request, date_=None):

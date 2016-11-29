@@ -260,6 +260,19 @@ class AverageSpeeches(Timestampable, models.Model):
                                    help_text=_('date of analize'))
 
 
+class Tfidf(Timestampable, models.Model):
+    session = models.ForeignKey('Session',
+                               blank=True, null=True,
+                               related_name='tfidf',
+                               help_text=_('Session '))
+
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    data = JSONField(blank=True, null=True)
+
 class Tag(models.Model):
     id_parladata = models.IntegerField(_('parladata id'),
                                        blank=True,
