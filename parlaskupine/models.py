@@ -464,3 +464,17 @@ class StyleScores(Timestampable, models.Model): #Card for Style Scores of MP
     preprosto_average = models.FloatField(_('Preprosto average style score'),
                                    blank=True, null=True,
                                    help_text=_('Preprosto average style score'))
+
+
+class Tfidf(Timestampable, models.Model):
+    organization = models.ForeignKey('Organization',
+                                     blank=True, null=True,
+                                     related_name='tfidf',
+                                     help_text=_('Org'))
+
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+
+    data = JSONField(blank=True, null=True)
