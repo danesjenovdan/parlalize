@@ -620,13 +620,10 @@ def getSessionsByClassification(request):
 
 
 def setTFIDF(request, session_id):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
-    else:
-        date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+    
+    date_of = datetime.now().date()
 
-    data = tryHard("https://isci.parlameter.si/tfidf/s/"+session_id).json()
+    data = tryHard("https://isci.parlameter.si/tfidf/s/"+str(session_id)).json()
     is_saved = saveOrAbortNew(Tfidf, 
                               session=Session.objects.get(id_parladata=session_id), 
                               created_for=date_of, 
