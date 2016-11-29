@@ -584,7 +584,7 @@ def getLastSessionLanding(request, date_=None):
                 if tfidf.status_code == 200:
                     ready = True
                 else:
-                    presence_intex += 1                
+                    presence_index += 1                
         else:
             presence_index += 1
  
