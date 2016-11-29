@@ -329,7 +329,7 @@ def getLastActivity(request, person_id, date_=None):
                     "vote_name": vote_names[i],
                     "vote_id": int(activity_ids[i]),
                     "type": types[i],
-                    "session_id": Vote.objects.filter(id_parladata=int(activity_ids[i])).order_by("-created_at")[0].session.id
+                    "session_id": Vote.objects.filter(id_parladata=int(activity_ids[i])).order_by("-created_at")[0].session.id_parladata
                     })
             elif types[i] == "speech":
                 data.append({
