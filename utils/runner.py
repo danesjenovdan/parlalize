@@ -438,7 +438,6 @@ def onDateMPCardRunner(date_=None):
         setLessEqualVoters,
         setMostEqualVoters,
         setPercentOFAttendedSession,
-        setTFIDF,
     ]
 
     memberships = tryHard(API_URL + '/getMPs/' + date_).json()
@@ -580,7 +579,6 @@ def onDatePGCardRunner(date_=None):
         setPercentOFAttendedSessionPG,
         setMPsOfPG,
         setBasicInfOfPG,
-        setTFIDFpg,
     ]
 
     membersOfPGsRanges = tryHard(
@@ -679,6 +677,7 @@ def update():
     print "update person has_function"
     updatePersonFunctions()
 
+    print "start update cards"
     updateLastDay()
 
     return 1
@@ -690,7 +689,7 @@ def dailyUpdate():
     return 1
 
 def updateLastDay():
-    lastVoteDay = Vote.objects.latest("created_for")
+    lastVoteDay = Vote.objects.latest("created_for").created_for
     onDateMPCardRunner(lastVoteDay.strftime(API_DATE_FORMAT))
     onDatePGCardRunner(lastVoteDay.strftime(API_DATE_FORMAT))
     return 1
