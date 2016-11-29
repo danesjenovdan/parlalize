@@ -1003,7 +1003,7 @@ def makeAverageStyleScores(date_):
 
     return output
 
-def setTFIDF(request, person_id):
+def setTFIDFold(request, person_id):
 
     mps = tryHard(API_URL+'/getMPs/').json()
 
@@ -1029,13 +1029,28 @@ def setTFIDF(request, person_id):
     else:
         return HttpResponse('All waz well');
 
-def getTFIDF(request, person_id, date=None):
+def setTFIDF(request, person_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
 
-    card = getPersonCardModel(Tfidf, int(person_id), date)
+    data = tryHard("https://isci.parlameter.si/tfidf/p/"+person_id).json()
+    is_saved = saveOrAbortNew(Tfidf, person=Person.objects.get(id_parladata=person_id), created_for=date_of, data=data["results"])
+
+    return JsonResponse({"alliswell": True,
+                         "saved": is_saved})
+
+def getTFIDF(request, person_id, date_=None):
+
+    card = getPersonCardModelNew(Tfidf, int(person_id), date_)
 
     out = {
-        'person': getPersonData(person_id, date),
-        'results': card.data
+        'person': getPersonData(person_id, date_),
+        'results': card.data,
+        "created_for": card.created_for, 
+        "created_at": card.created_at
     }
 
     return JsonResponse(out)
