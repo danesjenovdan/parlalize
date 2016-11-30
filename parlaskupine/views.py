@@ -1065,7 +1065,7 @@ def getTFIDF(request, party_id, date_=None):
     card = getPGCardModelNew(Tfidf, int(party_id), date_)
 
     out = {
-        'person': card.organization.getOrganizationData(),
+        'party': card.organization.getOrganizationData(),
         'results': card.data,
         "created_for": card.created_for.strftime(API_DATE_FORMAT), 
         "created_at": card.created_at.strftime(API_DATE_FORMAT)
