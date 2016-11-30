@@ -642,7 +642,7 @@ def getTFIDF(request, session_id):
 
     card = Tfidf.objects.filter(session__id_parladata=session_id)
     if card:
-        card = latest("created_at")
+        card = card.latest("created_at")
         out = {
             'person': card.session.getSessionData(),
             'results': card.data,
@@ -653,14 +653,7 @@ def getTFIDF(request, session_id):
         date_of = datetime.now().date()
         out = {
             'person': Session.objects.get(id_parladata=session_id).getSessionData(),
-            'results': [{
-                        "term": "ni me",
-                        "scores": {
-                            "tf": 0,
-                            "df": 0,
-                            "tf-idf": 0
-                            }
-                        }],
+            'results': [],
                                     "created_for": date_of.strftime(API_DATE_FORMAT), 
             "created_at": date_of.strftime(API_DATE_FORMAT)
         }
