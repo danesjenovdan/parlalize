@@ -1052,7 +1052,7 @@ def setTFIDF(request, party_id, date_=None):
     else:
         date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
-
+    print "TFIDF", party_id
     data = tryHard("https://isci.parlameter.si/tfidf/ps/"+party_id).json()
     is_saved = saveOrAbortNew(Tfidf, organization=Organization.objects.get(id_parladata=party_id), created_for=date_of, data=data["results"])
 
@@ -1060,9 +1060,9 @@ def setTFIDF(request, party_id, date_=None):
                          "saved": is_saved})
 
 
-def getTFIDF(request, person_id, date_=None):
+def getTFIDF(request, party_id, date_=None):
 
-    card = getPersonCardModelNew(Tfidf, int(person_id), date_)
+    card = getPGCardModelNew(Tfidf, int(party_id), date_)
 
     out = {
         'person': card.organization.getOrganizationData(),

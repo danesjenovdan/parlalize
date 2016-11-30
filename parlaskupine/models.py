@@ -478,3 +478,7 @@ class Tfidf(Timestampable, models.Model):
                                    help_text=_('date of analize'))
 
     data = JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return unicode(self.organization.name) + " --> " + unicode(self.created_for)
+

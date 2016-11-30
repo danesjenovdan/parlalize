@@ -273,6 +273,10 @@ class Tfidf(Timestampable, models.Model):
 
     data = JSONField(blank=True, null=True)
 
+    def __str__(self):
+        return unicode(self.session.name) + " --> " + unicode(self.session.organization.name)
+
+
 class Tag(models.Model):
     id_parladata = models.IntegerField(_('parladata id'),
                                        blank=True,
