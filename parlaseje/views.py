@@ -580,8 +580,10 @@ def getLastSessionLanding(request, date_=None):
         motions = json.loads(getMotionOfSession(None, presence.session.id_parladata).content)
         if type(motions)==dict:
             if "results" in motions.keys():
-                tfidf = tryHard("https://isci.parlameter.si/tfidf/s/"+str(presence.session.id_parladata))
-                if tfidf.status_code == 200:
+                #tfidf = tryHard("https://isci.parlameter.si/tfidf/s/"+str(presence.session.id_parladata))
+                #if tfidf.status_code == 200:
+                tfidf = json.loads(getTFIDF(None, presence.session.id_parladata).content)
+                if tfidf["results"]:
                     ready = True
                 else:
                     presence_index += 1                
@@ -597,7 +599,7 @@ def getLastSessionLanding(request, date_=None):
                          "created_at": datetime.today().strftime(API_DATE_FORMAT),
                          "presence": result, 
                          "motions": motions["results"], 
-                         "tfidf": tfidf.json()}, safe=False)
+                         "tfidf": tfidf}, safe=False)
 
 
 def getSessionsByClassification(request):
