@@ -165,9 +165,9 @@ def getSesCardModelNew(model, id, date=None):
 def resultOfMotion(yes, no, kvorum, not_present, vote_id, date_=None):
 	result = tryHard(API_URL+'/getResultOfMotion/' + str(vote_id)).json()	
 	allMPs = (int(len(tryHard(API_URL+'/getMPs/'+date_.strftime(API_DATE_FORMAT)).json())) * 2) / 3
-	if result['result'] == "1":
+	if result['result'] == "1" or result['result'] == "1 ":
 		return True
-	elif result['result'] == "0":
+	elif result['result'] == "0" or result['result'] == "0 ":
 		return False
 	else:
 		if yes >= allMPs:
