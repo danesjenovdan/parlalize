@@ -526,6 +526,9 @@ class Tfidf(Timestampable, models.Model):
 
     data = JSONField(blank=True, null=True)
 
+
+    def __str__(self):
+        return unicode(self.person.name) + " --> " + unicode(self.created_for)
 #class StyleScores(Timestampable, models.Model):
 #    person = models.ForeignKey('Person',
 #                               blank=True, null=True,
