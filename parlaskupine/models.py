@@ -45,7 +45,7 @@ class Organization(Timestampable, models.Model):
 
 
     def __str__(self):
-        return self.name
+        return unicode(self.name) + " " + str(self.id_parladata) 
 
     def getOrganizationData(self):
         return {
