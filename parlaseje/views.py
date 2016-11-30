@@ -610,6 +610,13 @@ def getSessionsByClassification(request):
            "dz": [ session.getSessionData() for session in Session.objects.filter(organization__id_parladata=DZ).order_by("-start_time")],
            "dt": [ org.getOrganizationData() for org in Organization.objects.filter(classification__in=working_bodies)],}
 
+
+    for dt in out["dt"]:
+        dt["sessions"] = [session.getSessionData() for session in Session.objects.filter(organization__id_parladata=dt["id"]).order_by("-start_time")]
+        for session in dt["sessions"]:
+            session.update({"votes": True if Vote.objects.filter(session__id_parladata=session["id"]) else False, 
+                            "speeches": True if Speech.objects.filter(session__id_parladata=session["id"]) else False})
+
     for session in out["kolegij"]:
         session.update({"votes": True if Vote.objects.filter(session__id_parladata=session["id"]) else False, 
                         "speeches": True if Speech.objects.filter(session__id_parladata=session["id"]) else False})
