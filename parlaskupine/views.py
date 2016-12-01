@@ -15,11 +15,11 @@ from parlaposlanci.views import getMPsList
 import math
 from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
 from django.core.cache import cache
+from django.views.decorators.csrf import csrf_exempt
 
 from parlalize.utils import tryHard
 
 # Create your views here.
-
 
 def setBasicInfOfPG(request, pg_id, date_):
     if date_:
@@ -996,6 +996,33 @@ def setStyleScoresPGsALL(request, date_=None):
 
     return JsonResponse({'alliswell': True})
 
+
+@csrf_exempt
+def setAllPGsStyleScoresFromSearch(request):
+    if request.method == 'POST':
+        post_data = json.loads(request.body)
+        print post_data
+        if post_data:
+            save_statuses = []
+            for score in post_data:
+                print score
+                print score["date_of"]
+                date_of = datetime.strptime(score["date_of"], API_DATE_FORMAT)
+                save_statuses.append(saveOrAbortNew(model=StyleScores,
+                                                    created_for=date_of,
+                                                    organization=Organization.objects.get(id_parladata=int(score["party"])),
+                                                    problematicno=float(score['problematicno']),
+                                                    privzdignjeno=float(score['privzdignjeno']),
+                                                    preprosto=float(score['preprosto']),
+                                                    problematicno_average=float(score['problematicno_average']),
+                                                    privzdignjeno_average=float(score['privzdignjeno_average']),
+                                                    preprosto_average=float(score['preprosto_average'])
+                                                ))
+            return JsonResponse({"status": "alliswell", "saved": save_statuses})
+        else:
+            return JsonResponse({"status": "There's not data"})
+    else:
+        return JsonResponse({"status": "It wasnt POST"})
 
 def getStyleScoresPG(request, pg_id, date_=None):
     card = getPGCardModelNew(StyleScores, int(pg_id), date_)
