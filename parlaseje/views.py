@@ -565,7 +565,7 @@ def getMaxSpeechesOnSession(request, date=False):
 
 def setQuote(request, speech_id, start_pos, end_pos):
     speech = get_object_or_404(Speech, id_parladata=speech_id)
-    quote = Quote(speech=speech, first_char=start_pos, last_char=end_pos, quoted_text=re.sub(r"\n+", "", speech.content.strip())[int(start_pos):int(end_pos)].strip())
+    quote = Quote(speech=speech, first_char=start_pos, last_char=end_pos, quoted_text=re.sub(r"\n+", " ", speech.content.strip())[int(start_pos):int(end_pos)].strip())
     quote.save()
 
     return JsonResponse({"status": "alliswell", "id": quote.id})
