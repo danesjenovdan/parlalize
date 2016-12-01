@@ -244,6 +244,29 @@ def getMotionOfSession(request, id_se, date=False):
                          "created_for": session.start_time.strftime(API_DATE_FORMAT),
                          "created_at": max(dates).strftime(API_DATE_FORMAT),}, safe=False)
 
+def getMotionOfSessionVotes(request, votes):
+    out = []
+    votes = votes.split(',')
+    for vote in votes:
+        if Vote.objects.filter(id_parladata=vote):
+            vot = Vote.objects.get(id_parladata=vote)
+            out.append({
+                'created_for': vot.created_for,
+                'session': vot.session.getSessionData(),
+                'results': {
+
+                        'motion_id': vot.id_parladata,
+                        'text': vot.motion,
+                        'votes_for': vot.votes_for,
+                        'against': vot.against,
+                        'abstain': vot.abstain,
+                        'not_present':vot.not_present,
+                        'result':vot.result}
+                })
+        else:
+            out.append({'Error': "No vote"})
+            return JsonResponse(out, safe=False)
+    return JsonResponse(out, safe=False)
 
 def getMotionGraph(request, id_mo, date=False):
     out = []
