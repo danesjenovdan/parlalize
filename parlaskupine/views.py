@@ -1074,6 +1074,24 @@ def getStyleScoresPG(request, pg_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
+@csrf_exempt
+def setAllPGsTFIDFsFromSearch(request):
+    if request.method == 'POST':
+        post_data = json.loads(request.body)
+        if post_data:
+            save_statuses = []
+            for score in post_data:
+                date_of = datetime.strptime(score["created_for"], API_DATE_FORMAT)
+                save_statuses.append(saveOrAbortNew(Tfidf, 
+                                                    organization=Organization.objects.get(id_parladata=score["party"]["id"]), 
+                                                    created_for=date_of, 
+                                                    data=score["results"]))
+            return JsonResponse({"status": "alliswell", "saved": save_statuses})
+        else:
+            return JsonResponse({"status": "There's not data"})
+    else:
+        return JsonResponse({"status": "It wasnt POST"})
+
 def setTFIDF(request, party_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
