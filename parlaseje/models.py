@@ -78,7 +78,8 @@ class Session(Timestampable, models.Model): # poslanec, minister, predsednik dz 
         return {'name': self.name,
                 'date': self.start_time.strftime(API_OUT_DATE_FORMAT),
                 'id': self.id_parladata,
-                'org': self.organization.getOrganizationData(),}
+                'org': self.organization.getOrganizationData(),
+                'in_review': self.in_review,}
 
 class Activity(Timestampable, models.Model):
     id_parladata = models.IntegerField(_('parladata id'),
