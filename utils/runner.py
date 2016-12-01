@@ -148,6 +148,7 @@ def setAllSessions():
                 session.classification = sessions['classification']
                 session.id_parladata = sessions['id']
                 session.organization = Organization.objects.get(id_parladata=sessions['organization_id'])
+                session.in_review = sessions['is_in_review']
                 session.save()
 
     return 1
