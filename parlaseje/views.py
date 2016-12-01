@@ -25,7 +25,7 @@ def getSpeech(request, speech_id):
          "session": speech.session.getSessionData(), 
          "quoted_text": None, 
          "end_idx": None, 
-         "start_idx": None
+         "start_idx": None,
          'quote_id': None}
 
     result = {
@@ -582,7 +582,7 @@ def getQuote(request, quote_id):
                                      "end_idx": quote.last_char, 
                                      "speech_id": quote.speech.id_parladata,
                                      "content": quote.speech.content,
-                                     'session': quote.speech.session.getSessionData()
+                                     'session': quote.speech.session.getSessionData(),
                                      'quote_id': quote.id}})
 
 
