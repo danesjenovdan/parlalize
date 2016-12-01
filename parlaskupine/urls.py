@@ -90,6 +90,10 @@ urlpatterns = patterns('',
     url(r'^getPGsIDs', getPGsIDs),
 
     ####################################################################################
+    #POST setters
+    url(r'^setAllPGsStyleScoresFromSearch/', setAllPGsStyleScoresFromSearch),
+
+    ####################################################################################
 
     # runenr
     #url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
