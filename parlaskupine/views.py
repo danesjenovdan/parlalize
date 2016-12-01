@@ -14,6 +14,7 @@ from parlaposlanci.models import Person
 from parlaposlanci.views import getMPsList
 import math
 from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
+from django.core.cache import cache
 
 from parlalize.utils import tryHard
 
@@ -1074,46 +1075,53 @@ def getTFIDF(request, party_id, date_=None):
     return JsonResponse(out)
 
 
-def getListOfPGs(request, date_=None):
+def getListOfPGs(request, date_=None, force_render=False):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        key = date_
     else:
         date_of = datetime.now().date()
         date_=date_of.strftime(API_DATE_FORMAT)
+        key = date_
 
-    allPGs = tryHard(API_URL+'/getAllPGsExt/').json().keys()
-    pgs = tryHard(API_URL+'/getMembersOfPGsRanges/'+date_).json()[-1]["members"]
-    data = []
-    for pg, members in pgs.items():
-        if pg in allPGs and members:
-            pg_obj = {}
-            pg_obj["results"] = {}
-            pg_id = pg
-            pg_obj["party"] = Organization.objects.get(id_parladata=pg).getOrganizationData()
-            try:
-                pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
-                pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
-            except:
-                pg_obj["results"]["presence_sessions"] = None
-                pg_obj["results"]["presence_votes"] = None
+    c_data = cache.get("pg_list_" + key)
+    if c_data and not force_render:
+        data = c_data
+    else:
+        allPGs = tryHard(API_URL+'/getAllPGsExt/').json().keys()
+        pgs = tryHard(API_URL+'/getMembersOfPGsRanges/'+date_).json()[-1]["members"]
+        data = []
+        for pg, members in pgs.items():
+            if pg in allPGs and members:
+                pg_obj = {}
+                pg_obj["results"] = {}
+                pg_id = pg
+                pg_obj["party"] = Organization.objects.get(id_parladata=pg).getOrganizationData()
+                try:
+                    pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
+                    pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
+                except:
+                    pg_obj["results"]["presence_sessions"] = None
+                    pg_obj["results"]["presence_votes"] = None
 
-            try:
-                pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
-            except:
-                pg_obj["results"]["vocabulary_size"] = None
+                try:
+                    pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
+                except:
+                    pg_obj["results"]["vocabulary_size"] = None
 
-            try:
-                styleScores = json.loads(getStyleScoresPG(None, pg_id, date_).content)
-            except:
-                styleScores = None
-            pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
-            pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
-            pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
-            pg_obj["results"]["seat_count"] = len(members)
-            
+                try:
+                    styleScores = json.loads(getStyleScoresPG(None, pg_id, date_).content)
+                except:
+                    styleScores = None
+                pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
+                pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
+                pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
+                pg_obj["results"]["seat_count"] = len(members)
+                
 
 
-            data.append(pg_obj)
-    data = sorted(data, key=lambda k: k['results']["seat_count"], reverse=True)
+                data.append(pg_obj)
+        data = sorted(data, key=lambda k: k['results']["seat_count"], reverse=True)
+        cache.set("pg_list_" + key, data, 60 * 60 * 48) 
 
     return JsonResponse({"data": data})
