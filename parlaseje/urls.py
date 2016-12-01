@@ -13,6 +13,7 @@ urlpatterns = patterns(
     
     url(r'^setMotionOfSession/(?P<id_se>\d+)', setMotionOfSession),
     url(r'^setMotionOfSession/(?P<id_se>\d+)/(?P<date_>[\w].+)', setMotionOfSession),
+    url(r'^getMotionOfSessionVotes/(?P<votes>[\w,]+)$', getMotionOfSessionVotes),
 
     url(r'^setMotionOfSessionGraph/(?P<id_se>\d+)/(?P<date_>[\w].+)', setMotionOfSessionGraph),
     url(r'^setMotionOfSessionGraph/(?P<id_se>\d+)', setMotionOfSessionGraph),
