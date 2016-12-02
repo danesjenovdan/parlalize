@@ -1006,8 +1006,8 @@ def setAllPGsStyleScoresFromSearch(request):
             save_statuses = []
             for score in post_data:
                 print score
-                print score["date_of"]
-                date_of = datetime.strptime(score["date_of"], API_DATE_FORMAT)
+                #print score["date_of"]
+                date_of = datetime.today()
                 save_statuses.append(saveOrAbortNew(model=StyleScores,
                                                     created_for=date_of,
                                                     organization=Organization.objects.get(id_parladata=int(score["party"])),
@@ -1081,7 +1081,7 @@ def setAllPGsTFIDFsFromSearch(request):
         if post_data:
             save_statuses = []
             for score in post_data:
-                date_of = datetime.strptime(score["created_for"], API_DATE_FORMAT)
+                date_of = datetime.today()
                 save_statuses.append(saveOrAbortNew(Tfidf, 
                                                     organization=Organization.objects.get(id_parladata=score["party"]["id"]), 
                                                     created_for=date_of, 
