@@ -220,7 +220,8 @@ def getSpeechesOfPG(request, pg_id, date_=False):
         endTime = datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT)
         speeches = [[speech for speech in Speech.objects.filter(person__id_parladata__in = pgMembersRange["members"][pg_id], start_time__range=[t_date, t_date+timedelta(days=1)]).order_by("-id_parladata")] for t_date in Speech.objects.filter(start_time__lte=endTime, start_time__gte=startTime, person__id_parladata__in = pgMembersRange["members"][pg_id]).datetimes('start_time', 'day')]
         for day in reversed(speeches):
-            dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "sessions":[]}
+            #dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "sessions":[]}
+            dayDataDict = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "sessions":{}}
             addedPersons = []
             addedSessions = []
             for speech in day:
@@ -230,25 +231,61 @@ def getSpeechesOfPG(request, pg_id, date_=False):
                 #print "add", speech.person.id_parladata, speech.session.id_parladata
                 #print speech.id_parladata, speech.start_time
                 #print "index", addedPersons.index(speech.person.id_parladata), addedSessions.index(speech.session.id_parladata)
-                if speech.session.id_parladata in addedSessions:
-                    if speech.person.id_parladata in addedPersons:
-                        dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"][addedPersons.index(speech.person.id_parladata)]["speeches"].append(speech.id_parladata)
+                
+                #if speech.session.id_parladata in addedSessions:
+                if speech.session.id_parladata in dayDataDict["sessions"].keys():
+                    if speech.person.id_parladata in dayDataDict["sessions"][speech.session.id_parladata]["speakers"].keys():
+                        #session = dayData["sessions"][addedSessions.index(speech.session.id_parladata)]
+                        #speaker = session["speakers"][addedPersons.index(speech.person.id_parladata)]
+                        #speaker = ["speeches"].append(speech.id_parladata)
+
+                        session = dayDataDict["sessions"][speech.session.id_parladata]
+                        speaker = session["speakers"][speech.person.id_parladata]
+                        speaker["speeches"].append(speech.id_parladata)
                     else:
-                        addedPersons.append(speech.person.id_parladata)
-                        dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"].append({"speeches":[speech.id_parladata],
-                                                "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))})
+                        #addedPersons.append(speech.person.id_parladata)
+                        #dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"].append({"speeches":[speech.id_parladata],
+                        #                        "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))})
+                        session = dayDataDict["sessions"][speech.session.id_parladata]
+                        session["speakers"][speech.person.id_parladata] = {
+                            "speeches":[speech.id_parladata],
+                            "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))
+                        }
                 else:
                     #reset persons for each session on date
-                    addedPersons = []
-                    addedSessions.append(speech.session.id_parladata)
-                    addedPersons.append(speech.person.id_parladata)
-                    dayData["sessions"].append({"session_name": speech.session.name,"session_id": speech.session.id_parladata, "speakers":[{"speeches":[speech.id_parladata],
-                                                "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))}]})
-            out.append(dayData)
+                    #addedPersons = []
+                    #addedSessions.append(speech.session.id_parladata)
+                    #addedPersons.append(speech.person.id_parladata)
+
+                    dayDataDict["sessions"][speech.session.id_parladata]={
+                        "session_name": speech.session.name,
+                        "session_org": speech.session.organization.name,
+                        "session_id": speech.session.id_parladata, 
+                        "speakers":{ 
+                            speech.person.id_parladata:{
+                                "speeches":[speech.id_parladata],
+                                "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))
+                            }
+                        }
+                    }
+
+                    #dayData["sessions"].append({"session_name": speech.session.name,"session_id": speech.session.id_parladata, "speakers":[{"speeches":[speech.id_parladata],
+                    #                            "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))}]})
+            #out.append(dayData)
+            out.append(dayDataDict)
             if len(out)>14:
                 break
         if len(out)>14:
             break
+
+    #dict to list for sorting in front
+    for day in out:
+        ses_ids = day["sessions"].keys()
+        for session in ses_ids:
+            day["sessions"][session]["speakers"] = sorted(day["sessions"][session]["speakers"].values(), key=lambda k,: k["person"]["name"], reverse=False)
+        ses_order_ids = Session.objects.filter(id_parladata__in=ses_ids).order_by("-start_time").values_list("id_parladata", flat=True)
+        temp_day_order = [day["sessions"][s_id] for s_id in ses_order_ids]
+        day["sessions"] = temp_day_order
 
     #WORKAROUND: created_at is today.
     result  = {
