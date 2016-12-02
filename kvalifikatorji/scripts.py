@@ -112,9 +112,9 @@ def getScores(words_list, counter, total):
     if float(total) == 0.0:
         total = 1
 
-    scores['problematicno'] = scores['problematicno']/float(total)
-    scores['privzdignjeno'] = scores['privzdignjeno']/float(total)
-    scores['preprosto'] = scores['preprosto']/float(total)
+    scores['problematicno'] = scores['problematicno']*1000000000/float(total)
+    scores['privzdignjeno'] = scores['privzdignjeno']*1000000000/float(total)
+    scores['preprosto'] = scores['preprosto']*1000000000/float(total)
 
     return scores
 
