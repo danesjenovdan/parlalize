@@ -141,7 +141,7 @@ def setMotionOfSession(request, id_se):
         not_present = 0
     return JsonResponse({'alliswell': True})
 
-def setMotionOfSessionGraph(request, id_se):
+def setMotionOfSessionGraph (request, id_se):
     motion  = tryHard(API_URL + '/motionOfSession/'+str(id_se)+'/').json()
     session = Session.objects.get(id_parladata=id_se)
     tab = []
@@ -180,7 +180,28 @@ def setMotionOfSessionGraph(request, id_se):
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])
 
-        vg = saveOrAbortNew(model=Vote_graph,
+        if Vote_graph.objects.filter(vote__id_parladata=mot['vote_id']):
+            Vote_graph.objects.filter(vote__id_parladata=mot['vote_id']).update(
+                        session=session,
+                        vote=Vote.objects.get(id_parladata=mot['vote_id']),
+                        created_for=session.start_time,
+                        motion=mot['text'],
+                        votes_for=yes,
+                        against=no,
+                        abstain=kvorum,
+                        not_present=not_present,
+                        result=resultOfMotion(yes, no, kvorum, not_present, mot['id'], session.start_time),
+                        pgs_yes=yesdic,
+                        pgs_no=nodic,
+                        pgs_np=npdic,
+                        pgs_kvor=kvordic,
+                        mp_yes=tabyes,
+                        mp_no=tabno,
+                        mp_np=tabnp,
+                        mp_kvor=tabkvo,
+                        )
+        else:
+            vg = saveOrAbortNew(model=Vote_graph,
                          session=session,
                          vote=Vote.objects.get(id_parladata=mot['vote_id']),
                          created_for=session.start_time,
