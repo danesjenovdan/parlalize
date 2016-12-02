@@ -237,34 +237,39 @@ def setMotionOfSessionGraph (request, id_se):
 
 def getMotionOfSession(request, id_se, date=False):
     out = []
-    session = Session.objects.get(id_parladata=int(id_se))
-    if Vote.objects.filter(session__id_parladata=id_se):
-        if date:
-            model = Vote.objects.filter(session__id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
-        else:
-            model = Vote.objects.filter(session__id_parladata=id_se)
-        dates = []
-        for card in model:
-            out.append({
-            'session': session.getSessionData(),
-            'results': {
+    created_at = None
+    if Session.objects.filter(id_parladata=int(id_se)):
+        session = Session.objects.get(id_parladata=int(id_se))
+        if Vote.objects.filter(session__id_parladata=id_se):
+            if date:
+                model = Vote.objects.filter(session__id_parladata=id_se, start_time__lte=datetime.strptime(date, '%d.%m.%Y'))
+            else:
+                model = Vote.objects.filter(session__id_parladata=id_se)
+            dates = []
+            for card in model:
+                print card
+                out.append({
+                'session': session.getSessionData(),
+                'results': {
 
-                    'motion_id': card.id_parladata,
-                    'text': card.motion,
-                    'votes_for': card.votes_for,
-                    'against': card.against,
-                    'abstain': card.abstain,
-                    'not_present':card.not_present,
-                    'result':card.result}
-            })
-            dates.append(card.created_at)
+                        'motion_id': card.id_parladata,
+                        'text': card.motion,
+                        'votes_for': card.votes_for,
+                        'against': card.against,
+                        'abstain': card.abstain,
+                        'not_present':card.not_present,
+                        'result':card.result}
+                })
+                dates.append(card.created_at)
+            created_at = max(dates).strftime(API_DATE_FORMAT)
+        else:
+            out = []
+        return JsonResponse({"results": out,
+                             "session": session.getSessionData(),
+                             "created_for": session.start_time.strftime(API_DATE_FORMAT),
+                             "created_at": created_at}, safe=False)
     else:
-        session = get_object_or_404(Session, id_parladata=id_se)
-        return JsonResponse([{"status": "Seja brez glasov"}], safe=False)
-    return JsonResponse({"results": out,
-                         "session": session.getSessionData(),
-                         "created_for": session.start_time.strftime(API_DATE_FORMAT),
-                         "created_at": max(dates).strftime(API_DATE_FORMAT),}, safe=False)
+        return JsonResponse({'result':'No session'})
 
 def getMotionOfSessionVotes(request, votes):
     out = []
