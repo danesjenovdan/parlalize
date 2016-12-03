@@ -103,10 +103,13 @@ class WordAnalysis(object):
         #prepare data for groups
         elif self.count_of == "groups":
             self.membersOfPGsRanges = tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+self.date_ if self.date_ else "/")).json()
+            allTimePGs = tryHard(API_URL+'/getAllPGsExt/').json().keys()
             print "[INFO] prepering data for groups: "
             for pgMembersRange in self.membersOfPGsRanges:
                 #print "___" + pgMembersRange["start_date"]
                 for pg in pgMembersRange["members"].keys():
+                    if pg not in allTimePGs.keys():
+                        continue
                     for member in pgMembersRange["members"][pg]: 
                         speeches = tryHard(API_URL+'/getSpeechesInRange/' + str(member) + "/" + pgMembersRange["start_date"] + "/" + pgMembersRange["end_date"]).json()
                         if pg in self.text.keys():
