@@ -516,14 +516,16 @@ def getDeviationInOrg(request, pg_id, date_=None):
     mostMatching = getPGCardModelNew(DeviationInOrganization, pg_id, date_)
     if not date_:
         date_=""
+    out_r = []
+    for result in json.loads(mostMatching.data):
+        out_r.append({
+            "ratio": result["ratio"],
+            "person": getMPStaticPersonData(int(result["id"]), date_)})
     out = {
         'organization': Organization.objects.get(id_parladata=int(pg_id)).getOrganizationData(),
         'created_at': mostMatching.created_at.strftime(API_DATE_FORMAT),
         'created_for': mostMatching.created_for.strftime(API_DATE_FORMAT),
-        'results': [{
-            "ratio": result["ratio"], 
-            "person": getMPStaticPersonData(result["id"], date_)} for result in mostMatching.data
-        ]
+        'results': out_r 
     }
     #remove None from list. If PG dont have 6 members.
     out["results"] = filter(lambda a: a != None, out["results"])
