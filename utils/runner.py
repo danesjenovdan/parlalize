@@ -793,6 +793,7 @@ def updateWB():
 def morningCash():
     allUrls = tryHard("https://glej.parlameter.si/api/cards/getUrls").json()
     theUrl = 'https://glej.parlameter.si/'
+    mps = tryHard('https://data.parlameter.si/v1/getMPs').json()
     for url in allUrls:
         if url['group'] == 's':
             print url['method']
@@ -800,21 +801,21 @@ def morningCash():
                 method = url['group'] + '/' + url['method'] + '/'
                 print theUrl + method + str(ses) + '?forceRender=true'
                 requests.get(theUrl + method + str(ses) + '?forceRender=true')
-                requests.get(theUrl + method + str(ses) + '?forceRender=true&frame=true')
-                requests.get(theUrl + method + str(ses) + '?forceRender=true&embed=true')
+                requests.get(theUrl + method + str(ses) + '?forceRender=true&frame=true&altHeader=true')
+                requests.get(theUrl + method + str(ses) + '?forceRender=true&embed=true&altHeader=true')
         if url['group'] == 'p':
             print url['method']
-            for per in Person.objects.values_list("id_parladata", flat=True):
+            for mp in mps:
                 method = url['group'] + '/' + url['method'] + '/'
-                print theUrl + method + str(per) + '?forceRender=true'
-                requests.get(theUrl + method + str(per) + '?forceRender=true')
-                requests.get(theUrl + method + str(per) + '?forceRender=true&frame=true')
-                requests.get(theUrl + method + str(per) + '?forceRender=true&embed=true')
+                print theUrl + method + str(mp.id) + '?forceRender=true'
+                requests.get(theUrl + method + str(mp.id) + '?forceRender=true')
+                requests.get(theUrl + method + str(mp.id) + '?forceRender=true&frame=true&altHeader=true')
+                requests.get(theUrl + method + str(mp.id) + '?forceRender=true&embed=true&altHeader=true')
         if url['group'] == 'pg':
             print url['method']
             for pg in Organization.objects.values_list("id_parladata", flat=True):
                 method = url['group'] + '/' + url['method'] + '/'
                 print theUrl + method + str(pg) + '?forceRender=true'
                 requests.get(theUrl + method + str(pg) + '?forceRender=true')
-                requests.get(theUrl + method + str(pg) + '?forceRender=true&frame=true')
-                requests.get(theUrl + method + str(pg) + '?forceRender=true&embed=true')
+                requests.get(theUrl + method + str(pg) + '?forceRender=true&frame=true&altHeader=true')
+                requests.get(theUrl + method + str(pg) + '?forceRender=true&embed=true&altHeader=true')
