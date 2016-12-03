@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import requests
 from parlaposlanci.views import setMPStaticPL
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
@@ -791,27 +793,204 @@ def updateWB():
 
 
 def morningCash():
-    allUrls = tryHard("https://glej.parlameter.si/api/cards/getUrls").json()
+
+    allUrls = [
+        {
+            "group":"s",
+            "method":"seznam-odsotnih-poslancev",
+            "class": "DZ"
+        },{
+            "group":"p",
+            "method":"osnovne-informacije",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"razrez-glasovanj",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"stilne-analize",
+            "class": "all"
+        },{
+            "group":"s",
+            "method":"glasovanje-layered",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"najmanjkrat-enako",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"najveckrat-enako",
+            "class": "all"
+        },{
+            "group":"s",
+            "method":"glasovanja-seja",
+            "class": "DZ"
+        },{
+            "group":"pg",
+            "method":"razrez-glasovanj",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"izracunana-prisotnost-glasovanja",
+            "class": "all"
+        },{
+            "group":"pg",
+            "method":"izracunana-prisotnost-seje",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"glasovanja",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"izracunana-prisotnost-seje",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"besedni-zaklad",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"stevilo-izgovorjenih-besed",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"clanstva",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"povezave-do-govorov",
+            "class": "all"
+        },{
+            "group":"ps",
+            "method":"besedni-zaklad",
+            "class": "all"
+        },{
+            "group":"ps",
+            "method":"vsi-govori-poslanske-skupine",
+            "class": "all"
+        },{
+            "group":"c",
+            "method":"kompas",
+            "class": "none"
+        },{
+            "group":"pg",
+            "method":"glasovanja",
+            "class": "all"
+        },{
+            "group":"c",
+            "method":"zadnja-seja",
+            "class": "none"
+        },{
+            "group":"p",
+            "method":"tfidf",
+            "class": "all"
+        },{
+            "group":"ps",
+            "method":"stilne-analize",
+            "class": "all"
+        },{
+            "group":"c",
+            "method":"besedni-zaklad-vsi",
+            "class": "none"
+        },{
+            "group":"p",
+            "method":"povprecno-stevilo-govorov-na-sejo",
+            "class": "all"
+        },{
+            "group":"p",
+            "method":"zadnje-aktivnosti",
+            "class": "all"
+        },{
+            "group" : "ps",
+            "method" : "osnovne-informacije-poslanska-skupina",
+            "class": "all"
+        },
+        {
+            "group" : "ps",
+            "method" : "izracunana-prisotnost-glasovanja",
+            "class": "all"
+        },
+        {
+            "group" : "ps",
+            "method" : "tfidf",
+            "class": "all"
+        },
+        {
+            "group" : "wb",
+            "method" : "getWorkingBodies",
+            "class" : "all"
+        },
+        {
+            "group" : "ps",
+            "method" : "clanice-in-clani-poslanske-skupine",
+            "class" : "all"
+        },
+        { 
+            "group" : "pg",
+            "method" : "najlazje-pridruzili",
+            "class" : "all"
+        },
+        { 
+            "group" : "pg",
+            "method" : "najtezje-pridruzili",
+            "class" : "all"
+        },
+        { 
+            "group" : "pg",
+            "method" : "odstopanje-od-poslanske-skupine",
+            "class" : "all"
+        },
+        { 
+            "group" : "s",
+            "method" : "prisotnost-po-poslanskih-skupinah",
+            "class" : "DZ"
+        },
+        {
+            "group" : "p",
+            "method" : "seznam-poslancev",
+            "class" : "none"
+        },
+        {
+            "group" : "ps",
+            "method" : "seznam-poslanskih-skupin",
+            "class": "all"
+        }    
+    ]
+
+    # allUrls = tryHard("https://glej.parlameter.si/api/cards/getUrls").json()
     theUrl = 'https://glej.parlameter.si/'
     mps = tryHard('https://data.parlameter.si/v1/getMPs').json()
     for url in allUrls:
         if url['group'] == 's':
-            print url['method']
-            for ses in Session.objects.values_list("id_parladata", flat=True):
-                method = url['group'] + '/' + url['method'] + '/'
-                print theUrl + method + str(ses) + '?forceRender=true'
-                requests.get(theUrl + method + str(ses) + '?forceRender=true')
-                requests.get(theUrl + method + str(ses) + '?forceRender=true&frame=true&altHeader=true')
-                requests.get(theUrl + method + str(ses) + '?forceRender=true&embed=true&altHeader=true')
+            if url['class'] == 'DZ':
+                # SAMO DZ
+                print 'yay!'
+            else:
+                # VSE SEJE
+                print url['method']
+                for ses in Session.objects.values_list("id_parladata", flat=True):
+                    method = url['group'] + '/' + url['method'] + '/'
+                    print theUrl + method + str(ses) + '?forceRender=true'
+                    requests.get(theUrl + method + str(ses) + '?forceRender=true')
+                    requests.get(theUrl + method + str(ses) + '?forceRender=true&frame=true&altHeader=true')
+                    requests.get(theUrl + method + str(ses) + '?forceRender=true&embed=true&altHeader=true')
         if url['group'] == 'p':
-            print url['method']
-            for mp in mps:
-                method = url['group'] + '/' + url['method'] + '/'
-                print theUrl + method + str(mp.id) + '?forceRender=true'
-                requests.get(theUrl + method + str(mp.id) + '?forceRender=true')
-                requests.get(theUrl + method + str(mp.id) + '?forceRender=true&frame=true&altHeader=true')
-                requests.get(theUrl + method + str(mp.id) + '?forceRender=true&embed=true&altHeader=true')
-        if url['group'] == 'pg':
+            if url['class'] == "none":
+                #kličeš brez IDja s končnim slashem
+                print 'yay!'
+            else:
+                # vsi poslanci
+                print url['method']
+                for mp in mps:
+                    method = url['group'] + '/' + url['method'] + '/'
+                    print theUrl + method + str(mp.id) + '?forceRender=true'
+                    requests.get(theUrl + method + str(mp.id) + '?forceRender=true')
+                    requests.get(theUrl + method + str(mp.id) + '?forceRender=true&frame=true&altHeader=true')
+                    requests.get(theUrl + method + str(mp.id) + '?forceRender=true&embed=true&altHeader=true')
+        if (url['group'] == 'pg') or (url['group'] == 'ps'):
             print url['method']
             for pg in Organization.objects.values_list("id_parladata", flat=True):
                 method = url['group'] + '/' + url['method'] + '/'
@@ -819,3 +998,9 @@ def morningCash():
                 requests.get(theUrl + method + str(pg) + '?forceRender=true')
                 requests.get(theUrl + method + str(pg) + '?forceRender=true&frame=true&altHeader=true')
                 requests.get(theUrl + method + str(pg) + '?forceRender=true&embed=true&altHeader=true')
+        if (url['group'] == 'c'):
+            # kličeš brez IDja s končnim slashem
+            print 'yay!'
+        if (url['group'] == 'wb'):
+            # kličeš vsa delovna telesa
+            print 'yay!'
