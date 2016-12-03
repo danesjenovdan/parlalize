@@ -699,7 +699,7 @@ def getTFIDF(request, session_id):
     if card:
         card = card.latest("created_at")
         out = {
-            'person': card.session.getSessionData(),
+            'session': card.session.getSessionData(),
             'results': card.data,
             "created_for": card.created_for.strftime(API_DATE_FORMAT), 
             "created_at": card.created_at.strftime(API_DATE_FORMAT)
@@ -707,7 +707,7 @@ def getTFIDF(request, session_id):
     else:
         date_of = datetime.now().date()
         out = {
-            'person': Session.objects.get(id_parladata=session_id).getSessionData(),
+            'session': Session.objects.get(id_parladata=session_id).getSessionData(),
             'results': [],
                                     "created_for": date_of.strftime(API_DATE_FORMAT), 
             "created_at": date_of.strftime(API_DATE_FORMAT)
