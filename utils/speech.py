@@ -39,9 +39,9 @@ class WordAnalysis(object):
             #get members for this day
             self.members = tryHard(API_URL +'/getMPs/'+self.date_).json()
             self.allTimeMembers = tryHard(API_URL +'/getAllTimeMemberships').json()
-            self.prepereSpeechesFromSearch()
-            #self.prepereSpeeches()
-            #self.wordCounter()
+            #self.prepereSpeechesFromSearch()
+            self.prepereSpeeches()
+            self.wordCounter()
 
     def prepereSpeechesFromSearch(self):
         if self.count_of == "members":
