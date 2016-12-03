@@ -784,9 +784,29 @@ def updateWB():
 
 def morningCash():
     allUrls = tryHard("https://glej.parlameter.si/api/cards/getUrls").json()
-    theUrl = 'https://analize.parlameter.si/v1/'
+    theUrl = 'https://glej.parlameter.si/'
     for url in allUrls:
         if url['group'] == 's':
             print url['method']
             for ses in Session.objects.values_list("id_parladata", flat=True):
-                requests.get(theUrl + str(ses)).json()
+                method = url['group'] + '/' + url['method'] + '/'
+                print theUrl + method + str(ses) + '?forceRender=true'
+                requests.get(theUrl + method + str(ses) + '?forceRender=true')
+                requests.get(theUrl + method + str(ses) + '?forceRender=true&frame=true')
+                requests.get(theUrl + method + str(ses) + '?forceRender=true&embed=true')
+        if url['group'] == 'p':
+            print url['method']
+            for per in Person.objects.values_list("id_parladata", flat=True):
+                method = url['group'] + '/' + url['method'] + '/'
+                print theUrl + method + str(per) + '?forceRender=true'
+                requests.get(theUrl + method + str(per) + '?forceRender=true')
+                requests.get(theUrl + method + str(per) + '?forceRender=true&frame=true')
+                requests.get(theUrl + method + str(per) + '?forceRender=true&embed=true')
+        if url['group'] == 'pg':
+            print url['method']
+            for pg in Organization.objects.values_list("id_parladata", flat=True):
+                method = url['group'] + '/' + url['method'] + '/'
+                print theUrl + method + str(pg) + '?forceRender=true'
+                requests.get(theUrl + method + str(pg) + '?forceRender=true')
+                requests.get(theUrl + method + str(pg) + '?forceRender=true&frame=true')
+                requests.get(theUrl + method + str(pg) + '?forceRender=true&embed=true')
