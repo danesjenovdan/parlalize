@@ -771,13 +771,13 @@ def updatePersonFunctions():
 def updateWB():
     organizations = tryHard(API_URL + "/getOrganizatonByClassification").json()
     for wb in organizations["working_bodies"] + organizations["council"]:
-        pg = tryHard(API_URL + '/getMembersOfPGRanges/'+ str(wb['id']) +'/' + datetime.now().date().strftime(API_DATE_FORMAT)).json()
-        for mem in pg:
-            print "setting working_bodie: ",wb['name']
-            try:
-                setWorkingBodies(None, str(wb["id"]), mem['start_date'])  
-            except:
-                client.captureException()
+        #pg = tryHard(API_URL + '/getMembersOfPGRanges/'+ str(wb['id']) +'/' + datetime.now().date().strftime(API_DATE_FORMAT)).json()
+        #for mem in pg:
+        print "setting working_bodie: ",wb['name']
+        try:
+            setWorkingBodies(None, str(wb["id"]), datetime.now().date().strftime(API_DATE_FORMAT))  
+        except:
+            client.captureException()
             
     return "all is fine :D WB so settani"
 
