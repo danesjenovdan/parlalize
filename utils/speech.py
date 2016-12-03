@@ -108,7 +108,7 @@ class WordAnalysis(object):
             for pgMembersRange in self.membersOfPGsRanges:
                 #print "___" + pgMembersRange["start_date"]
                 for pg in pgMembersRange["members"].keys():
-                    if pg not in allTimePGs.keys():
+                    if pg not in allTimePGs:
                         continue
                     for member in pgMembersRange["members"][pg]: 
                         speeches = tryHard(API_URL+'/getSpeechesInRange/' + str(member) + "/" + pgMembersRange["start_date"] + "/" + pgMembersRange["end_date"]).json()

@@ -500,7 +500,7 @@ def getPersonData(id_parladata, date_=None):
     except:
         guest  = tryHard(API_URL + '/getPersonData/'+str(id_parladata)+'/').json()
         gov_id = None
-        if guest['gov_id']:
+        if guest and guest['gov_id']:
             return {
                 'type': "visitor" if guest else "unknown",
                 'party': {
