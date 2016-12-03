@@ -57,6 +57,7 @@ class Session(Timestampable, models.Model): # poslanec, minister, predsednik dz 
 
     actived = models.CharField(_('actived'),
                             null=True,
+                            blank=True,
                             max_length=128,
                             help_text=_('Yes if PG is actived or no if it is not'))
 
