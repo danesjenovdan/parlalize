@@ -302,6 +302,7 @@ def howMatchingThem(request, pg_id, type_of, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
 
     pg_score, membersInPGs, votes, all_votes = getRangeVotes([pg_id], date_, "logic")
 
@@ -419,24 +420,15 @@ def setDeviationInOrg(request, pg_id, date_=None):
 
     numOfKeys = len(keys)
 
-    out = {index: members[key] for key, index in zip(keys[:3], [1, 2, 3])}
-    out.update({index: members[key] for key, index in zip(keys[-3:], [4, 5, 6])})
+    #out = {index: members[key] for key, index in zip(keys[:3], [1, 2, 3])}
+    #out.update({index: members[key] for key, index in zip(keys[-3:], [4, 5, 6])})
+    out = [data for member, data in members.items() if member in keys]
+    out = sorted(out, key=lambda k,: k["ratio"], reverse=False)
     try:
         result = saveOrAbortNew(model=DeviationInOrganization,
                                 created_for=date_of,
                                 organization=Organization.objects.get(id_parladata=int(pg_id)),
-                                person1=Person.objects.get(id_parladata=int(out[1]['id'])) if numOfKeys > 0 else None,
-                                votes1=out[1]['ratio'] if numOfKeys > 0 else None,
-                                person2=Person.objects.get(id_parladata=int(out[2]['id'])) if numOfKeys > 1 else None,
-                                votes2=out[2]['ratio'] if numOfKeys > 1 else None,
-                                person3=Person.objects.get(id_parladata=int(out[3]['id'])) if numOfKeys > 2 else None,
-                                votes3=out[3]['ratio'] if numOfKeys > 2 else None,
-                                person4=Person.objects.get(id_parladata=int(out[4]['id'])) if numOfKeys > 3 else None,
-                                votes4=out[4]['ratio'] if numOfKeys > 3 else None,
-                                person5=Person.objects.get(id_parladata=int(out[5]['id'])) if numOfKeys > 4 else None,
-                                votes5=out[5]['ratio'] if numOfKeys > 4 else None,
-                                person6=Person.objects.get(id_parladata=int(out[6]['id'])) if numOfKeys > 5 else None,
-                                votes6=out[6]['ratio'] if numOfKeys > 5 else None,
+                                data = json.dumps(out)
                                 )
 
         return JsonResponse({'alliswell': True, "status":'OK', "saved": result})
@@ -528,31 +520,9 @@ def getDeviationInOrg(request, pg_id, date_=None):
         'organization': Organization.objects.get(id_parladata=int(pg_id)).getOrganizationData(),
         'created_at': mostMatching.created_at.strftime(API_DATE_FORMAT),
         'created_for': mostMatching.created_for.strftime(API_DATE_FORMAT),
-        'results': [
-            {
-                "ratio": mostMatching.votes1,
-                "person": getMPStaticPersonData(mostMatching.person1.id_parladata, date_)
-            },
-            {
-                "ratio": mostMatching.votes2,
-                "person": getMPStaticPersonData(mostMatching.person2.id_parladata, date_)
-            } if mostMatching.votes2 else None,
-            {
-                "ratio": mostMatching.votes3,
-                "person": getMPStaticPersonData(mostMatching.person3.id_parladata, date_)
-            } if mostMatching.votes3 else None,
-            {
-                "ratio": mostMatching.votes4,
-                "person": getMPStaticPersonData(mostMatching.person4.id_parladata, date_)
-            } if mostMatching.votes4 else None,
-            {
-                "ratio": mostMatching.votes5,
-                "person": getMPStaticPersonData(mostMatching.person5.id_parladata, date_)
-            } if mostMatching.votes5 else None,
-            {
-                "ratio": mostMatching.votes6,
-                "person": getMPStaticPersonData(mostMatching.person6.id_parladata, date_)
-            } if mostMatching.votes6 else None,
+        'results': [{
+            "ratio": result["ratio"], 
+            "person": getMPStaticPersonData(result["id"], date_)} for result in mostMatching.data
         ]
     }
     #remove None from list. If PG dont have 6 members.
