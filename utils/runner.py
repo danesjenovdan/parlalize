@@ -436,11 +436,12 @@ def onDateMPCardRunner(date_=None):
         date_of = (datetime.now()-timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
     setters = [
-        setCutVotes,
-        setMembershipsOfMember,
-        setLessEqualVoters,
-        setMostEqualVoters,
-        setPercentOFAttendedSession,
+        #setCutVotes,
+        #setMembershipsOfMember,
+        #setLessEqualVoters,
+        #setMostEqualVoters,
+        #setPercentOFAttendedSession,
+        setTFIDF
     ]
 
     memberships = tryHard(API_URL + '/getMPs/' + date_).json()
@@ -456,9 +457,9 @@ def onDateMPCardRunner(date_=None):
 
     # Runner for setters ALL
     all_in_one_setters = [
-        setAverageNumberOfSpeechesPerSessionAll,
-        setVocabularySizeAndSpokenWords,
-        setCompass,
+        #setAverageNumberOfSpeechesPerSessionAll,
+        #setVocabularySizeAndSpokenWords,
+        #setCompass,
     ]
 
     zero = datetime(day=2, month=8, year=2014).date()
@@ -575,13 +576,13 @@ def onDatePGCardRunner(date_=None):
         date_ = date_of.strftime(API_DATE_FORMAT)
     print date_
     setters = [
-        setCutVotesPG,
+        #setCutVotesPG,
         setDeviationInOrg,
-        setLessMatchingThem,
-        setMostMatchingThem,
-        setPercentOFAttendedSessionPG,
-        setMPsOfPG,
-        setBasicInfOfPG,
+        #setLessMatchingThem,
+        #setMostMatchingThem,
+        #setPercentOFAttendedSessionPG,
+        #setMPsOfPG,
+        #setBasicInfOfPG,
     ]
 
     membersOfPGsRanges = tryHard(
@@ -600,7 +601,7 @@ def onDatePGCardRunner(date_=None):
 
     # Runner for setters ALL
     all_in_one_setters = [
-        setVocabularySizeALL,
+        #setVocabularySizeALL,
     ]
 
     for setter in all_in_one_setters:
@@ -609,7 +610,7 @@ def onDatePGCardRunner(date_=None):
         except:
             print FAIL + "FAIL on: " + str(setter) + ENDC
 
-    updateWB()
+    #updateWB()
 
 def runSettersSessions(date_to=None):
     if not date_to:
@@ -680,8 +681,8 @@ def update():
     print "update person has_function"
     updatePersonFunctions()
 
-    print "start update cards"
-    updateLastDay()
+    #print "start update cards"
+    #updateLastDay()
 
     return 1
 
