@@ -4,8 +4,11 @@ from parlaseje.models import *
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+class SessionAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+
 # Register your models here.
-admin.site.register(Session)
+admin.site.register(Session, SessionAdmin)
 admin.site.register(Vote_graph)
 admin.site.register(Vote)
 admin.site.register(Activity)
