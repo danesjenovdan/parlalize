@@ -69,13 +69,23 @@ def updateOrganizations():
 
 def updateSpeeches():
     data = tryHard(API_URL + '/getAllSpeeches').json()
-    existingISs = list(Speech.objects.all().values_list("id_parladata", flat=True))
-    print existingISs
     for dic in data:
-        if int(dic["id"]) not in existingISs and str(dic["id"]) not in existingISs:
+        if Speech.objects.filter(id_parladata=dic['id']):
+            print "updating speech"
+            Speech.objects.filter(id_parladata=dic['id']).update(person=Person.objects.get(
+                                id_parladata=int(dic['speaker'])),
+                            organization=Organization.objects.get(
+                                id_parladata=int(dic['party'])),
+                            content=dic['content'], order=dic['order'],
+                            session=Session.objects.get(
+                                id_parladata=int(dic['session'])),
+                            start_time=dic['start_time'],
+                            end_time=dic['end_time'],
+                            id_parladata=dic['id'])
+        else:
             print "adding speech"
             speech = Speech(person=Person.objects.get(id_parladata=int(dic['speaker'])),
-                            organization=Organization.objects.get(
+                            organization=Organization.bjects.get(
                                 id_parladata=int(dic['party'])),
                             content=dic['content'], order=dic['order'],
                             session=Session.objects.get(
@@ -617,9 +627,9 @@ def runSettersSessions(date_to=None):
         date_to=datetime.today().strftime(API_DATE_FORMAT)
  
     setters_models = {
-        PresenceOfPG: setPresenceOfPG,
-        AbsentMPs: setAbsentMPs,
-        AverageSpeeches: setSpeechesOnSession,
+        #PresenceOfPG: setPresenceOfPG,
+        #AbsentMPs: setAbsentMPs,
+        #AverageSpeeches: setSpeechesOnSession,
         Vote_graph: setMotionOfSessionGraph
     }
     for model, setter in setters_models.items():
@@ -770,3 +780,13 @@ def updateWB():
                 client.captureException()
             
     return "all is fine :D WB so settani"
+
+
+def morningCash():
+    allUrls = tryHard("https://glej.parlameter.si/api/cards/getUrls").json()
+    theUrl = 'https://analize.parlameter.si/v1/'
+    for url in allUrls:
+        if url['group'] == 's':
+            print url['method']
+            for ses in Session.objects.values_list("id_parladata", flat=True):
+                requests.get(theUrl + str(ses)).json()
