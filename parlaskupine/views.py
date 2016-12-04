@@ -199,7 +199,7 @@ def getMPsOfPG(request, pg_id, date_=None):
 
     card = getPGCardModelNew(MPOfPg, pg_id, date_)
     ids = card.MPs
-    result = [getPersonData(MP, date_) for MP in ids]
+    result = sorted([getPersonData(MP, date_) for MP in ids], key=lambda k: k['name'])
     return JsonResponse({"results": result,
                          "party": card.organization.getOrganizationData(),
                          "created_at": card.created_at.strftime(API_DATE_FORMAT),
