@@ -26,7 +26,7 @@ SECRET_KEY = 'exkqi8xb2vnn4a*fyh@1y)z7*amz0!9p15ce9acqotf@y*wjn&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEVELOPMENT = False
-DEBUG = not DEVELOPMENT
+DEBUG = DEVELOPMENT
 
 ALLOWED_HOSTS = ['*']
 
@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'parlalize.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 
-if DEVELOPMENT:
+if not DEVELOPMENT:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
