@@ -25,8 +25,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'exkqi8xb2vnn4a*fyh@1y)z7*amz0!9p15ce9acqotf@y*wjn&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
 DEVELOPMENT = False
+DEBUG = not DEVELOPMENT
 
 ALLOWED_HOSTS = ['*']
 
@@ -88,15 +88,26 @@ WSGI_APPLICATION = 'parlalize.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': '192.168.110.31',
-        'NAME': 'parlalize',
-        'USER': 'parladaddy',
-        'PASSWORD': 'razvrat',
+if DEVELOPMENT:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'HOST': '192.168.110.31',
+            'NAME': 'parlalize',
+            'USER': 'parladaddy',
+            'PASSWORD': 'razvrat',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'HOST': 'localhost',
+            'NAME': 'parlalize',
+            'USER': 'parladaddy',
+            'PASSWORD': 'razvrat',
+        }
+    }
 
 
 # Internationalization
@@ -163,7 +174,8 @@ LOGGING = {
 }
 
 RAVEN_CONFIG = {
-    'dsn': 'http://4e425a27eba144b8938f588f3a60662b:cf6ef8ba155b4d8da53ca4dea6cf074e@sentry.ilol.si/41',
+    # removed for dev MUKI SETTINGS
+     'dsn': 'http://4e425a27eba144b8938f588f3a60662b:cf6ef8ba155b4d8da53ca4dea6cf074e@sentry.ilol.si/41' if not DEVELOPMENT else '',
     # If you are using git, you can also automatically configure the
     # release based on the git info.
 #    'release': raven.fetch_git_sha(os.path.dirname(__file__)),
