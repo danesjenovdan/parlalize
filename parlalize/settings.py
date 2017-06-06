@@ -173,13 +173,6 @@ LOGGING = {
     },
 }
 
-RAVEN_CONFIG = {
-    # removed for dev MUKI SETTINGS
-     'dsn': 'http://4e425a27eba144b8938f588f3a60662b:cf6ef8ba155b4d8da53ca4dea6cf074e@sentry.ilol.si/41' if not DEVELOPMENT else '',
-    # If you are using git, you can also automatically configure the
-    # release based on the git info.
-#    'release': raven.fetch_git_sha(os.path.dirname(__file__)),
-}
 
 API_DATE_FORMAT = '%d.%m.%Y'
 
@@ -195,5 +188,6 @@ CACHES = {
 }
 
 slack_token = 'xoxp-2166854968-16070161283-174340973622-b24bc3486a697e4675a7574f1f5bba92'
+
 
 SETTER_KEY = "vednoboljsi112358"
