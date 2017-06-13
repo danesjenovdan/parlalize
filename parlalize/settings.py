@@ -152,6 +152,8 @@ else:
     ISCI_URL = "https://isci.parlameter.si"
 
 BASE_URL = 'https://analize.parlameter.si/v1'
+GLEJ_URL = 'https://glej.parlameter.si'
+PAGE_URL = 'https://parlameter.si'
 
 
 LOGGING = {
