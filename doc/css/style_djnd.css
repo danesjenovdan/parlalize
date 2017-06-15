@@ -1,11 +1,8 @@
 /* ------------------------------------------------------------------------------------------
  * Content
  * ------------------------------------------------------------------------------------------ */
- @import url('http://fonts.googleapis.com/css?family=Roboto');
-body {
-  min-width: 980px;
-  max-width: 1280px;
-}
+ @import url('https://fonts.googleapis.com/css?family=Roboto+Slab:300,400,700|Roboto:300,400,500,700');
+
 
 body, p, a, div, th, td {
   font-family: "Roboto";
@@ -15,7 +12,7 @@ body, p, a, div, th, td {
 
 td.code {
   font-size: 14px;
-  font-family: "Roboto", monospace;
+  font-family: monospace;
   font-style: normal;
   font-weight: 400;
 }
@@ -24,6 +21,7 @@ td.code {
   padding-top: 16px;
   z-Index: -1;
   margin-left: 270px;
+  padding-right: 16px;
 }
 
 p {
@@ -31,17 +29,18 @@ p {
 }
 
 h1 {
-  font-family: "Roboto";
+  font-family: "Roboto Slab", serif;
   font-weight: normal;
   font-size: 44px;
   line-height: 50px;
   margin: 0 0 10px 0;
   padding: 0;
   color: #009cdd;
+  font-weight: 300;
 }
 
 h2 {
-  font-family: "Roboto", sans-serif;
+  font-family: "Roboto Slab", serif;
   font-weight: normal;
   font-size: 24px;
   line-height: 40px;
@@ -56,27 +55,29 @@ section {
 }
 
 section h1 {
-  font-family: "Roboto";
+  font-family: "Roboto Slab", serif;
   font-size: 32px;
   line-height: 40px;
   padding-bottom: 14px;
-  margin: 0 0 20px 0;
+  margin: 0;
   padding: 0;
+  font-weight: 300;
 }
 
 article {
-  padding: 14px 0 30px 0;
+  padding: 0 0 30px 0;
 }
 
 article h1 {
-  font-family: "Roboto";
+  font-family: "Roboto Slab", serif;
   font-size: 24px;
   line-height: 26px;
-  color: black;
+  color: #505050;
+  font-weight: 300;
 }
 
 article h2 {
-  font-family: "Roboto";
+  font-family: "Roboto Slab", serif;
   font-weight: 600;
   font-size: 18px;
   line-height: 24px;
@@ -84,7 +85,7 @@ article h2 {
 }
 
 article h3 {
-  font-family: "Roboto";
+  font-family: "Roboto Slab", serif;
   font-weight: 600;
   font-size: 16px;
   line-height: 18px;
@@ -92,7 +93,7 @@ article h3 {
 }
 
 article h4 {
-  font-family: "Roboto";
+  font-family: "Roboto Slab", serif;
   font-weight: 600;
   font-size: 14px;
   line-height: 16px;
@@ -103,6 +104,7 @@ table {
   border-collapse: collapse;
   width: 100%;
   margin: 0 0 20px 0;
+  border-top: 1px solid #e0e0e0;
 }
 
 th {
@@ -147,7 +149,7 @@ td {
 }
 
 #apidoc h1 {
-  font-family: "Roboto";
+  font-family: "Roboto Slab", serif;
   font-weight: 700;
   font-size: 32px;
   line-height: 40px;
@@ -157,7 +159,7 @@ td {
 }
 
 #apidoc h2 {
-  font-family: "Roboto";
+  font-family: "Roboto Slab", serif;
   font-weight: 600;
   font-size: 22px;
   line-height: 26px;
@@ -174,13 +176,13 @@ pre {
   position: relative;
   margin: 10px 0 20px 0;
   overflow-x: auto;
-  color: black;
+  color: #505050;
 }
 
 pre.prettyprint {
   width: 100%;
-  background-color: #f5f5f5
-
+  background-color: #f0f0f0;
+  border-radius: 0;
 }
 
 code.language-text {
@@ -244,7 +246,7 @@ pre code {
   font-weight: 400;
   word-wrap: normal;
   white-space: pre;
-  color: black;
+  color: #505050;
 }
 
 pre code.sample-request-response-json {
@@ -561,7 +563,7 @@ p.deprecated span{
   }
 
   p {
-    color: #000000
+    color: #505050
   }
 
   pre {
@@ -582,8 +584,13 @@ p.deprecated span{
 }
 
 .btn-default {
-  border-color: black;
+  border-color: #505050;
 
+}
+
+.btn-group button {
+  background-color: #ffffff;
+  border: 1px solid #505050;
 }
 
 .navbar, .navbar-inverse {
@@ -591,7 +598,7 @@ p.deprecated span{
   border: none;
   margin-bottom: 1;
   min-height: 80px;
-  color: black;
+  color: #505050;
 }
 
 .nav li {
@@ -600,7 +607,7 @@ p.deprecated span{
 }
 
 .navbar-inverse .navbar-nav > li > a {
-  color: #000000;
+  color: #505050;
   font-family: Lato;
   font-size: 1.7em;
   font-weight: 300;
@@ -619,6 +626,59 @@ p.deprecated span{
 }
 
 .icon-bar{
-  color: black;
+  color: #505050;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+.typ {
+  color: #ffffff;
+  background-color: #009cdd;
+  padding: 5px;
+}
+pre .pln {
+  color: #505050;
+  font-family: "Roboto Slab", monospace;
+}
+.language-curl .com {
+  color: #505050;
+}
+
+a {
+  color: #009cdd !important;
+}
+
+input.search {
+  border-radius: 0 !important;
+}
+
+.sidenav > li.active > a {
+  background-color: transparent;
+  color: #505050;
+}
+.sidenav {
+  padding:  20px 0 20px 0;
+}
+.sidenav li a {
+  width: auto !important;
+}
+
+@media (max-width: 991px) {
+  #sidenav {
+    display: none;
+  }
+  #content {
+    margin-left: 0;
+    padding: 20px;
+  }
+}
