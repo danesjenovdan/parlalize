@@ -22,10 +22,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'exkqi8xb2vnn4a*fyh@1y)z7*amz0!9p15ce9acqotf@y*wjn&'
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEVELOPMENT = False
+
 DEBUG = DEVELOPMENT
 
 ALLOWED_HOSTS = ['*']
@@ -92,20 +93,20 @@ if not DEVELOPMENT:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'HOST': '192.168.110.31',
-            'NAME': 'parlalize',
-            'USER': 'parladaddy',
-            'PASSWORD': 'razvrat',
+            'HOST': '',
+            'NAME': '',
+            'USER': '',
+            'PASSWORD': '',
         }
     }
 else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'HOST': 'localhost',
-            'NAME': 'parlalize',
-            'USER': 'parladaddy',
-            'PASSWORD': 'razvrat',
+            'HOST': '',
+            'NAME': '',
+            'USER': '',
+            'PASSWORD': '',
         }
     }
 
@@ -128,7 +129,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/home/parladaddy/parlalize/static/'
+STATIC_ROOT = ''
 
 
 LAST_ACTIVITY_COUNT = 10
@@ -148,12 +149,12 @@ if DEVELOPMENT:
     ISCI_URL = "http://localhost:8888"
 
 else:
-    API_URL = "https://data.parlameter.si/v1"
-    ISCI_URL = "https://isci.parlameter.si"
+    API_URL = ""
+    ISCI_URL = ""
 
-BASE_URL = 'https://analize.parlameter.si/v1'
-GLEJ_URL = 'https://glej.parlameter.si'
-PAGE_URL = 'https://parlameter.si'
+BASE_URL = ''
+GLEJ_URL = ''
+PAGE_URL = ''
 
 
 LOGGING = {
@@ -180,24 +181,21 @@ API_DATE_FORMAT = '%d.%m.%Y'
 
 # CORS config
 CORS_ORIGIN_ALLOW_ALL = True
+
 API_OUT_DATE_FORMAT = '%-d. %-m. %Y'
 
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
+        'LOCATION': '',
     }
 }
 
-slack_token = 'xoxp-2166854968-16070161283-174340973622-b24bc3486a697e4675a7574f1f5bba92'
+slack_token = ''
 
-
-SETTER_KEY = "vednoboljsi112358"
+# Key for parlalize setters
+SETTER_KEY = ''
 
 RAVEN_CONFIG = {
-    # removed for dev MUKI SETTINGS
-     'dsn': 'http://4e425a27eba144b8938f588f3a60662b:cf6ef8ba155b4d8da53ca4dea6cf074e@sentry.ilol.si/41' if not DEVELOPMENT else '',
-    # If you are using git, you can also automatically configure the
-    # release based on the git info.
-    #'release': raven.fetch_git_sha(os.path.dirname(__file__)),
+      'dsn': 'key' if not DEVELOPMENT else '',
 }
