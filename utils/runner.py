@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import requests
 from parlaposlanci.views import setMPStaticPL
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY
 from parlalize.utils import getPGIDs, findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
 from raven.contrib.django.raven_compat.models import client
+from django.test.client import RequestFactory
 
 from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass
@@ -15,7 +16,7 @@ from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic
 
 from parlaseje.models import Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
 
-from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
+from parlaseje.views import setPresenceOfPG, setSpeechesOnSession, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
 from parlaseje.utils import idsOfSession, getSesDates
 from utils.recache import updatePagesS
 from utils.imports import update, updateDistricts, updateTags
@@ -31,6 +32,8 @@ from slackclient import SlackClient
 from time import time
 
 DZ = 95
+factory = RequestFactory()
+request_with_key = factory.get('?key=' + SETTER_KEY)
 
 
 # parlaposlanci runner methods #
@@ -44,14 +47,14 @@ def updateMPStatic():
         # call setters for new pg
         for pg in list(set(change['members'].keys()) - set(lastObject['members'].keys())):
             for member in change['members'][pg]:
-                setMPStaticPL(None, str(member), change['start_date'])
+                setMPStaticPL(request_with_key, str(member), change['start_date'])
 
         # call setters for members which have change in memberships
         for pg in change['members'].keys():
             if pg in lastObject['members'].keys():
                 personsForUpdate = list(set(change['members'][pg]) - set(lastObject['members'][pg]))
                 for member in personsForUpdate:
-                    setMPStaticPL(None, str(member), change['start_date'])
+                    setMPStaticPL(request_with_key, str(member), change['start_date'])
         lastObject = change
 
 
@@ -80,7 +83,7 @@ def onDateMPCardRunner(date_=None):
         for setter in setters:
             print 'running:' + str(setter)
             try:
-                setter(None, str(membership['id']), date_)
+                setter(request_with_key, str(membership['id']), date_)
             except:
                 msg = ('' + FAIL + ''
                        'FAIL on: '
@@ -89,7 +92,7 @@ def onDateMPCardRunner(date_=None):
                        '' + str(membership['id']) + ''
                        '' + ENDC + '')
                 print msg
-        setLastActivity(None, str(membership['id']))
+        setLastActivity(request_with_key, str(membership['id']))
 
     # Runner for setters ALL
     all_in_one_setters = [
@@ -102,7 +105,7 @@ def onDateMPCardRunner(date_=None):
     for setter in all_in_one_setters:
         print 'running:' + str(setter)
         try:
-            setter(None, date_)
+            setter(request_with_key, date_)
         except:
             print 'FAIL on: ' + str(setter)
 
@@ -134,7 +137,7 @@ def onDatePGCardRunner(date_=None):
         for ID in IDs:
             print setter
             try:
-                setter(None, str(ID), date_)
+                setter(request_with_key, str(ID), date_)
             except:
                 text = ('' + FAIL + 'FAIL on: ' + str(setter) + ''
                         ' and with id: ' + str(ID) + ENDC + '')
@@ -147,7 +150,7 @@ def onDatePGCardRunner(date_=None):
 
     for setter in all_in_one_setters:
         try:
-            setter(None, date_)
+            setter(request_with_key, date_)
         except:
             print FAIL + 'FAIL on: ' + str(setter) + ENDC
 
@@ -177,7 +180,7 @@ def runSettersSessions(date_to=None, sessions_ids=None):
             for ID in last:
                 print ID
                 try:
-                    setter(None, str(ID))
+                    setter(request_with_key, str(ID))
                 except:
                     client.captureException()
         else:
@@ -189,7 +192,7 @@ def runSettersSessions(date_to=None, sessions_ids=None):
             for date in datesSes:
                 print date
                 try:
-                    setter(None, date.strftime(API_DATE_FORMAT))
+                    setter(request_with_key, date.strftime(API_DATE_FORMAT))
                 except:
                     client.captureException()
     return 'all is fine :D'
@@ -262,7 +265,7 @@ def updateWB():
     for wb in organizations['working_bodies'] + organizations['council']:
         print 'setting working_bodie: ', wb['name']
         try:
-            setWorkingBodies(None,
+            setWorkingBodies(request_with_key,
                              str(wb['id']),
                              datetime.now().date().strftime(API_DATE_FORMAT))
         except:
@@ -432,7 +435,7 @@ def fastUpdate(fast=True, date_=None):
                 channel="#parlalize_notif",
                 text='Start update votes at: ' + str(datetime.now()))
     for session_id in data['sessions_of_updated_votes']:
-        setMotionOfSession(None, str(session_id))
+        setMotionOfSession(request_with_key, str(session_id))
 
     # update ballots
     sc.api_call("chat.postMessage",
@@ -597,14 +600,14 @@ def setListOfMembers(date_time):
     """
     start_date = datetime.strptime(date_time, '%Y-%m-%dT%X')
     start_date = start_date - timedelta(days=1)
-    setListOfMembersTickers(None, start_time.strftime(API_DATE_FORMAT))
+    setListOfMembersTickers(request_with_key, start_time.strftime(API_DATE_FORMAT))
 
 
 def updateLastActivity(mps_ids):
     print 'set last activity for: ', mps_ids
     for mp in mps_ids:
         print mp
-        print setLastActivity(None, str(mp))
+        print setLastActivity(request_with_key, str(mp))
         print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '/?frame=true&altHeader=true&forceRender=true')
         print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '/?embed=true&altHeader=true&forceRender=true')
         print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?forceRender=true')
