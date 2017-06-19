@@ -110,6 +110,7 @@ class VotesAnalysis(object):
                        allSessionsCount,
                        on='voter',
                        how='right')
+        out = out.fillna(0)
         out['attendance'] = 100 * (1 - out.id_x / out.id_y)
         self.presenceMP_S = out
 
