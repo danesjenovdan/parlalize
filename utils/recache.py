@@ -127,10 +127,13 @@ def updateCacheIntraDisunion():
 def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[]):
     def cardRecache(card_url):
         url = card_url + '?forceRender=true'
+        print url
         requests.get(url)
-        url = card_url + '?forceRender=true&frame=true&altHeader=true'
+        url = card_url + '?frame=true&altHeader=true&forceRender=true'
+        print url
         requests.get(url)
-        url = card_url + '?forceRender=true&embed=true&altHeader=true'
+        print url
+        url = card_url + '?embed=true&altHeader=true&forceRender=true'
         requests.get(url)
 
     mps = tryHard(API_URL + '/getMPs/').json()
