@@ -146,6 +146,9 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[]):
             for pgCard in pgCards:
                 card_url = base_url + 'ps/' + pgCard + '/' + str(pg)
                 cardRecache(card_url)
+                # the dirtiest workaround
+                card_url = base_url + 'pg/' + pgCard + '/' + str(pg)
+                cardRecache(card_url)
             printProgressBar(pg_ids.index(pg), len(pg_ids), prefix='Orgs: ')
 
     if mpCards:
