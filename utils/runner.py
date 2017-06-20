@@ -169,32 +169,19 @@ def runSettersSessions(date_to=None, sessions_ids=None):
     # set outliers for all votes
     setOutliers()
     for model, setter in setters_models.items():
-        if model != AverageSpeeches:
-            # IDs = getSesIDs(dates[1],dates[-1])
-            if sessions_ids:
-                last = sessions_ids
-            else:
-                last = idsOfSession(model)
-            print last
-            print model
-            for ID in last:
-                print ID
-                try:
-                    setter(request_with_key, str(ID))
-                except:
-                    client.captureException()
+        # IDs = getSesIDs(dates[1],dates[-1])
+        if sessions_ids:
+            last = sessions_ids
         else:
-            dates = findDatesFromLastCard(model, None, date_to)
-            print model
-            if dates == []:
-                continue
-            datesSes = getSesDates(dates[-1])
-            for date in datesSes:
-                print date
-                try:
-                    setter(request_with_key, date.strftime(API_DATE_FORMAT))
-                except:
-                    client.captureException()
+            last = idsOfSession(model)
+        print last
+        print model
+        for ID in last:
+            print ID
+            try:
+                setter(request_with_key, str(ID))
+            except:
+                client.captureException()
     return 'all is fine :D'
 
 
