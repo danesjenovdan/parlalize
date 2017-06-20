@@ -92,8 +92,14 @@ class Session(Timestampable, models.Model):
         orgs_data = [org.getOrganizationData()
                      for org
                      in self.organizations.all()]
+        activity = Activity.objects.filter(session=self)
+        if activity:
+            last_day = activity.latest('updated_at').updated_at.strftime(API_OUT_DATE_FORMAT)
+        else:
+            last_day = self.start_time.strftime(API_OUT_DATE_FORMAT),
         return {'name': self.name,
                 'date': self.start_time.strftime(API_OUT_DATE_FORMAT),
+                'updated_at': last_day,
                 'date_ts': self.start_time,
                 'id': self.id_parladata,
                 'org': self.organization.getOrganizationData(),
