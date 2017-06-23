@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 import re
 from django.db.models import Q, F
 from django.core.cache import cache
-from parlalize.utils import tryHard, lockSetter
+from parlalize.utils import tryHard, lockSetter, getAllStaticData
 
 
 def getSpeech(request, speech_id):
@@ -3002,12 +3002,13 @@ def getVotesData(request, votes):
     }
     ]
     """
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
     out = []
     votes = votes.split(',')
     for vote in Vote.objects.filter(id_parladata__in=votes):
         out.append({
             'created_for': vote.created_for,
-            'session': vote.session.getSessionData(),
+            'session': sessionsData[str(vote.session.id_parladata)],
             'results': {
 
                     'motion_id': vote.id_parladata,
