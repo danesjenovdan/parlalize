@@ -3007,7 +3007,7 @@ def getVotesData(request, votes):
     for vote in Vote.objects.filter(id_parladata__in=votes):
         out.append({
             'created_for': vote.created_for,
-            'session': vot.session.getSessionData(),
+            'session': vote.session.getSessionData(),
             'results': {
 
                     'motion_id': vote.id_parladata,
