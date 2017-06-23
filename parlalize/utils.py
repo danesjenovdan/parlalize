@@ -431,7 +431,7 @@ def getAllStaticData(request, force_render=False):
         PS_NP = ['poslanska skupina', 'nepovezani poslanec']
         date_ = datetime.now().strftime(API_DATE_FORMAT)
 
-        out = {'persons': {}, 'partys': {}, 'wbs': {}}
+        out = {'persons': {}, 'partys': {}, 'wbs': {}, 'sessions': {}}
         for person in Person.objects.all():
             personData = getPersonData(person.id_parladata,
                                        date_)
