@@ -441,6 +441,10 @@ def getAllStaticData(request, force_render=False):
         for party in parliamentary_group:
             out['partys'][party.id_parladata] = party.getOrganizationData()
 
+        sessions = Session.objects.all()
+        for session in sessions:
+            out['sessions'][session.id_parladata] = session.getOrganizationData()
+
         working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
         orgs = Organization.objects.filter(classification__in=working_bodies)
         out['wbs'] = [{'id': org.id_parladata,
