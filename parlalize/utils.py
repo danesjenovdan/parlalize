@@ -443,7 +443,7 @@ def getAllStaticData(request, force_render=False):
 
         sessions = Session.objects.all()
         for session in sessions:
-            out['sessions'][session.id_parladata] = session.getOrganizationData()
+            out['sessions'][session.id_parladata] = session.getSessionData()
 
         working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
         orgs = Organization.objects.filter(classification__in=working_bodies)
