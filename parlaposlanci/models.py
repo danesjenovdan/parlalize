@@ -478,6 +478,20 @@ class MinisterStatic(Timestampable, models.Model):
                               default="f",
                               help_text=_('Gender'))
 
+    def getJsonData(self):
+        return {
+                'type': "ministry",
+                'name': self.person.name,
+                'id': int(self.person.id_parladata),
+                'gov_id': self.gov_id,
+                'party': self.party.getOrganizationData() if self.party else None,
+                'ministry': self.ministry.getOrganizationData() if self.ministry else None,
+                'gender': self.gender,
+                'district': self.district,
+                'is_active': True if self.person.actived == "True" else False,
+                'has_function': self.person.has_function,
+                }
+
 
 class MPStaticGroup(Timestampable, models.Model):
 
