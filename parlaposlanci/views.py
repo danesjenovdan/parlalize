@@ -257,41 +257,47 @@ def getMPStaticPL(request, person_id, date_=None):
 def setMinsterStatic(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        data = tryHard(API_URL+'/getMinistrStatic/' + person_id + "/" + date_).json()
+        m_data = tryHard(API_URL+'/getMinistrStatic/' + person_id + "/" + date_).json()
     else:
         date_of = datetime.now().date()
-        data = tryHard(API_URL+'/getMinistrStatic/' + person_id).json()
+        m_data = tryHard(API_URL+'/getMinistrStatic/' + person_id).json()
 
     person = Person.objects.get(id_parladata=int(person_id))
-    if not data:
+    if not m_:
         return JsonResponse({"status": 'Nothing iz well', "saved": False})
-    dic = dict()
 
-    if data['party']:
-        party = Organization.objects.get(id_parladata=data['party']['id'])
-    else:
-        party = None
+    for data in m_data:
+        if data['party']:
+            party = Organization.objects.get(id_parladata=data['party']['id'])
+        else:
+            party = None
 
-    if data['ministry']:
-        ministry = Organization.objects.get(id_parladata=data['ministry']['id'])
-    else:
-        ministry = None
+        if data['ministry']:
+            ministry = Organization.objects.get(id_parladata=data['ministry']['id'])
+        else:
+            ministry = None
 
-    result = saveOrAbortNew(model=MinisterStatic,
-                            created_for=date_of,
-                            person=person,
-                            age=data['age'],
-                            party=party,
-                            education=data['education'],
-                            previous_occupation=data['previous_occupation'],
-                            name=data['name'],
-                            district=data['district'],
-                            facebook=data['social']['facebook'],
-                            twitter=data['social']['twitter'],
-                            linkedin=data['social']['linkedin'],
-                            gov_id=data['gov_id'],
-                            gender=data['gender'],
-                            ministry=ministry)
+        ministry_static = MinisterStatic.objects.filter(person=person,
+                                                        ministry=ministry,
+                                                        created_for=data['start_time'])
+        if ministry_static:
+            # TODO: edit?
+            pass
+        else:
+            MinisterStatic(created_for=data['start_time'],
+                           person=person,
+                           age=data['age'],
+                           party=party,
+                           education=data['education'],
+                           previous_occupation=data['previous_occupation'],
+                           name=data['name'],
+                           district=data['district'],
+                           facebook=data['social']['facebook'],
+                           twitter=data['social']['twitter'],
+                           linkedin=data['social']['linkedin'],
+                           gov_id=data['gov_id'],
+                           gender=data['gender'],
+                           ministry=ministry).save()
 
     return JsonResponse({"status":'All iz well', "saved":result})
 
@@ -1922,8 +1928,8 @@ def getTFIDF(request, person_id, date_=None):
 def setVocabularySizeAndSpokenWords(request, date_=None):
     sw = WordAnalysis(count_of="members", date_=date_)
 
-    if not sw.isNewSpeech:
-        return JsonResponse({'alliswell': False})
+    #if not sw.isNewSpeech:
+    #    return JsonResponse({'alliswell': False})
 
     #Vocabolary size
     all_score = sw.getVocabularySize()
