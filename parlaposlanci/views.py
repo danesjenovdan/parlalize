@@ -966,13 +966,14 @@ def getLastActivity(request, person_id, date_=None):
         sessions_ids = day_activites.session_id.split(';')
         for i in range(len(day_activites.typee.split(';'))):
             if types[i] == 'ballot':
+                vote = Vote.objects.filter(id_parladata=activity_ids[i]).order_by('-created_at')[0]
                 data.append({
                     'option': options[i],
-                    'result': Vote.objects.filter(id_parladata=activity_ids[i]).order_by('-created_at')[0].result,
+                    'result': vote.result,
                     'vote_name': vote_names[i],
                     'vote_id': int(activity_ids[i]),
                     'type': types[i],
-                    'session_id': Vote.objects.filter(id_parladata=int(activity_ids[i])).order_by('-created_at')[0].session.id_parladata
+                    'session_id': vote.session.id_parladata
                     })
             elif types[i] == 'speech':
                 data.append({
@@ -987,10 +988,8 @@ def getLastActivity(request, person_id, date_=None):
                     sesData = question.session.getSessionData()
                 else:
                     sesData = None
-                persons = []
+                persons = [ministr.getJsonData() for ministr in question.recipient_persons_static.all()]
                 orgs = []
-                for person in question.recipient_persons.all():
-                    persons.append(getMinistryData(person.id_parladata, question.start_time.strftime(API_DATE_FORMAT)))
                 for org in question.recipient_organizations.all():
                     orgs.append(org.getOrganizationData())
                 data.append({
@@ -3374,25 +3373,11 @@ def getQuestions(request, person_id, date_=None):
     created_at = []
     for day in questions:
         dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT),
-                   'questions':[]}
+                   'questions': []}
         lastDay = day[0].start_time.strftime(API_OUT_DATE_FORMAT)
         for question in day:
             created_at.append(question.created_at)
-            persons = []
-            orgs = []
-            for person in question.recipient_persons.all():
-                persons.append(getMinistryData(person.id_parladata, question.start_time.strftime(API_DATE_FORMAT)))
-            for org in question.recipient_organizations.all():
-                orgs.append(org.getOrganizationData())
-            dayData['questions'].append({
-                'session_name': question.session.name if question.session else 'Unknown',
-                'id': question.id_parladata,
-                'title': question.title,
-                'recipient_text': question.recipient_text,
-                'recipient_persons': persons,
-                'recipient_orgs': orgs,
-                'url': question.content_link,
-                'session_id': question.session.id_parladata if question.session else 'Unknown'})
+            dayData['questions'].append(question.getQuestionData())
         out.append(dayData)
 
     result = {
