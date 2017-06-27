@@ -2,6 +2,7 @@ from parlalize.utils import tryHard
 from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
+from parlaposlanci.views import setMinsterStatic
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag
 from datetime import datetime, timedelta
 from django.test.client import RequestFactory
