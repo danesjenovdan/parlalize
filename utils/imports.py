@@ -1,12 +1,15 @@
 from parlalize.utils import tryHard
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.test.client import RequestFactory
 # parlalize initial runner methods #
 
 DZ = 95
+factory = RequestFactory()
+request_with_key = factory.get('?key=' + SETTER_KEY)
 
 
 def updatePeople():
@@ -255,7 +258,7 @@ def updateMinistrers():
         if diff:
             for person in diff:
                 print person
-                setMinsterStatic(None, str(person), today.strftime(API_DATE_FORMAT))
+                setMinsterStatic(request_with_key, str(person), today.strftime(API_DATE_FORMAT))
             prev_ministers = ministers
 
 
