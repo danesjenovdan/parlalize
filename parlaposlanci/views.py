@@ -263,10 +263,11 @@ def setMinsterStatic(request, person_id, date_=None):
         m_data = tryHard(API_URL+'/getMinistrStatic/' + person_id).json()
 
     person = Person.objects.get(id_parladata=int(person_id))
-    if not m_:
+    if not m_data:
         return JsonResponse({"status": 'Nothing iz well', "saved": False})
 
     for data in m_data:
+        start_time = data['start_time'].split('T')[0]
         if data['party']:
             party = Organization.objects.get(id_parladata=data['party']['id'])
         else:
@@ -279,12 +280,12 @@ def setMinsterStatic(request, person_id, date_=None):
 
         ministry_static = MinisterStatic.objects.filter(person=person,
                                                         ministry=ministry,
-                                                        created_for=data['start_time'])
+                                                        created_for=start_time)
         if ministry_static:
             # TODO: edit?
             pass
         else:
-            MinisterStatic(created_for=data['start_time'],
+            MinisterStatic(created_for=start_time,
                            person=person,
                            age=data['age'],
                            party=party,
