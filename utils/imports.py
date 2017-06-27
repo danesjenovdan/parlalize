@@ -258,7 +258,7 @@ def updateMinistrers():
         if diff:
             for person in diff:
                 print person
-                setMinsterStatic(None, str(person), today.strftime(API_DATE_FORMAT))
+                setMinsterStatic(request_with_key, str(person), today.strftime(API_DATE_FORMAT))
             prev_ministers = ministers
 
 
