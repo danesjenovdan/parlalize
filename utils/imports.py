@@ -3,6 +3,7 @@ from parlalize.settings import API_URL, API_DATE_FORMAT
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag
+from datetime import datetime
 # parlalize initial runner methods #
 
 DZ = 95
