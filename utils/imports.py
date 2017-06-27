@@ -247,10 +247,7 @@ def setAllSessions():
 
 
 def updateMinistrers():
-    start_date = datetime(day=2, month=8, year=2014)
-    days = range((datetime.now()-start_date).days)
-    prev_ministers = []
-    ministers = tryHard(API_URL + '/getIDsOfAllMinisters/' + today.strftime(API_DATE_FORMAT)).json()['ministers_ids']
+    ministers = tryHard(API_URL + '/getIDsOfAllMinisters/').json()['ministers_ids']
     for ministr in ministers:
         print ministr
         setMinsterStatic(request_with_key, str(ministr))
