@@ -462,6 +462,11 @@ def fastUpdate(fast=True, date_=None):
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
+            for post in dic['recipient_posts']:
+                static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
+                                                       ministry__id_parladata=post['organization_id'])
+                if static:
+                    rec_posts.append(static[0])
             question = Question(person=person,
                                 session=session,
                                 start_time=dic['date'],
@@ -473,6 +478,7 @@ def fastUpdate(fast=True, date_=None):
             question.save()
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
+            question.recipient_persons_static.add(*rec_posts)
 
     updateDistricts()
 

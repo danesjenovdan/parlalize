@@ -174,6 +174,11 @@ class Question(Activity):
                                                null=True,
                                                help_text='Recipient persons (if it\'s a person).',
                                                related_name='questions')
+    recipient_persons_static = models.ManyToManyField('parlaposlanci.MinisterStatic',
+                                                      blank=True,
+                                                      null=True,
+                                                      help_text='Recipient persons (if it\'s a person).',
+                                                      related_name='questions_static')
     recipient_organizations = models.ManyToManyField('parlaskupine.Organization',
                                                      blank=True,
                                                      null=True,
