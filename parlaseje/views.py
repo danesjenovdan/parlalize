@@ -13,6 +13,7 @@ import re
 from django.db.models import Q, F
 from django.core.cache import cache
 from parlalize.utils import tryHard, lockSetter, getAllStaticData
+from django.views.decorators.csrf import csrf_exempt
 
 
 def getSpeech(request, speech_id):
