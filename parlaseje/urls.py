@@ -13,7 +13,7 @@ urlpatterns = patterns(
     url(r'^setPresenceOfPG/(?P<session_id>\d+)', setPresenceOfPG),
     url(r'^setPresenceOfPG/(?P<session_id>\d+)/(?P<date_>[\w].+)', setPresenceOfPG),
 
-    url(r'^setTFIDF/(?P<session_id>\d+)', setTFIDF),
+    url(r'^setTFIDF/', setTFIDF),
 
     url(r'^setMotionOfSessionGraph/(?P<session_id>\d+)', setMotionOfSessionGraph),
     url(r'^setMotionOfSessionGraph/(?P<session_id>\d+)/(?P<date_>[\w].+)', setMotionOfSessionGraph),
@@ -32,7 +32,7 @@ urlpatterns = patterns(
 
     url(r'^getQuote/(?P<quote_id>\d+)', getQuote),
 
-    url(r'^getTFIDF/', getTFIDF),
+    url(r'^getTFIDF/(?P<session_id>\d+)', getTFIDF),
 
     url(r'^getLastSessionLanding(/(?P<date_>[\w].+))?', getLastSessionLanding),
 
