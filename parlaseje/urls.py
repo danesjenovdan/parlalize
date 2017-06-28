@@ -32,7 +32,7 @@ urlpatterns = patterns(
 
     url(r'^getQuote/(?P<quote_id>\d+)', getQuote),
 
-    url(r'^getTFIDF/(?P<session_id>\d+)', getTFIDF),
+    url(r'^getTFIDF/', getTFIDF),
 
     url(r'^getLastSessionLanding(/(?P<date_>[\w].+))?', getLastSessionLanding),
 
