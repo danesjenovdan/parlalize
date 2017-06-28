@@ -462,6 +462,8 @@ def fastUpdate(fast=True, date_=None):
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
+
+            rec_posts = []
             for post in dic['recipient_posts']:
                 static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
                                                        ministry__id_parladata=post['organization_id'])
