@@ -13,6 +13,7 @@ import re
 from django.db.models import Q, F
 from django.core.cache import cache
 from parlalize.utils import tryHard, lockSetter, getAllStaticData
+from django.views.decorators.csrf import csrf_exempt
 
 
 def getSpeech(request, speech_id):
@@ -2110,21 +2111,26 @@ def getSessionsList(request, date_=None, force_render=False):
 
 
 @lockSetter
-def setTFIDF(request, session_id):
+@csrf_exempt
+def setTFIDF(request):
     """Stores TFIDF analysis.
     """
-    date_of = datetime.now().date()
-    url = ISCI_URL + "/tfidf/s/" + str(session_id)
-    data = tryHard(url).json()
-    session = Session.objects.get(id_parladata=session_id)
-    is_saved = saveOrAbortNew(Tfidf,
-                              session=session,
-                              created_for=date_of,
-                              is_visible=False,
-                              data=data["results"])
+    if request.method == 'POST':
+        post_data = json.loads(request.body)
+        date_of = datetime.now().date()
+        session = Session.objects.get(id_parladata=post_data['session'])
+        is_saved = saveOrAbortNew(Tfidf,
+                                  session=session,
+                                  created_for=date_of,
+                                  is_visible=False,
+                                  data=post_data["results"])
+    else:
+        return JsonResponse({'alliswell': False,
+                             'saveds': False,
+                             'status': 'there\'s no post data'})
 
-    return JsonResponse({"alliswell": True,
-                         "saved": is_saved})
+    return JsonResponse({'alliswell': True,
+                         'saved': is_saved})
 
 
 def getTFIDF(request, session_id):
