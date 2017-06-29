@@ -334,7 +334,7 @@ def getPersonData(id_parladata, date_=None):
     try:
         data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
     except:
-        url = API_URL + '/utils/getPersonData/' + str(id_parladata) + '/'
+        url = API_URL + '/getPersonData/' + str(id_parladata) + '/'
         guest = tryHard(url).json()
         gov_id = None
         if guest and guest['gov_id']:
