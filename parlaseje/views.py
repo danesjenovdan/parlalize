@@ -2561,9 +2561,13 @@ def getComparedVotes(request):
         parties_different_list = []
     
     if len(people_same_list) + len(parties_same_list) == 0:
-        return JsonResponse([], safe=False)
+        out = {
+            'total': Vote.objects.all().count(),
+            'results': []
+        }
+        return JsonResponse(out, safe=False)
     if len(people_same_list) + len(parties_same_list) < 2 and len(people_different_list) + len(parties_different_list) < 1:
-        return JsonResponse([], safe=False)
+        return JsonResponse(out, safe=False)
 
     beginning = 'SELECT * FROM '
     select_same_people = ''
