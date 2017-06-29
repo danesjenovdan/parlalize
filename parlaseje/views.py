@@ -2110,8 +2110,8 @@ def getSessionsList(request, date_=None, force_render=False):
     return JsonResponse(out)
 
 
-@lockSetter
 @csrf_exempt
+@lockSetter
 def setTFIDF(request):
     """Stores TFIDF analysis.
     """
