@@ -19,6 +19,7 @@ from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 from parlalize.utils import tryHard, lockSetter
+from django.forms.models import model_to_dict
 
 # Create your views here.
 @lockSetter
