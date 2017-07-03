@@ -1279,51 +1279,45 @@ def getTaggedBallots(request, pg_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
-        date_of = datetime.now().date()
+        date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    url = API_URL + '/getMembersOfPGRanges/' + pg_id + '/' + date_
-    membersOfPGRanges = tryHard(url).json()
-    out = []
-    latest = []
-    for pgMembersRange in membersOfPGRanges:
-        ballots = Ballot.objects.filter(person__id_parladata__in=pgMembersRange['members'],
-                                        start_time__lte=datetime.strptime(pgMembersRange['end_date'],
-                                                                          API_DATE_FORMAT),
-                                        start_time__gte=datetime.strptime(pgMembersRange['start_date'],
-                                                                          API_DATE_FORMAT))
-        if ballots:
-            latest.append(ballots.latest('created_at').created_at)
-        ballots = [ballots.filter(start_time__range=[t_date,
-                                                     t_date+timedelta(days=1)])
-                   for t_date
-                   in ballots.order_by('start_time').datetimes('start_time',
-                                                               'day')]
+    b = Ballot.objects.filter(org_voter__id_parladata=1,
+                              start_time__lte=date_of)
+    votes = Vote.objects.filter(start_time__lte=date_of).order_by('start_time')
+    # add start_time_date to querySetObjets
+    votes = votes.extra(select={'start_time_date': 'DATE(start_time)'})
+    b_s = [model_to_dict(i, fields=['vote', 'option']) for i in b]
+    b_s = {bal['vote']: bal['option'] for bal in b_s}
+    # get unique dates
+    dates = list(set(list(votes.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+    #current_data = {'date': votes[0].start_time_date, 'ballots': []}
+    for vote in votes:
+        try:
+            data[vote.start_time_date].append({
+                'motion': vote.motion,
+                'vote_id': vote.id_parladata,
+                'result': vote.result,
+                'session_id': vote.session.id_parladata if vote.session else None,
+                'option': b_s[vote.id],
+                'tags': vote.tags})
+        except:
+            print 'Ni vota ' + str(vote.id)
 
-        for day in ballots:
-            dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT),
-                       'ballots': []}
-            votes = list(set(day.order_by('start_time').values_list('vote_id',
-                                                                    flat=True)))
-            for vote in votes:
-                vote_balots = day.filter(vote_id=vote)
-                counter = Counter(vote_balots.values_list('option', flat=True))
-                dayData['ballots'].append({
-                    'motion': vote_balots[0].vote.motion,
-                    'vote_id': vote_balots[0].vote.id_parladata,
-                    'result': vote_balots[0].vote.result,
-                    'session_id': vote_balots[0].vote.session.id_parladata if vote_balots[0].vote.session else None,
-                    'option': max(counter, key=counter.get),
-                    'tags': vote_balots[0].vote.tags})
-            out.append(dayData)
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'ballots': data[date]}
+           for date in dates]
 
     tags = list(Tag.objects.all().values_list('name', flat=True))
     result = {
         'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
-        'created_at': max(latest).strftime(API_DATE_FORMAT) if latest else None,
-        'created_for': out[-1]['date'] if out else None,
+        'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
         'all_tags': tags,
-        'results': list(reversed(out))
+        'results': out
         }
+
     return JsonResponse(result, safe=False)
 
 
