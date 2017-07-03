@@ -1315,7 +1315,7 @@ def getTaggedBallots(request, pg_id, date_=None):
         'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
         'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
         'all_tags': tags,
-        'results': out
+        'results': list(reversed(out))
         }
 
     return JsonResponse(result, safe=False)
