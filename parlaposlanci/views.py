@@ -1,31 +1,31 @@
 # -*- coding: UTF-8 -*-
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.forms.models import model_to_dict
+from django.core.cache import cache
+
 from scipy.stats.stats import pearsonr
 from scipy.stats import rankdata
 from scipy.spatial.distance import euclidean
 from datetime import date, datetime, timedelta
-from django.core.cache import cache
-
-import numpy
-from parlalize.utils import *
-import requests
-import json
-from django.http import HttpResponse
-import string
-from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from collections import Counter
-from parlalize.settings import LAST_ACTIVITY_COUNT
-from .models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT, SETTER_KEY
-from parlaseje.models import Session, Tag, Question
-from utils.speech import WordAnalysis
 from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
-from django.views.decorators.csrf import csrf_exempt
 
+from parlalize.utils import *
+from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
+                                SETTER_KEY, LAST_ACTIVITY_COUNT)
+from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
+from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
+from parlaseje.models import Session, Tag, Question
+from utils.speech import WordAnalysis
 from utils.compass import getData as getCompassData
+from .models import *
 
-from parlalize.utils import tryHard, lockSetter
+import numpy
+import requests
+import json
+import string
 
 
 # get List of MPs
