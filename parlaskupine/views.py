@@ -1,26 +1,29 @@
 # -*- coding: UTF-8 -*-
-from utils.speech import WordAnalysis
-from parlalize.utils import *
-import requests
-import json
-from django.http import JsonResponse
-from parlaskupine.models import *
-from parlaseje.models import Activity, Session, Vote, Speech, Question
-from collections import Counter
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT, SETTER_KEY
-import numpy as np
-from scipy.stats.stats import pearsonr
-from scipy.spatial.distance import euclidean
-from parlaposlanci.models import Person
-from parlaposlanci.views import getMPsList
-import math
-from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
-from parlalize.utils import tryHard, lockSetter
 from django.forms.models import model_to_dict
+from django.http import JsonResponse
+
+from collections import Counter
+from scipy.stats.stats import pearsonr
+from scipy.spatial.distance import euclidean
+
+import requests
+import json
+import math
+import numpy as np
+
+from utils.speech import WordAnalysis
+from parlalize.utils import *
 from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT, SETTER_KEY
+from parlaskupine.models import *
+from parlaseje.models import Activity, Session, Vote, Speech, Question
+from parlaposlanci.models import Person
+from parlaposlanci.views import getMPsList
+from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
+
 
 # Create your views here.
 @lockSetter
