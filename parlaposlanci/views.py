@@ -16,7 +16,9 @@ from parlalize.utils import *
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 SETTER_KEY, LAST_ACTIVITY_COUNT)
 from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
-from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
+from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
+                                    getScores, problematicno, privzdignjeno,
+                                    preprosto, TFIDF, getCountList)
 from parlaseje.models import Session, Tag, Question
 from utils.speech import WordAnalysis
 from utils.compass import getData as getCompassData
