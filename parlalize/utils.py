@@ -19,7 +19,7 @@ from parlaskupine.models import (Organization, WorkingBodies,
 from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
                               PresenceOfPG, AbsentMPs, VoteDetailed, Quote)
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
-                                DEBUG)
+                                DEBUG, API_OUT_DATE_FORMAT)
 from django.contrib.contenttypes.models import ContentType
 import requests
 import json
@@ -620,7 +620,7 @@ def setQuoteSourceSpeeachToLatestValid(session_id):
                 quote.save()
 
 
-def prepareTaggedBallots(datetime_obj, ballots, car_owner_data):
+def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
     """
     generic method which return tagged ballots for partys and members
     """
@@ -659,5 +659,5 @@ def prepareTaggedBallots(datetime_obj, ballots, car_owner_data):
         'all_tags': tags,
         'results': list(reversed(out))
         }
-    result.update(car_owner_data)
+    result.update(card_owner_data)
     return result
