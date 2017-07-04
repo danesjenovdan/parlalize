@@ -2110,8 +2110,8 @@ def getSessionsList(request, date_=None, force_render=False):
     return JsonResponse(out)
 
 
-@lockSetter
 @csrf_exempt
+@lockSetter
 def setTFIDF(request):
     """Stores TFIDF analysis.
     """
@@ -2561,9 +2561,13 @@ def getComparedVotes(request):
         parties_different_list = []
     
     if len(people_same_list) + len(parties_same_list) == 0:
-        return HttpResponse('Need at least one same to compare.')
+        out = {
+            'total': Vote.objects.all().count(),
+            'results': []
+        }
+        return JsonResponse(out, safe=False)
     if len(people_same_list) + len(parties_same_list) < 2 and len(people_different_list) + len(parties_different_list) < 1:
-        return HttpResponse('Not enough to compare.')
+        return JsonResponse(out, safe=False)
 
     beginning = 'SELECT * FROM '
     select_same_people = ''
@@ -2877,35 +2881,56 @@ def getComparedVotes(request):
     print 'match_different_parties_organizations ' + match_different_parties_organizations
     print 'match_different_parties_options ' + match_different_parties_options
 
-    ballots = Ballot.objects.raw(query)
-    session_ids = set([b.vote.session.id for b in ballots])
-    sessions = {}
-    for s in session_ids:
-        sessions[s] = Session.objects.get(id=s).getSessionData()
+    # ballots = Ballot.objects.raw(query)
+    votes = Vote.objects.filter(id_parladata__in=[ballot.vote.id_parladata for ballot in Ballot.objects.raw(query)])
+    # sessionsData = requests.get('https://analize.parlameter.si/v1/utils/getAllStaticData').json()['sessions']
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
 
-    print '[SESSION IDS:]'
-    print set(session_ids)
+    # session_ids = set([b.vote.session.id for b in ballots])
+    # sessions = {}
+    # for s in session_ids:
+    #     sessions[s] = Session.objects.get(id=s).getSessionData()
+
+    # print '[SESSION IDS:]'
+    # print set(session_ids)
     out = {
         'total': Vote.objects.all().count(),
         'results': []
     }
 
-    for ballot in ballots:
+    for vote in votes:
         out['results'].append({
-            'session': sessions[ballot.vote.session.id],
+            'session': sessionsData[str(vote.session.id_parladata)],
             'results': {
-                'motion_id': ballot.vote.id_parladata,
-                'text': ballot.vote.motion,
-                'votes_for': ballot.vote.votes_for,
-                'against': ballot.vote.against,
-                'abstain': ballot.vote.abstain,
-                'not_present': ballot.vote.not_present,
-                'result': ballot.vote.result,
-                'is_outlier': ballot.vote.is_outlier,
-                'tags': ballot.vote.tags,
-                'date': ballot.start_time.strftime(API_DATE_FORMAT)
+                'motion_id': vote.id_parladata,
+                'text': vote.motion,
+                'votes_for': vote.votes_for,
+                'against': vote.against,
+                'abstain': vote.abstain,
+                'not_present': vote.not_present,
+                'result': vote.result,
+                'is_outlier': vote.is_outlier,
+                'tags': vote.tags,
+                'date': vote.start_time.strftime(API_DATE_FORMAT)
             }
         })
+
+    # for ballot in ballots:
+    #     out['results'].append({
+    #         'session': sessionsData[ballot.vote.session.id_parladata],
+    #         'results': {
+    #             'motion_id': ballot.vote.id_parladata,
+    #             'text': ballot.vote.motion,
+    #             'votes_for': ballot.vote.votes_for,
+    #             'against': ballot.vote.against,
+    #             'abstain': ballot.vote.abstain,
+    #             'not_present': ballot.vote.not_present,
+    #             'result': ballot.vote.result,
+    #             'is_outlier': ballot.vote.is_outlier,
+    #             'tags': ballot.vote.tags,
+    #             'date': ballot.start_time.strftime(API_DATE_FORMAT)
+    #         }
+    #     })
 
     return JsonResponse(out, safe=False)
 
