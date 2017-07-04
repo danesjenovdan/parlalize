@@ -1,25 +1,29 @@
 # -*- coding: UTF-8 -*-
-from utils.speech import WordAnalysis
-from parlalize.utils import *
-import requests
-import json
-from django.http import JsonResponse
-from parlaskupine.models import *
-from parlaseje.models import Activity, Session, Vote, Speech, Question
-from collections import Counter
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT, SETTER_KEY
-import numpy as np
-from scipy.stats.stats import pearsonr
-from scipy.spatial.distance import euclidean
-from parlaposlanci.models import Person
-from parlaposlanci.views import getMPsList
-import math
-from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
-from parlalize.utils import tryHard, lockSetter
 from django.forms.models import model_to_dict
+from django.http import JsonResponse
+
+from collections import Counter
+from scipy.stats.stats import pearsonr
+from scipy.spatial.distance import euclidean
+
+import requests
+import json
+import math
+import numpy as np
+
+from utils.speech import WordAnalysis
+from parlalize.utils import *
+from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT, SETTER_KEY
+from parlaskupine.models import *
+from parlaseje.models import Activity, Session, Vote, Speech, Question
+from parlaposlanci.models import Person
+from parlaposlanci.views import getMPsList
+from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
+
 
 # Create your views here.
 @lockSetter
@@ -1282,42 +1286,14 @@ def getTaggedBallots(request, pg_id, date_=None):
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    b = Ballot.objects.filter(org_voter__id_parladata=1,
+    b = Ballot.objects.filter(org_voter__id_parladata=pg_id,
                               start_time__lte=date_of)
-    votes = Vote.objects.filter(start_time__lte=date_of).order_by('start_time')
-    # add start_time_date to querySetObjets
-    votes = votes.extra(select={'start_time_date': 'DATE(start_time)'})
-    b_s = [model_to_dict(i, fields=['vote', 'option']) for i in b]
-    b_s = {bal['vote']: bal['option'] for bal in b_s}
-    # get unique dates
-    dates = list(set(list(votes.values_list("start_time_date", flat=True))))
-    dates.sort()
-    data = {date: [] for date in dates}
-    #current_data = {'date': votes[0].start_time_date, 'ballots': []}
-    for vote in votes:
-        try:
-            data[vote.start_time_date].append({
-                'motion': vote.motion,
-                'vote_id': vote.id_parladata,
-                'result': vote.result,
-                'session_id': vote.session.id_parladata if vote.session else None,
-                'option': b_s[vote.id],
-                'tags': vote.tags})
-        except:
-            print 'Ni vota ' + str(vote.id)
+    b_s = [model_to_dict(i, fields=['vote', 'option', 'id_parladata']) for i in b]
+    b_s = {bal['vote']: (bal['id_parladata'], bal['option']) for bal in b_s}
+    org = Organization.objects.get(id_parladata=pg_id)
+    org_data = {'party': org.getOrganizationData()}
 
-    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
-            'ballots': data[date]}
-           for date in dates]
-
-    tags = list(Tag.objects.all().values_list('name', flat=True))
-    result = {
-        'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
-        'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
-        'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
-        'all_tags': tags,
-        'results': list(reversed(out))
-        }
+    result = prepareTaggedBallots(date_of, b_s, org_data)
 
     return JsonResponse(result, safe=False)
 

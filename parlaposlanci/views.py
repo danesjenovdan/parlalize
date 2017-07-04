@@ -1,31 +1,33 @@
 # -*- coding: UTF-8 -*-
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.forms.models import model_to_dict
+from django.core.cache import cache
+
 from scipy.stats.stats import pearsonr
 from scipy.stats import rankdata
 from scipy.spatial.distance import euclidean
 from datetime import date, datetime, timedelta
-from django.core.cache import cache
-
-import numpy
-from parlalize.utils import *
-import requests
-import json
-from django.http import HttpResponse
-import string
-from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from collections import Counter
-from parlalize.settings import LAST_ACTIVITY_COUNT
-from .models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT, SETTER_KEY
-from parlaseje.models import Session, Tag, Question
-from utils.speech import WordAnalysis
 from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
-from django.views.decorators.csrf import csrf_exempt
 
+from parlalize.utils import *
+from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
+                                SETTER_KEY, LAST_ACTIVITY_COUNT)
+from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
+from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
+                                    getScores, problematicno, privzdignjeno,
+                                    preprosto, TFIDF, getCountList)
+from parlaseje.models import Session, Tag, Question
+from utils.speech import WordAnalysis
 from utils.compass import getData as getCompassData
+from .models import *
 
-from parlalize.utils import tryHard, lockSetter
+import numpy
+import requests
+import json
+import string
 
 
 # get List of MPs
@@ -3049,43 +3051,23 @@ def getTaggedBallots(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
-        date_of = datetime.now().date()
-    out = []
+        date_of = datetime.now().date() + timedelta(days=1)
+
     ballots = Ballot.objects.filter(person__id_parladata=person_id,
                                     start_time__lte=date_of)
     if ballots:
         created_at = ballots.latest('created_at').created_at
     else:
         created_at = datetime.now()
-    b_list = [[ballot for ballot in ballots.filter(start_time__range=[t_date,
-                                                                      t_date+timedelta(days=1)])]
-              for t_date in ballots.order_by('start_time').datetimes('start_time',
-                                                                     'day')]
 
-    lastDay = None
-    for day in b_list:
-        dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT),
-                   'ballots': []}
-        lastDay = day[0].start_time.strftime(API_OUT_DATE_FORMAT)
-        for ballot in day:
-            dayData['ballots'].append({
-                'motion': ballot.vote.motion,
-                'vote_id': ballot.vote.id_parladata,
-                'result': ballot.vote.result,
-                'ballot_id': ballot.id_parladata,
-                'session_id': ballot.vote.session.id_parladata if ballot.vote.session else None,
-                'option': ballot.option,
-                'tags': ballot.vote.tags})
-        out.append(dayData)
+    b = Ballot.objects.filter(person__id_parladata=person_id,
+                              start_time__lte=date_of)
+    b_s = [model_to_dict(i, fields=['vote', 'option', 'id_parladata']) for i in b]
+    b_s = {bal['vote']: (bal['id_parladata'], bal['option']) for bal in b_s}
+    person_data = {'person': getPersonData(person_id, date_)}
 
-    tags = list(Tag.objects.all().values_list('name', flat=True))
-    result = {
-        'person': getPersonData(person_id, date_),
-        'all_tags': tags,
-        'created_at': created_at.strftime(API_OUT_DATE_FORMAT),
-        'created_for': lastDay if lastDay else created_at.strftime(API_OUT_DATE_FORMAT),
-        'results': list(reversed(out))
-        }
+    result = prepareTaggedBallots(date_of, b_s, person_data)
+
     return JsonResponse(result, safe=False)
 
 
