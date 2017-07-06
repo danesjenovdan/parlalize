@@ -24,6 +24,7 @@ class Organization(Timestampable, models.Model):
                             help_text=_('A primary name, e.g. a legally recognized name'))
 
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True,
                                        null=True,
                                        help_text=_('id parladata'))

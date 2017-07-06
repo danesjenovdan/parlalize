@@ -449,6 +449,10 @@ def setMotionOfSession(request, session_id):
             if vote['option'] == str('ni'):
                 not_present = not_present + 1
         result = mot['result']
+        if mot['amendment_of']:
+            a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
+        else:
+            a_orgs = []
 
         if Vote.objects.filter(id_parladata=mot['vote_id']):
             vote = Vote.objects.filter(id_parladata=mot['vote_id'])
@@ -465,6 +469,7 @@ def setMotionOfSession(request, session_id):
                         id_parladata=mot['vote_id'],
                         document_url=mot['doc_url'],
                         )
+            vote[0].amendment_of.add(*a_orgs)
         else:
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
@@ -480,6 +485,9 @@ def setMotionOfSession(request, session_id):
                                     id_parladata=mot['vote_id'],
                                     document_url=mot['doc_url']
                                     )
+            if a_orgs:
+                vote = Vote.objects.get(id_parladata=mot['vote_id'])
+                vote.amendment_of.add(*a_orgs)
 
         yes = 0
         no = 0
