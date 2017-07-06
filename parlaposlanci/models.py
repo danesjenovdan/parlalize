@@ -33,6 +33,7 @@ class Person(Timestampable, models.Model):
                           help_text=_('Parlament group of MP'))
 
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True, null=True, help_text=_('id parladata'))
 
     image = models.URLField(_('image'),
