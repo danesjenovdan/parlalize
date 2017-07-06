@@ -278,6 +278,9 @@ class Vote(Timestampable, models.Model):
     intra_disunion = models.FloatField(default=0.0,
                                        help_text='intra disunion for all members')
 
+    amendment_of = models.ManyToManyField('parlaskupine.Organization',
+                                          related_name='amendments')
+
 
 class VoteDetailed(Timestampable, models.Model):
     """Model of votes with data, how each MP and PG voted."""
