@@ -81,8 +81,8 @@ urlpatterns = patterns('',
 
     url(r'^getPGsIDs', getPGsIDs),
 
-    url(r'^getPresenceThroughTime/(?P<party_id>\d+)/(?P<date_>[\w].+)', getAmendmentsOfPG),
-    url(r'^getPresenceThroughTime/(?P<party_id>\d+)', getAmendmentsOfPG),
+    url(r'^getAmendmentsOfPG/(?P<party_id>\d+)/(?P<date_>[\w].+)', getAmendmentsOfPG),
+    url(r'^getAmendmentsOfPG/(?P<party_id>\d+)', getAmendmentsOfPG),
 
     ####################################################################################
     #POST setters
