@@ -16,7 +16,7 @@ import numpy as np
 
 from utils.speech import WordAnalysis
 from parlalize.utils import *
-from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
+from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots, getAllStaticData
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT, SETTER_KEY
 from parlaskupine.models import *
 from parlaseje.models import Activity, Session, Vote, Speech, Question
@@ -1931,3 +1931,47 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
             cache.set("pg_disunion" + org_id, out, 60 * 60 * 48)
 
     return JsonResponse(out, safe=False)
+
+
+def getAmendmentsOfPG(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = ''
+    org = Organization.objects.get(id_parladata=pg_id)
+    amendments = org.amendments.filter(start_time__lte=date_of).order_by('-start_time')
+    amendments = amendments.extra(select={'start_time_date': 'DATE(start_time)'})
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
+
+    dates = list(set(list(amendments.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+    out = []
+    for vote in amendments:
+        data[vote.start_time_date].append({'session': sessionsData[str(session.id_parladata)],
+                                           'results': {'motion_id': vote.id_parladata,
+                                                       'text': vote.motion,
+                                                       'votes_for': vote.votes_for,
+                                                       'against': vote.against,
+                                                       'abstain': vote.abstain,
+                                                       'not_present': vote.not_present,
+                                                       'result': vote.result,
+                                                       'is_outlier': vote.is_outlier,
+                                                       'tags': vote.tags,
+                                                       'has_outliers': vote.has_outlier_voters
+                                                       }
+                                           })
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'votes': data[date]}
+           for date in dates]
+
+    tags = list(Tag.objects.all().values_list('name', flat=True))
+    result = {
+        'party': org.getOrganizationData(),
+        'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'all_tags': tags,
+        'results': list(reversed(out))
+        }
+    return JsonResponse(result, safe=False)
