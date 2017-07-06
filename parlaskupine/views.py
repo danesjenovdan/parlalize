@@ -1943,13 +1943,12 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
     amendments = org.amendments.filter(start_time__lte=date_of).order_by('-start_time')
     amendments = amendments.extra(select={'start_time_date': 'DATE(start_time)'})
     sessionsData = json.loads(getAllStaticData(None).content)['sessions']
-
     dates = list(set(list(amendments.values_list("start_time_date", flat=True))))
     dates.sort()
     data = {date: [] for date in dates}
     out = []
     for vote in amendments:
-        data[vote.start_time_date].append({'session': sessionsData[str(session.id_parladata)],
+        data[vote.start_time_date].append({'session': sessionsData[str(vote.session.id_parladata)],
                                            'results': {'motion_id': vote.id_parladata,
                                                        'text': vote.motion,
                                                        'votes_for': vote.votes_for,
