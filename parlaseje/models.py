@@ -28,6 +28,7 @@ class Session(Timestampable, models.Model):
                                help_text=_('date of session'))
 
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True, null=True,
                                        help_text=_('id parladata'))
 
@@ -111,6 +112,7 @@ class Activity(Timestampable, models.Model):
     """All activities of MP."""
 
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True, null=True,
                                        help_text=_('id parladata'))
 
@@ -239,7 +241,6 @@ class Vote(Timestampable, models.Model):
     motion = models.TextField(blank=True, null=True,
                               help_text='The motion for which the vote took place')
 
-
     tags = JSONField(blank=True, null=True)
 
     votes_for = models.IntegerField(blank=True, null=True,
@@ -259,6 +260,7 @@ class Vote(Timestampable, models.Model):
                                      help_text='The result of the vote')
 
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True, null=True,
                                        help_text=_('id parladata'))
 
