@@ -704,6 +704,7 @@ class MembershipsOfMember(Timestampable, models.Model):
 
 class District(models.Model):
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True,
                                        null=True,
                                        help_text=_('id parladata'))
