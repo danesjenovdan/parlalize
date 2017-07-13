@@ -1,11 +1,16 @@
 from parlalize.utils import tryHard
-from parlalize.settings import API_URL, API_DATE_FORMAT
-from parlaposlanci.models import Person, District
+from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY
+from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
+from parlaposlanci.views import setMinsterStatic
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag
+from datetime import datetime, timedelta
+from django.test.client import RequestFactory
 # parlalize initial runner methods #
 
 DZ = 95
+factory = RequestFactory()
+request_with_key = factory.get('?key=' + SETTER_KEY)
 
 
 def updatePeople():
@@ -116,6 +121,12 @@ def updateQuestions():
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
+            rec_posts = []
+            for post in dic['recipient_posts']:
+                static = MinisterStatic.objects.filter(person__id=post['membership__person_id'],
+                                                       ministry=post['organization_id'])
+                if static:
+                    rec_posts.append(static[0])
             question = Question(person=person,
                                 session=session,
                                 start_time=dic['date'],
@@ -127,6 +138,7 @@ def updateQuestions():
             question.save()
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
+            question.recipient_persons_static.all(*rec_posts)
         else:
             print "update question"
             if dic['recipient_id']:
@@ -137,9 +149,16 @@ def updateQuestions():
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
+            rec_posts = []
+            for post in dic['recipient_posts']:
+                static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
+                                                       ministry__id_parladata=post['organization_id'])
+                if static:
+                    rec_posts.append(static[0])
             question = Question.objects.get(id_parladata=dic["id"])
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
+            question.recipient_persons_static.add(*rec_posts)
 
     return 1
 
@@ -229,19 +248,10 @@ def setAllSessions():
 
 
 def updateMinistrers():
-    start_date = datetime(day=2, month=8, year=2014)
-    days = range((datetime.now()-start_date).days)
-    prev_ministers = []
-    for day in days:
-        today = start_date + timedelta(days=day)
-        print today
-        ministers = tryHard(API_URL + '/getIDsOfAllMinisters/' + today.strftime(API_DATE_FORMAT)).json()['ministers_ids']
-        diff = list(set(ministers) - set(prev_ministers))
-        if diff:
-            for person in diff:
-                print person
-                setMinsterStatic(None, str(person), today.strftime(API_DATE_FORMAT))
-            prev_ministers = ministers
+    ministers = tryHard(API_URL + '/getIDsOfAllMinisters/').json()['ministers_ids']
+    for ministr in ministers:
+        print ministr
+        setMinsterStatic(request_with_key, str(ministr))
 
 
 def updateDistricts():

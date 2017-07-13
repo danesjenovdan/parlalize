@@ -4,7 +4,7 @@ from parlalize.utils import *
 import json
 from django.http import JsonResponse, HttpResponse
 from parlaseje.models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
 from parlaseje.utils import *
 from collections import defaultdict, Counter
 from django.core.exceptions import ObjectDoesNotExist
@@ -12,16 +12,16 @@ from django.shortcuts import get_object_or_404
 import re
 from django.db.models import Q, F
 from django.core.cache import cache
-from parlalize.utils import tryHard
+from parlalize.utils import tryHard, lockSetter, getAllStaticData
+from django.views.decorators.csrf import csrf_exempt
 
 
 def getSpeech(request, speech_id):
     """
-    * @api {get} /getSpeech/{speech_id} Requests information of speech.
+    * @api {get} /getSpeech/{speech_id} Speech info
     * @apiName GetSpeech
     * @apiGroup Session
     * @apiParam {speech_id} speech id is parameter which returns exactly specified speech
-    * @@apiSuccess {Json} This function returns detiled data of specific speech.
     * @apiSuccess {Object} person MP's person object (comes with most calls).
     * @apiSuccess {Boolean} person.is_active Answer the question: Is this MP currently active?
     * @apiSuccess {Integer[]} person.district List of Parladata ids for districts this person was elected in.
@@ -137,11 +137,10 @@ def getSpeech(request, speech_id):
 
 def getSpeechesOfSession(request, session_id):
     """
-    * @api {get} /getSpeechesOfSession/{session_id} Requests information of speeches on session.
+    * @api {get} /getSpeechesOfSession/{session_id} All speeches from a session
     * @apiName getSpeechesOfSession
     * @apiGroup Session
     * @apiParam {session_id} session id is parameter which returns specific session
-    * @apiSuccess {Json} returns detiled data of all speeches on session.
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for For when was this data created?
     * @apiSuccess {Object} session object
@@ -357,11 +356,10 @@ def getSpeechesOfSession(request, session_id):
 
 def getSpeechesIDsOfSession(request, session_id):
     """
-    * @api {get} /getSpeechesIDsOfSession/{session_id} Requests IDs of all speeches on specific session.
+    * @api {get} /getSpeechesIDsOfSession/{session_id} IDs of all speeches from a specific session
     * @apiName getSpeechesIDsOfSession
     * @apiGroup Session
     * @apiParam {session_id} session id is parameter which returns specific session
-    * @apiSuccess {Json} returns IDs of speeches on specific session
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for For when was this data created?
     * @apiSuccess {Object} session object
@@ -428,6 +426,7 @@ def getSpeechesIDsOfSession(request, session_id):
                          "results": speeches_ids})
 
 
+@lockSetter
 def setMotionOfSession(request, session_id):
     """Stores all motions with detiled data of specific sesison.
     """
@@ -438,7 +437,7 @@ def setMotionOfSession(request, session_id):
     kvorum = 0
     not_present = 0
     for mot in motion:
-        url = API_URL + '/getVotesOfMotion/' + str(mot['vote_id']) + '/'
+        url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
         for vote in votes:
             if vote['option'] == str('za'):
@@ -450,6 +449,10 @@ def setMotionOfSession(request, session_id):
             if vote['option'] == str('ni'):
                 not_present = not_present + 1
         result = mot['result']
+        if mot['amendment_of']:
+            a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
+        else:
+            a_orgs = []
 
         if Vote.objects.filter(id_parladata=mot['vote_id']):
             vote = Vote.objects.filter(id_parladata=mot['vote_id'])
@@ -466,6 +469,7 @@ def setMotionOfSession(request, session_id):
                         id_parladata=mot['vote_id'],
                         document_url=mot['doc_url'],
                         )
+            vote[0].amendment_of.add(*a_orgs)
         else:
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
@@ -481,6 +485,9 @@ def setMotionOfSession(request, session_id):
                                     id_parladata=mot['vote_id'],
                                     document_url=mot['doc_url']
                                     )
+            if a_orgs:
+                vote = Vote.objects.get(id_parladata=mot['vote_id'])
+                vote.amendment_of.add(*a_orgs)
 
         yes = 0
         no = 0
@@ -489,6 +496,7 @@ def setMotionOfSession(request, session_id):
     return JsonResponse({'alliswell': True})
 
 
+@lockSetter
 def setMotionOfSessionGraph(request, session_id):
     """Stores all motions with detiled data of specific sesison.
     """
@@ -507,7 +515,7 @@ def setMotionOfSessionGraph(request, session_id):
     kvordic = defaultdict(int)
     npdic = defaultdict(int)
     for mot in motion:
-        url = API_URL + '/getVotesOfMotion/' + str(mot['vote_id']) + '/'
+        url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
         for vote in votes:
             if vote['option'] == str('za'):
@@ -536,7 +544,7 @@ def setMotionOfSessionGraph(request, session_id):
                                 vote=vote,
                                 created_for=session.start_time,
                                 motion=mot['text'],
-                                otes_for=yes,
+                                votes_for=yes,
                                 against=no,
                                 abstain=kvorum,
                                 not_present=not_present,
@@ -587,11 +595,10 @@ def setMotionOfSessionGraph(request, session_id):
 
 def getMotionOfSession(request, session_id, date=False):
     """
-    * @api {get} /getMotionOfSession/{session_id}/{?date} Requests information of all motions on specific session.
+    * @api {get} /getMotionOfSession/{session_id}/{?date} All motions from a specific session
     * @apiName getMotionOfSession
     * @apiGroup Session
     * @apiParam {speech_id} session id is parameter which returns exactly specified session
-    * @apiSuccess {Json} returns detiled data of all motions on specific session
     * @apiParam {date} date Optional date.
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for For when was this data created?
@@ -734,12 +741,11 @@ def getMotionOfSession(request, session_id, date=False):
 
 def getMotionGraph(request, id_mo, date=False):
     """
-    * @api {get} /getMotionGraph/{id_mo}/{?date} Requests information of specific motion.
+    * @api {get} /getMotionGraph/{id_mo}/{?date} [DEPRECATED] Information on a specific motion
     * @apiName getMotionGraph
     * @apiGroup Session
     * @apiParam {id_mo} session id is parameter which returns exactly specified motion
     * @apiParam {date} date Optional date.
-    * @apiSuccess {Json} returns detiled data of motion
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for For when was this data created?
     * @apiSuccess {Object} session object
@@ -996,6 +1002,284 @@ def getMotionGraph(request, id_mo, date=False):
 
 
 def getMotionAnalize(request, motion_id):
+    """
+    * @api {get} /getMotionAnalize/{id_mo} Information on a specific motion
+    * @apiName getMotionAnalize
+    * @apiGroup Session
+    * @apiParam {id_mo} session id is parameter which returns exactly specified motion
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {String} id This vote's id
+    * @apiSuccess {String[]} documents List of documents associated with this vote 
+    * @apiSuccess {String} name The name of this vote
+    * @apiSuccess {date} created_at When was this card created?
+    * @apiSuccess {Object} session Session data
+    * @apiSuccess {String} session.name Name of session.
+    * @apiSuccess {Date} session.date_ts Date and time of session.
+    * @apiSuccess {Date} session.date Date of session.
+    * @apiSuccess {Integer} session.id Id of session.
+    * @apiSuccess {Boolean} session.in_review Return true or false if session is in review.
+    * @apiSuccess {Object[]} session.orgs Organization object
+    * @apiSuccess {String} session.orgs.acronym Organization acronym
+    * @apiSuccess {Boolean} session.orgs.is_coalition True of False if organization is in coalition
+    * @apiSuccess {Integer} session.orgs.id Id of organization
+    * @apiSuccess {Integer} session.orgs.name Name of organization
+
+    * @apiSuccess {Object} gov_side Breakdown by coalition/opposition
+    * @apiSuccess {Object} gov_side.coalition Coalition's results
+    * @apiSuccess {Object} gov_side.coalition.max Which option won?
+    * @apiSuccess {String} gov_side.coalition.max.max_opt Option as string (for|against|abstain|not_present|cant_compute)
+    * @apiSuccess {Float} gov_side.coalition.max.maxOptPerc Percentage of MPs that voted for the winning option
+    * @apiSuccess {Object} gov_side.coalition.votes Number of votes for each option
+    * @apiSuccess {Integer} gov_side.coalition.votes.abstain Number of abstentions
+    * @apiSuccess {Integer} gov_side.coalition.votes.not_present Number of MPs who weren't present
+    * @apiSuccess {Integer} gov_side.coalition.votes.for Number of votes for the motion
+    * @apiSuccess {Integer} gov_side.coalition.votes.against Number of votes against the motion
+    * @apiSuccess {String[]} gov_side.coalition.outliers List of options that have outliers/rebels.
+
+    * @apiSuccess {Object} gov_side.opposition Opposition's results
+    * @apiSuccess {Object} gov_side.opposition.max Which option won?
+    * @apiSuccess {String} gov_side.opposition.max.max_opt Option as string (for|against|abstain|not_present|cant_compute)
+    * @apiSuccess {Float} gov_side.opposition.max.maxOptPerc Percentage of MPs that voted for the winning option
+    * @apiSuccess {Object} gov_side.opposition.votes Number of votes for each option
+    * @apiSuccess {Integer} gov_side.opposition.votes.abstain Number of abstentions
+    * @apiSuccess {Integer} gov_side.opposition.votes.not_present Number of MPs who weren't present
+    * @apiSuccess {Integer} gov_side.opposition.votes.for Number of votes for the motion
+    * @apiSuccess {Integer} gov_side.opposition.votes.against Number of votes against the motion
+    * @apiSuccess {String[]} gov_side.opposition.outliers List of options that have outliers/rebels.
+
+    * @apiSuccess {Object} all Totals by option
+    * @apiSuccess {Integer} all.abstain Number of abstentions
+    * @apiSuccess {Integer} all.not_present Number of MPs who weren't present
+    * @apiSuccess {Integer} all.for Number of votes for the motion
+    * @apiSuccess {Integer} all.against Number of votes against the motion
+
+    * @apiSuccess {Object} result Result of the vote
+    * @apiSuccess {Boolean} result.is_outlier Is this vote a "weird" one (flame icon)?
+    * @apiSuccess {Boolean} result.accepted Did the motion pass?
+    * @apiSuccess {Float} result.value Percentage of the winning option
+    * @apiSuccess {String} result.max_opt The winning option
+
+    * @apiSuccess {Object[]} members List of individual MPs and their votes
+    * @apiSuccess {Object} members.person MP's person object (comes with most calls).
+    * @apiSuccess {Boolean} members.person.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} members.person.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} members.person.name MP's full name.
+    * @apiSuccess {String} members.person.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} members.person.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} members.person.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} members.person.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} members.person.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} members.person.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} members.person.party.name The party's name.
+    * @apiSuccess {String} members.person.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} members.person.id The person's Parladata id.
+    * @apiSuccess {Boolean} members.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    * @apiSuccess {String} members.option The option this member chose
+    * @apiSuccess {Boolean} members.is_outlier Did this person vote "against" their party?
+
+    * @apiSuccess {Object[]} parties Results grouped by party
+    * @apiSuccess {Object} parties.max Which option won?
+    * @apiSuccess {String} parties.max.max_opt Option as string (for|against|abstain|not_present|cant_compute)
+    * @apiSuccess {Float} parties.max.maxOptPerc Percentage of MPs that voted for the winning option
+    * @apiSuccess {Object} parties.votes Number of votes for each option
+    * @apiSuccess {Integer} parties.votes.abstain Number of abstentions
+    * @apiSuccess {Integer} parties.votes.not_present Number of MPs who weren't present
+    * @apiSuccess {Integer} parties.votes.for Number of votes for the motion
+    * @apiSuccess {Integer} parties.votes.against Number of votes against the motion
+    * @apiSuccess {String[]} parties.outliers List of options that have outliers/rebels.
+    * @apiSuccess {Object} parties.party PG data
+    * @apiSuccess {String} parties.party.acronym The PG's acronym
+    * @apiSuccess {Boolean} parties.party.is_coalition Is this PG a part of the coalition?
+    * @apiSuccess {Integer} parties.party.id PG's Parladata id
+    * @apiSuccess {String} parties.party.name PG's name
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/s/getMotionAnalize/6900
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/s/getMotionAnalize/6900/21.12.2016
+    * @apiSuccessExample {json} Example response:
+    {
+        "gov_side": {
+            "coalition": {
+                "max": {
+                    "max_opt": "for",
+                    "maxOptPerc": 92.3076923076923
+                },
+                "votes": {
+                    "abstain": 1.0,
+                    "not_present": 2.0,
+                    "for": 48.0,
+                    "against": 1.0
+                },
+                "outliers": ["abstain", "against"]
+            },
+            "opposition": {
+                "max": {
+                    "max_opt": "against",
+                    "maxOptPerc": 60.526315789473685
+                },
+                "votes": {
+                    "abstain": 1.0,
+                    "not_present": 13.0,
+                    "for": 1.0,
+                    "against": 23.0
+                },
+                "outliers": []
+            }
+        },
+        "created_for": "20.04.2017",
+        "all": {
+            "abstain": 2,
+            "not_present": 15,
+            "against": 24,
+            "for": 49
+        },
+        "session": {
+            "name": "29. redna seja",
+            "date_ts": "2017-04-20T02:00:00",
+            "orgs": [{
+                "acronym": "DZ",
+                "is_coalition": false,
+                "id": 95,
+                "name": "Dr\u017eavni zbor"
+            }],
+            "date": "20. 4. 2017",
+            "org": {
+                "acronym": "DZ",
+                "is_coalition": false,
+                "id": 95,
+                "name": "Dr\u017eavni zbor"
+            },
+            "id": 9427,
+            "in_review": true
+        },
+        "result": {
+            "is_outlier": false,
+            "accepted": true,
+            "value": 54.44444444444444,
+            "max_opt": "for"
+        },
+        "members": [{
+            "person": {
+                "is_active": false,
+                "district": [76],
+                "name": "Jani M\u00f6derndorfer",
+                "gov_id": "P191",
+                "gender": "m",
+                "party": {
+                    "acronym": "SMC",
+                    "is_coalition": true,
+                    "id": 1,
+                    "name": "PS Stranka modernega centra"
+                },
+                "type": "mp",
+                "id": 59,
+                "has_function": false
+            },
+            "option": "for",
+            "is_outlier": false
+        }, {
+            "person": {
+                "is_active": false,
+                "district": [37],
+                "name": "Marija Antonija Kova\u010di\u010d",
+                "gov_id": "P297",
+                "gender": "f",
+                "party": {
+                    "acronym": "DeSUS",
+                    "is_coalition": true,
+                    "id": 3,
+                    "name": "PS Demokratska Stranka Upokojencev Slovenije"
+                },
+                "type": "mp",
+                "id": 96,
+                "has_function": false
+            },
+            "option": "for",
+            "is_outlier": false
+        }, {
+            "person": {
+                "is_active": false,
+                "district": [20],
+                "name": "Du\u0161an Radi\u010d",
+                "gov_id": "P300",
+                "gender": "m",
+                "party": {
+                    "acronym": "SMC",
+                    "is_coalition": true,
+                    "id": 1,
+                    "name": "PS Stranka modernega centra"
+                },
+                "type": "mp",
+                "id": 1357,
+                "has_function": false
+            },
+            "option": "for",
+            "is_outlier": false
+        }],
+        "parties": [{
+            "max": {
+                "max_opt": "for",
+                "maxOptPerc": 100.0
+            },
+            "votes": {
+                "abstain": 0.0,
+                "not_present": 0.0,
+                "for": 35.0,
+                "against": 0.0
+            },
+            "outliers": [],
+            "party": {
+                "acronym": "SMC",
+                "is_coalition": true,
+                "id": 1,
+                "name": "PS Stranka modernega centra"
+            }
+        }, {
+            "max": {
+                "max_opt": "against",
+                "maxOptPerc": 52.63157894736842
+            },
+            "votes": {
+                "abstain": 0.0,
+                "not_present": 9.0,
+                "for": 0.0,
+                "against": 10.0
+            },
+            "outliers": [],
+            "party": {
+                "acronym": "SDS",
+                "is_coalition": false,
+                "id": 5,
+                "name": "PS Slovenska Demokratska Stranka"
+            }
+        }, {
+            "max": {
+                "max_opt": "for",
+                "maxOptPerc": 90.9090909090909
+            },
+            "votes": {
+                "abstain": 0.0,
+                "not_present": 1.0,
+                "for": 10.0,
+                "against": 0.0
+            },
+            "outliers": [],
+            "party": {
+                "acronym": "DeSUS",
+                "is_coalition": true,
+                "id": 3,
+                "name": "PS Demokratska Stranka Upokojencev Slovenije"
+            }
+        }],
+        "id": "6979",
+        "documents": [],
+        "name": "Zakon o izgradnji, upravljanju in gospodarjenju z drugim tirom \u017eelezni\u0161ke proge Diva\u010da - Koper - Glasovanje o zakonu v celoti",
+        "created_at": "03.05.2017"
+    }
+    """
     model = get_object_or_404(Vote_analysis, vote__id_parladata=motion_id)
     vote = model.vote
     docs = vote.document_url
@@ -1034,7 +1318,7 @@ def getMotionAnalize(request, motion_id):
                             ('not_present', json.loads(model.mp_np)),
                             ('abstain', json.loads(model.mp_kvor))]:
         for mp in members_ids:
-            personData = getPersonData(mp)
+            personData = getPersonData(mp, vote.start_time.strftime(API_DATE_FORMAT))
             # set if person is outlier
             outlier = False
             if personData['party']['id'] in pg_outliers.keys():
@@ -1062,10 +1346,11 @@ def getMotionAnalize(request, motion_id):
     return JsonResponse(out, safe=False)
 
 
+@lockSetter
 def setPresenceOfPG(request, session_id):
     """ Stores presence of PGs on specific session
     """
-    votes = tryHard(API_URL + '/getVotesOfSession/' + str(session_id) + '/').json()
+    votes = tryHard(API_URL + '/getBallotsOfSession/' + str(session_id) + '/').json()
     motions = tryHard(API_URL + '/motionOfSession/' + str(session_id) + '/').json()
     session = Session.objects.get(id_parladata=session_id)
     membersOfPG = tryHard(API_URL + '/getMembersOfPGsOnDate/' + session.start_time.strftime(API_DATE_FORMAT)).json()
@@ -1108,12 +1393,11 @@ def setPresenceOfPG(request, session_id):
 
 def getPresenceOfPG(request, session_id, date=False):
     """
-    * @api {get} /getPresenceOfPG/{session_id}/{?date} Requests information of presence of PGs on specific session.
+    * @api {get} /getPresenceOfPG/{session_id}/{?date} PGs' presence on a specific session
     * @apiName getPresenceOfPG
     * @apiGroup Session
     * @apiParam {session_id} session id is parameter which returns exactly specified session
     * @apiParam {date} date Optional date.
-    * @apiSuccess {Json} returns data presence of PGs on specific session
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for For when was this data created?
     * @apiSuccess {Object} session object
@@ -1213,11 +1497,10 @@ def setQuote(request, speech_id, start_pos, end_pos):
 
 def getQuote(request, quote_id):
     """
-    * @api {get} /getQuote/{quote_id} Requests specific quote of speech.
+    * @api {get} /getQuote/{quote_id} Get quote
     * @apiName getQuote
     * @apiGroup Session
     * @apiParam {quote_id} quote id is parameter which returns exactly specified quote
-    * @apiSuccess {Json} returns specific quote of speech.
     * @apiSuccess {Object} person MP's person object (comes with most calls).
     * @apiSuccess {Boolean} person.is_active Answer the question: Is this MP currently active?
     * @apiSuccess {Integer[]} person.district List of Parladata ids for districts this person was elected in.
@@ -1326,11 +1609,10 @@ def getQuote(request, quote_id):
 
 def getLastSessionLanding(request, date_=None):
     """
-    * @api {get} /getLastSessionLanding/{?date} Requests data of last session.
+    * @api {get} /getLastSessionLanding/{?date} Data from last session
     * @apiName getLastSessionLanding
     * @apiGroup Session
     * @apiParam {date} date Optional date.
-    * @apiSuccess {Json} returns data like presence, tfidf and all motions of last session.
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for For when was this data created?
     * @apiSuccess {Object} presence
@@ -1545,10 +1827,9 @@ def getLastSessionLanding(request, date_=None):
 
 def getSessionsByClassification(request):
     """
-    * @api {get} /getSessionsByClassification/ Requests data of all sessions by classification.
+    * @api {get} /getSessionsByClassification/ All sessions grouped by classification
     * @apiName getSessionsByClassification
     * @apiGroup Session
-    * @apiSuccess {Json} returns data of all session by classification.
     * @apiSuccess {Object[]} kolegij Classification of session
     * @apiSuccess {String} kolegij.name Name of session.
     * @apiSuccess {Date} kolegij.date_ts Date and time of session.
@@ -1695,12 +1976,11 @@ def getSessionsByClassification(request):
 
 def getSessionsList(request, date_=None, force_render=False):
     """
-    * @api {get} /getSessionsList/ Requests data of all sessions.
+    * @api {get} /getSessionsList/ List all sessions
     * @apiName getSessionsList
     * @apiGroup Session
     * @apiParam {date} date Optional date.
     * @apiParam {Boolean} force_render Optional force render.
-    * @apiSuccess {Json} returns data of all sessions.
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for For when was this data created?
     * @apiSuccess {Object} session object
@@ -1838,26 +2118,32 @@ def getSessionsList(request, date_=None, force_render=False):
     return JsonResponse(out)
 
 
-def setTFIDF(request, session_id):
+@csrf_exempt
+@lockSetter
+def setTFIDF(request):
     """Stores TFIDF analysis.
     """
-    date_of = datetime.now().date()
-    url = "https://isci.parlameter.si/tfidf/s/" + str(session_id)
-    data = tryHard(url).json()
-    session = Session.objects.get(id_parladata=session_id)
-    is_saved = saveOrAbortNew(Tfidf,
-                              session=session,
-                              created_for=date_of,
-                              is_visible=False,
-                              data=data["results"])
+    if request.method == 'POST':
+        post_data = json.loads(request.body)
+        date_of = datetime.now().date()
+        session = Session.objects.get(id_parladata=post_data['session'])
+        is_saved = saveOrAbortNew(Tfidf,
+                                  session=session,
+                                  created_for=date_of,
+                                  is_visible=False,
+                                  data=post_data["results"])
+    else:
+        return JsonResponse({'alliswell': False,
+                             'saveds': False,
+                             'status': 'there\'s no post data'})
 
-    return JsonResponse({"alliswell": True,
-                         "saved": is_saved})
+    return JsonResponse({'alliswell': True,
+                         'saved': is_saved})
 
 
 def getTFIDF(request, session_id):
     """
-    * @api {get} /getTFIDF/{session_id} Requests data of TFIDF analysis.
+    * @api {get} /getTFIDF/{session_id} TFIDF analysis of a specific session
     * @apiName getTFIDF
     * @apiGroup Session
     * @apiParam {date} date Optional date.
@@ -1960,7 +2246,7 @@ def getTFIDF(request, session_id):
 
 def getWorkingBodies(request):
     """
-    * @api {get} /getWorkingBodies/ Requests data of all working bodies.
+    * @api {get} /getWorkingBodies/ List all working bodies
     * @apiName getWorkingBodies
     * @apiGroup Session
     * @apiSuccess {Json} returns data of all working bodies.
@@ -1991,7 +2277,274 @@ def getWorkingBodies(request):
         data.append({'id': org.id_parladata, 'name': org.name})
     return JsonResponse(data, safe=False)
 
+
 def getComparedVotes(request):
+    """
+    * @api {get} /getComparedVotes/?people_same={people_same_ids}&parties_same={parties_same_ids}&people_different={people_different_ids}&parties_different={parties_different_ids} List all votes where selected MPs/PGs voted the same/differently
+    * @apiName getComparedVotes
+    * @apiGroup Session
+    * @apiParam {people_same_ids} Comma separated list of Parladata ids for MPs who voted the same
+    * @apiParam {parties_same_ids} Comma separated list of Parladata ids for PGs who voted the same
+    * @apiParam {people_different_ids} Comma separated list of Parladata ids for MPs who voted differently
+    * @apiParam {parties_different_ids} Comma separated list of Parladata ids for PGs who voted the differently
+
+    * @apiSuccess {Integer} total Total number of votes so far
+    * @apiSuccess {Object[]} results List of votes that satisfy the supplied criteria
+    * @apiSuccess {Object} results.session Session data for this vote
+    * @apiSuccess {String} results.session.name Name of session.
+    * @apiSuccess {Date} results.session.date_ts Date and time of session.
+    * @apiSuccess {Date} results.session.date Date of session.
+    * @apiSuccess {Integer} results.session.id Id of session.
+    * @apiSuccess {Boolean} results.session.in_review Return true or false if session is in review.
+    * @apiSuccess {Object[]} results.session.orgs Organization object
+    * @apiSuccess {String} results.session.orgs.acronym Organization acronym
+    * @apiSuccess {Boolean} results.session.orgs.is_coalition True of False if organization is in coalition
+    * @apiSuccess {Integer} results.session.orgs.id Id of organization
+    * @apiSuccess {Integer} results.session.orgs.name Name of organization
+
+    * @apiSuccess {Object} results.results Results for this vote
+    * @apiSuccess {Integer} results.results.abstain Number of abstentions
+    * @apiSuccess {Integer} results.results.against Number of MPs who voted against the motion
+    * @apiSuccess {Integer} results.results.not_present Number of MPs who weren't present at the vote
+    * @apiSuccess {Integer} results.results.votes_for Number of MPs who voted for the motion
+    * @apiSuccess {date} results.results.date The date of the vote
+    * @apiSuccess {String} results.results.text The text of the motion which was voted upon
+    * @apiSuccess {String[]} results.results.tags List of tags that belong to this motion
+    * @apiSuccess {Boolean} results.results.is_outlier Is this vote a weird one (flame icon)?
+    * @apiSuccess {Boolean} results.results.result Did the motion pass?
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/s/getComparedVotes/?people_same=&parties_same=1&people_different=&parties_different=2
+    * @apiSuccessExample {json} Example response:
+    {
+        "total": 2155,
+        "results": [{
+            "session": {
+                "name": "44. izredna seja",
+                "date_ts": "2017-05-30T02:00:00",
+                "orgs": [{
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                }],
+                "date": "30. 5. 2017",
+                "org": {
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                },
+                "id": 9587,
+                "in_review": false
+            },
+            "results": {
+                "abstain": 0,
+                "against": 0,
+                "motion_id": 7260,
+                "date": "09.06.2017",
+                "text": "Dnevni red v celoti",
+                "tags": ["Proceduralna glasovanja"],
+                "is_outlier": false,
+                "not_present": 34,
+                "votes_for": 56,
+                "result": true
+            }
+        }, {
+            "session": {
+                "name": "44. izredna seja",
+                "date_ts": "2017-05-30T02:00:00",
+                "orgs": [{
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                }],
+                "date": "30. 5. 2017",
+                "org": {
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                },
+                "id": 9587,
+                "in_review": false
+            },
+            "results": {
+                "abstain": 0,
+                "against": 34,
+                "motion_id": 7258,
+                "date": "09.06.2017",
+                "text": "Priporo\u010dilo Vladi RS v zvezi z okoljsko katastrofo, ki jo je povzro\u010dil po\u017ear v podjetju Kemis d.o.o. - Amandma: k 5. to\u010dki 9.6.2017 [SDS - Poslanska skupina Slovenske demokratske stranke]",
+                "tags": ["Odbor za infrastrukturo, okolje in prostor"],
+                "is_outlier": false,
+                "not_present": 35,
+                "votes_for": 21,
+                "result": false
+            }
+        }, {
+            "session": {
+                "name": "30. redna seja",
+                "date_ts": "2017-05-22T02:00:00",
+                "orgs": [{
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                }],
+                "date": "22. 5. 2017",
+                "org": {
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                },
+                "id": 9580,
+                "in_review": true
+            },
+            "results": {
+                "abstain": 4,
+                "against": 18,
+                "motion_id": 7219,
+                "date": "30.05.2017",
+                "text": "Zakon o dopolnitvi Zakona o omejevanju uporabe toba\u010dnih in povezanih izdelkov - Glasovanje o zakonu v celoti",
+                "tags": ["Odbor za zdravstvo"],
+                "is_outlier": false,
+                "not_present": 16,
+                "votes_for": 52,
+                "result": true
+            }
+        }, {
+            "session": {
+                "name": "30. redna seja",
+                "date_ts": "2017-05-22T02:00:00",
+                "orgs": [{
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                }],
+                "date": "22. 5. 2017",
+                "org": {
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                },
+                "id": 9580,
+                "in_review": true
+            },
+            "results": {
+                "abstain": 6,
+                "against": 23,
+                "motion_id": 7218,
+                "date": "30.05.2017",
+                "text": "Zakon o spremembah in dopolnitvah Zakona o zdravstveni dejavnosti - Eviden\u010dni sklep o primernosti predloga zakona 30.5.2017",
+                "tags": ["Odbor za zdravstvo"],
+                "is_outlier": false,
+                "not_present": 19,
+                "votes_for": 42,
+                "result": true
+            }
+        }, {
+            "session": {
+                "name": "30. redna seja",
+                "date_ts": "2017-05-22T02:00:00",
+                "orgs": [{
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                }],
+                "date": "22. 5. 2017",
+                "org": {
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                },
+                "id": 9580,
+                "in_review": true
+            },
+            "results": {
+                "abstain": 6,
+                "against": 23,
+                "motion_id": 7218,
+                "date": "30.05.2017",
+                "text": "Zakon o spremembah in dopolnitvah Zakona o zdravstveni dejavnosti - Eviden\u010dni sklep o primernosti predloga zakona 30.5.2017",
+                "tags": ["Odbor za zdravstvo"],
+                "is_outlier": false,
+                "not_present": 19,
+                "votes_for": 42,
+                "result": true
+            }
+        }, {
+            "session": {
+                "name": "30. redna seja",
+                "date_ts": "2017-05-22T02:00:00",
+                "orgs": [{
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                }],
+                "date": "22. 5. 2017",
+                "org": {
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                },
+                "id": 9580,
+                "in_review": true
+            },
+            "results": {
+                "abstain": 3,
+                "against": 22,
+                "motion_id": 7217,
+                "date": "30.05.2017",
+                "text": "Priporo\u010dilo v zvezi s problematiko slovenskega zdravstva - Eviden\u010dni sklep MDT 30.5.2017",
+                "tags": ["Odbor za zdravstvo"],
+                "is_outlier": false,
+                "not_present": 14,
+                "votes_for": 51,
+                "result": true
+            }
+        }, {
+            "session": {
+                "name": "30. redna seja",
+                "date_ts": "2017-05-22T02:00:00",
+                "orgs": [{
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                }],
+                "date": "22. 5. 2017",
+                "org": {
+                    "acronym": "DZ",
+                    "is_coalition": false,
+                    "id": 95,
+                    "name": "Dr\u017eavni zbor"
+                },
+                "id": 9580,
+                "in_review": true
+            },
+            "results": {
+                "abstain": 2,
+                "against": 51,
+                "motion_id": 7216,
+                "date": "30.05.2017",
+                "text": "Zakon o spremembah in dopolnitvah Zakona o pokojninskem in invalidskem zavarovanju - Eviden\u010dni sklep o primernosti predloga zakona 30.5.2017",
+                "tags": ["Odbor za delo, dru\u017eino, socialne zadeve in invalide"],
+                "is_outlier": false,
+                "not_present": 13,
+                "votes_for": 24,
+                "result": false
+            }
+        }]
+    }
+    """
     people_same = request.GET.get('people_same')
     parties_same = request.GET.get('parties_same')
     people_different = request.GET.get('people_different')
@@ -2016,9 +2569,13 @@ def getComparedVotes(request):
         parties_different_list = []
     
     if len(people_same_list) + len(parties_same_list) == 0:
-        return HttpResponse('Need at least one same to compare.')
+        out = {
+            'total': Vote.objects.all().count(),
+            'results': []
+        }
+        return JsonResponse(out, safe=False)
     if len(people_same_list) + len(parties_same_list) < 2 and len(people_different_list) + len(parties_different_list) < 1:
-        return HttpResponse('Not enough to compare.')
+        return JsonResponse(out, safe=False)
 
     beginning = 'SELECT * FROM '
     select_same_people = ''
@@ -2306,7 +2863,6 @@ def getComparedVotes(request):
             else:
                 exclude_ni_parties_different = '%s dpb%s.option != \'ni\'' % (exclude_ni_parties_different, i)
 
-
         exclude_ni_list = [exclude_ni_people_same, exclude_ni_parties_same, exclude_ni_people_different, exclude_ni_parties_different]
         exclude_ni_list_clean = [s for s in exclude_ni_list if s != '']
         exclude_ni = ' AND '.join(exclude_ni_list_clean)
@@ -2333,34 +2889,173 @@ def getComparedVotes(request):
     print 'match_different_parties_organizations ' + match_different_parties_organizations
     print 'match_different_parties_options ' + match_different_parties_options
 
-    ballots = Ballot.objects.raw(query)
-    session_ids = set([b.vote.session.id for b in ballots])
-    sessions = {}
-    for s in session_ids:
-        sessions[s] = Session.objects.get(id=s).getSessionData()
+    # ballots = Ballot.objects.raw(query)
+    votes = Vote.objects.filter(id_parladata__in=[ballot.vote.id_parladata for ballot in Ballot.objects.raw(query)])
+    # sessionsData = requests.get('https://analize.parlameter.si/v1/utils/getAllStaticData').json()['sessions']
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
 
-    print '[SESSION IDS:]'
-    print set(session_ids)
+    # session_ids = set([b.vote.session.id for b in ballots])
+    # sessions = {}
+    # for s in session_ids:
+    #     sessions[s] = Session.objects.get(id=s).getSessionData()
+
+    # print '[SESSION IDS:]'
+    # print set(session_ids)
     out = {
         'total': Vote.objects.all().count(),
         'results': []
     }
 
-    for ballot in ballots:
+    for vote in votes:
         out['results'].append({
-            'session': sessions[ballot.vote.session.id], #Session.objects.get(id_parladata=int(ballot.vote.session.id_parladata)).getSessionData(),
+            'session': sessionsData[str(vote.session.id_parladata)],
             'results': {
-                'motion_id': ballot.vote.id_parladata,
-                'text': ballot.vote.motion,
-                'votes_for': ballot.vote.votes_for,
-                'against': ballot.vote.against,
-                'abstain': ballot.vote.abstain,
-                'not_present': ballot.vote.not_present,
-                'result': ballot.vote.result,
-                'is_outlier': ballot.vote.is_outlier,
-                'tags': ballot.vote.tags
+                'motion_id': vote.id_parladata,
+                'text': vote.motion,
+                'votes_for': vote.votes_for,
+                'against': vote.against,
+                'abstain': vote.abstain,
+                'not_present': vote.not_present,
+                'result': vote.result,
+                'is_outlier': vote.is_outlier,
+                'tags': vote.tags,
+                'date': vote.start_time.strftime(API_DATE_FORMAT)
             }
         })
 
+    # for ballot in ballots:
+    #     out['results'].append({
+    #         'session': sessionsData[ballot.vote.session.id_parladata],
+    #         'results': {
+    #             'motion_id': ballot.vote.id_parladata,
+    #             'text': ballot.vote.motion,
+    #             'votes_for': ballot.vote.votes_for,
+    #             'against': ballot.vote.against,
+    #             'abstain': ballot.vote.abstain,
+    #             'not_present': ballot.vote.not_present,
+    #             'result': ballot.vote.result,
+    #             'is_outlier': ballot.vote.is_outlier,
+    #             'tags': ballot.vote.tags,
+    #             'date': ballot.start_time.strftime(API_DATE_FORMAT)
+    #         }
+    #     })
 
+    return JsonResponse(out, safe=False)
+
+
+def getVotesData(request, votes):
+    """
+    * @api {get} /getVotesData/{votes} Requests detailed data of votes
+    * @apiName getVotesData
+    * @apiGroup Session
+    * @apiParam {votes} votes is parameter which returns detailed data of all comma separated votes ids given as a parameter
+    * @apiSuccess {date} created_for For when was this data created?
+    * @apiSuccess {Object} session object
+    * @apiSuccess {String} session.name Name of session.
+    * @apiSuccess {Date} session.date_ts Date and time of session.
+    * @apiSuccess {Date} session.date Date of session.
+    * @apiSuccess {Integer} session.id Id of session.
+    * @apiSuccess {Boolean} session.in_review Return true or false if session is in review.
+    * @apiSuccess {Object[]} session.orgs Organization object
+    * @apiSuccess {String} session.orgs.acronym Organization acronym
+    * @apiSuccess {Boolean} session.orgs.is_coalition True of False if organization is in coalition
+    * @apiSuccess {Integer} session.orgs.id Id of organization
+    * @apiSuccess {Integer} session.orgs.name Name of organization
+    * @apiSuccess {Object} results object
+    * @apiSuccess {Integer} results.motion_id ID of motion.
+    * @apiSuccess {String} results.text Text of motion
+    * @apiSuccess {Integer} results.not_present Number of MPs that were not present.
+    * @apiSuccess {Integer} results.votes_for Number of MPs that voted with yes.
+    * @apiSuccess {Integer} results.abstain Number of MPs that abstain on voting.
+    * @apiSuccess {Integer} results.against Number of MPs that are against on voting.
+    * @apiSuccess {Boolean} results.result True or False if the motion was successful.
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/s/getVotesData/6512,6513
+    * @apiSuccessExample {json} Example response:
+    [
+    {
+    "session": {
+    "name": "1. redna seja",
+    "date_ts": "2014-08-01T02:00:00",
+    "orgs": [
+    {
+    "acronym": "DZ",
+    "is_coalition": false,
+    "id": 95,
+    "name": "Državni zbor"
+    }
+    ],
+    "date": "1. 8. 2014",
+    "org": {
+    "acronym": "DZ",
+    "is_coalition": false,
+    "id": 95,
+    "name": "Državni zbor"
+    },
+    "id": 6684,
+    "in_review": false
+    },
+    "created_for": "2014-08-01",
+    "results": {
+    "abstain": 0,
+    "text": "Proceduralni predlog za prekinitev 1. točke dnevnega reda",
+    "against": 59,
+    "votes_for": 26,
+    "motion_id": 6512,
+    "not_present": 5,
+    "result": false
+    }
+    },
+    {
+    "session": {
+    "name": "1. redna seja",
+    "date_ts": "2014-08-01T02:00:00",
+    "orgs": [
+    {
+    "acronym": "DZ",
+    "is_coalition": false,
+    "id": 95,
+    "name": "Državni zbor"
+    }
+    ],
+    "date": "1. 8. 2014",
+    "org": {
+    "acronym": "DZ",
+    "is_coalition": false,
+    "id": 95,
+    "name": "Državni zbor"
+    },
+    "id": 6684,
+    "in_review": false
+    },
+    "created_for": "2014-08-01",
+    "results": {
+    "abstain": 0,
+    "text": "Dnevni red v celoti",
+    "against": 0,
+    "votes_for": 84,
+    "motion_id": 6513,
+    "not_present": 6,
+    "result": true
+    }
+    }
+    ]
+    """
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
+    out = []
+    votes = votes.split(',')
+    for vote in Vote.objects.filter(id_parladata__in=votes):
+        out.append({
+            'created_for': vote.created_for,
+            'session': sessionsData[str(vote.session.id_parladata)],
+            'results': {
+
+                    'motion_id': vote.id_parladata,
+                    'text': vote.motion,
+                    'votes_for': vote.votes_for,
+                    'against': vote.against,
+                    'abstain': vote.abstain,
+                    'not_present': vote.not_present,
+                    'result': vote.result}
+            })
     return JsonResponse(out, safe=False)

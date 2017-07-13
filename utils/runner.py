@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*-
 import requests
 from parlaposlanci.views import setMPStaticPL
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, slack_token
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY
 from parlalize.utils import getPGIDs, findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
 from raven.contrib.django.raven_compat.models import client
+from django.test.client import RequestFactory
 
 from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic
-from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass
+from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass, MinisterStatic
 
 from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG
 from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic
 
-from parlaseje.models import Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, Vote_graph, Vote_analysis
+from parlaseje.models import Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
 
-from parlaseje.views import setPresenceOfPG, setAbsentMPs, setSpeechesOnSession, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
+from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
 from parlaseje.utils import idsOfSession, getSesDates
 from utils.recache import updatePagesS
-from utils.imports import update, updateDistricts, updateTags
+from utils.imports import update, updateDistricts, updateTags, updatePersonStatus
 from utils.votes_outliers import setMotionAnalize, setOutliers
 
 from .votes import VotesAnalysis
@@ -31,6 +32,8 @@ from slackclient import SlackClient
 from time import time
 
 DZ = 95
+factory = RequestFactory()
+request_with_key = factory.get('?key=' + SETTER_KEY)
 
 
 # parlaposlanci runner methods #
@@ -44,14 +47,14 @@ def updateMPStatic():
         # call setters for new pg
         for pg in list(set(change['members'].keys()) - set(lastObject['members'].keys())):
             for member in change['members'][pg]:
-                setMPStaticPL(None, str(member), change['start_date'])
+                setMPStaticPL(request_with_key, str(member), change['start_date'])
 
         # call setters for members which have change in memberships
         for pg in change['members'].keys():
             if pg in lastObject['members'].keys():
                 personsForUpdate = list(set(change['members'][pg]) - set(lastObject['members'][pg]))
                 for member in personsForUpdate:
-                    setMPStaticPL(None, str(member), change['start_date'])
+                    setMPStaticPL(request_with_key, str(member), change['start_date'])
         lastObject = change
 
 
@@ -80,7 +83,7 @@ def onDateMPCardRunner(date_=None):
         for setter in setters:
             print 'running:' + str(setter)
             try:
-                setter(None, str(membership['id']), date_)
+                setter(request_with_key, str(membership['id']), date_)
             except:
                 msg = ('' + FAIL + ''
                        'FAIL on: '
@@ -89,7 +92,7 @@ def onDateMPCardRunner(date_=None):
                        '' + str(membership['id']) + ''
                        '' + ENDC + '')
                 print msg
-        setLastActivity(None, str(membership['id']))
+        setLastActivity(request_with_key, str(membership['id']))
 
     # Runner for setters ALL
     all_in_one_setters = [
@@ -102,7 +105,7 @@ def onDateMPCardRunner(date_=None):
     for setter in all_in_one_setters:
         print 'running:' + str(setter)
         try:
-            setter(None, date_)
+            setter(request_with_key, date_)
         except:
             print 'FAIL on: ' + str(setter)
 
@@ -134,7 +137,7 @@ def onDatePGCardRunner(date_=None):
         for ID in IDs:
             print setter
             try:
-                setter(None, str(ID), date_)
+                setter(request_with_key, str(ID), date_)
             except:
                 text = ('' + FAIL + 'FAIL on: ' + str(setter) + ''
                         ' and with id: ' + str(ID) + ENDC + '')
@@ -147,7 +150,7 @@ def onDatePGCardRunner(date_=None):
 
     for setter in all_in_one_setters:
         try:
-            setter(None, date_)
+            setter(request_with_key, date_)
         except:
             print FAIL + 'FAIL on: ' + str(setter) + ENDC
 
@@ -160,38 +163,25 @@ def runSettersSessions(date_to=None, sessions_ids=None):
 
     setters_models = {
         PresenceOfPG: setPresenceOfPG,
-        Vote_graph: setMotionOfSessionGraph,
+        VoteDetailed: setMotionOfSessionGraph,
         Vote_analysis: setMotionAnalize,
     }
     # set outliers for all votes
     setOutliers()
     for model, setter in setters_models.items():
-        if model != AverageSpeeches:
-            # IDs = getSesIDs(dates[1],dates[-1])
-            if sessions_ids:
-                last = sessions_ids
-            else:
-                last = idsOfSession(model)
-            print last
-            print model
-            for ID in last:
-                print ID
-                try:
-                    setter(None, str(ID))
-                except:
-                    client.captureException()
+        # IDs = getSesIDs(dates[1],dates[-1])
+        if sessions_ids:
+            last = sessions_ids
         else:
-            dates = findDatesFromLastCard(model, None, date_to)
-            print model
-            if dates == []:
-                continue
-            datesSes = getSesDates(dates[-1])
-            for date in datesSes:
-                print date
-                try:
-                    setter(None, date.strftime(API_DATE_FORMAT))
-                except:
-                    client.captureException()
+            last = idsOfSession(model)
+        print last
+        print model
+        for ID in last:
+            print ID
+            try:
+                setter(request_with_key, str(ID))
+            except:
+                client.captureException()
     return 'all is fine :D'
 
 
@@ -258,11 +248,11 @@ def deleteAppModels(appName):
 
 
 def updateWB():
-    organizations = tryHard(API_URL + '/getOrganizatonByClassification').json()
+    organizations = tryHard(API_URL + '/getOrganizatonsByClassification').json()
     for wb in organizations['working_bodies'] + organizations['council']:
         print 'setting working_bodie: ', wb['name']
         try:
-            setWorkingBodies(None,
+            setWorkingBodies(request_with_key,
                              str(wb['id']),
                              datetime.now().date().strftime(API_DATE_FORMAT))
         except:
@@ -432,7 +422,7 @@ def fastUpdate(fast=True, date_=None):
                 channel="#parlalize_notif",
                 text='Start update votes at: ' + str(datetime.now()))
     for session_id in data['sessions_of_updated_votes']:
-        setMotionOfSession(None, str(session_id))
+        setMotionOfSession(request_with_key, str(session_id))
 
     # update ballots
     sc.api_call("chat.postMessage",
@@ -472,6 +462,13 @@ def fastUpdate(fast=True, date_=None):
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
+
+            rec_posts = []
+            for post in dic['recipient_posts']:
+                static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
+                                                       ministry__id_parladata=post['organization_id'])
+                if static:
+                    rec_posts.append(static[0])
             question = Question(person=person,
                                 session=session,
                                 start_time=dic['date'],
@@ -483,6 +480,7 @@ def fastUpdate(fast=True, date_=None):
             question.save()
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
+            question.recipient_persons_static.add(*rec_posts)
 
     updateDistricts()
 
@@ -597,23 +595,23 @@ def setListOfMembers(date_time):
     """
     start_date = datetime.strptime(date_time, '%Y-%m-%dT%X')
     start_date = start_date - timedelta(days=1)
-    setListOfMembersTickers(None, start_time.strftime(API_DATE_FORMAT))
+    setListOfMembersTickers(request_with_key, start_time.strftime(API_DATE_FORMAT))
 
 
 def updateLastActivity(mps_ids):
     print 'set last activity for: ', mps_ids
     for mp in mps_ids:
         print mp
-        print setLastActivity(None, str(mp))
-        print requests.get('https://glej.parlameter.si/p/zadnje-aktivnosti/' + str(mp) + '/?frame=true&altHeader=true&forceRender=true')
-        print requests.get('https://glej.parlameter.si/p/zadnje-aktivnosti/' + str(mp) + '/?embed=true&altHeader=true&forceRender=true')
-        print requests.get('https://glej.parlameter.si/p/zadnje-aktivnosti/' + str(mp) + '?forceRender=true')
+        print setLastActivity(request_with_key, str(mp))
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '/?frame=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '/?embed=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?forceRender=true')
 
 
 def recacheActivities(activity, mps_ids):
     print 'recache ', activity[0], mps_ids
     orgs = list(set([getPersonData(mp)['party']['id'] for mp in mps_ids]))
-    base_url = 'https://glej.parlameter.si/p/' + activity[0] + '/'
+    base_url = GLEJ_URL + '/p/' + activity[0] + '/'
     for mp in mps_ids:
         print mp
         url = base_url + str(mp)
@@ -622,7 +620,7 @@ def recacheActivities(activity, mps_ids):
         print requests.get(url + '?forceRender=true')
 
     print 'recache orgs ', activity[1], orgs
-    base_url = 'https://glej.parlameter.si/ps/' + activity[1] + '/'
+    base_url = GLEJ_URL + '/ps/' + activity[1] + '/'
     for org in orgs:
         print org
         url = base_url + str(org)
@@ -632,7 +630,7 @@ def recacheActivities(activity, mps_ids):
 
 
 def recacheWBs():
-    wbs = tryHard('https://data.parlameter.si/v1/getOrganizatonByClassification').json()['working_bodies']
+    wbs = tryHard(API_URL + '/getOrganizatonsByClassification').json()['working_bodies']
     for wb in wbs:
         print wb
-        print requests.get('https://glej.parlameter.si/wb/getWorkingBodies/'+str(wb['id'])+'?frame=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?frame=true&altHeader=true&forceRender=true')

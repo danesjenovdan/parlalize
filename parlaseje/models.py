@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from behaviors.models import Timestampable, Versionable
-from parlalize.settings import API_OUT_DATE_FORMAT
+from parlalize.settings import API_OUT_DATE_FORMAT, API_DATE_FORMAT
 from datetime import datetime
 
 
@@ -28,6 +28,7 @@ class Session(Timestampable, models.Model):
                                help_text=_('date of session'))
 
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True, null=True,
                                        help_text=_('id parladata'))
 
@@ -92,8 +93,14 @@ class Session(Timestampable, models.Model):
         orgs_data = [org.getOrganizationData()
                      for org
                      in self.organizations.all()]
+        activity = Activity.objects.filter(session=self)
+        if activity:
+            last_day = activity.latest('updated_at').updated_at.strftime(API_OUT_DATE_FORMAT)
+        else:
+            last_day = self.start_time.strftime(API_OUT_DATE_FORMAT),
         return {'name': self.name,
                 'date': self.start_time.strftime(API_OUT_DATE_FORMAT),
+                'updated_at': last_day,
                 'date_ts': self.start_time,
                 'id': self.id_parladata,
                 'org': self.organization.getOrganizationData(),
@@ -105,6 +112,7 @@ class Activity(Timestampable, models.Model):
     """All activities of MP."""
 
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True, null=True,
                                        help_text=_('id parladata'))
 
@@ -163,26 +171,26 @@ class Question(Activity):
     title = models.TextField(blank=True, null=True,
                              help_text='Words spoken')
 
-    recipient_person = models.ForeignKey('parlaposlanci.Person',
-                                         blank=True, null=True,
-                                         help_text='Recipient person (if it\'s a person).',
-                                         related_name='questions')
-
-    recipient_organization = models.ForeignKey('parlaskupine.Organization',
-                                               blank=True, null=True,
-                                               help_text='Recipient organization (if it\'s an organization).',
-                                               related_name='questions_org')
-
-    recipient_text = models.TextField(blank=True, null=True,
+    recipient_persons = models.ManyToManyField('parlaposlanci.Person',
+                                               blank=True,
+                                               help_text='Recipient persons (if it\'s a person).',
+                                               related_name='questions')
+    recipient_persons_static = models.ManyToManyField('parlaposlanci.MinisterStatic',
+                                                      blank=True,
+                                                      help_text='Recipient persons (if it\'s a person).',
+                                                      related_name='questions_static')
+    recipient_organizations = models.ManyToManyField('parlaskupine.Organization',
+                                                     blank=True,
+                                                     help_text='Recipient organizations (if it\'s an organization).',
+                                                     related_name='questions_org')
+    recipient_text = models.TextField(blank=True,
+                                      null=True,
                                       help_text='Recipient name as written on dz-rs.si')
 
     def getQuestionData(self):
-        # fix import issue
-        from parlalize.utils import getMinistryData
         persons = []
         orgs = []
-        for person in self.recipient_persons.all():
-            persons.append(getMinistryData(person.id_parladata, self.start_time.strftime(API_DATE_FORMAT)))
+        persons = [ministr.getJsonData() for ministr in self.recipient_persons_static.all()]
         for org in self.recipient_organizations.all():
             orgs.append(org.getOrganizationData())
         return {'title': self.title,
@@ -190,7 +198,9 @@ class Question(Activity):
                 'recipient_persons': persons,
                 'recipient_orgs': orgs,
                 'url': self.content_link,
-                'id': self.id_parladata}
+                'id': self.id_parladata,
+                'session_name': self.session.name if self.session else 'Unknown',
+                'session_id': self.session.id_parladata if self.session else 'Unknown'}
 
 
 class Ballot(Activity):
@@ -231,7 +241,6 @@ class Vote(Timestampable, models.Model):
     motion = models.TextField(blank=True, null=True,
                               help_text='The motion for which the vote took place')
 
-
     tags = JSONField(blank=True, null=True)
 
     votes_for = models.IntegerField(blank=True, null=True,
@@ -251,6 +260,7 @@ class Vote(Timestampable, models.Model):
                                      help_text='The result of the vote')
 
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True, null=True,
                                        help_text=_('id parladata'))
 
@@ -269,6 +279,9 @@ class Vote(Timestampable, models.Model):
 
     intra_disunion = models.FloatField(default=0.0,
                                        help_text='intra disunion for all members')
+
+    amendment_of = models.ManyToManyField('parlaskupine.Organization',
+                                          related_name='amendments')
 
 
 class VoteDetailed(Timestampable, models.Model):
