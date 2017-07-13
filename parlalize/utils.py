@@ -3,10 +3,23 @@ import numpy
 from datetime import datetime, timedelta
 from django.http import Http404, JsonResponse, HttpResponse
 import requests
-from parlaposlanci.models import Person, StyleScores, CutVotes, MPStaticPL, MembershipsOfMember, LessEqualVoters, EqualVoters, Presence, AverageNumberOfSpeechesPerSession, VocabularySize, Compass, SpokenWords, LastActivity, MinisterStatic
-from parlaskupine.models import Organization, WorkingBodies, CutVotes as CutVotesPG, DeviationInOrganization, LessMatchingThem, MostMatchingThem, PercentOFAttendedSession, MPOfPg, PGStatic, VocabularySize as VocabularySizePG, StyleScores as StyleScoresPG
-from parlaseje.models import VoteDetailed, Session, Vote, Ballot, Speech, PresenceOfPG, AbsentMPs, VoteDetailed
-from parlalize.settings import VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT, DEBUG
+from parlaposlanci.models import (Person, StyleScores, CutVotes, MPStaticPL,
+                                  MembershipsOfMember, LessEqualVoters,
+                                  EqualVoters, Presence,
+                                  AverageNumberOfSpeechesPerSession,
+                                  VocabularySize, Compass, SpokenWords,
+                                  LastActivity, MinisterStatic)
+from parlaskupine.models import (Organization, WorkingBodies,
+                                 CutVotes as CutVotesPG,
+                                 DeviationInOrganization, LessMatchingThem,
+                                 MostMatchingThem, PercentOFAttendedSession,
+                                 MPOfPg, PGStatic,
+                                 VocabularySize as VocabularySizePG,
+                                 StyleScores as StyleScoresPG)
+from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
+                              PresenceOfPG, AbsentMPs, VoteDetailed, Quote)
+from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
+                                DEBUG, API_OUT_DATE_FORMAT)
 from django.contrib.contenttypes.models import ContentType
 import requests
 import json
@@ -14,6 +27,21 @@ import numpy as np
 import time
 import csv
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
+from parlalize.settings import SETTER_KEY
+
+
+def lockSetter(function):
+    def wrap(request, *args, **kwargs):
+        if request:
+            setterKey = request.GET.get('key')
+            if str(setterKey) == str(SETTER_KEY):
+                return function(request, *args, **kwargs)
+            else:
+                raise PermissionDenied
+        else:
+            return function(*args, **kwargs)
+    return wrap
 
 
 def tryHard(url):
@@ -32,96 +60,6 @@ def tryHard(url):
     return data
 
 
-def voteToLogical(vote):
-    if vote == 'za':
-        return 1
-    elif vote == 'proti':
-        return 0
-    else:
-        return -1
-
-
-# Return dictionary of votes results by user ids.
-def getLogicVotes(date_=None):
-    if date_:
-        r = tryHard(API_URL+'/getVotes/'+date_)
-        v = tryHard(API_URL+'/getAllVotes/'+date_)
-    else:
-        r = tryHard(API_URL+'/getVotes/')
-        v = tryHard(API_URL+'/getAllVotes/')
-    pl_votes = v.json()
-    votes = r.json()
-
-    niPoslanec = VOTE_MAP['ni_poslanec']
-
-    for person_id in votes.keys():
-        for vote in pl_votes:
-            try:
-                logic_vote = VOTE_MAP[str(votes[str(person_id)][str(vote['id'])])]
-                votes[str(person_id)][str(vote['id'])] = logic_vote
-            except:
-                if type(votes[str(person_id)]) == list:
-                    votes[str(person_id)] = {}
-                votes[str(person_id)][str(vote['id'])] = niPoslanec
-
-    return votes
-
-
-def getVotes():
-    r = tryHard(API_URL + '/getVotes/')
-    pl_votes = Vote.objects.all()
-    votes = r.json()
-    for person_id in votes.keys():
-        for vote in pl_votes:
-            try:
-                if not votes[str(person_id)][str(vote.id_parladata)]:
-                    print 'bu'
-            except:
-                if type(votes[str(person_id)]) == list:
-                    votes[str(person_id)] = {}
-                votes[str(person_id)][str(vote.id_parladata)] = 'ni_poslanec'
-    return votes
-
-
-def votesToLogical(votes, length):
-    maxVotes = length
-    for key in votes.keys():
-        votes[key] = map(voteToLogical, votes[key])
-        if (len(votes[key]) < length):
-            votes[key].extend(numpy.zeros(maxVotes-int(len(votes[key]))))
-        else:
-
-            votes[key] = [votes[key][i] for i in range(length)]
-
-
-def voteFor(vote):
-    if vote == 'za':
-        return 1
-    else:
-        return 0
-
-
-def voteAgainst(vote):
-    if vote == 'proti':
-        return 1
-    else:
-        return 0
-
-
-def voteAbstain(vote):
-    if vote == 'kvorum':
-        return 1
-    else:
-        return 0
-
-
-def voteAbsent(vote):
-    if vote == 'ni':
-        return 1
-    else:
-        return 0
-
-
 def normalize(val, max_):
     try:
         return round((float(val)*100)/float(max_))
@@ -130,6 +68,7 @@ def normalize(val, max_):
 
 
 # checks if cards with the data exists or not
+# DEPRICATED
 def saveOrAbort(model, **kwargs):
     savedModel = model.objects.filter(**kwargs)
     if savedModel:
@@ -279,6 +218,7 @@ def getPersonCardModelNew(model, id, date=None, is_visible=None):
     return modelObject
 
 
+# DEPRICATED
 def getPersonCardModel(model, id, date=None):
     if date:
         dateObj = datetime.strptime(date, '%d.%m.%Y')
@@ -379,127 +319,6 @@ def getPGIDs():
     data = tryHard(API_URL+'/getAllPGsExt/').json()
 
     return [pg for pg in data]
-
-
-def getRangeVotes(pgs, date_, votes_type='logic'):
-    def getVotesOnDay(votesPerDay_, day):
-        # tempList = sorted(votesPerDay_, key=lambda k: k['time'])
-        if day in votesPerDay_.keys():
-            votesPerDay_[day].sort(key=lambda r: r['time'])
-        else:
-            return []
-        try:
-            out = [a['id'] for a in votesPerDay_[day]]
-            return out
-        except:
-            return []
-
-    # get data
-    r = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_)
-    membersInPGs = r.json()
-
-    r = tryHard(API_URL+'/getMembersOfPGsRanges/'+date_)
-    membersInPGsRanges = r.json()
-
-    # create dict votesPerDay
-    r = tryHard(API_URL+'/getAllVotes/'+date_)
-    allVotesData = r.json()
-
-    if date_:
-        if votes_type == 'logic':
-            votes = getLogicVotes(date_)
-        else:
-            r = tryHard(API_URL+'/getVotes/'+date_)
-            votes = r.json()
-
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        if votes_type == 'logic':
-            votes = getLogicVotes()
-        else:
-            r = tryHard(API_URL+'/getVotes/'+date_)
-            votes = r.json()
-        date_of = datetime.now().date()
-
-    # print votes
-    # prepare votes in 'windows'
-    votesPerDay = {}
-    for vote in allVotesData:
-        vote_date = vote['start_time'].split('T')[0]
-        if vote_date in votesPerDay.keys():
-            dateObj = datetime.strptime(vote['start_time'], '%Y-%m-%dT%X')
-            votesPerDay[vote_date].append({'id': vote['id'],
-                                           'time': dateObj})
-        else:
-            dateObj = datetime.strptime(vote['start_time'], '%Y-%m-%dT%X')
-            votesPerDay[vote_date] = [{'id': vote['id'],
-                                       'time': dateObj}]
-
-    # get average score of PG
-    if votes_type == 'logic':
-        pg_score = np.array([])
-    else:
-        pg_score = []
-    counter = 0
-    all_votes = []
-    for membersInRange in membersInPGsRanges:
-        if len(pgs) == 1 and not membersInRange['members'][str(pgs[0])]:
-            continue
-        start_date = datetime.strptime(membersInRange['start_date'],
-                                       API_DATE_FORMAT).date()
-        end_date = datetime.strptime(membersInRange['end_date'],
-                                     API_DATE_FORMAT).date()
-        days = (end_date - start_date).days
-        votes_ids = [vote_id
-                     for i
-                     in range(days+1)
-                     for vote_id
-                     in getVotesOnDay(votesPerDay,
-                                      (start_date+timedelta(days=i)).strftime('%Y-%m-%d'))]
-        if votes_ids == []:
-            continue
-        all_votes = all_votes + votes_ids
-        counter += len(votes_ids)
-        if votes_type == 'logic':
-            pg_score_temp = np.mean([[votes[str(member)][str(b)]
-                                      for b
-                                      in votes_ids
-                                      ]
-                                     for pg_id
-                                     in pgs
-                                     for member
-                                     in membersInRange['members'][pg_id]],
-                                    axis=0)
-        else:
-            members = [member
-                       for pg_id
-                       in pgs
-                       for member
-                       in membersInRange['members'][pg_id]]
-
-            # print member, votes[str(member)].keys()
-            # Print member and vote id where is fail in data for cutVotes
-            for member in members:
-                for b in votes_ids:
-                    if str(b) not in votes[str(member)].keys():
-                        print member, b, 'FAIL'
-                        # fix for cutVotes for members which isn't member for a half of day
-                        if votes_type == 'plain':
-                            votes[str(member)][str(b)] = 'X'
-            pg_score_temp = [votes[str(member)][str(b)]
-                             for member
-                             in members
-                             for b
-                             in votes_ids if votes[str(member)][str(b)] != 'X']
-
-        if votes_type == 'logic':
-            pg_score = np.concatenate((pg_score,
-                                       pg_score_temp),
-                                      axis=0)
-        else:
-            pg_score = pg_score+pg_score_temp
-
-    return pg_score, membersInPGs, votes, all_votes
 
 
 def getMPGovId(id_parladata):
@@ -612,7 +431,7 @@ def getAllStaticData(request, force_render=False):
         PS_NP = ['poslanska skupina', 'nepovezani poslanec']
         date_ = datetime.now().strftime(API_DATE_FORMAT)
 
-        out = {'persons': {}, 'partys': {}, 'wbs': {}}
+        out = {'persons': {}, 'partys': {}, 'wbs': {}, 'sessions': {}}
         for person in Person.objects.all():
             personData = getPersonData(person.id_parladata,
                                        date_)
@@ -621,6 +440,10 @@ def getAllStaticData(request, force_render=False):
         parliamentary_group = Organization.objects.filter(classification__in=PS_NP)
         for party in parliamentary_group:
             out['partys'][party.id_parladata] = party.getOrganizationData()
+
+        sessions = Session.objects.all()
+        for session in sessions:
+            out['sessions'][session.id_parladata] = session.getSessionData()
 
         working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
         orgs = Organization.objects.filter(classification__in=working_bodies)
@@ -732,7 +555,7 @@ def getOrgsCardDates(request, org_id):
 
 def monitorMe(request):
 
-    r = requests.get('https://analize.parlameter.si/v1/p/getMPStatic/2/')
+    r = requests.get(BASE_URL + '/p/getMPStatic/2/')
     if r.status_code == 200:
         return HttpResponse('All iz well.')
     else:
@@ -764,3 +587,77 @@ def printProgressBar(iteration,
     # Print New Line on Complete
     if iteration == total:
         print()
+
+
+def setQuoteSourceSpeeachToLatestValid(session_id):
+    quotes = Quote.objects.filter(speech__session__id_parladata=session_id)
+    for quote in quotes:
+        print quote.id
+        speech = quote.speech
+        lastSpeech = Speech.getValidSpeeches(datetime.now()).filter(person=speech.person,
+                                                                    order=speech.order,
+                                                                    session__id_parladata=session_id,
+                                                                    start_time=speech.start_time)
+        if lastSpeech:
+            print speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata
+            print (lastSpeech[0].content[0:100], lastSpeech[0].id_parladata)
+            print lastSpeech.count()
+            quote.speech = lastSpeech[0]
+            quote.save()
+        else:
+            print "fejl"
+            print speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata
+            lastSpeech = Speech.getValidSpeeches(datetime.now()).filter(person=speech.person,
+                                                                        order=speech.order-20,
+                                                                        session__id_parladata=session_id,
+                                                                        start_time=speech.start_time)
+            if lastSpeech:
+                print "Juhej debug"
+                print speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata
+                print (lastSpeech[0].content[0:100], lastSpeech[0].id_parladata)
+                print lastSpeech.count()
+                quote.speech = lastSpeech[0]
+                quote.save()
+
+
+def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
+    """
+    generic method which return tagged ballots for partys and members
+    """
+    votes = Vote.objects.filter(start_time__lte=datetime_obj).order_by('start_time')
+    votes = votes.filter(id__in=ballots.keys())
+    # add start_time_date to querySetObjets
+    votes = votes.extra(select={'start_time_date': 'DATE(start_time)'})
+    # get unique dates
+    dates = list(set(list(votes.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+    #current_data = {'date': votes[0].start_time_date, 'ballots': []}
+    for vote in votes:
+        try:
+            temp_data = {
+                'motion': vote.motion,
+                'vote_id': vote.id_parladata,
+                'result': vote.result,
+                'session_id': vote.session.id_parladata if vote.session else None,
+                'option': ballots[vote.id][1],
+                'tags': vote.tags}
+            if ballots[vote.id][0]:
+                temp_data['ballot_id'] = ballots[vote.id][0]
+            data[vote.start_time_date].append(temp_data)
+        except:
+            print 'Ni vota ' + str(vote.id)
+
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'ballots': data[date]}
+           for date in dates]
+
+    tags = list(Tag.objects.all().values_list('name', flat=True))
+    result = {
+        'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'all_tags': tags,
+        'results': list(reversed(out))
+        }
+    result.update(card_owner_data)
+    return result

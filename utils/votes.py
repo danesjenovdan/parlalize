@@ -110,6 +110,7 @@ class VotesAnalysis(object):
                        allSessionsCount,
                        on='voter',
                        how='right')
+        out = out.fillna(0)
         out['attendance'] = 100 * (1 - out.id_x / out.id_y)
         self.presenceMP_S = out
 
@@ -330,14 +331,16 @@ class VotesAnalysis(object):
         votes = self.presenceMP_V
         sessions = self.presenceMP_S
 
-        self.members
         actualVotes = votes[votes.voter.isin(self.members)]
         avgVote = actualVotes[['attendance']].mean().attendance
         maxVote = actualVotes.max()
+        max_vote_value = actualVotes['attendance'].max()
+        max_vote_voters = actualVotes[actualVotes.attendance == max_vote_value]['voter'].tolist()
 
         actualSession = sessions[sessions.voter.isin(self.members)]
         avgSession = actualSession[['attendance']].mean().attendance
-        maxSession = actualSession.max()
+        max_session_value = actualSession['attendance'].max()
+        max_ses_voters = actualSession[actualSession.attendance == max_session_value]['voter'].tolist()
 
         for mp in self.members:
             person = Person.objects.get(id_parladata=int(mp))
@@ -350,13 +353,13 @@ class VotesAnalysis(object):
                                     created_for=self.date_of,
                                     person=person,
                                     person_value_sessions=thisSession,
-                                    maxMP_sessions=[int(maxSession.voter)],
+                                    maxMP_sessions=max_ses_voters,
                                     average_sessions=avgSession,
-                                    maximum_sessions=maxSession.attendance,
+                                    maximum_sessions=max_session_value,
                                     person_value_votes=thisVotes,
-                                    maxMP_votes=[int(maxVote.voter)],
+                                    maxMP_votes=max_vote_voters,
                                     average_votes=avgVote,
-                                    maximum_votes=maxVote.attendance)
+                                    maximum_votes=max_vote_value)
 
     def setPresenceOfPGs(self):
         """

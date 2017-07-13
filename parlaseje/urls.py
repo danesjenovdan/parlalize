@@ -13,7 +13,7 @@ urlpatterns = patterns(
     url(r'^setPresenceOfPG/(?P<session_id>\d+)', setPresenceOfPG),
     url(r'^setPresenceOfPG/(?P<session_id>\d+)/(?P<date_>[\w].+)', setPresenceOfPG),
 
-    url(r'^setTFIDF/(?P<session_id>\d+)', setTFIDF),
+    url(r'^setTFIDF/', setTFIDF),
 
     url(r'^setMotionOfSessionGraph/(?P<session_id>\d+)', setMotionOfSessionGraph),
     url(r'^setMotionOfSessionGraph/(?P<session_id>\d+)/(?P<date_>[\w].+)', setMotionOfSessionGraph),
@@ -49,4 +49,6 @@ urlpatterns = patterns(
     url(r'^getMotionGraph/(?P<id_mo>\d+)/(?P<date>[\w].+)', getMotionGraph),
 
     url(r'^getComparedVotes/', getComparedVotes),
+
+    url(r'^getVotesData/(?P<votes>[\w,]+)$', getVotesData),
 )
