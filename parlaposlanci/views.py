@@ -1025,6 +1025,64 @@ def getLastActivity(request, person_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
+def getLastActivityRework(request, person_id, date_=None):
+    def getBallotData(ballot):
+        vote = ballot.vote
+        return {'option': ballot.option,
+                'result': vote.result,
+                'vote_name': vote.name,
+                'vote_id': vote.id_parladata,
+                'type': 'ballot',
+                'session_id': vote.session.id_parladata
+                }
+ 
+    def getSpeechData(speech, sessions_data):
+        this_session = sessions_data[str(speech.session.id_parladata)]
+        return {'speech_id': speech.id_parladata,
+                'type': 'speech',
+                'session': this_session,
+                }
+ 
+    def getQuestionData(question, session_data):
+        persons = [ministr.getJsonData() for ministr in question.recipient_persons_static.all()]
+        orgs = []
+        for org in question.recipient_organizations.all():
+            orgs.append(org.getOrganizationData())
+        return {'question_id': question.id_parladata,
+                'type': 'question',
+                'session': session_data,
+                'title': question.title,
+                'recipient_text': question.recipient_text,
+                'content_url': question.content_link,
+                'recipient_persons': persons,
+                'recipient_orgs': orgs,
+                }
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+    a = Activity.objects.filter(person__id_parladata=person_id)
+    a = a.extra(select={'start_time_date': 'DATE(start_time)'})
+    dates = list(set(list(a.values_list("start_time_date", flat=True))))
+    dates.sort()
+    a = Activity.objects.filter(person__id_parladata=person_id,
+                                start_time__gte=dates[-15]).order_by('-start_time')
+    a = a.extra(select={'start_time_date': 'DATE(start_time)'})
+ 
+    staticData = requests.get(BASE_URL + '/utils/getAllStaticData/').json()
+    result = []
+    for activity in a:
+        act_obj = activity.get_child()
+        if type(act_obj) == Ballot:
+            result.append(getBallotData(act_obj))
+        elif type(act_obj) == Speech:
+            result.append(getSpeechData(act_obj, staticData['sessions']))
+        elif type(act_obj) == Question:
+            result.append(getQuestionData(act_obj))
+ 
+    return JsonResponse(result, safe=False)
+
+
 # TODO date
 def getAllSpeeches(request, person_id, date_=None):
     """
