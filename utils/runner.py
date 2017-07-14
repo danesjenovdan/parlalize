@@ -602,9 +602,8 @@ def updateLastActivity(mps_ids):
     print 'set last activity for: ', mps_ids
     for mp in mps_ids:
         print mp
-        print setLastActivity(request_with_key, str(mp))
-        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '/?frame=true&altHeader=true&forceRender=true')
-        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '/?embed=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?frame=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?embed=true&altHeader=true&forceRender=true')
         print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?forceRender=true')
 
 

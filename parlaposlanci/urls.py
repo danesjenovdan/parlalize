@@ -64,8 +64,6 @@ urlpatterns = patterns(
 
     url(r'^getLastActivity/(?P<person_id>\d+)/(?P<date_>[\w].+)', getLastActivity),
     url(r'^getLastActivity/(?P<person_id>\d+)', getLastActivity),
-    url(r'^getLastActivityRework/(?P<person_id>\d+)/(?P<date_>[\w].+)', getLastActivityRework),
-    url(r'^getLastActivityRework/(?P<person_id>\d+)', getLastActivityRework),
 
     url(r'^getVocabularySize/(?P<person_id>\d+)/(?P<date_>[\w].+)', getVocabularySize),
     url(r'^getVocabularySize/(?P<person_id>\d+)', getVocabularySize),
