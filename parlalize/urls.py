@@ -6,7 +6,7 @@ from utils import getPersonDataAPI
 from parlaseje.utils import getSessionDataAPI
 from parlaskupine.utils_ import getPgDataAPI
 from parlalize.utils import modelsData, getPersonsCardDates, getOrgsCardDates, getAllStaticData, monitorMe
-from utils.recache import recacheLastSession
+from utils import recacheLastSession
 
 # admin.autodiscover()
 
