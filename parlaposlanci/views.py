@@ -963,79 +963,77 @@ def getLastActivity(request, person_id, date_=None):
         }]
     }
     """
-    print date
+    def getBallotData(ballot):
+        vote = ballot.vote
+        return {'option': ballot.option,
+                'result': vote.result,
+                'vote_name': vote.motion,
+                'vote_id': vote.id_parladata,
+                'type': 'ballot',
+                'session_id': vote.session.id_parladata,
+                }
+ 
+    def getSpeechData(speech, sessions_data):
+        this_session = sessions_data[str(speech.session.id_parladata)]
+        return {'speech_id': speech.id_parladata,
+                'type': 'speech',
+                'session': this_session,
+                }
+ 
+    def getQuestionData(question, sessions_data):
+        persons = [ministr.getJsonData() for ministr in question.recipient_persons_static.all()]
+        orgs = []
+        if question.session:
+            this_session = sessions_data[str(question.session.id_parladata)]
+        else:
+            this_session = None
+        for org in question.recipient_organizations.all():
+            orgs.append(org.getOrganizationData())
+        return {'question_id': question.id_parladata,
+                'type': 'question',
+                'session': this_session,
+                'title': question.title,
+                'recipient_text': question.recipient_text,
+                'content_url': question.content_link,
+                'recipient_persons': persons,
+                'recipient_orgs': orgs,
+                }
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+    a = Activity.objects.filter(person__id_parladata=person_id)
+    a = a.extra(select={'start_time_date': 'DATE(start_time)'})
+    dates = list(set(list(a.values_list("start_time_date", flat=True))))
+    dates.sort()
+    a = a.filter(person__id_parladata=person_id,
+                 start_time__gte=dates[-15]).order_by('-start_time')
+ 
+    staticData = requests.get(BASE_URL + '/utils/getAllStaticData/').json()
+    result = []
+    dates = list(set(list(a.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+    for activity in a:
+        act_obj = activity.get_child()
+        if type(act_obj) == Ballot:
+            data[activity.start_time_date].append(getBallotData(act_obj))
+        elif type(act_obj) == Speech:
+            data[activity.start_time_date].append(getSpeechData(act_obj, staticData['sessions']))
+        elif type(act_obj) == Question:
+            data[activity.start_time_date].append(getQuestionData(act_obj, staticData['sessions']))
 
-    def parseDayActivites(day_activites):
-        data = []
-        types = day_activites.typee.split(';')
-        vote_names = day_activites.vote_name.split(';')
-        results = day_activites.result.split(';')
-        options = day_activites.option.split(';')
-        activity_ids = day_activites.activity_id.split(';')
-        sessions_ids = day_activites.session_id.split(';')
-        for i in range(len(day_activites.typee.split(';'))):
-            if types[i] == 'ballot':
-                vote = Vote.objects.filter(id_parladata=activity_ids[i]).order_by('-created_at')[0]
-                data.append({
-                    'option': options[i],
-                    'result': vote.result,
-                    'vote_name': vote_names[i],
-                    'vote_id': int(activity_ids[i]),
-                    'type': types[i],
-                    'session_id': vote.session.id_parladata
-                    })
-            elif types[i] == 'speech':
-                data.append({
-                    'speech_id': int(activity_ids[i]),
-                    'type': types[i],
-                    'session': Session.objects.get(id_parladata=sessions_ids[i]).getSessionData(),
-                    })
-            elif types[i] == 'question':
-                print "getQuest"
-                question = Question.objects.get(id_parladata=activity_ids[i])
-                if question.session:
-                    sesData = question.session.getSessionData()
-                else:
-                    sesData = None
-                persons = [ministr.getJsonData() for ministr in question.recipient_persons_static.all()]
-                orgs = []
-                for org in question.recipient_organizations.all():
-                    orgs.append(org.getOrganizationData())
-                data.append({
-                    'question_id': int(activity_ids[i]),
-                    'type': types[i],
-                    'session': sesData,
-                    'title': question.title,
-                    'recipient_text': question.recipient_text,
-                    'content_url': question.content_link,
-                    'recipient_persons': persons,
-                    'recipient_orgs': orgs,
-                    })
-        return {'date': day_activites.created_for.strftime(API_OUT_DATE_FORMAT), 'events': data}
-
-    out = []
-
-    lastActivites = getPersonCardModelNew(LastActivity, person_id, date_)
-    lastDay = lastActivites.created_for.strftime(API_OUT_DATE_FORMAT)
-    out.append(parseDayActivites(lastActivites))
-    for i in range(LAST_ACTIVITY_COUNT - 1):
-        startDate = lastActivites.created_for - timedelta(days=1)
-        try:
-            lastActivites = getPersonCardModelNew(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
-        except:
-            break
-        if lastActivites == None:
-            break
-        out.append(parseDayActivites(lastActivites))
-
-    static = getPersonCardModelNew(MPStaticPL, person_id, date_)
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'events': data[date]}
+           for date in dates]
 
     result = {
-        'created_at': lastDay,
-        'created_for': lastDay,
+        'created_at': dates[-1].strftime(API_OUT_DATE_FORMAT),
+        'created_for': dates[-1].strftime(API_OUT_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
-        'results': out
+        'results': list(reversed(out))
         }
+ 
     return JsonResponse(result, safe=False)
 
 
