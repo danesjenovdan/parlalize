@@ -704,14 +704,15 @@ def getMotionOfSession(request, session_id, date=False):
     """
     out = []
     created_at = None
-    if Session.objects.filter(id_parladata=int(session_id)):
-        session = Session.objects.get(id_parladata=int(session_id))
-        if Vote.objects.filter(session__id_parladata=session_id):
-            model = Vote.objects.filter(session__id_parladata=session_id)
+    session = Session.objects.get(id_parladata=int(session_id))
+    if session:
+        sessionData = session.getSessionData()
+        cards = Vote.objects.filter(session__id_parladata=session_id)
+        if cards:
             dates = []
-            for card in model:
+            for card in cards:
                 print card
-                out.append({'session': session.getSessionData(),
+                out.append({'session': sessionData,
                             'results': {'motion_id': card.id_parladata,
                                         'text': card.motion,
                                         'votes_for': card.votes_for,
