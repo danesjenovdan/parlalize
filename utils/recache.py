@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import requests
+from django.http import HttpResponse
 
 from datetime import datetime, timedelta
 from raven.contrib.django.raven_compat.models import client
@@ -182,3 +183,14 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[]):
         printProgressBar(votes_of_s.index(s),
                          len(votes_of_s),
                          prefix='Session: ')
+
+
+def recacheLastSession(request):
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?forceRender=true')
+
+    return HttpResponse('check it out')
