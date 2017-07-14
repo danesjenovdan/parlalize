@@ -19,7 +19,7 @@ from parlaskupine.models import (Organization, WorkingBodies,
 from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
                               PresenceOfPG, AbsentMPs, VoteDetailed, Quote)
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
-                                DEBUG, API_OUT_DATE_FORMAT)
+                                DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL)
 from django.contrib.contenttypes.models import ContentType
 import requests
 import json
@@ -661,3 +661,14 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
         }
     result.update(card_owner_data)
     return result
+
+
+def recacheLastSession(request):
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?forceRender=true')
+
+    return HttpResponse('check it out')
