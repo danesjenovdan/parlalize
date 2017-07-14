@@ -663,6 +663,7 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
     return result
 
 
+@lockSetter
 def recacheLastSession(request):
     requests.get(GLEJ_URL + '/c/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
     requests.get(GLEJ_URL + '/c/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
