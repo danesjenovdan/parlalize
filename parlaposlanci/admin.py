@@ -27,6 +27,7 @@ admin.site.register(Compass)
 admin.site.register(TaggedBallots)
 admin.site.register(MembershipsOfMember)
 admin.site.register(District)
+admin.site.register(MinisterStatic)
 
 
 

@@ -16,10 +16,10 @@ from parlaskupine.models import (Organization, WorkingBodies,
                                  MPOfPg, PGStatic,
                                  VocabularySize as VocabularySizePG,
                                  StyleScores as StyleScoresPG)
-from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech,
-                              PresenceOfPG, AbsentMPs, VoteDetailed)
+from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
+                              PresenceOfPG, AbsentMPs, VoteDetailed, Quote)
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
-                                DEBUG)
+                                DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL)
 from django.contrib.contenttypes.models import ContentType
 import requests
 import json
@@ -431,7 +431,7 @@ def getAllStaticData(request, force_render=False):
         PS_NP = ['poslanska skupina', 'nepovezani poslanec']
         date_ = datetime.now().strftime(API_DATE_FORMAT)
 
-        out = {'persons': {}, 'partys': {}, 'wbs': {}}
+        out = {'persons': {}, 'partys': {}, 'wbs': {}, 'sessions': {}}
         for person in Person.objects.all():
             personData = getPersonData(person.id_parladata,
                                        date_)
@@ -440,6 +440,10 @@ def getAllStaticData(request, force_render=False):
         parliamentary_group = Organization.objects.filter(classification__in=PS_NP)
         for party in parliamentary_group:
             out['partys'][party.id_parladata] = party.getOrganizationData()
+
+        sessions = Session.objects.all()
+        for session in sessions:
+            out['sessions'][session.id_parladata] = session.getSessionData()
 
         working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
         orgs = Organization.objects.filter(classification__in=working_bodies)
@@ -583,3 +587,89 @@ def printProgressBar(iteration,
     # Print New Line on Complete
     if iteration == total:
         print()
+
+
+def setQuoteSourceSpeeachToLatestValid(session_id):
+    quotes = Quote.objects.filter(speech__session__id_parladata=session_id)
+    for quote in quotes:
+        print quote.id
+        speech = quote.speech
+        lastSpeech = Speech.getValidSpeeches(datetime.now()).filter(person=speech.person,
+                                                                    order=speech.order,
+                                                                    session__id_parladata=session_id,
+                                                                    start_time=speech.start_time)
+        if lastSpeech:
+            print speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata
+            print (lastSpeech[0].content[0:100], lastSpeech[0].id_parladata)
+            print lastSpeech.count()
+            quote.speech = lastSpeech[0]
+            quote.save()
+        else:
+            print "fejl"
+            print speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata
+            lastSpeech = Speech.getValidSpeeches(datetime.now()).filter(person=speech.person,
+                                                                        order=speech.order-20,
+                                                                        session__id_parladata=session_id,
+                                                                        start_time=speech.start_time)
+            if lastSpeech:
+                print "Juhej debug"
+                print speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata
+                print (lastSpeech[0].content[0:100], lastSpeech[0].id_parladata)
+                print lastSpeech.count()
+                quote.speech = lastSpeech[0]
+                quote.save()
+
+
+def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
+    """
+    generic method which return tagged ballots for partys and members
+    """
+    votes = Vote.objects.filter(start_time__lte=datetime_obj).order_by('start_time')
+    votes = votes.filter(id__in=ballots.keys())
+    # add start_time_date to querySetObjets
+    votes = votes.extra(select={'start_time_date': 'DATE(start_time)'})
+    # get unique dates
+    dates = list(set(list(votes.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+    #current_data = {'date': votes[0].start_time_date, 'ballots': []}
+    for vote in votes:
+        try:
+            temp_data = {
+                'motion': vote.motion,
+                'vote_id': vote.id_parladata,
+                'result': vote.result,
+                'session_id': vote.session.id_parladata if vote.session else None,
+                'option': ballots[vote.id][1],
+                'tags': vote.tags}
+            if ballots[vote.id][0]:
+                temp_data['ballot_id'] = ballots[vote.id][0]
+            data[vote.start_time_date].append(temp_data)
+        except:
+            print 'Ni vota ' + str(vote.id)
+
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'ballots': data[date]}
+           for date in dates]
+
+    tags = list(Tag.objects.all().values_list('name', flat=True))
+    result = {
+        'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'all_tags': tags,
+        'results': list(reversed(out))
+        }
+    result.update(card_owner_data)
+    return result
+
+
+@lockSetter
+def recacheLastSession(request):
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?forceRender=true')
+
+    return HttpResponse('check it out')

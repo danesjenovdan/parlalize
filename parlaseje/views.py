@@ -12,7 +12,8 @@ from django.shortcuts import get_object_or_404
 import re
 from django.db.models import Q, F
 from django.core.cache import cache
-from parlalize.utils import tryHard, lockSetter
+from parlalize.utils import tryHard, lockSetter, getAllStaticData
+from django.views.decorators.csrf import csrf_exempt
 
 
 def getSpeech(request, speech_id):
@@ -448,6 +449,10 @@ def setMotionOfSession(request, session_id):
             if vote['option'] == str('ni'):
                 not_present = not_present + 1
         result = mot['result']
+        if mot['amendment_of']:
+            a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
+        else:
+            a_orgs = []
 
         if Vote.objects.filter(id_parladata=mot['vote_id']):
             vote = Vote.objects.filter(id_parladata=mot['vote_id'])
@@ -464,6 +469,7 @@ def setMotionOfSession(request, session_id):
                         id_parladata=mot['vote_id'],
                         document_url=mot['doc_url'],
                         )
+            vote[0].amendment_of.add(*a_orgs)
         else:
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
@@ -479,6 +485,9 @@ def setMotionOfSession(request, session_id):
                                     id_parladata=mot['vote_id'],
                                     document_url=mot['doc_url']
                                     )
+            if a_orgs:
+                vote = Vote.objects.get(id_parladata=mot['vote_id'])
+                vote.amendment_of.add(*a_orgs)
 
         yes = 0
         no = 0
@@ -695,14 +704,15 @@ def getMotionOfSession(request, session_id, date=False):
     """
     out = []
     created_at = None
-    if Session.objects.filter(id_parladata=int(session_id)):
-        session = Session.objects.get(id_parladata=int(session_id))
-        if Vote.objects.filter(session__id_parladata=session_id):
-            model = Vote.objects.filter(session__id_parladata=session_id)
+    session = Session.objects.get(id_parladata=int(session_id))
+    if session:
+        sessionData = session.getSessionData()
+        cards = Vote.objects.filter(session__id_parladata=session_id)
+        if cards:
             dates = []
-            for card in model:
+            for card in cards:
                 print card
-                out.append({'session': session.getSessionData(),
+                out.append({'session': sessionData,
                             'results': {'motion_id': card.id_parladata,
                                         'text': card.motion,
                                         'votes_for': card.votes_for,
@@ -2109,22 +2119,27 @@ def getSessionsList(request, date_=None, force_render=False):
     return JsonResponse(out)
 
 
+@csrf_exempt
 @lockSetter
-def setTFIDF(request, session_id):
+def setTFIDF(request):
     """Stores TFIDF analysis.
     """
-    date_of = datetime.now().date()
-    url = ISCI_URL + "/tfidf/s/" + str(session_id)
-    data = tryHard(url).json()
-    session = Session.objects.get(id_parladata=session_id)
-    is_saved = saveOrAbortNew(Tfidf,
-                              session=session,
-                              created_for=date_of,
-                              is_visible=False,
-                              data=data["results"])
+    if request.method == 'POST':
+        post_data = json.loads(request.body)
+        date_of = datetime.now().date()
+        session = Session.objects.get(id_parladata=post_data['session'])
+        is_saved = saveOrAbortNew(Tfidf,
+                                  session=session,
+                                  created_for=date_of,
+                                  is_visible=False,
+                                  data=post_data["results"])
+    else:
+        return JsonResponse({'alliswell': False,
+                             'saveds': False,
+                             'status': 'there\'s no post data'})
 
-    return JsonResponse({"alliswell": True,
-                         "saved": is_saved})
+    return JsonResponse({'alliswell': True,
+                         'saved': is_saved})
 
 
 def getTFIDF(request, session_id):
@@ -2555,9 +2570,13 @@ def getComparedVotes(request):
         parties_different_list = []
     
     if len(people_same_list) + len(parties_same_list) == 0:
-        return HttpResponse('Need at least one same to compare.')
+        out = {
+            'total': Vote.objects.all().count(),
+            'results': []
+        }
+        return JsonResponse(out, safe=False)
     if len(people_same_list) + len(parties_same_list) < 2 and len(people_different_list) + len(parties_different_list) < 1:
-        return HttpResponse('Not enough to compare.')
+        return JsonResponse(out, safe=False)
 
     beginning = 'SELECT * FROM '
     select_same_people = ''
@@ -2871,35 +2890,56 @@ def getComparedVotes(request):
     print 'match_different_parties_organizations ' + match_different_parties_organizations
     print 'match_different_parties_options ' + match_different_parties_options
 
-    ballots = Ballot.objects.raw(query)
-    session_ids = set([b.vote.session.id for b in ballots])
-    sessions = {}
-    for s in session_ids:
-        sessions[s] = Session.objects.get(id=s).getSessionData()
+    # ballots = Ballot.objects.raw(query)
+    votes = Vote.objects.filter(id_parladata__in=[ballot.vote.id_parladata for ballot in Ballot.objects.raw(query)])
+    # sessionsData = requests.get('https://analize.parlameter.si/v1/utils/getAllStaticData').json()['sessions']
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
 
-    print '[SESSION IDS:]'
-    print set(session_ids)
+    # session_ids = set([b.vote.session.id for b in ballots])
+    # sessions = {}
+    # for s in session_ids:
+    #     sessions[s] = Session.objects.get(id=s).getSessionData()
+
+    # print '[SESSION IDS:]'
+    # print set(session_ids)
     out = {
         'total': Vote.objects.all().count(),
         'results': []
     }
 
-    for ballot in ballots:
+    for vote in votes:
         out['results'].append({
-            'session': sessions[ballot.vote.session.id],
+            'session': sessionsData[str(vote.session.id_parladata)],
             'results': {
-                'motion_id': ballot.vote.id_parladata,
-                'text': ballot.vote.motion,
-                'votes_for': ballot.vote.votes_for,
-                'against': ballot.vote.against,
-                'abstain': ballot.vote.abstain,
-                'not_present': ballot.vote.not_present,
-                'result': ballot.vote.result,
-                'is_outlier': ballot.vote.is_outlier,
-                'tags': ballot.vote.tags,
-                'date': ballot.start_time.strftime(API_DATE_FORMAT)
+                'motion_id': vote.id_parladata,
+                'text': vote.motion,
+                'votes_for': vote.votes_for,
+                'against': vote.against,
+                'abstain': vote.abstain,
+                'not_present': vote.not_present,
+                'result': vote.result,
+                'is_outlier': vote.is_outlier,
+                'tags': vote.tags,
+                'date': vote.start_time.strftime(API_DATE_FORMAT)
             }
         })
+
+    # for ballot in ballots:
+    #     out['results'].append({
+    #         'session': sessionsData[ballot.vote.session.id_parladata],
+    #         'results': {
+    #             'motion_id': ballot.vote.id_parladata,
+    #             'text': ballot.vote.motion,
+    #             'votes_for': ballot.vote.votes_for,
+    #             'against': ballot.vote.against,
+    #             'abstain': ballot.vote.abstain,
+    #             'not_present': ballot.vote.not_present,
+    #             'result': ballot.vote.result,
+    #             'is_outlier': ballot.vote.is_outlier,
+    #             'tags': ballot.vote.tags,
+    #             'date': ballot.start_time.strftime(API_DATE_FORMAT)
+    #         }
+    #     })
 
     return JsonResponse(out, safe=False)
 
@@ -3002,25 +3042,21 @@ def getVotesData(request, votes):
     }
     ]
     """
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
     out = []
     votes = votes.split(',')
-    for vote in votes:
-        if Vote.objects.filter(id_parladata=vote):
-            vot = Vote.objects.get(id_parladata=vote)
-            out.append({
-                'created_for': vot.created_for,
-                'session': vot.session.getSessionData(),
-                'results': {
+    for vote in Vote.objects.filter(id_parladata__in=votes):
+        out.append({
+            'created_for': vote.created_for,
+            'session': sessionsData[str(vote.session.id_parladata)],
+            'results': {
 
-                        'motion_id': vot.id_parladata,
-                        'text': vot.motion,
-                        'votes_for': vot.votes_for,
-                        'against': vot.against,
-                        'abstain': vot.abstain,
-                        'not_present': vot.not_present,
-                        'result': vot.result}
-                })
-        else:
-            out.append({'Error': "No vote"})
-            return JsonResponse(out, safe=False)
+                    'motion_id': vote.id_parladata,
+                    'text': vote.motion,
+                    'votes_for': vote.votes_for,
+                    'against': vote.against,
+                    'abstain': vote.abstain,
+                    'not_present': vote.not_present,
+                    'result': vote.result}
+            })
     return JsonResponse(out, safe=False)
