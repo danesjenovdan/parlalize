@@ -1753,12 +1753,12 @@ def getListOfPGs(request, date_=None, force_render=False):
                 try:
                     pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
                     pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
-                    pg_obj["results"]["neenotnost_glasovanj"] = json.loads(getDisunionOrgID(None, pg_id).content)
+                    pg_obj["results"]["intra_disunion"] = json.loads(getDisunionOrgID(None, pg_id).content)
                 
                 except:
                     pg_obj["results"]["presence_sessions"] = None
                     pg_obj["results"]["presence_votes"] = None
-                    pg_obj["results"]["neenotnost_glasovanj"] = None
+                    pg_obj["results"]["intra_disunion"] = None
 
                 try:
                     pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
