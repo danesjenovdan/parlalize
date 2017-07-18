@@ -33,6 +33,7 @@ class Person(Timestampable, models.Model):
                           help_text=_('Parlament group of MP'))
 
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True, null=True, help_text=_('id parladata'))
 
     image = models.URLField(_('image'),
@@ -478,6 +479,20 @@ class MinisterStatic(Timestampable, models.Model):
                               default="f",
                               help_text=_('Gender'))
 
+    def getJsonData(self):
+        return {
+                'type': "ministry",
+                'name': self.person.name,
+                'id': int(self.person.id_parladata),
+                'gov_id': self.gov_id,
+                'party': self.party.getOrganizationData() if self.party else None,
+                'ministry': self.ministry.getOrganizationData() if self.ministry else None,
+                'gender': self.gender,
+                'district': self.district,
+                'is_active': True if self.person.actived == "True" else False,
+                'has_function': self.person.has_function,
+                }
+
 
 class MPStaticGroup(Timestampable, models.Model):
 
@@ -689,6 +704,7 @@ class MembershipsOfMember(Timestampable, models.Model):
 
 class District(models.Model):
     id_parladata = models.IntegerField(_('parladata id'),
+                                       db_index=True,
                                        blank=True,
                                        null=True,
                                        help_text=_('id parladata'))

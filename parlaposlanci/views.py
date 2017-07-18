@@ -1,31 +1,33 @@
 # -*- coding: UTF-8 -*-
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.forms.models import model_to_dict
+from django.core.cache import cache
+
 from scipy.stats.stats import pearsonr
 from scipy.stats import rankdata
 from scipy.spatial.distance import euclidean
 from datetime import date, datetime, timedelta
-from django.core.cache import cache
-
-import numpy
-from parlalize.utils import *
-import requests
-import json
-from django.http import HttpResponse
-import string
-from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from collections import Counter
-from parlalize.settings import LAST_ACTIVITY_COUNT
-from .models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT, SETTER_KEY
-from parlaseje.models import Session, Tag, Question
-from utils.speech import WordAnalysis
 from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
-from django.views.decorators.csrf import csrf_exempt
 
+from parlalize.utils import *
+from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
+                                SETTER_KEY, LAST_ACTIVITY_COUNT)
+from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
+from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
+                                    getScores, problematicno, privzdignjeno,
+                                    preprosto, TFIDF, getCountList)
+from parlaseje.models import Session, Tag, Question
+from utils.speech import WordAnalysis
 from utils.compass import getData as getCompassData
+from .models import *
 
-from parlalize.utils import tryHard, lockSetter
+import numpy
+import requests
+import json
+import string
 
 
 # get List of MPs
@@ -257,41 +259,48 @@ def getMPStaticPL(request, person_id, date_=None):
 def setMinsterStatic(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        data = tryHard(API_URL+'/getMinistrStatic/' + person_id + "/" + date_).json()
+        m_data = tryHard(API_URL+'/getMinistrStatic/' + person_id + "/" + date_).json()
     else:
         date_of = datetime.now().date()
-        data = tryHard(API_URL+'/getMinistrStatic/' + person_id).json()
+        m_data = tryHard(API_URL+'/getMinistrStatic/' + person_id).json()
 
     person = Person.objects.get(id_parladata=int(person_id))
-    if not data:
+    if not m_data:
         return JsonResponse({"status": 'Nothing iz well', "saved": False})
-    dic = dict()
 
-    if data['party']:
-        party = Organization.objects.get(id_parladata=data['party']['id'])
-    else:
-        party = None
+    for data in m_data:
+        start_time = data['start_time'].split('T')[0]
+        if data['party']:
+            party = Organization.objects.get(id_parladata=data['party']['id'])
+        else:
+            party = None
 
-    if data['ministry']:
-        ministry = Organization.objects.get(id_parladata=data['ministry']['id'])
-    else:
-        ministry = None
+        if data['ministry']:
+            ministry = Organization.objects.get(id_parladata=data['ministry']['id'])
+        else:
+            ministry = None
 
-    result = saveOrAbortNew(model=MinisterStatic,
-                            created_for=date_of,
-                            person=person,
-                            age=data['age'],
-                            party=party,
-                            education=data['education'],
-                            previous_occupation=data['previous_occupation'],
-                            name=data['name'],
-                            district=data['district'],
-                            facebook=data['social']['facebook'],
-                            twitter=data['social']['twitter'],
-                            linkedin=data['social']['linkedin'],
-                            gov_id=data['gov_id'],
-                            gender=data['gender'],
-                            ministry=ministry)
+        ministry_static = MinisterStatic.objects.filter(person=person,
+                                                        ministry=ministry,
+                                                        created_for=start_time)
+        if ministry_static:
+            # TODO: edit?
+            pass
+        else:
+            MinisterStatic(created_for=start_time,
+                           person=person,
+                           age=data['age'],
+                           party=party,
+                           education=data['education'],
+                           previous_occupation=data['previous_occupation'],
+                           name=data['name'],
+                           district=data['district'],
+                           facebook=data['social']['facebook'],
+                           twitter=data['social']['twitter'],
+                           linkedin=data['social']['linkedin'],
+                           gov_id=data['gov_id'],
+                           gender=data['gender'],
+                           ministry=ministry).save()
 
     return JsonResponse({"status":'All iz well', "saved":result})
 
@@ -954,80 +963,77 @@ def getLastActivity(request, person_id, date_=None):
         }]
     }
     """
-    print date
+    def getBallotData(ballot):
+        vote = ballot.vote
+        return {'option': ballot.option,
+                'result': vote.result,
+                'vote_name': vote.motion,
+                'vote_id': vote.id_parladata,
+                'type': 'ballot',
+                'session_id': vote.session.id_parladata,
+                }
+ 
+    def getSpeechData(speech, sessions_data):
+        this_session = sessions_data[str(speech.session.id_parladata)]
+        return {'speech_id': speech.id_parladata,
+                'type': 'speech',
+                'session': this_session,
+                }
+ 
+    def getQuestionData(question, sessions_data):
+        persons = [ministr.getJsonData() for ministr in question.recipient_persons_static.all()]
+        orgs = []
+        if question.session:
+            this_session = sessions_data[str(question.session.id_parladata)]
+        else:
+            this_session = None
+        for org in question.recipient_organizations.all():
+            orgs.append(org.getOrganizationData())
+        return {'question_id': question.id_parladata,
+                'type': 'question',
+                'session': this_session,
+                'title': question.title,
+                'recipient_text': question.recipient_text,
+                'content_url': question.content_link,
+                'recipient_persons': persons,
+                'recipient_orgs': orgs,
+                }
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+    a = Activity.objects.filter(person__id_parladata=person_id)
+    a = a.extra(select={'start_time_date': 'DATE(start_time)'})
+    dates = list(set(list(a.values_list("start_time_date", flat=True))))
+    dates.sort()
+    a = a.filter(person__id_parladata=person_id,
+                 start_time__gte=dates[-15]).order_by('-start_time')
+ 
+    staticData = requests.get(BASE_URL + '/utils/getAllStaticData/').json()
+    result = []
+    dates = list(set(list(a.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+    for activity in a:
+        act_obj = activity.get_child()
+        if type(act_obj) == Ballot:
+            data[activity.start_time_date].append(getBallotData(act_obj))
+        elif type(act_obj) == Speech:
+            data[activity.start_time_date].append(getSpeechData(act_obj, staticData['sessions']))
+        elif type(act_obj) == Question:
+            data[activity.start_time_date].append(getQuestionData(act_obj, staticData['sessions']))
 
-    def parseDayActivites(day_activites):
-        data = []
-        types = day_activites.typee.split(';')
-        vote_names = day_activites.vote_name.split(';')
-        results = day_activites.result.split(';')
-        options = day_activites.option.split(';')
-        activity_ids = day_activites.activity_id.split(';')
-        sessions_ids = day_activites.session_id.split(';')
-        for i in range(len(day_activites.typee.split(';'))):
-            if types[i] == 'ballot':
-                data.append({
-                    'option': options[i],
-                    'result': Vote.objects.filter(id_parladata=activity_ids[i]).order_by('-created_at')[0].result,
-                    'vote_name': vote_names[i],
-                    'vote_id': int(activity_ids[i]),
-                    'type': types[i],
-                    'session_id': Vote.objects.filter(id_parladata=int(activity_ids[i])).order_by('-created_at')[0].session.id_parladata
-                    })
-            elif types[i] == 'speech':
-                data.append({
-                    'speech_id': int(activity_ids[i]),
-                    'type': types[i],
-                    'session': Session.objects.get(id_parladata=sessions_ids[i]).getSessionData(),
-                    })
-            elif types[i] == 'question':
-                print "getQuest"
-                question = Question.objects.get(id_parladata=activity_ids[i])
-                if question.session:
-                    sesData = question.session.getSessionData()
-                else:
-                    sesData = None
-                persons = []
-                orgs = []
-                for person in question.recipient_persons.all():
-                    persons.append(getMinistryData(person.id_parladata, question.start_time.strftime(API_DATE_FORMAT)))
-                for org in question.recipient_organizations.all():
-                    orgs.append(org.getOrganizationData())
-                data.append({
-                    'question_id': int(activity_ids[i]),
-                    'type': types[i],
-                    'session': sesData,
-                    'title': question.title,
-                    'recipient_text': question.recipient_text,
-                    'content_url': question.content_link,
-                    'recipient_persons': persons,
-                    'recipient_orgs': orgs,
-                    })
-        return {'date': day_activites.created_for.strftime(API_OUT_DATE_FORMAT), 'events': data}
-
-    out = []
-
-    lastActivites = getPersonCardModelNew(LastActivity, person_id, date_)
-    lastDay = lastActivites.created_for.strftime(API_OUT_DATE_FORMAT)
-    out.append(parseDayActivites(lastActivites))
-    for i in range(LAST_ACTIVITY_COUNT - 1):
-        startDate = lastActivites.created_for - timedelta(days=1)
-        try:
-            lastActivites = getPersonCardModelNew(LastActivity, person_id, datetime.strftime(startDate, "%d.%m.%Y"))
-        except:
-            break
-        if lastActivites == None:
-            break
-        out.append(parseDayActivites(lastActivites))
-
-    static = getPersonCardModelNew(MPStaticPL, person_id, date_)
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'events': data[date]}
+           for date in dates]
 
     result = {
-        'created_at': lastDay,
-        'created_for': lastDay,
+        'created_at': dates[-1].strftime(API_OUT_DATE_FORMAT),
+        'created_for': dates[-1].strftime(API_OUT_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
-        'results': out
+        'results': list(reversed(out))
         }
+ 
     return JsonResponse(result, safe=False)
 
 
@@ -1923,8 +1929,8 @@ def getTFIDF(request, person_id, date_=None):
 def setVocabularySizeAndSpokenWords(request, date_=None):
     sw = WordAnalysis(count_of="members", date_=date_)
 
-    if not sw.isNewSpeech:
-        return JsonResponse({'alliswell': False})
+    #if not sw.isNewSpeech:
+    #    return JsonResponse({'alliswell': False})
 
     #Vocabolary size
     all_score = sw.getVocabularySize()
@@ -3043,43 +3049,23 @@ def getTaggedBallots(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
-        date_of = datetime.now().date()
-    out = []
+        date_of = datetime.now().date() + timedelta(days=1)
+
     ballots = Ballot.objects.filter(person__id_parladata=person_id,
                                     start_time__lte=date_of)
     if ballots:
         created_at = ballots.latest('created_at').created_at
     else:
         created_at = datetime.now()
-    b_list = [[ballot for ballot in ballots.filter(start_time__range=[t_date,
-                                                                      t_date+timedelta(days=1)])]
-              for t_date in ballots.order_by('start_time').datetimes('start_time',
-                                                                     'day')]
 
-    lastDay = None
-    for day in b_list:
-        dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT),
-                   'ballots': []}
-        lastDay = day[0].start_time.strftime(API_OUT_DATE_FORMAT)
-        for ballot in day:
-            dayData['ballots'].append({
-                'motion': ballot.vote.motion,
-                'vote_id': ballot.vote.id_parladata,
-                'result': ballot.vote.result,
-                'ballot_id': ballot.id_parladata,
-                'session_id': ballot.vote.session.id_parladata if ballot.vote.session else None,
-                'option': ballot.option,
-                'tags': ballot.vote.tags})
-        out.append(dayData)
+    b = Ballot.objects.filter(person__id_parladata=person_id,
+                              start_time__lte=date_of)
+    b_s = [model_to_dict(i, fields=['vote', 'option', 'id_parladata']) for i in b]
+    b_s = {bal['vote']: (bal['id_parladata'], bal['option']) for bal in b_s}
+    person_data = {'person': getPersonData(person_id, date_)}
 
-    tags = list(Tag.objects.all().values_list('name', flat=True))
-    result = {
-        'person': getPersonData(person_id, date_),
-        'all_tags': tags,
-        'created_at': created_at.strftime(API_OUT_DATE_FORMAT),
-        'created_for': lastDay if lastDay else created_at.strftime(API_OUT_DATE_FORMAT),
-        'results': list(reversed(out))
-        }
+    result = prepareTaggedBallots(date_of, b_s, person_data)
+
     return JsonResponse(result, safe=False)
 
 
@@ -3374,25 +3360,11 @@ def getQuestions(request, person_id, date_=None):
     created_at = []
     for day in questions:
         dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT),
-                   'questions':[]}
+                   'questions': []}
         lastDay = day[0].start_time.strftime(API_OUT_DATE_FORMAT)
         for question in day:
             created_at.append(question.created_at)
-            persons = []
-            orgs = []
-            for person in question.recipient_persons.all():
-                persons.append(getMinistryData(person.id_parladata, question.start_time.strftime(API_DATE_FORMAT)))
-            for org in question.recipient_organizations.all():
-                orgs.append(org.getOrganizationData())
-            dayData['questions'].append({
-                'session_name': question.session.name if question.session else 'Unknown',
-                'id': question.id_parladata,
-                'title': question.title,
-                'recipient_text': question.recipient_text,
-                'recipient_persons': persons,
-                'recipient_orgs': orgs,
-                'url': question.content_link,
-                'session_id': question.session.id_parladata if question.session else 'Unknown'})
+            dayData['questions'].append(question.getQuestionData())
         out.append(dayData)
 
     result = {

@@ -6069,6 +6069,995 @@
   },
   {
     "type": "get",
+    "url": "getBasicInfOfPG/{pg_id}",
+    "title": "Get basic info of a PG",
+    "name": "getBasicInfOfPG",
+    "group": "PGs",
+    "description": "<p>This function returns basic data of a selected PG</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "allVoters",
+            "description": "<p>[WRONG] Calculated number of voters who voted for this PG. This number is not reliable, do not use it.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "headOfPg",
+            "description": "<p>The president of the PG</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "headOfPg.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "headOfPg.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "headOfPg.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "headOfPg.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "headOfPg.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "headOfPg.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "headOfPg.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "headOfPg.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "headOfPg.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "headOfPg.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "headOfPg.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "headOfPg.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "headOfPg.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "social",
+            "description": "<p>Social media links for this PG</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "social.twitter",
+            "description": "<p>Url to PG's Twitter account (or null)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "social.facebook",
+            "description": "<p>Url to PG's Facebook account (or null)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "social.email",
+            "description": "<p>The email address of the primary contact for this PG</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "numberOfSeats",
+            "description": "<p>The number of seats this PG holds in the parliament.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The party object</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "viceOfPg",
+            "description": "<p>List of objects representing PG's vice presidents.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "viceOfPg.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "viceOfPg.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "viceOfPg.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "viceOfPg.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "viceOfPg.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "viceOfPg.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "viceOfPg.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "viceOfPg.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "viceOfPg.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "viceOfPg.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "viceOfPg.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "viceOfPg.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "viceOfPg.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "{\n    \"allVoters\": 119061,\n    \"created_for\": \"13.02.2017\",\n    \"headOfPG\": {\n        \"is_active\": false,\n        \"district\": [102],\n        \"name\": \"Simona Kustec Lipicer\",\n        \"gov_id\": \"P266\",\n        \"gender\": \"f\",\n        \"party\": {\n            \"acronym\": \"SMC\",\n            \"is_coalition\": true,\n            \"id\": 1,\n            \"name\": \"PS Stranka modernega centra\"\n        },\n        \"type\": \"mp\",\n        \"id\": 48,\n        \"has_function\": false\n    },\n    \"social\": {\n        \"twitter\": \"https://twitter.com/strankasmc\",\n        \"facebook\": \"https://www.facebook.com/StrankaSMC/\",\n        \"email\": \"monika.mandic@dz-rs.si\"\n    },\n    \"numberOfSeats\": 35,\n    \"party\": {\n        \"acronym\": \"SMC\",\n        \"is_coalition\": true,\n        \"id\": 1,\n        \"name\": \"PS Stranka modernega centra\"\n    },\n    \"created_at\": \"28.02.2017\",\n    \"viceOfPG\": [{\n        \"is_active\": false,\n        \"district\": [30],\n        \"name\": \"Anita Kole\\u0161a\",\n        \"gov_id\": \"P260\",\n        \"gender\": \"f\",\n        \"party\": {\n            \"acronym\": \"SMC\",\n            \"is_coalition\": true,\n            \"id\": 1,\n            \"name\": \"PS Stranka modernega centra\"\n        },\n        \"type\": \"mp\",\n        \"id\": 40,\n        \"has_function\": false\n    }, {\n        \"is_active\": false,\n        \"district\": [99],\n        \"name\": \"Du\\u0161an Verbi\\u010d\",\n        \"gov_id\": \"P296\",\n        \"gender\": \"m\",\n        \"party\": {\n            \"acronym\": \"SMC\",\n            \"is_coalition\": true,\n            \"id\": 1,\n            \"name\": \"PS Stranka modernega centra\"\n        },\n        \"type\": \"mp\",\n        \"id\": 92,\n        \"has_function\": false\n    }]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getBasicInfOfPG/1",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getPercentOFAttendedSessionPG/{pg_id}/{?date}",
+    "title": "Get percentage of attended sessions",
+    "name": "getPercentOFAttendedSessionPG",
+    "group": "PGs",
+    "description": "<p>This function returns the percentage of attended sessions and voting events for a specific PG.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The PG with the most attended voting events.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": "<p>List of MPs</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "results.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "{\n    \"party\": {\n        \"acronym\": \"IMNS\",\n        \"is_coalition\": false,\n        \"id\": 2,\n        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n    },\n    \"created_at\": \"28.02.2017\",\n    \"created_for\": \"13.02.2017\",\n    \"results\": [{\n        \"is_active\": false,\n        \"district\": [91],\n        \"name\": \"L\\u00e1szl\\u00f3 G\\u00f6ncz\",\n        \"gov_id\": \"P117\",\n        \"gender\": \"m\",\n        \"party\": {\n            \"acronym\": \"IMNS\",\n            \"is_coalition\": false,\n            \"id\": 2,\n            \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n        },\n        \"type\": \"mp\",\n        \"id\": 24,\n        \"has_function\": false\n    }, {\n        \"is_active\": false,\n        \"district\": [90],\n        \"name\": \"Roberto Battelli\",\n        \"gov_id\": \"P005\",\n        \"gender\": \"m\",\n        \"party\": {\n            \"acronym\": \"IMNS\",\n            \"is_coalition\": false,\n            \"id\": 2,\n            \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n        },\n        \"type\": \"mp\",\n        \"id\": 4,\n        \"has_function\": false\n    }]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getMPsOfPG/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getMPsOfPG/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getPercentOFAttendedSessionPG/{pg_id}/{?date}",
+    "title": "Get percentage of attended sessions",
+    "name": "getPercentOFAttendedSessionPG",
+    "group": "PGs",
+    "description": "<p>This function returns the percentage of attended sessions and voting events for a specific PG.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "votes",
+            "description": "<p>Presence at voting events</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "votes.maxPG",
+            "description": "<p>The PG with the most attended voting events.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes.maxPG.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "votes.maxPG.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "votes.maxPG.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes.maxPG.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "votes.organization_value",
+            "description": "<p>The percentage of attended voting events for the organization in question.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "votes.average",
+            "description": "<p>The average percentage of attended voting events.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "votes.maximum",
+            "description": "<p>The maximum percentage of attended voting events.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "sessions",
+            "description": "<p>Presence at sessions</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "sessions.maxPG",
+            "description": "<p>The PG with the most attended sessions.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.maxPG.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "sessions.maxPG.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "sessions.maxPG.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.maxPG.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "sessions.organization_value",
+            "description": "<p>The percentage of attended sessions for the organization in question.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "sessions.average",
+            "description": "<p>The average percentage of attended sessions.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "sessions.maximum",
+            "description": "<p>The maximum percentage of attended sessions.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "{\n    \"organization\": {\n        \"acronym\": \"SMC\",\n        \"is_coalition\": true,\n        \"id\": 1,\n        \"name\": \"PS Stranka modernega centra\"\n    },\n    \"created_at\": \"17.05.2017\",\n    \"created_for\": \"17.05.2017\",\n    \"votes\": {\n        \"maxPG\": [{\n            \"acronym\": \"SMC\",\n            \"is_coalition\": true,\n            \"id\": 1,\n            \"name\": \"PS Stranka modernega centra\"\n        }],\n        \"organization_value\": 92.7485210066434,\n        \"average\": 73.4046479186465,\n        \"maximum\": 92.7485210066434\n    },\n    \"sessions\": {\n        \"maxPG\": [{\n            \"acronym\": \"DeSUS\",\n            \"is_coalition\": true,\n            \"id\": 3,\n            \"name\": \"PS Demokratska Stranka Upokojencev Slovenije\"\n        }],\n        \"organization_value\": 93.5318406140705,\n        \"average\": 84.0306159427153,\n        \"maximum\": 93.5866013071896\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getPercentOFAttendedSessionPG/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getPercentOFAttendedSessionPG/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getSpeechesOfPG/{pg_id}/{?date}",
+    "title": "Get PG's speeches",
+    "name": "getSpeechesOfPG",
+    "group": "PGs",
+    "description": "<p>This function returns the list of last 21 days of speeches for a specific PG.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The PG with the most attended voting events.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": "<p>List of Speeches</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>The date in question</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "sessions",
+            "description": "<p>List of sessions on that day</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.session_name",
+            "description": "<p>Name of the session</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.session_org",
+            "description": "<p>The organization in which the session took place.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "sessions.speakers",
+            "description": "<p>List of speakers from this PG who spoke at the session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "sessions.speaker.person",
+            "description": "<p>Person object for this speaker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "sessions.speaker.person.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "sessions.speaker.person.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.speaker.person.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.speaker.person.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.speaker.person.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "sessions.speaker.person.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.speaker.person.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "sessions.speaker.person.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "sessions.speaker.person.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.speaker.person.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sessions.speaker.person.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "sessions.speaker.person.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "sessions.speaker.person.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "sessions.speeches",
+            "description": "<p>List of speech ids for that speaker.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "sessions.session_id",
+            "description": "<p>Parladata id of the session in question</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "{\n    \"party\": {\n        \"acronym\": \"IMNS\",\n        \"is_coalition\": false,\n        \"id\": 2,\n        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n    },\n    \"created_at\": \"14.06.2017\",\n    \"created_for\": \"14. 6. 2016\",\n    \"results\": [{\n        \"date\": \"10. 2. 2017\",\n        \"sessions\": [{\n            \"session_name\": \"87. redna seja\",\n            \"session_org\": \"Kolegij predsednika dr\\u017eavnega zbora\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [91],\n                    \"name\": \"L\\u00e1szl\\u00f3 G\\u00f6ncz\",\n                    \"gov_id\": \"P117\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 24,\n                    \"has_function\": false\n                },\n                \"speeches\": [1110405]\n            }],\n            \"session_id\": 9155\n        }]\n    }, {\n        \"date\": \"2. 2. 2017\",\n        \"sessions\": [{\n            \"session_name\": \"33. redna seja\",\n            \"session_org\": \"Odbor za finance in monetarno politiko\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [90],\n                    \"name\": \"Roberto Battelli\",\n                    \"gov_id\": \"P005\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 4,\n                    \"has_function\": false\n                },\n                \"speeches\": [1158590, 1158570]\n            }],\n            \"session_id\": 8966\n        }]\n    }, {\n        \"date\": \"20. 12. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"25. redna seja\",\n            \"session_org\": \"Dr\\u017eavni zbor\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [90],\n                    \"name\": \"Roberto Battelli\",\n                    \"gov_id\": \"P005\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 4,\n                    \"has_function\": false\n                },\n                \"speeches\": [1248602, 1248590, 1248543]\n            }],\n            \"session_id\": 7654\n        }]\n    }, {\n        \"date\": \"15. 12. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"25. redna seja\",\n            \"session_org\": \"Dr\\u017eavni zbor\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [91],\n                    \"name\": \"L\\u00e1szl\\u00f3 G\\u00f6ncz\",\n                    \"gov_id\": \"P117\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 24,\n                    \"has_function\": false\n                },\n                \"speeches\": [1247957]\n            }],\n            \"session_id\": 7654\n        }]\n    }, {\n        \"date\": \"6. 12. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"7. redna seja\",\n            \"session_org\": \"Komisija za narodni skupnosti\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [90],\n                    \"name\": \"Roberto Battelli\",\n                    \"gov_id\": \"P005\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 4,\n                    \"has_function\": false\n                },\n                \"speeches\": [1216615, 1216613, 1216611, 1216609, 1216607, 1216605, 1216604, 1216603, 1216602, 1216601, 1216600, 1216599, 1216598, 1216596, 1216594, 1216592, 1216588, 1216586, 1216585, 1216584, 1216583, 1216582, 1216580, 1216578, 1216577, 1216575, 1216572, 1216571, 1216569, 1216568, 1216566, 1216564, 1216562, 1216560, 1216558, 1216556, 1216554]\n            }],\n            \"session_id\": 8908\n        }]\n    }, {\n        \"date\": \"17. 11. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"24. redna seja\",\n            \"session_org\": \"Dr\\u017eavni zbor\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [90],\n                    \"name\": \"Roberto Battelli\",\n                    \"gov_id\": \"P005\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 4,\n                    \"has_function\": false\n                },\n                \"speeches\": [1256385, 1256379]\n            }],\n            \"session_id\": 5572\n        }]\n    }, {\n        \"date\": \"16. 11. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"24. redna seja\",\n            \"session_org\": \"Dr\\u017eavni zbor\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [90],\n                    \"name\": \"Roberto Battelli\",\n                    \"gov_id\": \"P005\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 4,\n                    \"has_function\": false\n                },\n                \"speeches\": [1256240]\n            }],\n            \"session_id\": 5572\n        }]\n    }, {\n        \"date\": \"12. 11. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"68. nujna seja\",\n            \"session_org\": \"Odbor za finance in monetarno politiko\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [90],\n                    \"name\": \"Roberto Battelli\",\n                    \"gov_id\": \"P005\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 4,\n                    \"has_function\": false\n                },\n                \"speeches\": [633823]\n            }],\n            \"session_id\": 5970\n        }]\n    }, {\n        \"date\": \"3. 11. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"22. redna seja\",\n            \"session_org\": \"Odbor za izobra\\u017eevanje, znanost, \\u0161port in mladino\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [91],\n                    \"name\": \"L\\u00e1szl\\u00f3 G\\u00f6ncz\",\n                    \"gov_id\": \"P117\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 24,\n                    \"has_function\": false\n                },\n                \"speeches\": [634797]\n            }],\n            \"session_id\": 6307\n        }]\n    }, {\n        \"date\": \"12. 10. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"6. redna seja\",\n            \"session_org\": \"Komisija za narodni skupnosti\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [90],\n                    \"name\": \"Roberto Battelli\",\n                    \"gov_id\": \"P005\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 4,\n                    \"has_function\": false\n                },\n                \"speeches\": [595799, 595798, 595797, 595795, 595793, 595791, 595789, 595787, 595784, 595782, 595780, 595779, 595777, 595775, 595773, 595771, 595769, 595767, 595765, 595763, 595762, 595760, 595758, 595756]\n            }],\n            \"session_id\": 7425\n        }, {\n            \"session_name\": \"7. nujna seja\",\n            \"session_org\": \"Komisija za odnose s Slovenci v zamejstvu in po svetu\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [91],\n                    \"name\": \"L\\u00e1szl\\u00f3 G\\u00f6ncz\",\n                    \"gov_id\": \"P117\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 24,\n                    \"has_function\": false\n                },\n                \"speeches\": [876273]\n            }],\n            \"session_id\": 7414\n        }]\n    }, {\n        \"date\": \"1. 10. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"25. nujna seja\",\n            \"session_org\": \"Odbor za izobra\\u017eevanje, znanost, \\u0161port in mladino\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [91],\n                    \"name\": \"L\\u00e1szl\\u00f3 G\\u00f6ncz\",\n                    \"gov_id\": \"P117\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 24,\n                    \"has_function\": false\n                },\n                \"speeches\": [558096]\n            }],\n            \"session_id\": 6308\n        }]\n    }, {\n        \"date\": \"28. 9. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"24. nujna seja\",\n            \"session_org\": \"Odbor za izobra\\u017eevanje, znanost, \\u0161port in mladino\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [91],\n                    \"name\": \"L\\u00e1szl\\u00f3 G\\u00f6ncz\",\n                    \"gov_id\": \"P117\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 24,\n                    \"has_function\": false\n                },\n                \"speeches\": [558345]\n            }],\n            \"session_id\": 6311\n        }]\n    }, {\n        \"date\": \"15. 7. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"21. redna seja\",\n            \"session_org\": \"Dr\\u017eavni zbor\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [90],\n                    \"name\": \"Roberto Battelli\",\n                    \"gov_id\": \"P005\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 4,\n                    \"has_function\": false\n                },\n                \"speeches\": [890570]\n            }],\n            \"session_id\": 5575\n        }]\n    }, {\n        \"date\": \"28. 6. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"18. redna seja\",\n            \"session_org\": \"Odbor za izobra\\u017eevanje, znanost, \\u0161port in mladino\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [91],\n                    \"name\": \"L\\u00e1szl\\u00f3 G\\u00f6ncz\",\n                    \"gov_id\": \"P117\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 24,\n                    \"has_function\": false\n                },\n                \"speeches\": [558602]\n            }],\n            \"session_id\": 6315\n        }]\n    }, {\n        \"date\": \"14. 6. 2016\",\n        \"sessions\": [{\n            \"session_name\": \"20. redna seja\",\n            \"session_org\": \"Dr\\u017eavni zbor\",\n            \"speakers\": [{\n                \"person\": {\n                    \"is_active\": false,\n                    \"district\": [90],\n                    \"name\": \"Roberto Battelli\",\n                    \"gov_id\": \"P005\",\n                    \"gender\": \"m\",\n                    \"party\": {\n                        \"acronym\": \"IMNS\",\n                        \"is_coalition\": false,\n                        \"id\": 2,\n                        \"name\": \"PS italijanske in mad\\u017earske narodne skupnosti\"\n                    },\n                    \"type\": \"mp\",\n                    \"id\": 4,\n                    \"has_function\": false\n                },\n                \"speeches\": [625866, 625828, 625815]\n            }],\n            \"session_id\": 5576\n        }]\n    }]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getSpeechesOfPG/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getSpeechesOfPG/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
     "url": "/getSpeech/{speech_id}",
     "title": "Speech info",
     "name": "GetSpeech",
@@ -6341,6 +7330,210 @@
       {
         "title": "Example:",
         "content": "curl -i https://analize.parlameter.si/v1/s/getSpeech/1118139",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaseje/views.py",
+    "groupTitle": "Session"
+  },
+  {
+    "type": "get",
+    "url": "/getComparedVotes/?people_same={people_same_ids}&parties_same={parties_same_ids}&people_different={people_different_ids}&parties_different={parties_different_ids}",
+    "title": "List all votes where selected MPs/PGs voted the same/differently",
+    "name": "getComparedVotes",
+    "group": "Session",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "people_same_ids",
+            "optional": false,
+            "field": "Comma",
+            "description": "<p>separated list of Parladata ids for MPs who voted the same</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "total",
+            "description": "<p>Total number of votes so far</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": "<p>List of votes that satisfy the supplied criteria</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.session",
+            "description": "<p>Session data for this vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.session.name",
+            "description": "<p>Name of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "results.session.date_ts",
+            "description": "<p>Date and time of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "results.session.date",
+            "description": "<p>Date of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.session.id",
+            "description": "<p>Id of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.session.in_review",
+            "description": "<p>Return true or false if session is in review.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results.session.orgs",
+            "description": "<p>Organization object</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.session.orgs.acronym",
+            "description": "<p>Organization acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.session.orgs.is_coalition",
+            "description": "<p>True of False if organization is in coalition</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.session.orgs.id",
+            "description": "<p>Id of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.session.orgs.name",
+            "description": "<p>Name of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.results",
+            "description": "<p>Results for this vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.results.abstain",
+            "description": "<p>Number of abstentions</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.results.against",
+            "description": "<p>Number of MPs who voted against the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.results.not_present",
+            "description": "<p>Number of MPs who weren't present at the vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.results.votes_for",
+            "description": "<p>Number of MPs who voted for the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "results.results.date",
+            "description": "<p>The date of the vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.results.text",
+            "description": "<p>The text of the motion which was voted upon</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "results.results.tags",
+            "description": "<p>List of tags that belong to this motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.results.is_outlier",
+            "description": "<p>Is this vote a weird one (flame icon)?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.results.result",
+            "description": "<p>Did the motion pass?</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "{\n    \"total\": 2155,\n    \"results\": [{\n        \"session\": {\n            \"name\": \"44. izredna seja\",\n            \"date_ts\": \"2017-05-30T02:00:00\",\n            \"orgs\": [{\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            }],\n            \"date\": \"30. 5. 2017\",\n            \"org\": {\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            },\n            \"id\": 9587,\n            \"in_review\": false\n        },\n        \"results\": {\n            \"abstain\": 0,\n            \"against\": 0,\n            \"motion_id\": 7260,\n            \"date\": \"09.06.2017\",\n            \"text\": \"Dnevni red v celoti\",\n            \"tags\": [\"Proceduralna glasovanja\"],\n            \"is_outlier\": false,\n            \"not_present\": 34,\n            \"votes_for\": 56,\n            \"result\": true\n        }\n    }, {\n        \"session\": {\n            \"name\": \"44. izredna seja\",\n            \"date_ts\": \"2017-05-30T02:00:00\",\n            \"orgs\": [{\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            }],\n            \"date\": \"30. 5. 2017\",\n            \"org\": {\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            },\n            \"id\": 9587,\n            \"in_review\": false\n        },\n        \"results\": {\n            \"abstain\": 0,\n            \"against\": 34,\n            \"motion_id\": 7258,\n            \"date\": \"09.06.2017\",\n            \"text\": \"Priporo\\u010dilo Vladi RS v zvezi z okoljsko katastrofo, ki jo je povzro\\u010dil po\\u017ear v podjetju Kemis d.o.o. - Amandma: k 5. to\\u010dki 9.6.2017 [SDS - Poslanska skupina Slovenske demokratske stranke]\",\n            \"tags\": [\"Odbor za infrastrukturo, okolje in prostor\"],\n            \"is_outlier\": false,\n            \"not_present\": 35,\n            \"votes_for\": 21,\n            \"result\": false\n        }\n    }, {\n        \"session\": {\n            \"name\": \"30. redna seja\",\n            \"date_ts\": \"2017-05-22T02:00:00\",\n            \"orgs\": [{\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            }],\n            \"date\": \"22. 5. 2017\",\n            \"org\": {\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            },\n            \"id\": 9580,\n            \"in_review\": true\n        },\n        \"results\": {\n            \"abstain\": 4,\n            \"against\": 18,\n            \"motion_id\": 7219,\n            \"date\": \"30.05.2017\",\n            \"text\": \"Zakon o dopolnitvi Zakona o omejevanju uporabe toba\\u010dnih in povezanih izdelkov - Glasovanje o zakonu v celoti\",\n            \"tags\": [\"Odbor za zdravstvo\"],\n            \"is_outlier\": false,\n            \"not_present\": 16,\n            \"votes_for\": 52,\n            \"result\": true\n        }\n    }, {\n        \"session\": {\n            \"name\": \"30. redna seja\",\n            \"date_ts\": \"2017-05-22T02:00:00\",\n            \"orgs\": [{\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            }],\n            \"date\": \"22. 5. 2017\",\n            \"org\": {\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            },\n            \"id\": 9580,\n            \"in_review\": true\n        },\n        \"results\": {\n            \"abstain\": 6,\n            \"against\": 23,\n            \"motion_id\": 7218,\n            \"date\": \"30.05.2017\",\n            \"text\": \"Zakon o spremembah in dopolnitvah Zakona o zdravstveni dejavnosti - Eviden\\u010dni sklep o primernosti predloga zakona 30.5.2017\",\n            \"tags\": [\"Odbor za zdravstvo\"],\n            \"is_outlier\": false,\n            \"not_present\": 19,\n            \"votes_for\": 42,\n            \"result\": true\n        }\n    }, {\n        \"session\": {\n            \"name\": \"30. redna seja\",\n            \"date_ts\": \"2017-05-22T02:00:00\",\n            \"orgs\": [{\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            }],\n            \"date\": \"22. 5. 2017\",\n            \"org\": {\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            },\n            \"id\": 9580,\n            \"in_review\": true\n        },\n        \"results\": {\n            \"abstain\": 6,\n            \"against\": 23,\n            \"motion_id\": 7218,\n            \"date\": \"30.05.2017\",\n            \"text\": \"Zakon o spremembah in dopolnitvah Zakona o zdravstveni dejavnosti - Eviden\\u010dni sklep o primernosti predloga zakona 30.5.2017\",\n            \"tags\": [\"Odbor za zdravstvo\"],\n            \"is_outlier\": false,\n            \"not_present\": 19,\n            \"votes_for\": 42,\n            \"result\": true\n        }\n    }, {\n        \"session\": {\n            \"name\": \"30. redna seja\",\n            \"date_ts\": \"2017-05-22T02:00:00\",\n            \"orgs\": [{\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            }],\n            \"date\": \"22. 5. 2017\",\n            \"org\": {\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            },\n            \"id\": 9580,\n            \"in_review\": true\n        },\n        \"results\": {\n            \"abstain\": 3,\n            \"against\": 22,\n            \"motion_id\": 7217,\n            \"date\": \"30.05.2017\",\n            \"text\": \"Priporo\\u010dilo v zvezi s problematiko slovenskega zdravstva - Eviden\\u010dni sklep MDT 30.5.2017\",\n            \"tags\": [\"Odbor za zdravstvo\"],\n            \"is_outlier\": false,\n            \"not_present\": 14,\n            \"votes_for\": 51,\n            \"result\": true\n        }\n    }, {\n        \"session\": {\n            \"name\": \"30. redna seja\",\n            \"date_ts\": \"2017-05-22T02:00:00\",\n            \"orgs\": [{\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            }],\n            \"date\": \"22. 5. 2017\",\n            \"org\": {\n                \"acronym\": \"DZ\",\n                \"is_coalition\": false,\n                \"id\": 95,\n                \"name\": \"Dr\\u017eavni zbor\"\n            },\n            \"id\": 9580,\n            \"in_review\": true\n        },\n        \"results\": {\n            \"abstain\": 2,\n            \"against\": 51,\n            \"motion_id\": 7216,\n            \"date\": \"30.05.2017\",\n            \"text\": \"Zakon o spremembah in dopolnitvah Zakona o pokojninskem in invalidskem zavarovanju - Eviden\\u010dni sklep o primernosti predloga zakona 30.5.2017\",\n            \"tags\": [\"Odbor za delo, dru\\u017eino, socialne zadeve in invalide\"],\n            \"is_outlier\": false,\n            \"not_present\": 13,\n            \"votes_for\": 24,\n            \"result\": false\n        }\n    }]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/s/getComparedVotes/?people_same=&parties_same=1&people_different=&parties_different=2",
         "type": "curl"
       }
     ],
@@ -6832,8 +8025,616 @@
   },
   {
     "type": "get",
-    "url": "/getMotionGraph/{id_mo}/{?date}",
+    "url": "/getMotionAnalize/{id_mo}",
     "title": "Information on a specific motion",
+    "name": "getMotionAnalize",
+    "group": "Session",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "id_mo",
+            "optional": false,
+            "field": "session",
+            "description": "<p>id is parameter which returns exactly specified motion</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>This vote's id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "documents",
+            "description": "<p>List of documents associated with this vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>The name of this vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>When was this card created?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "session",
+            "description": "<p>Session data</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "session.name",
+            "description": "<p>Name of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "session.date_ts",
+            "description": "<p>Date and time of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "session.date",
+            "description": "<p>Date of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "session.id",
+            "description": "<p>Id of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "session.in_review",
+            "description": "<p>Return true or false if session is in review.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "session.orgs",
+            "description": "<p>Organization object</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "session.orgs.acronym",
+            "description": "<p>Organization acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "session.orgs.is_coalition",
+            "description": "<p>True of False if organization is in coalition</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "session.orgs.id",
+            "description": "<p>Id of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "session.orgs.name",
+            "description": "<p>Name of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "gov_side",
+            "description": "<p>Breakdown by coalition/opposition</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "gov_side.coalition",
+            "description": "<p>Coalition's results</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "gov_side.coalition.max",
+            "description": "<p>Which option won?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "gov_side.coalition.max.max_opt",
+            "description": "<p>Option as string (for|against|abstain|not_present|cant_compute)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "gov_side.coalition.max.maxOptPerc",
+            "description": "<p>Percentage of MPs that voted for the winning option</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "gov_side.coalition.votes",
+            "description": "<p>Number of votes for each option</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "gov_side.coalition.votes.abstain",
+            "description": "<p>Number of abstentions</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "gov_side.coalition.votes.not_present",
+            "description": "<p>Number of MPs who weren't present</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "gov_side.coalition.votes.for",
+            "description": "<p>Number of votes for the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "gov_side.coalition.votes.against",
+            "description": "<p>Number of votes against the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "gov_side.coalition.outliers",
+            "description": "<p>List of options that have outliers/rebels.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "gov_side.opposition",
+            "description": "<p>Opposition's results</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "gov_side.opposition.max",
+            "description": "<p>Which option won?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "gov_side.opposition.max.max_opt",
+            "description": "<p>Option as string (for|against|abstain|not_present|cant_compute)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "gov_side.opposition.max.maxOptPerc",
+            "description": "<p>Percentage of MPs that voted for the winning option</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "gov_side.opposition.votes",
+            "description": "<p>Number of votes for each option</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "gov_side.opposition.votes.abstain",
+            "description": "<p>Number of abstentions</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "gov_side.opposition.votes.not_present",
+            "description": "<p>Number of MPs who weren't present</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "gov_side.opposition.votes.for",
+            "description": "<p>Number of votes for the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "gov_side.opposition.votes.against",
+            "description": "<p>Number of votes against the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "gov_side.opposition.outliers",
+            "description": "<p>List of options that have outliers/rebels.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "all",
+            "description": "<p>Totals by option</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "all.abstain",
+            "description": "<p>Number of abstentions</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "all.not_present",
+            "description": "<p>Number of MPs who weren't present</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "all.for",
+            "description": "<p>Number of votes for the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "all.against",
+            "description": "<p>Number of votes against the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "result",
+            "description": "<p>Result of the vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "result.is_outlier",
+            "description": "<p>Is this vote a &quot;weird&quot; one (flame icon)?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "result.accepted",
+            "description": "<p>Did the motion pass?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "result.value",
+            "description": "<p>Percentage of the winning option</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "result.max_opt",
+            "description": "<p>The winning option</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "members",
+            "description": "<p>List of individual MPs and their votes</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "members.person",
+            "description": "<p>MP's person object (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "members.person.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "members.person.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "members.person.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "members.person.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "members.person.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "members.person.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "members.person.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "members.person.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "members.person.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "members.person.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "members.person.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "members.person.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "members.person.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "members.option",
+            "description": "<p>The option this member chose</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "members.is_outlier",
+            "description": "<p>Did this person vote &quot;against&quot; their party?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "parties",
+            "description": "<p>Results grouped by party</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "parties.max",
+            "description": "<p>Which option won?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "parties.max.max_opt",
+            "description": "<p>Option as string (for|against|abstain|not_present|cant_compute)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "parties.max.maxOptPerc",
+            "description": "<p>Percentage of MPs that voted for the winning option</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "parties.votes",
+            "description": "<p>Number of votes for each option</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "parties.votes.abstain",
+            "description": "<p>Number of abstentions</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "parties.votes.not_present",
+            "description": "<p>Number of MPs who weren't present</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "parties.votes.for",
+            "description": "<p>Number of votes for the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "parties.votes.against",
+            "description": "<p>Number of votes against the motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "parties.outliers",
+            "description": "<p>List of options that have outliers/rebels.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "parties.party",
+            "description": "<p>PG data</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "parties.party.acronym",
+            "description": "<p>The PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "parties.party.is_coalition",
+            "description": "<p>Is this PG a part of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "parties.party.id",
+            "description": "<p>PG's Parladata id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "parties.party.name",
+            "description": "<p>PG's name</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "{\n    \"gov_side\": {\n        \"coalition\": {\n            \"max\": {\n                \"max_opt\": \"for\",\n                \"maxOptPerc\": 92.3076923076923\n            },\n            \"votes\": {\n                \"abstain\": 1.0,\n                \"not_present\": 2.0,\n                \"for\": 48.0,\n                \"against\": 1.0\n            },\n            \"outliers\": [\"abstain\", \"against\"]\n        },\n        \"opposition\": {\n            \"max\": {\n                \"max_opt\": \"against\",\n                \"maxOptPerc\": 60.526315789473685\n            },\n            \"votes\": {\n                \"abstain\": 1.0,\n                \"not_present\": 13.0,\n                \"for\": 1.0,\n                \"against\": 23.0\n            },\n            \"outliers\": []\n        }\n    },\n    \"created_for\": \"20.04.2017\",\n    \"all\": {\n        \"abstain\": 2,\n        \"not_present\": 15,\n        \"against\": 24,\n        \"for\": 49\n    },\n    \"session\": {\n        \"name\": \"29. redna seja\",\n        \"date_ts\": \"2017-04-20T02:00:00\",\n        \"orgs\": [{\n            \"acronym\": \"DZ\",\n            \"is_coalition\": false,\n            \"id\": 95,\n            \"name\": \"Dr\\u017eavni zbor\"\n        }],\n        \"date\": \"20. 4. 2017\",\n        \"org\": {\n            \"acronym\": \"DZ\",\n            \"is_coalition\": false,\n            \"id\": 95,\n            \"name\": \"Dr\\u017eavni zbor\"\n        },\n        \"id\": 9427,\n        \"in_review\": true\n    },\n    \"result\": {\n        \"is_outlier\": false,\n        \"accepted\": true,\n        \"value\": 54.44444444444444,\n        \"max_opt\": \"for\"\n    },\n    \"members\": [{\n        \"person\": {\n            \"is_active\": false,\n            \"district\": [76],\n            \"name\": \"Jani M\\u00f6derndorfer\",\n            \"gov_id\": \"P191\",\n            \"gender\": \"m\",\n            \"party\": {\n                \"acronym\": \"SMC\",\n                \"is_coalition\": true,\n                \"id\": 1,\n                \"name\": \"PS Stranka modernega centra\"\n            },\n            \"type\": \"mp\",\n            \"id\": 59,\n            \"has_function\": false\n        },\n        \"option\": \"for\",\n        \"is_outlier\": false\n    }, {\n        \"person\": {\n            \"is_active\": false,\n            \"district\": [37],\n            \"name\": \"Marija Antonija Kova\\u010di\\u010d\",\n            \"gov_id\": \"P297\",\n            \"gender\": \"f\",\n            \"party\": {\n                \"acronym\": \"DeSUS\",\n                \"is_coalition\": true,\n                \"id\": 3,\n                \"name\": \"PS Demokratska Stranka Upokojencev Slovenije\"\n            },\n            \"type\": \"mp\",\n            \"id\": 96,\n            \"has_function\": false\n        },\n        \"option\": \"for\",\n        \"is_outlier\": false\n    }, {\n        \"person\": {\n            \"is_active\": false,\n            \"district\": [20],\n            \"name\": \"Du\\u0161an Radi\\u010d\",\n            \"gov_id\": \"P300\",\n            \"gender\": \"m\",\n            \"party\": {\n                \"acronym\": \"SMC\",\n                \"is_coalition\": true,\n                \"id\": 1,\n                \"name\": \"PS Stranka modernega centra\"\n            },\n            \"type\": \"mp\",\n            \"id\": 1357,\n            \"has_function\": false\n        },\n        \"option\": \"for\",\n        \"is_outlier\": false\n    }],\n    \"parties\": [{\n        \"max\": {\n            \"max_opt\": \"for\",\n            \"maxOptPerc\": 100.0\n        },\n        \"votes\": {\n            \"abstain\": 0.0,\n            \"not_present\": 0.0,\n            \"for\": 35.0,\n            \"against\": 0.0\n        },\n        \"outliers\": [],\n        \"party\": {\n            \"acronym\": \"SMC\",\n            \"is_coalition\": true,\n            \"id\": 1,\n            \"name\": \"PS Stranka modernega centra\"\n        }\n    }, {\n        \"max\": {\n            \"max_opt\": \"against\",\n            \"maxOptPerc\": 52.63157894736842\n        },\n        \"votes\": {\n            \"abstain\": 0.0,\n            \"not_present\": 9.0,\n            \"for\": 0.0,\n            \"against\": 10.0\n        },\n        \"outliers\": [],\n        \"party\": {\n            \"acronym\": \"SDS\",\n            \"is_coalition\": false,\n            \"id\": 5,\n            \"name\": \"PS Slovenska Demokratska Stranka\"\n        }\n    }, {\n        \"max\": {\n            \"max_opt\": \"for\",\n            \"maxOptPerc\": 90.9090909090909\n        },\n        \"votes\": {\n            \"abstain\": 0.0,\n            \"not_present\": 1.0,\n            \"for\": 10.0,\n            \"against\": 0.0\n        },\n        \"outliers\": [],\n        \"party\": {\n            \"acronym\": \"DeSUS\",\n            \"is_coalition\": true,\n            \"id\": 3,\n            \"name\": \"PS Demokratska Stranka Upokojencev Slovenije\"\n        }\n    }],\n    \"id\": \"6979\",\n    \"documents\": [],\n    \"name\": \"Zakon o izgradnji, upravljanju in gospodarjenju z drugim tirom \\u017eelezni\\u0161ke proge Diva\\u010da - Koper - Glasovanje o zakonu v celoti\",\n    \"created_at\": \"03.05.2017\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/s/getMotionAnalize/6900",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/s/getMotionAnalize/6900/21.12.2016",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaseje/views.py",
+    "groupTitle": "Session"
+  },
+  {
+    "type": "get",
+    "url": "/getMotionGraph/{id_mo}/{?date}",
+    "title": "[DEPRECATED] Information on a specific motion",
     "name": "getMotionGraph",
     "group": "Session",
     "parameter": {

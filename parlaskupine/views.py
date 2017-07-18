@@ -1,24 +1,29 @@
 # -*- coding: UTF-8 -*-
-from utils.speech import WordAnalysis
-from parlalize.utils import *
-import requests
-import json
-from django.http import JsonResponse
-from parlaskupine.models import *
-from parlaseje.models import Activity, Session, Vote, Speech, Question
-from collections import Counter
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT, SETTER_KEY
-import numpy as np
-from scipy.stats.stats import pearsonr
-from scipy.spatial.distance import euclidean
-from parlaposlanci.models import Person
-from parlaposlanci.views import getMPsList
-import math
-from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
-from parlalize.utils import tryHard, lockSetter
+from django.forms.models import model_to_dict
+from django.http import JsonResponse
+
+from collections import Counter
+from scipy.stats.stats import pearsonr
+from scipy.spatial.distance import euclidean
+
+import requests
+import json
+import math
+import numpy as np
+
+from utils.speech import WordAnalysis
+from parlalize.utils import *
+from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots, getAllStaticData
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT, SETTER_KEY
+from parlaskupine.models import *
+from parlaseje.models import Activity, Session, Vote, Speech, Question
+from parlaposlanci.models import Person
+from parlaposlanci.views import getMPsList
+from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
+
 
 # Create your views here.
 @lockSetter
@@ -1279,51 +1284,17 @@ def getTaggedBallots(request, pg_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
-        date_of = datetime.now().date()
+        date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    url = API_URL + '/getMembersOfPGRanges/' + pg_id + '/' + date_
-    membersOfPGRanges = tryHard(url).json()
-    out = []
-    latest = []
-    for pgMembersRange in membersOfPGRanges:
-        ballots = Ballot.objects.filter(person__id_parladata__in=pgMembersRange['members'],
-                                        start_time__lte=datetime.strptime(pgMembersRange['end_date'],
-                                                                          API_DATE_FORMAT),
-                                        start_time__gte=datetime.strptime(pgMembersRange['start_date'],
-                                                                          API_DATE_FORMAT))
-        if ballots:
-            latest.append(ballots.latest('created_at').created_at)
-        ballots = [ballots.filter(start_time__range=[t_date,
-                                                     t_date+timedelta(days=1)])
-                   for t_date
-                   in ballots.order_by('start_time').datetimes('start_time',
-                                                               'day')]
+    b = Ballot.objects.filter(org_voter__id_parladata=pg_id,
+                              start_time__lte=date_of)
+    b_s = [model_to_dict(i, fields=['vote', 'option', 'id_parladata']) for i in b]
+    b_s = {bal['vote']: (bal['id_parladata'], bal['option']) for bal in b_s}
+    org = Organization.objects.get(id_parladata=pg_id)
+    org_data = {'party': org.getOrganizationData()}
 
-        for day in ballots:
-            dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT),
-                       'ballots': []}
-            votes = list(set(day.order_by('start_time').values_list('vote_id',
-                                                                    flat=True)))
-            for vote in votes:
-                vote_balots = day.filter(vote_id=vote)
-                counter = Counter(vote_balots.values_list('option', flat=True))
-                dayData['ballots'].append({
-                    'motion': vote_balots[0].vote.motion,
-                    'vote_id': vote_balots[0].vote.id_parladata,
-                    'result': vote_balots[0].vote.result,
-                    'session_id': vote_balots[0].vote.session.id_parladata if vote_balots[0].vote.session else None,
-                    'option': max(counter, key=counter.get),
-                    'tags': vote_balots[0].vote.tags})
-            out.append(dayData)
+    result = prepareTaggedBallots(date_of, b_s, org_data)
 
-    tags = list(Tag.objects.all().values_list('name', flat=True))
-    result = {
-        'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
-        'created_at': max(latest).strftime(API_DATE_FORMAT) if latest else None,
-        'created_for': out[-1]['date'] if out else None,
-        'all_tags': tags,
-        'results': list(reversed(out))
-        }
     return JsonResponse(result, safe=False)
 
 
@@ -1698,99 +1669,6 @@ def getNumberOfQuestions(request, pg_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
-def getQuestions(request, person_id, date_=None):
-    if date_:
-        fdate = datetime.strptime(date_, '%d.%m.%Y')
-        questions = Question.objects.objects.filter(person__id_parladata=person_id)
-        questions = [[question for question in questions.filter(start_time__range=[t_date, t_date+timedelta(days=1)])] for t_date in questions.filter(start_time__lte=fdate).order_by('start_time').datetimes('start_time', 'day')]
-    else:
-        fdate = datetime.now()
-        questions = Question.objects.filter(person__id_parladata=person_id)
-        questions = [[question
-                      for question
-                      in questions.filter(start_time__range=[t_date, t_date+timedelta(days=1)])
-                      ]
-                     for t_date
-                     in questions.order_by('start_time').datetimes('start_time', 'day')]
-    out = []
-    lastDay = None
-    created_at = []
-    for day in questions:
-        dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT),
-                   'questions':[]}
-        lastDay = day[0].start_time.strftime(API_OUT_DATE_FORMAT)
-        for question in day:
-            created_at.append(question.created_at)
-            dayData['questions'].append({
-                'session_name': question.session.name if question.session else 'Unknown',
-                'question_id': question.id_parladata,
-                'title': question.title,
-                'recipient_text': question.recipient_text,
-                'url': question.content_link,
-                'session_id': question.session.id_parladata if question.session else 'Unknown'})
-        out.append(dayData)
-
-    result = {
-        'person': getPersonData(person_id, date_),
-        'created_at': max(created_at).strftime(API_OUT_DATE_FORMAT) if created_at else datetime.today().strftime('API_DATE_FORMAT'),
-        'created_for': lastDay if lastDay else datetime.today().strftime('API_DATE_FORMAT'),
-        'results': list(reversed(out))
-        }
-    return JsonResponse(result, safe=False)
-
-
-def getQuestionsOfPG1(request, pg_id, date_=False):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
-
-    end_of_day = date_of + timedelta(days=1)
-    questions = Question.objects.filter(start_time__lt=end_of_day)
-
-    membersOfPGRanges = reversed(tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "")).json())
-    out = []
-    personsData = {}
-    for pgMembersRange in membersOfPGRanges:
-        startTime = datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT)
-        endTime = datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT)+timedelta(hours=23, minutes=59)
-        questionz = [[question
-                      for question
-                      in questions.filter(person__id_parladata__in=pgMembersRange["members"][pg_id],
-                                          start_time__range=[t_date, t_date+timedelta(hours=23, minutes=59)]).order_by("-id_parladata")
-                      ]
-                     for t_date
-                     in questions.filter(start_time__lt=endTime,
-                                         start_time__gt=startTime,
-                                         person__id_parladata__in=pgMembersRange["members"][pg_id]).datetimes('start_time', 'day')]
-        for day in reversed(questionz):
-            #dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "sessions":[]}
-            dayDataDict = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "questions": []}
-            addedPersons = []
-            addedSessions = []
-            for question in day:
-                person_id = question.person.id_parladata
-                try:
-                    personData = personsData[person_id]
-                except KeyError as e:
-                    personData = getPersonData(person_id, date_)
-                    personsData[person_id] = personData
-                questionData = question.getQuestionData()
-                questionData.update({'person': personData})
-                dayDataDict["questions"].append(questionData)
-
-            out.append(dayDataDict)
-
-    # WORKAROUND: created_at is today.
-    result = {
-        'results': out,
-        'created_for': out[-1]["date"] if out else date_,
-        'created_at': date_,
-        'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
-        }
-    return JsonResponse(result, safe=False)
-
 
 def getQuestionsOfPG(request, pg_id, date_=False):
     if date_:
@@ -2011,13 +1889,13 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     ob['votes'] = []
     tab = []
     acr = Organization.objects.get(id_parladata=org_id).acronym
-    votes = Vote.objects.all().order_by('start_time')                               
+    votes = Vote.objects.all().order_by('start_time')
     for vote in votes:
-        votesData[vote.id_parladata] = {'text':vote.motion,
-                                        'result':vote.result,
-                                        'date':vote.start_time,
-                                        'tag':vote.tags,
-                                        'id_parladata':vote.id_parladata}
+        votesData[vote.id_parladata] = {'text': vote.motion,
+                                        'result': vote.result,
+                                        'date': vote.start_time,
+                                        'tag': vote.tags,
+                                        'id_parladata': vote.id_parladata}
 
     c_data = cache.get("pg_disunion" + org_id)
     if c_data and not force_render:
@@ -2025,17 +1903,18 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     else:
         if int(org_id) == 95:
             for vote in votes:
-                tab.append({'text':vote.motion,
-                             'result':vote.result,
-                             'date':vote.start_time,
-                             'tag':vote.tags,
-                             'maximum':vote.intra_disunion})
+                tab.append({'text': vote.motion,
+                            'result': vote.result,
+                            'date': vote.start_time,
+                            'tag': vote.tags,
+                            'maximum': vote.intra_disunion,
+                            'id_parladata': vote.id_parladata})
                 out['DZ'] = {'organization': 'dz',
                              'votes': tab}
             
-            out[str(acr)] = sorted(out[str(acr)]['votes'] ,key=lambda k:k['maximum'])
+            out[str(acr)] = sorted(out[str(acr)]['votes'], key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name', flat=True))
-            cache.set("pg_disunion" + org_id, out, 60 * 60 * 48) 
+            cache.set("pg_disunion" + org_id, out, 60 * 60 * 48)
         else:
             for vote in votes:
                 intraD = IntraDisunion.objects.filter(vote=vote,
@@ -2046,9 +1925,52 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                     ob['votes'].append(obj)
                     ob['organization'] = Organization.objects.get(id_parladata=org_id).getOrganizationData()
                 out[Organization.objects.get(id_parladata=org_id).acronym] = ob
-            
-            out[str(acr)] = sorted(out[str(acr)]['votes'] ,key=lambda k:k['maximum'])
+
+            out[str(acr)] = sorted(out[str(acr)]['votes'], key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name', flat=True))
-            cache.set("pg_disunion" + org_id, out, 60 * 60 * 48) 
-    
+            cache.set("pg_disunion" + org_id, out, 60 * 60 * 48)
+
     return JsonResponse(out, safe=False)
+
+
+def getAmendmentsOfPG(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = ''
+    org = Organization.objects.get(id_parladata=pg_id)
+    amendments = org.amendments.filter(start_time__lte=date_of).order_by('-start_time')
+    amendments = amendments.extra(select={'start_time_date': 'DATE(start_time)'})
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
+    dates = list(set(list(amendments.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+    out = []
+    for vote in amendments:
+        data[vote.start_time_date].append({'session': sessionsData[str(vote.session.id_parladata)],
+                                           'results': {'motion_id': vote.id_parladata,
+                                                       'text': vote.motion,
+                                                       'votes_for': vote.votes_for,
+                                                       'against': vote.against,
+                                                       'abstain': vote.abstain,
+                                                       'not_present': vote.not_present,
+                                                       'result': vote.result,
+                                                       'is_outlier': vote.is_outlier,
+                                                       'tags': vote.tags,
+                                                       'has_outliers': vote.has_outlier_voters
+                                                       }
+                                           })
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'votes': data[date]}
+           for date in dates]
+
+    tags = list(Tag.objects.all().values_list('name', flat=True))
+    result = {
+        'party': org.getOrganizationData(),
+        'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'all_tags': tags,
+        'results': list(reversed(out))
+        }
+    return JsonResponse(result, safe=False)
