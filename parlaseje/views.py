@@ -2908,6 +2908,7 @@ def getComparedVotes(request):
     }
 
     for vote in votes:
+        print vote.has_outliers
         out['results'].append({
             'session': sessionsData[str(vote.session.id_parladata)],
             'results': {
@@ -2919,6 +2920,7 @@ def getComparedVotes(request):
                 'not_present': vote.not_present,
                 'result': vote.result,
                 'is_outlier': vote.is_outlier,
+                'has_outliers': vote.has_outliers,
                 'tags': vote.tags,
                 'date': vote.start_time.strftime(API_DATE_FORMAT)
             }
