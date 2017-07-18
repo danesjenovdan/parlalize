@@ -1753,9 +1753,12 @@ def getListOfPGs(request, date_=None, force_render=False):
                 try:
                     pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
                     pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
+                    pg_obj["results"]["neenotnost_glasovanj"] = json.loads(getDisunionOrgID(None, pg_id).content)
+                
                 except:
                     pg_obj["results"]["presence_sessions"] = None
                     pg_obj["results"]["presence_votes"] = None
+                    pg_obj["results"]["neenotnost_glasovanj"] = None
 
                 try:
                     pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
@@ -1974,3 +1977,29 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
         'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
+
+
+def getDisunionOrg(request, force_render=False):
+    result = []
+    data = tryHard(API_URL + '/getAllPGs/').json()
+    for org in data:
+        el = IntraDisunion.objects.filter(organization__id_parladata=org).values_list("maximum", flat=True)
+        if len(el) != 0:
+            suma = sum(map(float, el))/el.count()
+        else:
+            suma = 0
+        out = {
+        'organization': Organization.objects.get(id_parladata=org).getOrganizationData(),
+        'sum': suma
+        }
+        result.append(out)
+    return JsonResponse(result, safe=False)
+
+
+def getDisunionOrgID(request, pg_id, force_render=False):
+    el = IntraDisunion.objects.filter(organization__id_parladata=pg_id).values_list("maximum", flat=True)
+    if len(el) != 0:
+        suma = sum(map(float, el))/el.count()
+    else:
+        suma = 0
+    return JsonResponse(suma, safe=False)
