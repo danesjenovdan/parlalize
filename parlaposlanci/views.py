@@ -3337,41 +3337,37 @@ def getQuestions(request, person_id, date_=None):
         }]
     }
     """
-
     if date_:
-        fdate = datetime.strptime(date_, '%d.%m.%Y')
-        questions = Question.objects.filter(person__id_parladata=person_id)
-        questions = [[question
-                      for question
-                      in questions.filter(start_time__range=[t_date, t_date+timedelta(days=1)])]
-                     for t_date
-                     in questions.filter(start_time__lte=fdate).order_by('start_time').datetimes('start_time', 'day')]
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        fdate = datetime.now()
-        questions = Question.objects.filter(person__id_parladata=person_id)
-        questions = [[question
-                      for question
-                      in questions.filter(start_time__range=[t_date, t_date+timedelta(days=1)])
-                      ]
-                     for t_date
-                     in questions.order_by('start_time').datetimes('start_time', 'day')]
-    out = []
-    lastDay = None
-    created_at = []
-    for day in questions:
-        dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT),
-                   'questions': []}
-        lastDay = day[0].start_time.strftime(API_OUT_DATE_FORMAT)
-        for question in day:
-            created_at.append(question.created_at)
-            dayData['questions'].append(question.getQuestionData())
-        out.append(dayData)
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    end_of_day = date_of + timedelta(days=1)
+    questions = Question.objects.filter(start_time__lt=end_of_day,
+                                        person__id_parladata=person_id).order_by("-start_time")
+
+    staticData = tryHard(BASE_URL + "/utils/getAllStaticData/").json()
+    personsStatic = staticData['persons']
+    ministrStatic = staticData['ministrs']
+
+    questions = questions.extra(select={'start_time_date': 'DATE(start_time)'})
+    dates = list(set(list(questions.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+
+    for question in questions:
+        data[question.start_time_date].append(question.getQuestionData(ministrStatic))
+
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'questions': data[date]}
+           for date in dates]
 
     result = {
+        'results': list(reversed(out)),
+        'created_for': out[-1]["date"] if out else date_,
+        'created_at': out[-1]["date"] if out else date_,
         'person': getPersonData(person_id, date_),
-        'created_at': max(created_at).strftime(API_OUT_DATE_FORMAT) if created_at else datetime.today().strftime('API_DATE_FORMAT'),
-        'created_for': lastDay if lastDay else datetime.today().strftime('API_DATE_FORMAT'),
-        'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
 
