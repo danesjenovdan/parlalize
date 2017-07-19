@@ -1768,11 +1768,16 @@ def getListOfPGs(request, date_=None, force_render=False):
                     pg_obj["results"]["number_of_questions"] = json.loads(getNumberOfQuestions(None, pg_id, date_).content)["results"]["score"]
                 except:
                     pg_obj["results"]["number_of_questions"] = None
+                try:
+                    pg_obj["results"]["number_of_amendments"] = json.loads(getNumberOfAmendmetsOfPG(None, pg_id, date_).content)
+                except:
+                    pg_obj["results"]["number_of_amendments"] = None
 
                 try:
                     styleScores = json.loads(getStyleScoresPG(None, pg_id, date_).content)
                 except:
                     styleScores = None
+
                 pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
                 pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
                 pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
@@ -1996,10 +2001,21 @@ def getDisunionOrg(request, force_render=False):
     return JsonResponse(result, safe=False)
 
 
-def getDisunionOrgID(request, pg_id, force_render=False):
+def getDisunionOrgID(request, pg_id):
     el = IntraDisunion.objects.filter(organization__id_parladata=pg_id).values_list("maximum", flat=True)
     if len(el) != 0:
         suma = sum(map(float, el))/el.count()
     else:
         suma = 0
     return JsonResponse(suma, safe=False)
+
+
+def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = ''
+    org = Organization.objects.get(id_parladata=pg_id)
+    count = org.amendments.filter(start_time__lte=date_of).count()
+    return JsonResponse(count, safe=False)
