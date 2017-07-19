@@ -72,8 +72,6 @@ urlpatterns = patterns('',
 
     url(r'^getQuestionsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getQuestionsOfPG),
     url(r'^getQuestionsOfPG/(?P<pg_id>\d+)/', getQuestionsOfPG),
-    url(r'^getQuestionsOfPGrework/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getQuestionsOfPGrework),
-    url(r'^getQuestionsOfPGrework/(?P<pg_id>\d+)/', getQuestionsOfPGrework),
 
     url(r'^getPresenceThroughTime/(?P<party_id>\d+)/(?P<date_>[\w].+)', getPresenceThroughTime),
     url(r'^getPresenceThroughTime/(?P<party_id>\d+)', getPresenceThroughTime),
