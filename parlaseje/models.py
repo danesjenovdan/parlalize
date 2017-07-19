@@ -171,6 +171,11 @@ class Question(Activity):
     title = models.TextField(blank=True, null=True,
                              help_text='Words spoken')
 
+    author_org = models.ForeignKey('parlaskupine.Organization',
+                                   blank=True, null=True,
+                                   related_name='AuthorOrg',
+                                   help_text=_('Author organization'))
+
     recipient_persons = models.ManyToManyField('parlaposlanci.Person',
                                                blank=True,
                                                help_text='Recipient persons (if it\'s a person).',
