@@ -2928,6 +2928,7 @@ def getComparedVotes(request):
                 'not_present': vote.not_present,
                 'result': vote.result,
                 'is_outlier': vote.is_outlier,
+                'has_outliers': vote.has_outlier_voters,
                 'tags': vote.tags,
                 'date': vote.start_time.strftime(API_DATE_FORMAT)
             }
@@ -3066,6 +3067,8 @@ def getVotesData(request, votes):
                     'against': vote.against,
                     'abstain': vote.abstain,
                     'not_present': vote.not_present,
-                    'result': vote.result}
+                    'result': vote.result,
+                    'is_outlier': vote.is_outlier,
+                    'has_outliers': vote.has_outlier_voters}
             })
     return JsonResponse(out, safe=False)
