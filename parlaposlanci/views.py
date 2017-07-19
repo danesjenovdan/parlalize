@@ -302,7 +302,7 @@ def setMinsterStatic(request, person_id, date_=None):
                            gender=data['gender'],
                            ministry=ministry).save()
 
-    return JsonResponse({"status":'All iz well', "saved":result})
+    return JsonResponse({"status":'All iz well'})
 
 
 # Saves to DB percent of attended sessions of MP and
