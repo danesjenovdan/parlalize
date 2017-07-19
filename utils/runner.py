@@ -469,7 +469,7 @@ def fastUpdate(fast=True, date_=None):
             rec_posts = []
             for post in dic['recipient_posts']:
                 static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
-                                                       ministry__id_parladata=post['organization_id'])
+                                                       ministry__id_parladata=post['organization_id']).order_by('-created_for')
                 if static:
                     rec_posts.append(static[0])
             question = Question(person=person,

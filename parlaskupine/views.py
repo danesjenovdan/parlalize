@@ -1669,18 +1669,20 @@ def getNumberOfQuestions(request, pg_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
-def getQuestionsOfPGrework(request, pg_id, date_=False):
+def getQuestionsOfPG(request, pg_id, date_=False):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        date_of = datetime.now().date()
+        date_of = datetime.now().date() + timedelta(days=1)
         date_ = date_of.strftime(API_DATE_FORMAT)
 
     end_of_day = date_of + timedelta(days=1)
     questions = Question.objects.filter(start_time__lt=end_of_day,
                                         author_org__id_parladata=pg_id)
 
-    personsStatic = tryHard(BASE_URL + "/utils/getAllStaticData/").json()['persons']
+    staticData = tryHard(BASE_URL + "/utils/getAllStaticData/").json()
+    personsStatic = staticData['persons']
+    ministrStatic = staticData['ministrs']
 
     questions = questions.extra(select={'start_time_date': 'DATE(start_time)'})
     dates = list(set(list(questions.values_list("start_time_date", flat=True))))
@@ -1691,82 +1693,23 @@ def getQuestionsOfPGrework(request, pg_id, date_=False):
                                                 flat=True))
     for question in questions:
         p_id = str(question.person.id_parladata)
-        temp_data = question.getQuestionData()
+        temp_data = question.getQuestionData(ministrStatic)
         author = personsStatic[p_id]
         all_authors[p_id] = author
         temp_data.update({'person': author})
         data[question.start_time_date].append(temp_data)
 
     out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
-            'ballots': data[date]}
+            'questions': data[date]}
            for date in dates]
 
 
     result = {
-        'results': out,
+        'results': list(reversed(out)),
         'created_for': out[-1]["date"] if out else date_,
         'created_at': date_,
         'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
         'all_authors': all_authors.values(),
-        'all_recipients': list(set(all_recipients)),
-        }
-    return JsonResponse(result, safe=False)
-
-
-
-def getQuestionsOfPG(request, pg_id, date_=False):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
-
-    end_of_day = date_of + timedelta(days=1)
-    questions = Question.objects.filter(start_time__lt=end_of_day)
-
-    personsData = {}
-
-    all_recipients = []
-
-    membersOfPGRanges = reversed(tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "")).json())
-    i = 0
-    out = []
-    for pgMembersRange in membersOfPGRanges:
-        startTime = datetime.strptime(pgMembersRange["start_date"], API_DATE_FORMAT)
-        endTime = datetime.strptime(pgMembersRange["end_date"], API_DATE_FORMAT) + timedelta(hours=23, minutes=59)
-
-        rangeQuestions = questions.filter(start_time__lt=endTime,
-                                          start_time__gt=startTime,
-                                          person__id_parladata__in=pgMembersRange["members"][pg_id])
-        all_recipients += list(rangeQuestions.values_list('recipient_text',
-                                                          flat=True))
-
-        for t_date in rangeQuestions.datetimes('start_time', 'day').order_by("-start_time"):
-            thisRangeQ = rangeQuestions.filter(start_time__range=[t_date, t_date+timedelta(hours=23, minutes=59)]).order_by('-start_time')
-            questionsOnDate = []
-            for question in thisRangeQ:
-                i += 1
-                persons_id = question.person.id_parladata
-                try:
-                    personData = personsData[persons_id]
-                except KeyError as e:
-                    personData = getPersonData(persons_id, date_)
-                    personsData[persons_id] = personData
-                questionData = question.getQuestionData()
-                questionData.update({'person': personData})
-                questionsOnDate.append(questionData)
-
-            dayDataDict = {"date": t_date.strftime(API_OUT_DATE_FORMAT),
-                           "questions": questionsOnDate}
-            out.append(dayDataDict)
-    print i
-    # WORKAROUND: created_at is today.
-    result = {
-        'results': out,
-        'created_for': out[-1]["date"] if out else date_,
-        'created_at': date_,
-        'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
-        'all_authors': [pData for pData in personsData.values()],
         'all_recipients': list(set(all_recipients)),
         }
     return JsonResponse(result, safe=False)
