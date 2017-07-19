@@ -1669,6 +1669,50 @@ def getNumberOfQuestions(request, pg_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
+def getQuestionsOfPGrework(request, pg_id, date_=False):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    end_of_day = date_of + timedelta(days=1)
+    questions = Question.objects.filter(start_time__lt=end_of_day,
+                                        author_org__id_parladata=pg_id)
+
+    personsStatic = tryHard(BASE_URL + "/utils/getAllStaticData/").json()['persons']
+
+    questions = questions.extra(select={'start_time_date': 'DATE(start_time)'})
+    dates = list(set(list(questions.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+    all_authors = {}
+    all_recipients = list(questions.values_list('recipient_text',
+                                                flat=True))
+    for question in questions:
+        p_id = str(question.person.id_parladata)
+        temp_data = question.getQuestionData()
+        author = personsStatic[p_id]
+        all_authors[p_id] = author
+        temp_data.update({'person': author})
+        data[question.start_time_date].append(temp_data)
+
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'ballots': data[date]}
+           for date in dates]
+
+
+    result = {
+        'results': out,
+        'created_for': out[-1]["date"] if out else date_,
+        'created_at': date_,
+        'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
+        'all_authors': all_authors.values(),
+        'all_recipients': list(set(all_recipients)),
+        }
+    return JsonResponse(result, safe=False)
+
+
 
 def getQuestionsOfPG(request, pg_id, date_=False):
     if date_:
