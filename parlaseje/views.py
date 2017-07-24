@@ -704,14 +704,15 @@ def getMotionOfSession(request, session_id, date=False):
     """
     out = []
     created_at = None
-    if Session.objects.filter(id_parladata=int(session_id)):
-        session = Session.objects.get(id_parladata=int(session_id))
-        if Vote.objects.filter(session__id_parladata=session_id):
-            model = Vote.objects.filter(session__id_parladata=session_id)
+    session = Session.objects.get(id_parladata=int(session_id))
+    if session:
+        sessionData = session.getSessionData()
+        cards = Vote.objects.filter(session__id_parladata=session_id)
+        if cards:
             dates = []
-            for card in model:
+            for card in cards:
                 print card
-                out.append({'session': session.getSessionData(),
+                out.append({'session': sessionData,
                             'results': {'motion_id': card.id_parladata,
                                         'text': card.motion,
                                         'votes_for': card.votes_for,
@@ -1992,6 +1993,7 @@ def getSessionsList(request, date_=None, force_render=False):
     * @apiSuccess {Boolean} session.in_review Return true or false if session is in review.
     * @apiSuccess {Boolean} session.speeches Return true or false if session has speeches.
     * @apiSuccess {Boolean} session.votes Return true or false if session has votes_for.
+    * @apiSuccess {Boolean} session.link_to votes (if session has votes)|transcript (if session has transcripts)|nothing.
     * @apiSuccess {Object[]} session.orgs Organization object
     * @apiSuccess {String} session.orgs.acronym Organization acronym
     * @apiSuccess {Boolean} session.orgs.is_coalition True of False if organization is in coalition
@@ -2011,6 +2013,7 @@ def getSessionsList(request, date_=None, force_render=False):
     {
     "updated_at_ts": "2017-04-24T20:39:11.782",
     "speeches": true,
+    "link_to": "votes",
     "name": "29. redna seja",
     "date_ts": "2017-04-20T02:00:00",
     "votes": true,
@@ -2036,6 +2039,7 @@ def getSessionsList(request, date_=None, force_render=False):
     {
     "updated_at_ts": "2017-04-20T01:26:40.675",
     "speeches": true,
+    "link_to": "transcript",
     "name": "93. redna seja",
     "date_ts": "2017-04-19T02:00:00",
     "votes": false,
@@ -2094,8 +2098,8 @@ def getSessionsList(request, date_=None, force_render=False):
                 last_day = session['date_ts']
                 # TODO zbrisi ta umazn fix ko se dodajo empty state-si
                 # continue
-            session.update({"updated_at": last_day.strftime(API_DATE_FORMAT)})
-            session.update({"updated_at_ts": last_day})
+            session.update({"updated_at": last_day.strftime(API_DATE_FORMAT),
+                            "updated_at_ts": last_day})
             if Vote.objects.filter(session__id_parladata=session["id"]):
                 is_vote = True
             else:
@@ -2104,8 +2108,14 @@ def getSessionsList(request, date_=None, force_render=False):
                 is_speech = True
             else:
                 is_speech = False
+            link_to = 'nothing'
+            if is_vote:
+                link_to = 'votes'
+            elif is_speech:
+                link_to = 'transcript'
             session.update({"votes": is_vote,
-                            "speeches": is_speech})
+                            "speeches": is_speech,
+                            'link_to': link_to})
             # joint sessions fix
             if session['id'] not in sessionsIds:
                 # TODO zbrisi ta umazn fix ko se dodajo empty state-si
@@ -2918,6 +2928,7 @@ def getComparedVotes(request):
                 'not_present': vote.not_present,
                 'result': vote.result,
                 'is_outlier': vote.is_outlier,
+                'has_outliers': vote.has_outlier_voters,
                 'tags': vote.tags,
                 'date': vote.start_time.strftime(API_DATE_FORMAT)
             }
@@ -3056,6 +3067,8 @@ def getVotesData(request, votes):
                     'against': vote.against,
                     'abstain': vote.abstain,
                     'not_present': vote.not_present,
-                    'result': vote.result}
+                    'result': vote.result,
+                    'is_outlier': vote.is_outlier,
+                    'has_outliers': vote.has_outlier_voters}
             })
     return JsonResponse(out, safe=False)

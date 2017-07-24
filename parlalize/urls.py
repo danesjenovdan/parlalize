@@ -6,6 +6,7 @@ from utils import getPersonDataAPI
 from parlaseje.utils import getSessionDataAPI
 from parlaskupine.utils_ import getPgDataAPI
 from parlalize.utils import modelsData, getPersonsCardDates, getOrgsCardDates, getAllStaticData, monitorMe
+from utils import recacheLastSession
 
 # admin.autodiscover()
 
@@ -22,6 +23,7 @@ urlpatterns = patterns('',
     (r'^v1/utils/getPersonCardDates/(?P<person_id>\d+)', getPersonsCardDates),
     (r'^v1/utils/getOrgsCardDates/(?P<org_id>\d+)', getOrgsCardDates),
     (r'^v1/utils/getAllStaticData/', getAllStaticData),
+    (r'^v1/utils/recacheLastSession/', recacheLastSession),
     (r'^v1/monitoring/', monitorMe),
 
 )

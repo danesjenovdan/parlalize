@@ -17,15 +17,16 @@ from parlaskupine.models import (Organization, WorkingBodies,
                                  VocabularySize as VocabularySizePG,
                                  StyleScores as StyleScoresPG)
 from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
-                              PresenceOfPG, AbsentMPs, VoteDetailed, Quote)
+                              PresenceOfPG, AbsentMPs, VoteDetailed, Quote, Question)
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
-                                DEBUG, API_OUT_DATE_FORMAT)
+                                DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL)
 from django.contrib.contenttypes.models import ContentType
 import requests
 import json
 import numpy as np
 import time
 import csv
+import itertools
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from parlalize.settings import SETTER_KEY
@@ -431,7 +432,7 @@ def getAllStaticData(request, force_render=False):
         PS_NP = ['poslanska skupina', 'nepovezani poslanec']
         date_ = datetime.now().strftime(API_DATE_FORMAT)
 
-        out = {'persons': {}, 'partys': {}, 'wbs': {}, 'sessions': {}}
+        out = {'persons': {}, 'partys': {}, 'wbs': {}, 'sessions': {}, 'ministrs': {}}
         for person in Person.objects.all():
             personData = getPersonData(person.id_parladata,
                                        date_)
@@ -444,6 +445,10 @@ def getAllStaticData(request, force_render=False):
         sessions = Session.objects.all()
         for session in sessions:
             out['sessions'][session.id_parladata] = session.getSessionData()
+
+        ministrs = MinisterStatic.objects.all()
+        for ministr in ministrs:
+            out['ministrs'][ministr.id] = ministr.getJsonData() 
 
         working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
         orgs = Organization.objects.filter(classification__in=working_bodies)
@@ -661,3 +666,35 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
         }
     result.update(card_owner_data)
     return result
+
+
+@lockSetter
+def recacheLastSession(request):
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/c/zadnja-seja/?forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(GLEJ_URL + '/sta/zadnja-seja/?forceRender=true')
+
+    return HttpResponse('check it out')
+
+
+def checkIfQuestionRecipinetsDuplication():
+    for q in list(Question.objects.all())[:100]:
+        recpt = list(q.recipient_persons_static.all())
+        for a, b in itertools.combinations(recpt, 2):
+            if a.getJsonData() == b.getJsonData():
+                print q.id
+
+
+def removeMinistrStaticDuplications():
+    m_ids = list(set(list(MinisterStatic.objects.all().values_list("person__id_parladata", flat=True))))
+    for m in m_ids:
+        ms = MinisterStatic.objects.filter(person__id_parladata=m)
+        ministrs = list(set(list(ms.values_list("ministry__id_parladata", flat=True))))
+        for ministry in ministrs:
+            mm = MinisterStatic.objects.filter(person__id_parladata=m,
+                                               ministry__id_parladata=ministry)
+            for for_del in mm[1:]:
+                for_del.delete()

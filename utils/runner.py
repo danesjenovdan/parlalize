@@ -462,11 +462,14 @@ def fastUpdate(fast=True, date_=None):
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
-
+            if dic['author_org_id']:
+                author_org = Organization.objects.get(id_parladata=dic['author_org_id'])
+            else:
+                author_org = None
             rec_posts = []
             for post in dic['recipient_posts']:
                 static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
-                                                       ministry__id_parladata=post['organization_id'])
+                                                       ministry__id_parladata=post['organization_id']).order_by('-created_for')
                 if static:
                     rec_posts.append(static[0])
             question = Question(person=person,
@@ -476,6 +479,7 @@ def fastUpdate(fast=True, date_=None):
                                 recipient_text=dic['recipient_text'],
                                 title=dic['title'],
                                 content_link=link,
+                                author_org=author_org,
                                 )
             question.save()
             question.recipient_persons.add(*rec_p)
@@ -602,9 +606,8 @@ def updateLastActivity(mps_ids):
     print 'set last activity for: ', mps_ids
     for mp in mps_ids:
         print mp
-        print setLastActivity(request_with_key, str(mp))
-        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '/?frame=true&altHeader=true&forceRender=true')
-        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '/?embed=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?frame=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?embed=true&altHeader=true&forceRender=true')
         print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?forceRender=true')
 
 
@@ -634,3 +637,4 @@ def recacheWBs():
     for wb in wbs:
         print wb
         print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?frame=true&altHeader=true&forceRender=true')
+

@@ -1608,58 +1608,43 @@ def getQuestionsOfPG(request, pg_id, date_=False):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        date_of = datetime.now().date()
+        date_of = datetime.now().date() + timedelta(days=1)
         date_ = date_of.strftime(API_DATE_FORMAT)
 
     end_of_day = date_of + timedelta(days=1)
-    questions = Question.objects.filter(start_time__lt=end_of_day)
+    questions = Question.objects.filter(start_time__lt=end_of_day,
+                                        author_org__id_parladata=pg_id)
 
-    personsData = {}
+    staticData = tryHard(BASE_URL + "/utils/getAllStaticData/").json()
+    personsStatic = staticData['persons']
+    ministrStatic = staticData['ministrs']
 
-    all_recipients = []
-    url = API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "")
-    membersOfPGRanges = reversed(tryHard(url).json())
-    i = 0
-    out = []
-    for pgMembersRange in membersOfPGRanges:
-        startTime = datetime.strptime(pgMembersRange["start_date"],
-                                      API_DATE_FORMAT)
-        endTime = datetime.strptime(pgMembersRange["end_date"],
-                                    API_DATE_FORMAT) + timedelta(hours=23,
-                                                                 minutes=59)
+    questions = questions.extra(select={'start_time_date': 'DATE(start_time)'})
+    dates = list(set(list(questions.values_list("start_time_date", flat=True))))
+    dates.sort()
+    data = {date: [] for date in dates}
+    all_authors = {}
+    all_recipients = list(questions.values_list('recipient_text',
+                                                flat=True))
+    for question in questions:
+        p_id = str(question.person.id_parladata)
+        temp_data = question.getQuestionData(ministrStatic)
+        author = personsStatic[p_id]
+        all_authors[p_id] = author
+        temp_data.update({'person': author})
+        data[question.start_time_date].append(temp_data)
 
-        rangeQuestions = questions.filter(start_time__lt=endTime,
-                                          start_time__gt=startTime,
-                                          person__id_parladata__in=pgMembersRange["members"][pg_id])
-        all_recipients += list(rangeQuestions.values_list('recipient_text',
-                                                          flat=True))
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'questions': data[date]}
+           for date in dates]
 
-        for t_date in rangeQuestions.datetimes('start_time', 'day').order_by("-start_time"):
-            thisRangeQ = rangeQuestions.filter(start_time__range=[t_date, t_date+timedelta(hours=23, minutes=59)]).order_by('-start_time')
-            questionsOnDate = []
-            for question in thisRangeQ:
-                i += 1
-                persons_id = question.person.id_parladata
-                try:
-                    personData = personsData[persons_id]
-                except KeyError as e:
-                    personData = getPersonData(persons_id, date_)
-                    personsData[persons_id] = personData
-                questionData = question.getQuestionData()
-                questionData.update({'person': personData})
-                questionsOnDate.append(questionData)
 
-            dayDataDict = {"date": t_date.strftime(API_OUT_DATE_FORMAT),
-                           "questions": questionsOnDate}
-            out.append(dayDataDict)
-    print i
-    # WORKAROUND: created_at is today.
     result = {
-        'results': out,
+        'results': list(reversed(out)),
         'created_for': out[-1]["date"] if out else date_,
         'created_at': date_,
         'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
-        'all_authors': [pData for pData in personsData.values()],
+        'all_authors': all_authors.values(),
         'all_recipients': list(set(all_recipients)),
         }
     return JsonResponse(result, safe=False)
@@ -1690,9 +1675,12 @@ def getListOfPGs(request, date_=None, force_render=False):
                 try:
                     pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
                     pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
+                    pg_obj["results"]["intra_disunion"] = json.loads(getDisunionOrgID(None, pg_id).content)
+                
                 except:
                     pg_obj["results"]["presence_sessions"] = None
                     pg_obj["results"]["presence_votes"] = None
+                    pg_obj["results"]["intra_disunion"] = None
 
                 try:
                     pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
@@ -1702,11 +1690,16 @@ def getListOfPGs(request, date_=None, force_render=False):
                     pg_obj["results"]["number_of_questions"] = json.loads(getNumberOfQuestions(None, pg_id, date_).content)["results"]["score"]
                 except:
                     pg_obj["results"]["number_of_questions"] = None
+                try:
+                    pg_obj["results"]["number_of_amendments"] = json.loads(getNumberOfAmendmetsOfPG(None, pg_id, date_).content)
+                except:
+                    pg_obj["results"]["number_of_amendments"] = None
 
                 try:
                     styleScores = json.loads(getStyleScoresPG(None, pg_id, date_).content)
                 except:
                     styleScores = None
+
                 pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
                 pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
                 pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
@@ -1911,3 +1904,40 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
         'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
+
+
+def getDisunionOrg(request, force_render=False):
+    result = []
+    data = tryHard(API_URL + '/getAllPGs/').json()
+    for org in data:
+        el = IntraDisunion.objects.filter(organization__id_parladata=org).values_list("maximum", flat=True)
+        if len(el) != 0:
+            suma = sum(map(float, el))/el.count()
+        else:
+            suma = 0
+        out = {
+        'organization': Organization.objects.get(id_parladata=org).getOrganizationData(),
+        'sum': suma
+        }
+        result.append(out)
+    return JsonResponse(result, safe=False)
+
+
+def getDisunionOrgID(request, pg_id):
+    el = IntraDisunion.objects.filter(organization__id_parladata=pg_id).values_list("maximum", flat=True)
+    if len(el) != 0:
+        suma = sum(map(float, el))/el.count()
+    else:
+        suma = 0
+    return JsonResponse(suma, safe=False)
+
+
+def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = ''
+    org = Organization.objects.get(id_parladata=pg_id)
+    count = org.amendments.filter(start_time__lte=date_of).count()
+    return JsonResponse(count, safe=False)
