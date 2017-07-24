@@ -121,6 +121,10 @@ def updateQuestions():
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
+            if dic['author_org_id']:
+                author_org = Organization.objects.get(id_parladata=dic['author_org_id'])
+            else:
+                author_org = None
             rec_posts = []
             for post in dic['recipient_posts']:
                 static = MinisterStatic.objects.filter(person__id=post['membership__person_id'],
@@ -131,6 +135,7 @@ def updateQuestions():
                                 session=session,
                                 start_time=dic['date'],
                                 id_parladata=dic['id'],
+                                author_org=author_org,
                                 recipient_text=dic['recipient_text'],
                                 title=dic['title'],
                                 content_link=link,
@@ -149,13 +154,19 @@ def updateQuestions():
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
+            if dic['author_org_id']:
+                author_org = Organization.objects.get(id_parladata=dic['author_org_id'])
+            else:
+                author_org = None
             rec_posts = []
             for post in dic['recipient_posts']:
                 static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
-                                                       ministry__id_parladata=post['organization_id'])
+                                                       ministry__id_parladata=post['organization_id']).order_by('-created_for')
                 if static:
                     rec_posts.append(static[0])
             question = Question.objects.get(id_parladata=dic["id"])
+            question.author_org = author_org
+            question.save()
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.add(*rec_posts)

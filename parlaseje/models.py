@@ -171,6 +171,11 @@ class Question(Activity):
     title = models.TextField(blank=True, null=True,
                              help_text='Words spoken')
 
+    author_org = models.ForeignKey('parlaskupine.Organization',
+                                   blank=True, null=True,
+                                   related_name='AuthorOrg',
+                                   help_text=_('Author organization'))
+
     recipient_persons = models.ManyToManyField('parlaposlanci.Person',
                                                blank=True,
                                                help_text='Recipient persons (if it\'s a person).',
@@ -187,10 +192,13 @@ class Question(Activity):
                                       null=True,
                                       help_text='Recipient name as written on dz-rs.si')
 
-    def getQuestionData(self):
+    def getQuestionData(self, ministerStatic = None):
         persons = []
         orgs = []
-        persons = [ministr.getJsonData() for ministr in self.recipient_persons_static.all()]
+        if ministerStatic:
+            persons = [ministerStatic[str(ministr.id)] for ministr in self.recipient_persons_static.all()]
+        else:
+            persons = [ministr.getJsonData() for ministr in self.recipient_persons_static.all()]
         for org in self.recipient_organizations.all():
             orgs.append(org.getOrganizationData())
         return {'title': self.title,
