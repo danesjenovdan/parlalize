@@ -553,6 +553,8 @@ def fastUpdate(fast=True, date_=None):
         print 'recache'
         updatePagesS(list(set(s_update)))
         requests.get('https://parlameter.si/fetch/sps?t=vkSzv8Nu4eDkLBk7kUw4BBhyLjysJm')
+        if not fast:
+            updateWB()
 
     p_update += list(speeches.values_list("person__id_parladata", flat=True))
 
