@@ -17,7 +17,7 @@ import numpy as np
 from utils.speech import WordAnalysis
 from parlalize.utils import *
 from parlalize.utils import (tryHard, lockSetter, prepareTaggedBallots,
-                             getAllStaticData)
+                             getAllStaticData, setCardData)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY)
 from parlaskupine.models import *
@@ -1656,62 +1656,72 @@ def getListOfPGs(request, date_=None, force_render=False):
         key = date_
     else:
         date_of = datetime.now().date()
-        date_=date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(API_DATE_FORMAT)
         key = date_
 
-    c_data = cache.get("pg_list_" + key)
+    c_data = cache.get('pg_list_' + key)
     if c_data and not force_render:
         data = c_data
     else:
-        allPGs = tryHard(API_URL+'/getAllPGsExt/').json().keys()
-        pgs = tryHard(API_URL+'/getMembersOfPGsRanges/'+date_).json()[-1]["members"]
+        allPGs = tryHard(API_URL + '/getAllPGsExt/').json().keys()
+        url = API_URL + '/getMembersOfPGsRanges/' + date_
+        pgs = tryHard(url).json()[-1]['members']
+        list_of_cards = [{'method': getPercentOFAttendedSessionPG,
+                          'data_path': ('sessions', 'organization_value'),
+                          'out_path': ('results', 'presence_sessions')},
+                         {'method': getPercentOFAttendedSessionPG,
+                          'data_path': ('votes', 'organization_value'),
+                          'out_path': ('results', 'presence_votes')},
+                         {'method': getDisunionOrgID,
+                          'data_path': (),
+                          'out_path': ('results', 'intra_disunion')},
+                         {'method': getVocabularySize,
+                          'data_path': ('results', 'score'),
+                          'out_path': ('results', 'vocabulary_size')},
+                         {'method': getNumberOfQuestions,
+                          'data_path': ('results', 'score'),
+                          'out_path': ('results', 'number_of_questions')},
+                         {'method': getNumberOfAmendmetsOfPG,
+                          'data_path': (),
+                          'out_path': ('results', 'number_of_amendments')},
+                         {'method': getStyleScoresPG,
+                          'data_path': ('results', 'privzdignjeno'),
+                          'out_path': ('results', 'privzdignjeno')},
+                         {'method': getStyleScoresPG,
+                          'data_path': ('results', 'preprosto'),
+                          'out_path': ('results', 'preprosto')},
+                         {'method': getStyleScoresPG,
+                          'data_path': ('results', 'problematicno'),
+                          'out_path': ('results', 'problematicno')},
+                         ]
         data = []
         for pg, members in pgs.items():
             if pg in allPGs and members:
                 pg_obj = {}
-                pg_obj["results"] = {}
+                pg_obj['results'] = {}
                 pg_id = pg
-                pg_obj["party"] = Organization.objects.get(id_parladata=pg).getOrganizationData()
-                try:
-                    pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
-                    pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
-                    pg_obj["results"]["intra_disunion"] = json.loads(getDisunionOrgID(None, pg_id).content)
-                
-                except:
-                    pg_obj["results"]["presence_sessions"] = None
-                    pg_obj["results"]["presence_votes"] = None
-                    pg_obj["results"]["intra_disunion"] = None
+                org = Organization.objects.get(id_parladata=pg)
+                pg_obj['party'] = org.getOrganizationData()
 
-                try:
-                    pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
-                except:
-                    pg_obj["results"]["vocabulary_size"] = None
-                try:
-                    pg_obj["results"]["number_of_questions"] = json.loads(getNumberOfQuestions(None, pg_id, date_).content)["results"]["score"]
-                except:
-                    pg_obj["results"]["number_of_questions"] = None
-                try:
-                    pg_obj["results"]["number_of_amendments"] = json.loads(getNumberOfAmendmetsOfPG(None, pg_id, date_).content)
-                except:
-                    pg_obj["results"]["number_of_amendments"] = None
+                # load data from cards
+                for card in list_of_cards:
+                    print card
+                    setCardData(pg_obj,
+                                card['method'],
+                                pg_id,
+                                date_,
+                                card['data_path'],
+                                card['out_path'])
 
-                try:
-                    styleScores = json.loads(getStyleScoresPG(None, pg_id, date_).content)
-                except:
-                    styleScores = None
-
-                pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
-                pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
-                pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
-                pg_obj["results"]["seat_count"] = len(members)
-                
-
+                pg_obj['results']['seat_count'] = len(members)
 
                 data.append(pg_obj)
-        data = sorted(data, key=lambda k: k['results']["seat_count"], reverse=True)
-        cache.set("pg_list_" + key, data, 60 * 60 * 48) 
+        data = sorted(data,
+                      key=lambda k: k['results']['seat_count'],
+                      reverse=True)
+        cache.set('pg_list_' + key, data, 60 * 60 * 48)
 
-    return JsonResponse({"data": data})
+    return JsonResponse({'data': data})
 
 
 @lockSetter
