@@ -698,3 +698,21 @@ def removeMinistrStaticDuplications():
                                                ministry__id_parladata=ministry)
             for for_del in mm[1:]:
                 for_del.delete()
+
+
+def setCardData(dic, method, pg_id, date_, path, out_keys):
+    """
+    Mathod is used for get card data. Find data in dictionaty by path and
+    set value in a nested dictionary (dic) with given a list (out_keys) of indices
+    """
+    try:
+        card_data = json.loads(method(None, pg_id, date_).content)
+        # get data
+        for key in path:
+            card_data = card_data[key]
+    except:
+        card_data = None
+    # set data
+    for key in out_keys[:-1]:
+        dic = dic.setdefault(key, {})
+    dic[out_keys[-1]] = card_data
