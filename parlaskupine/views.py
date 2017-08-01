@@ -16,13 +16,16 @@ import numpy as np
 
 from utils.speech import WordAnalysis
 from parlalize.utils import *
-from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots, getAllStaticData
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, API_OUT_DATE_FORMAT, SETTER_KEY
+from parlalize.utils import (tryHard, lockSetter, prepareTaggedBallots,
+                             getAllStaticData, setCardData)
+from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
+                                API_OUT_DATE_FORMAT, SETTER_KEY)
 from parlaskupine.models import *
 from parlaseje.models import Activity, Session, Vote, Speech, Question
 from parlaposlanci.models import Person
 from parlaposlanci.views import getMPsList
-from kvalifikatorji.scripts import countWords, getCountListPG, getScores, problematicno, privzdignjeno, preprosto
+from kvalifikatorji.scripts import (countWords, getCountListPG, getScores,
+                                    problematicno, privzdignjeno, preprosto)
 
 
 # Create your views here.
@@ -30,30 +33,32 @@ from kvalifikatorji.scripts import countWords, getCountListPG, getScores, proble
 def setBasicInfOfPG(request, pg_id, date_):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        data = tryHard(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_).json()
+        url = API_URL + '/getBasicInfOfPG/' + str(pg_id) + '/' + date_
+        data = tryHard(url).json()
     else:
         date_of = datetime.now().date()
-        data = tryHard(API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_of).json()
+        url = API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_of
+        data = tryHard(url).json()
 
     headOfPG = 0
     viceOfPG = []
-    if data['HeadOfPG'] != None:
+    if data['HeadOfPG'] is not None:
         headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG']))
     else:
         headOfPG = None
 
     if data['ViceOfPG']:
         for vice in data['ViceOfPG']:
-            if vice != None:
+            if vice is not None:
                 viceOfPG.append(vice)
             else:
                 viceOfPG.append(None)
     else:
                 viceOfPG.append(None)
-
+    org = Organization.objects.get(id_parladata=int(pg_id))
     result = saveOrAbortNew(model=PGStatic,
                             created_for=date_of,
-                            organization=Organization.objects.get(id_parladata=int(pg_id)),
+                            organization=org,
                             headOfPG=headOfPG,
                             viceOfPG=viceOfPG,
                             numberOfSeats=data['NumberOfSeats'],
@@ -203,20 +208,19 @@ def getBasicInfOfPG(request, pg_id, date=None):
         # else:
             # viceOfPG.append(0)
 
-    data = {
-           'party':card.organization.getOrganizationData(),
-           'created_at': card.created_at.strftime(API_DATE_FORMAT),
-           'created_for': card.created_for.strftime(API_DATE_FORMAT),
-           'headOfPG':headOfPG,
-           'viceOfPG':viceOfPG,
-           'numberOfSeats':card.numberOfSeats,
-           'allVoters':card.allVoters,
-           'social':{
-           'facebook':card.facebook,
-           'twitter':card.twitter,
-           'email':card.email
-           }
-           }
+    data = {'party': card.organization.getOrganizationData(),
+            'created_at': card.created_at.strftime(API_DATE_FORMAT),
+            'created_for': card.created_for.strftime(API_DATE_FORMAT),
+            'headOfPG': headOfPG,
+            'viceOfPG': viceOfPG,
+            'numberOfSeats': card.numberOfSeats,
+            'allVoters': card.allVoters,
+            'social': {
+                'facebook': card.facebook,
+                'twitter': card.twitter,
+                'email': card.email
+                }
+            }
 
     return JsonResponse(data)
 
@@ -224,13 +228,18 @@ def getBasicInfOfPG(request, pg_id, date=None):
 @lockSetter
 def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
     if date_:
-        isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
+        url = API_URL + '/isVoteOnDay/' + date_
+        isNewVote = tryHard(url).json()['isVote']
         print isNewVote
         if not isNewVote:
-            return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
+            return JsonResponse({'alliswell': True,
+                                 'status': 'Ni glasovanja na ta dan',
+                                 'saved': False})
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        date_of = findDatesFromLastCard(PercentOFAttendedSession, pg_id, datetime.now().date())[0]
+        date_of = findDatesFromLastCard(PercentOFAttendedSession,
+                                        pg_id,
+                                        datetime.now().date())[0]
 
     allSum = {}
     data = {}
@@ -238,42 +247,49 @@ def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
     membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
     data = tryHard(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
 
-    sessions = {pg:[] for pg in membersOfPG if membersOfPG[pg]}
-    votes = {pg:[] for pg in membersOfPG if membersOfPG[pg]}
+    sessions = {pg: [] for pg in membersOfPG if membersOfPG[pg]}
+    votes = {pg: [] for pg in membersOfPG if membersOfPG[pg]}
     for pg in membersOfPG:
         if not membersOfPG[pg]:
             continue
         for member in membersOfPG[pg]:
-            if str(member) in data["sessions"].keys():
-                sessions[pg].append(data["sessions"][str(member)])
-                votes[pg].append(data["votes"][str(member)])
+            if str(member) in data['sessions'].keys():
+                sessions[pg].append(data['sessions'][str(member)])
+                votes[pg].append(data['votes'][str(member)])
         sessions[pg] = sum(sessions[pg])/len(sessions[pg])
         votes[pg] = sum(votes[pg])/len(votes[pg])
 
     thisMPSessions = sessions[pg_id]
     maximumSessions = max(sessions.values())
-    maximumPGSessions = [pgId for pgId in sessions if sessions[pgId]==maximumSessions]
-    averageSessions = sum(data["sessions"].values()) / len(data["sessions"])
+    maximumPGSessions = [pgId
+                         for pgId
+                         in sessions
+                         if sessions[pgId] == maximumSessions]
+    averageSessions = sum(data['sessions'].values()) / len(data['sessions'])
 
     thisMPVotes = votes[pg_id]
     maximumVotes = max(votes.values())
-    maximumPGVotes = [pgId for pgId in votes if votes[pgId]==maximumVotes]
-    averageVotes = sum(data["votes"].values()) / len(data["votes"])
+    maximumPGVotes = [pgId
+                      for pgId
+                      in votes
+                      if votes[pgId] == maximumVotes]
+    averageVotes = sum(data['votes'].values()) / len(data['votes'])
+    org = Organization.objects.get(id_parladata=int(pg_id))
 
-    #kaksen bo interfejs ko bo imela prav ta PG maksimum
     result = saveOrAbortNew(model=PercentOFAttendedSession,
-                         created_for=date_of,
-                         organization=Organization.objects.get(id_parladata=int(pg_id)),
-                         organization_value_sessions = thisMPSessions,
-                         maxPG_sessions=maximumPGSessions,
-                         average_sessions=averageSessions,
-                         maximum_sessions=maximumSessions,
-                         organization_value_votes = thisMPVotes,
-                         maxPG_votes=maximumPGVotes,
-                         average_votes=averageVotes,
-                         maximum_votes=maximumVotes)
+                            created_for=date_of,
+                            organization=org,
+                            organization_value_sessions=thisMPSessions,
+                            maxPG_sessions=maximumPGSessions,
+                            average_sessions=averageSessions,
+                            maximum_sessions=maximumSessions,
+                            organization_value_votes=thisMPVotes,
+                            maxPG_votes=maximumPGVotes,
+                            average_votes=averageVotes,
+                            maximum_votes=maximumVotes)
 
     return JsonResponse({'alliswell': True})
+
 
 def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
     """
@@ -347,25 +363,28 @@ def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
     }
     """
     card = getPGCardModelNew(PercentOFAttendedSession, pg_id, date_)
+    max_s_orgs = [Organization.objects.get(id_parladata=pg).getOrganizationData()
+                  for pg in card.maxPG_sessions]
+    max_v_orgs = [Organization.objects.get(id_parladata=pg).getOrganizationData()
+                  for pg in card.maxPG_votes]
 
     # uprasi ce isto kot pri personu razdelimo
-    data = {
-           'organization': card.organization.getOrganizationData(),
-           'created_at': card.created_at.strftime(API_DATE_FORMAT),
-           'created_for': card.created_for.strftime(API_DATE_FORMAT),
-           "sessions":{
+    data = {'organization': card.organization.getOrganizationData(),
+            'created_at': card.created_at.strftime(API_DATE_FORMAT),
+            'created_for': card.created_for.strftime(API_DATE_FORMAT),
+            'sessions': {
                 'organization_value': card.organization_value_sessions,
-                'maxPG': [Organization.objects.get(id_parladata=pg).getOrganizationData() for pg in card.maxPG_sessions],
+                'maxPG': max_s_orgs,
                 'average': card.average_sessions,
                 'maximum': card.maximum_sessions,
                 },
-            "votes":{
+            'votes': {
                 'organization_value': card.organization_value_votes,
-                'maxPG': [Organization.objects.get(id_parladata=pg).getOrganizationData() for pg in card.maxPG_votes],
+                'maxPG': max_v_orgs,
                 'average': card.average_votes,
                 'maximum': card.maximum_votes,
                 }
-           }
+            }
 
     return JsonResponse(data)
 
@@ -378,16 +397,17 @@ def setMPsOfPG(request, pg_id, date_=None):
         date_of = datetime.now().date()
         date_ = datetime.now().date()
 
-    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+ date_).json()
-
+    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/' + date_).json()
+    org = Organization.objects.get(id_parladata=pg_id)
     result = saveOrAbortNew(model=MPOfPg,
-                        organization=Organization.objects.get(id_parladata=pg_id),
-                        id_parladata=pg_id,
-                        MPs =  membersOfPG[pg_id],
-                        created_for=date_of
-                        )
+                            organization=org,
+                            id_parladata=pg_id,
+                            MPs=membersOfPG[pg_id],
+                            created_for=date_of
+                            )
 
     return JsonResponse({'alliswell': True})
+
 
 def getMPsOfPG(request, pg_id, date_=None):
     """
@@ -475,15 +495,18 @@ def getMPsOfPG(request, pg_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-        date_ = ""
+        date_ = ''
 
     card = getPGCardModelNew(MPOfPg, pg_id, date_)
     ids = card.MPs
-    result = sorted([getPersonData(MP, date_) for MP in ids], key=lambda k: k['name'])
-    return JsonResponse({"results": result,
-                         "party": card.organization.getOrganizationData(),
-                         "created_at": card.created_at.strftime(API_DATE_FORMAT),
-                         "created_for": card.created_for.strftime(API_DATE_FORMAT)})
+    result = sorted([getPersonData(MP, date_)
+                     for MP in ids], key=lambda k: k['name'])
+    created_at = card.created_at.strftime(API_DATE_FORMAT)
+    created_for = card.created_for.strftime(API_DATE_FORMAT)
+    return JsonResponse({'results': result,
+                         'party': card.organization.getOrganizationData(),
+                         'created_at': created_at,
+                         'created_for': created_for})
 
 
 def getSpeechesOfPG(request, pg_id, date_=False):
@@ -969,97 +992,74 @@ def getSpeechesOfPG(request, pg_id, date_=False):
         date_ = date_of.strftime(API_DATE_FORMAT)
 
     speeches_q = Speech.getValidSpeeches(date_of + timedelta(days=1))
-
-    membersOfPGRanges = reversed(tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "")).json())
+    url = API_URL+'/getMembersOfPGsRanges' + ('/'+date_ if date_ else '')
+    membersOfPGRanges = reversed(tryHard(url).json())
     out = []
     for pgMembersRange in membersOfPGRanges:
-        startTime = datetime.strptime(pgMembersRange["start_date"],
+        startTime = datetime.strptime(pgMembersRange['start_date'],
                                       API_DATE_FORMAT)
-        endTime = datetime.strptime(pgMembersRange["end_date"],
+        endTime = datetime.strptime(pgMembersRange['end_date'],
                                     API_DATE_FORMAT) + timedelta(hours=23,
                                                                  minutes=59)
+        members = pgMembersRange['members'][pg_id]
         speeches = [[speech
-                    for speech
-                    in speeches_q.filter(person__id_parladata__in=pgMembersRange["members"][pg_id],
-                                         start_time__range=[t_date, t_date+timedelta(days=1)]).order_by("-id_parladata")]
+                     for speech
+                     in speeches_q.filter(person__id_parladata__in=members,
+                                          start_time__range=[t_date, t_date+timedelta(days=1)]).order_by('-id_parladata')]
                     for t_date
                     in speeches_q.filter(start_time__lte=endTime,
                                          start_time__gte=startTime,
-                                         person__id_parladata__in=pgMembersRange["members"][pg_id]).datetimes('start_time', 'day')]
+                                         person__id_parladata__in=members).datetimes('start_time', 'day')]
         for day in reversed(speeches):
-            #dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "sessions":[]}
-            dayDataDict = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "sessions":{}}
+            #dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT), 'sessions':[]}
+            dayDataDict = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT), 'sessions':{}}
             addedPersons = []
             addedSessions = []
             for speech in day:
-                #debug
-                #print addedPersons, addedSessions
-                #print dayData
-                #print "add", speech.person.id_parladata, speech.session.id_parladata
-                #print speech.id_parladata, speech.start_time
-                #print "index", addedPersons.index(speech.person.id_parladata), addedSessions.index(speech.session.id_parladata)
-                
-                #if speech.session.id_parladata in addedSessions:
-                if speech.session.id_parladata in dayDataDict["sessions"].keys():
-                    if speech.person.id_parladata in dayDataDict["sessions"][speech.session.id_parladata]["speakers"].keys():
-                        #session = dayData["sessions"][addedSessions.index(speech.session.id_parladata)]
-                        #speaker = session["speakers"][addedPersons.index(speech.person.id_parladata)]
-                        #speaker = ["speeches"].append(speech.id_parladata)
-
-                        session = dayDataDict["sessions"][speech.session.id_parladata]
-                        speaker = session["speakers"][speech.person.id_parladata]
-                        speaker["speeches"].append(speech.id_parladata)
+                if speech.session.id_parladata in dayDataDict['sessions'].keys():
+                    if speech.person.id_parladata in dayDataDict['sessions'][speech.session.id_parladata]['speakers'].keys():
+                        session = dayDataDict['sessions'][speech.session.id_parladata]
+                        speaker = session['speakers'][speech.person.id_parladata]
+                        speaker['speeches'].append(speech.id_parladata)
                     else:
-                        #addedPersons.append(speech.person.id_parladata)
-                        #dayData["sessions"][addedSessions.index(speech.session.id_parladata)]["speakers"].append({"speeches":[speech.id_parladata],
-                        #                        "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))})
-                        session = dayDataDict["sessions"][speech.session.id_parladata]
-                        session["speakers"][speech.person.id_parladata] = {
-                            "speeches":[speech.id_parladata],
-                            "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))
+                        session = dayDataDict['sessions'][speech.session.id_parladata]
+                        session['speakers'][speech.person.id_parladata] = {
+                            'speeches': [speech.id_parladata],
+                            'person': getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))
                         }
                 else:
-                    #reset persons for each session on date
-                    #addedPersons = []
-                    #addedSessions.append(speech.session.id_parladata)
-                    #addedPersons.append(speech.person.id_parladata)
-
-                    dayDataDict["sessions"][speech.session.id_parladata]={
-                        "session_name": speech.session.name,
-                        "session_org": speech.session.organization.name,
-                        "session_id": speech.session.id_parladata, 
-                        "speakers":{ 
-                            speech.person.id_parladata:{
-                                "speeches":[speech.id_parladata],
-                                "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))
+                    dayDataDict['sessions'][speech.session.id_parladata] = {
+                        'session_name': speech.session.name,
+                        'session_org': speech.session.organization.name,
+                        'session_id': speech.session.id_parladata,
+                        'speakers': {
+                            speech.person.id_parladata: {
+                                'speeches': [speech.id_parladata],
+                                'person': getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))
                             }
                         }
                     }
-
-                    #dayData["sessions"].append({"session_name": speech.session.name,"session_id": speech.session.id_parladata, "speakers":[{"speeches":[speech.id_parladata],
-                    #                            "person":getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))}]})
-            #out.append(dayData)
             out.append(dayDataDict)
-            if len(out)>14:
+            if len(out) > 14:
                 break
-        if len(out)>14:
+        if len(out) > 14:
             break
 
     #dict to list for sorting in front
     for day in out:
-        ses_ids = day["sessions"].keys()
+        ses_ids = day['sessions'].keys()
         for session in ses_ids:
-            day["sessions"][session]["speakers"] = sorted(day["sessions"][session]["speakers"].values(), key=lambda k,: k["person"]["name"], reverse=False)
-        ses_order_ids = Session.objects.filter(id_parladata__in=ses_ids).order_by("-start_time").values_list("id_parladata", flat=True)
-        temp_day_order = [day["sessions"][s_id] for s_id in ses_order_ids]
-        day["sessions"] = temp_day_order
+            day['sessions'][session]['speakers'] = sorted(day['sessions'][session]['speakers'].values(), key=lambda k,: k['person']['name'], reverse=False)
+        ses_order_ids = Session.objects.filter(id_parladata__in=ses_ids).order_by('-start_time').values_list('id_parladata', flat=True)
+        temp_day_order = [day['sessions'][s_id] for s_id in ses_order_ids]
+        day['sessions'] = temp_day_order
 
     # WORKAROUND: created_at is today.
     result = {
         'results': out,
-        "created_for": out[-1]["date"],
-        "created_at": date_,
-        "party": Organization.objects.get(id_parladata=pg_id).getOrganizationData()
+        'created_for': out[-1]['date'],
+        'created_at': date_,
+        'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData()
         }
     return JsonResponse(result, safe=False)
 
@@ -1180,46 +1180,75 @@ def setWorkingBodies(request, org_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-    print "set "+org_id+" "+date_
-    members = tryHard(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
-    if not len(members["president"]) or not len(members["members"]) or not len(members["vice_president"]):
-        return JsonResponse({'alliswell': False, "status": {"president_count": len(members["president"]),
-                                                            "vice_president": len(members["vice_president"]),
-                                                            "members": len(members["members"]),
-                                                            "viceMember": len(members['viceMember'])
-                                                            }})
+    url = API_URL + '/getOrganizationRolesAndMembers/' + org_id + (('/'+date_) if date_ else '')
+    members = tryHard(url).json()
+    if not len(members['president']) or not len(members['members']) or not len(members['vice_president']):
+        return JsonResponse({'alliswell': False,
+                             'status': {'president_count': len(members['president']),
+                                        'vice_president': len(members['vice_president']),
+                                        'members': len(members['members']),
+                                        'viceMember': len(members['viceMember'])
+                                        }})
     out = {}
-    name = members.pop("name")
+    name = members.pop('name')
     all_members = [member for role in members.values() for member in role]
     coalitionPGs = tryHard(API_URL+'/getCoalitionPGs/').json()
     membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
-    sessions = tryHard(API_URL+'/getSessionsOfOrg/'+org_id+(("/"+date_) if date_ else "")).json()
-    coal_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["coalition"]}
-    oppo_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["opposition"]}
+    sessions = tryHard(API_URL+'/getSessionsOfOrg/'+org_id+(('/'+date_) if date_ else '')).json()
+    coal_pgs = {str(pg): [member
+                          for member
+                          in membersOfPG[str(pg)]
+                          if member
+                          in all_members]
+                for pg
+                in coalitionPGs['coalition']}
+    oppo_pgs = {str(pg): [member
+                          for member
+                          in membersOfPG[str(pg)]
+                          if member
+                          in all_members]
+                for pg
+                in coalitionPGs['opposition']}
 
     coal_members = sum([len(member) for member in coal_pgs.values()])
     oppo_members = sum([len(member) for member in oppo_pgs.values()])
 
-    kol = 100.0/float(coal_members+oppo_members)
-    
-    seats = [{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "coalition"}for pg_id, members_list in coal_pgs.items() if len(members_list)>0]+[{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "opposition"}for pg_id, members_list in oppo_pgs.items() if len(members_list)>0]
-    out["info"] = {role: [member for member in members_list] for role, members_list in members.items()}
-    out["ratio"] = {"coalition": coal_members*kol, "opposition": oppo_members*kol}
-    out["seats_per_pg"] = list(reversed(sorted(seats, key=lambda s: s["seats"])))
-    out["sessions"] = [{"id": session["id"], "name": session["name"], "date": session["start_time"]} for session in sessions]
-    out["name"] = name
+    kol = 100.0 / float(coal_members + oppo_members)
+
+    seats = [{'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
+              'seats': len(members_list), 'coalition': 'coalition'}
+             for pg_id, members_list
+             in coal_pgs.items()
+             if len(members_list) > 0
+             ] + [{'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
+                   'seats': len(members_list), 'coalition': 'opposition'}
+                  for pg_id, members_list
+                  in oppo_pgs.items() if len(members_list) > 0]
+    out['info'] = {role: [member
+                          for member
+                          in members_list]
+                   for role, members_list
+                   in members.items()}
+    out['ratio'] = {'coalition': coal_members * kol,
+                    'opposition': oppo_members * kol}
+    out['seats_per_pg'] = list(reversed(sorted(seats,
+                                               key=lambda s: s['seats'])))
+    out['sessions'] = [{'id': session['id'],
+                        'name': session['name'],
+                        'date': session['start_time']} for session in sessions]
+    out['name'] = name
     final_response = saveOrAbortNew(
         WorkingBodies,
         created_for=date_of,
         organization=Organization.objects.get(id_parladata=org_id),
-        president = Person.objects.get(id_parladata=out["info"]["president"][0]),
-        vice_president = out["info"]["vice_president"],
-        members = out["info"]["members"],
-        viceMember = out["info"]["viceMember"],
-        coal_ratio = coal_members*kol,
-        oppo_ratio = oppo_members*kol,
-        seats = list(reversed(sorted(seats, key=lambda s: s["seats"]))),
-        sessions = [session["id"] for session in sessions],
+        president=Person.objects.get(id_parladata=out['info']['president'][0]),
+        vice_president=out['info']['vice_president'],
+        members=out['info']['members'],
+        viceMember=out['info']['viceMember'],
+        coal_ratio=coal_members*kol,
+        oppo_ratio=oppo_members*kol,
+        seats=list(reversed(sorted(seats, key=lambda s: s['seats']))),
+        sessions=[session['id'] for session in sessions],
     )
     return JsonResponse(out)
 
@@ -1233,23 +1262,23 @@ def getWorkingBodies(request, org_id, date_=None):
     sessions = [session.getSessionData()
                 for session
                 in Session.objects.filter(organizations__id_parladata=org_id,
-                                          start_time__lte=date_of).order_by("-start_time")]
+                                          start_time__lte=date_of).order_by('-start_time')]
 
     for session in sessions:
-        session.update({"votes": True if Vote.objects.filter(session__id_parladata=session["id"]) else False, 
-                        "speeches": True if Speech.objects.filter(session__id_parladata=session["id"]) else False})
+        session.update({'votes': True if Vote.objects.filter(session__id_parladata=session['id']) else False,
+                        'speeches': True if Speech.objects.filter(session__id_parladata=session['id']) else False})
 
-    return JsonResponse({"organization": workingBodies.organization.getOrganizationData(),
+    return JsonResponse({'organization': workingBodies.organization.getOrganizationData(),
                          'created_at': workingBodies.created_at.strftime(API_DATE_FORMAT),
                          'created_for': workingBodies.created_for.strftime(API_DATE_FORMAT),
-                         "info": {"president": getPersonData(workingBodies.president.id_parladata),
-                                  "vice_president": sorted([getPersonData(person) for person in workingBodies.vice_president], key=lambda k: k['name']),
-                                  "members": sorted([getPersonData(person) for person in workingBodies.members], key=lambda k: k['name']),
-                                  "viceMember": sorted([getPersonData(person) for person in workingBodies.viceMember], key=lambda k: k['name'])},
-                         "ratio":{"coalition": workingBodies.coal_ratio,
-                                  "opposition": workingBodies.oppo_ratio},
-                         "seats_per_pg": workingBodies.seats,
-                         "sessions": sessions})
+                         'info': {'president': getPersonData(workingBodies.president.id_parladata),
+                                  'vice_president': sorted([getPersonData(person) for person in workingBodies.vice_president], key=lambda k: k['name']),
+                                  'members': sorted([getPersonData(person) for person in workingBodies.members], key=lambda k: k['name']),
+                                  'viceMember': sorted([getPersonData(person) for person in workingBodies.viceMember], key=lambda k: k['name'])},
+                         'ratio': {'coalition': workingBodies.coal_ratio,
+                                   'opposition': workingBodies.oppo_ratio},
+                         'seats_per_pg': workingBodies.seats,
+                         'sessions': sessions})
 
 
 def getWorkingBodies_live(request, org_id, date_=None):
@@ -1257,26 +1286,56 @@ def getWorkingBodies_live(request, org_id, date_=None):
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-    members = tryHard(API_URL+"/getOrganizationRolesAndMembers/"+org_id+(("/"+date_) if date_ else "")).json()
+    url = API_URL+'/getOrganizationRolesAndMembers/'+org_id+(('/'+date_) if date_ else '')
+    members = tryHard(url).json()
     out = {}
-    name = members.pop("name")
+    name = members.pop('name')
     all_members = [member for role in members.values() for member in role]
     coalitionPGs = tryHard(API_URL+'/getCoalitionPGs/').json()
     membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
-    sessions = tryHard(API_URL+'/getSessionsOfOrg/'+org_id+(("/"+date_) if date_ else "")).json()
-    coal_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["coalition"]}
-    oppo_pgs = {str(pg):[member for member in membersOfPG[str(pg)] if member in all_members] for pg in coalitionPGs["opposition"]}
+    sessions = tryHard(API_URL+'/getSessionsOfOrg/'+org_id+(('/'+date_) if date_ else '')).json()
+    coal_pgs = {str(pg): [member
+                          for member
+                          in membersOfPG[str(pg)]
+                          if member
+                          in all_members]
+                for pg
+                in coalitionPGs['coalition']}
+    oppo_pgs = {str(pg): [member
+                          for member
+                          in membersOfPG[str(pg)]
+                          if member
+                          in all_members]
+                for pg in coalitionPGs['opposition']}
 
     coal_members = sum([len(member) for member in coal_pgs.values()])
     oppo_members = sum([len(member) for member in oppo_pgs.values()])
 
     kol = 100.0/float(coal_members+oppo_members)
-    seats = [{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "coalition"}for pg_id, members_list in coal_pgs.items() if len(members_list)>0]+[{"party":Organization.objects.get(id_parladata=pg_id).getOrganizationData(), "seats": len(members_list), "coalition": "opposition"}for pg_id, members_list in oppo_pgs.items() if len(members_list)>0]
-    out["info"] = {role: [getPersonData(member) for member in members_list] for role, members_list in members.items()}
-    out["ratio"] = {"coalition": coal_members*kol, "opposition": oppo_members*kol}
-    out["seats_per_pg"] = list(reversed(sorted(seats, key=lambda s: s["seats"])))
-    out["sessions"] = [{"id": session["id"], "name": session["name"], "date": session["start_time"]} for session in sessions]
-    out["name"] = name
+    seats = [{'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
+              'seats': len(members_list), 'coalition': 'coalition'}
+             for pg_id, members_list
+             in coal_pgs.items()
+             if len(members_list) > 0] + [{'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
+                                           'seats': len(members_list), 'coalition': 'opposition'}
+                                          for pg_id, members_list
+                                          in oppo_pgs.items()
+                                          if len(members_list) > 0]
+
+    out['info'] = {role: [getPersonData(member)
+                          for member
+                          in members_list]
+                   for role, members_list
+                   in members.items()}
+    out['ratio'] = {'coalition': coal_members * kol,
+                    'opposition': oppo_members * kol}
+    out['seats_per_pg'] = list(reversed(sorted(seats, key=lambda s: s['seats'])))
+    out['sessions'] = [{'id': session['id'],
+                        'name': session['name'],
+                        'date': session['start_time']}
+                       for session
+                       in sessions]
+    out['name'] = name
     return JsonResponse(out)
 
 
@@ -1288,7 +1347,9 @@ def getTaggedBallots(request, pg_id, date_=None):
         date_ = ''
     b = Ballot.objects.filter(org_voter__id_parladata=pg_id,
                               start_time__lte=date_of)
-    b_s = [model_to_dict(i, fields=['vote', 'option', 'id_parladata']) for i in b]
+    b_s = [model_to_dict(i, fields=['vote', 'option', 'id_parladata'])
+           for i
+           in b]
     b_s = {bal['vote']: (bal['id_parladata'], bal['option']) for bal in b_s}
     org = Organization.objects.get(id_parladata=pg_id)
     org_data = {'party': org.getOrganizationData()}
@@ -1298,87 +1359,31 @@ def getTaggedBallots(request, pg_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
-#Deprecated
-@lockSetter
-def setVocabularySizeALL_(request, date_):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        date_of = datetime.now().date()
-        date_=""
-
-#    thisperson = Person.objects.get(id_parladata=int(person_id))
-
-    mps = tryHard(API_URL+'/getMPs/'+date_).json()
-    membersOfPGsRanges = tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "/")).json()
-    print "setVocabularySizeALL " + date_
-    text = {}
-    vocabulary_sizes = []
-    result = {}
-    for pgMembersRange in membersOfPGsRanges:
-        print "___" + pgMembersRange["start_date"]
-        for pg in pgMembersRange["members"].keys():
-            for member in pgMembersRange["members"][pg]: 
-                speeches = tryHard(API_URL+'/getSpeechesInRange/' + str(member) + "/" + pgMembersRange["start_date"] + "/" + pgMembersRange["end_date"]).json()
-                if pg in text.keys():
-                    text[pg] += ''.join([speech['content'] for speech in speeches])
-                else:
-                    text[pg] = ''.join([speech['content'] for speech in speeches])
-                    
-    for pg, words in text.items():
-        vocabulary_sizes.append({'pg': pg, 'vocabulary_size': len(countWords(words, Counter()))})
-
-#        if int(mp['id']) == int(person_id):
-#            result['person'] = len(countWords(text, Counter()))
-
-    vocabularies_sorted = sorted(vocabulary_sizes, key=lambda k: k['vocabulary_size'])
-
-    scores = [org['vocabulary_size'] for org in vocabulary_sizes]
-
-    result['average'] = float(sum(scores))/float(len(scores))
-
-    result['max'] = vocabularies_sorted[-1]['vocabulary_size']
-    maxOrg = Organization.objects.get(id_parladata=vocabularies_sorted[-1]['pg'])
-
-#    result.append({'person_id': vocabularies_sorted[-1]['person_id'], 'vocabulary_size': vocabularies_sorted[-1]['vocabulary_size']})
-
-    for p in vocabularies_sorted:
-        saveOrAbortNew(
-            VocabularySize,
-            organization=Organization.objects.get(id_parladata=int(p['pg'])),
-            created_for=date_of,
-            score=[v['vocabulary_size'] for v in vocabularies_sorted if v['pg'] == p['pg']][0],
-            maxOrg=maxOrg,
-            average=result['average'],
-            maximum=result['max'])
-
-    return JsonResponse({'alliswell': True})
-
-
 @lockSetter
 def setVocabularySizeALL(request, date_=None):
-    sw = WordAnalysis(count_of="groups", date_=date_)
+    sw = WordAnalysis(count_of='groups', date_=date_)
 
     if not sw.isNewSpeech:
-        return JsonResponse({'alliswell': True, 'msg': 'Na ta dan ni bilo govorov'})
+        return JsonResponse({'alliswell': True,
+                             'msg': 'Na ta dan ni bilo govorov'})
 
-    #Vocabolary size
+    # Vocabolary size
     all_score = sw.getVocabularySize()
     max_score, maxPGid = sw.getMaxVocabularySize()
     avg_score = sw.getAvgVocabularySize()
     date_of = sw.getDate()
     maxPG = Organization.objects.get(id_parladata=maxPGid)
 
-    print "[INFO] saving vocabulary size"
+    print '[INFO] saving vocabulary size'
     for p in all_score:
+        Organization.objects.get(id_parladata=int(p['counter_id']))
         saveOrAbortNew(model=VocabularySize,
-                       organization=Organization.objects.get(id_parladata=int(p['counter_id'])),
+                       organization=org,
                        created_for=date_of,
                        score=int(p['coef']),
                        maxOrg=maxPG,
                        average=avg_score,
                        maximum=max_score)
-
 
     return JsonResponse({'alliswell': True, 'msg': 'shranjeno'})
 
@@ -1403,61 +1408,17 @@ def getVocabularySize(request, pg_id, date_=None):
 
     return JsonResponse(out, safe=False)
 
+
 # get PGs IDs
 def getPGsIDs(request):
     output = []
     data = tryHard(API_URL+'/getAllPGs/')
     data = data.json()
-
-    output = {"list": [i for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
+    lastSession = Session.objects.all().order_by('-start_time')[0]
+    output = {'list': [i for i in data],
+              'lastDate': lastSession.start_time.strftime(API_DATE_FORMAT)}
 
     return JsonResponse(output, safe=False)
-
-
-@lockSetter
-def setStyleScoresPGsALL(request, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        date_of = datetime.now().date()
-        date_=date_of.strftime(API_DATE_FORMAT)
-
-    membersOfPGsRanges = tryHard(API_URL+'/getMembersOfPGsRanges' + ("/"+date_ if date_ else "/")).json()
-    pgs = membersOfPGsRanges[-1]["members"].keys()
-
-    print 'Starting PGs'
-    scores = {}
-    for pg in pgs:
-        print 'PG id: ' + str(pg)
-
-        # get word counts with solr
-        counter = Counter(getCountListPG(int(pg), date_))
-        total = sum(counter.values())
-
-        scores_local = getScores([problematicno, privzdignjeno, preprosto], counter, total)
-
-        #average = average_scores
-
-        print scores_local, #average
-        scores[pg] = scores_local
-
-
-    print scores
-    average = {"problematicno": sum([score['problematicno'] for score in scores.values()])/len(scores), "privzdignjeno": sum([score['privzdignjeno'] for score in scores.values()])/len(scores), "preprosto": sum([score['preprosto'] for score in scores.values()])/len(scores)}
-    for pg, score in scores.items():
-        saveOrAbortNew(
-            model=StyleScores,
-            created_for=date_of,
-            organization=Organization.objects.get(id_parladata=int(pg)),
-            problematicno=score['problematicno'],
-            privzdignjeno=score['privzdignjeno'],
-            preprosto=score['preprosto'],
-            problematicno_average=average['problematicno'],
-            privzdignjeno_average=average['privzdignjeno'],
-            preprosto_average=average['preprosto']
-        )
-
-    return JsonResponse({'alliswell': True})
 
 
 @csrf_exempt
@@ -1469,24 +1430,25 @@ def setAllPGsStyleScoresFromSearch(request):
         if post_data:
             save_statuses = []
             for score in post_data:
-                print score
-                #print score["date_of"]
+                org = Organization.objects.get(id_parladata=int(score['party']))
                 date_of = datetime.today()
-                save_statuses.append(saveOrAbortNew(model=StyleScores,
-                                                    created_for=date_of,
-                                                    organization=Organization.objects.get(id_parladata=int(score["party"])),
-                                                    problematicno=float(score['problematicno']),
-                                                    privzdignjeno=float(score['privzdignjeno']),
-                                                    preprosto=float(score['preprosto']),
-                                                    problematicno_average=float(score['problematicno_average']),
-                                                    privzdignjeno_average=float(score['privzdignjeno_average']),
-                                                    preprosto_average=float(score['preprosto_average'])
-                                                ))
-            return JsonResponse({"status": "alliswell", "saved": save_statuses})
+                save_statuses.append(saveOrAbortNew(
+                    model=StyleScores,
+                    created_for=date_of,
+                    organization=org,
+                    problematicno=float(score['problematicno']),
+                    privzdignjeno=float(score['privzdignjeno']),
+                    preprosto=float(score['preprosto']),
+                    problematicno_average=float(score['problematicno_average']),
+                    privzdignjeno_average=float(score['privzdignjeno_average']),
+                    preprosto_average=float(score['preprosto_average'])
+                ))
+            return JsonResponse({'status': 'alliswell',
+                                 'saved': save_statuses})
         else:
-            return JsonResponse({"status": "There's not data"})
+            return JsonResponse({'status': 'There\'s not data'})
     else:
-        return JsonResponse({"status": "It wasnt POST"})
+        return JsonResponse({'status': 'It wasnt POST'})
 
 
 def getStyleScoresPG(request, pg_id, date_=None):
@@ -1513,29 +1475,8 @@ def getStyleScoresPG(request, pg_id, date_=None):
             'privzdignjeno': privzdignjeno,
             'problematicno': problematicno,
             'preprosto': preprosto
-            # 'average': {
-            #     'privzdignjeno': card.privzdignjeno_average*10000,
-            #     'problematicno': card.problematicno_average*10000,
-            #     'preprosto': card.preprosto_average*10000
-            # }
         }
     }
-
-    # out = {
-    #     'party': card.organization.getOrganizationData(),
-    #     'created_at': card.created_at.strftime(API_DATE_FORMAT),
-    #     'created_for': card.created_for.strftime(API_DATE_FORMAT),
-    #     'results': {
-    #         'privzdignjeno': card.privzdignjeno*10000,
-    #         'problematicno': card.problematicno*10000,
-    #         'preprosto': card.preprosto*10000,
-    #         'average': {
-    #             'privzdignjeno': card.privzdignjeno_average*10000,
-    #             'problematicno': card.problematicno_average*10000,
-    #             'preprosto': card.preprosto_average*10000
-    #         }
-    #     }
-    # }
     return JsonResponse(out, safe=False)
 
 
@@ -1547,18 +1488,20 @@ def setAllPGsTFIDFsFromSearch(request):
         if post_data:
             save_statuses = []
             for score in post_data:
+                org = Organization.objects.get(id_parladata=score['party']['id'])
                 date_of = datetime.today()
-                save_statuses.append(saveOrAbortNew(Tfidf, 
-                                                    organization=Organization.objects.get(id_parladata=score["party"]["id"]), 
+                save_statuses.append(saveOrAbortNew(Tfidf,
+                                                    organization=org,
                                                     created_for=date_of,
                                                     is_visible=False,
-                                                    data=score["results"]))
+                                                    data=score['results']))
 
-            return JsonResponse({"status": "alliswell", "saved": save_statuses})
+            return JsonResponse({'status': 'alliswell',
+                                 'saved': save_statuses})
         else:
-            return JsonResponse({"status": "There's not data"})
+            return JsonResponse({'status': 'There\'s not data'})
     else:
-        return JsonResponse({"status": "It wasnt POST"})
+        return JsonResponse({'status': 'It wasnt POST'})
 
 
 def getTFIDF(request, party_id, date_=None):
@@ -1568,8 +1511,8 @@ def getTFIDF(request, party_id, date_=None):
     out = {
         'party': card.organization.getOrganizationData(),
         'results': card.data,
-        "created_for": card.created_for.strftime(API_DATE_FORMAT), 
-        "created_at": card.created_at.strftime(API_DATE_FORMAT)
+        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(API_DATE_FORMAT)
     }
 
     return JsonResponse(out)
@@ -1600,7 +1543,7 @@ def setNumberOfQuestionsAll(request, date_=None):
     pg_ids = [int(pg_id) for pg_id in pgs_on_date.keys()]
     authors = []
     for question in data:
-        qDate = datetime.strptime(question['date'], "%Y-%m-%dT%X")
+        qDate = datetime.strptime(question['date'], '%Y-%m-%dT%X')
         qDate = qDate.strftime(API_DATE_FORMAT)
         try:
             person_data = mpStatic[str(question['author_id'])]
@@ -1608,12 +1551,9 @@ def setNumberOfQuestionsAll(request, date_=None):
             person_data = getPersonData(str(question['author_id']), date_s)
             mpStatic[str(question['author_id'])] = person_data
         if person_data and person_data['party'] and person_data['party']['id']:
-            #if person_data['party']['id'] in pg_ids:
             authors.append(person_data['party']['id'])
-            #else:
-            #    print "ta pg ne obstaja zdj: ", person_data['party']['name']
         else:
-            print "person nima mpstatic: ", question['author_id']
+            print 'person nima mpstatic: ', question['author_id']
 
     avg = len(authors)/float(len(pg_ids))
     question_count = Counter(authors)
@@ -1637,8 +1577,8 @@ def setNumberOfQuestionsAll(request, date_=None):
                                        maximum=max_value,
                                        maxOrgs=max_orgs))
 
-    return JsonResponse({"alliswell": True,
-                         "saved": is_saved})
+    return JsonResponse({'alliswell': True,
+                         'saved': is_saved})
 
 
 def getNumberOfQuestions(request, pg_id, date_=None):
@@ -1680,12 +1620,12 @@ def getQuestionsOfPG(request, pg_id, date_=False):
     questions = Question.objects.filter(start_time__lt=end_of_day,
                                         author_org__id_parladata=pg_id)
 
-    staticData = tryHard(BASE_URL + "/utils/getAllStaticData/").json()
+    staticData = tryHard(BASE_URL + '/utils/getAllStaticData/').json()
     personsStatic = staticData['persons']
     ministrStatic = staticData['ministrs']
 
     questions = questions.extra(select={'start_time_date': 'DATE(start_time)'})
-    dates = list(set(list(questions.values_list("start_time_date", flat=True))))
+    dates = list(set(list(questions.values_list('start_time_date', flat=True))))
     dates.sort()
     data = {date: [] for date in dates}
     all_authors = {}
@@ -1703,12 +1643,13 @@ def getQuestionsOfPG(request, pg_id, date_=False):
             'questions': data[date]}
            for date in dates]
 
-
+    org = Organization.objects.get(id_parladata=pg_id)
+    org_data = org.getOrganizationData()
     result = {
         'results': list(reversed(out)),
-        'created_for': out[-1]["date"] if out else date_,
+        'created_for': out[-1]['date'] if out else date_,
         'created_at': date_,
-        'party': Organization.objects.get(id_parladata=pg_id).getOrganizationData(),
+        'party': org_data,
         'all_authors': all_authors.values(),
         'all_recipients': list(set(all_recipients)),
         }
@@ -1721,62 +1662,72 @@ def getListOfPGs(request, date_=None, force_render=False):
         key = date_
     else:
         date_of = datetime.now().date()
-        date_=date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(API_DATE_FORMAT)
         key = date_
 
-    c_data = cache.get("pg_list_" + key)
+    c_data = cache.get('pg_list_' + key)
     if c_data and not force_render:
         data = c_data
     else:
-        allPGs = tryHard(API_URL+'/getAllPGsExt/').json().keys()
-        pgs = tryHard(API_URL+'/getMembersOfPGsRanges/'+date_).json()[-1]["members"]
+        allPGs = tryHard(API_URL + '/getAllPGsExt/').json().keys()
+        url = API_URL + '/getMembersOfPGsRanges/' + date_
+        pgs = tryHard(url).json()[-1]['members']
+        list_of_cards = [{'method': getPercentOFAttendedSessionPG,
+                          'data_path': ('sessions', 'organization_value'),
+                          'out_path': ('results', 'presence_sessions')},
+                         {'method': getPercentOFAttendedSessionPG,
+                          'data_path': ('votes', 'organization_value'),
+                          'out_path': ('results', 'presence_votes')},
+                         {'method': getDisunionOrgID,
+                          'data_path': (),
+                          'out_path': ('results', 'intra_disunion')},
+                         {'method': getVocabularySize,
+                          'data_path': ('results', 'score'),
+                          'out_path': ('results', 'vocabulary_size')},
+                         {'method': getNumberOfQuestions,
+                          'data_path': ('results', 'score'),
+                          'out_path': ('results', 'number_of_questions')},
+                         {'method': getNumberOfAmendmetsOfPG,
+                          'data_path': (),
+                          'out_path': ('results', 'number_of_amendments')},
+                         {'method': getStyleScoresPG,
+                          'data_path': ('results', 'privzdignjeno'),
+                          'out_path': ('results', 'privzdignjeno')},
+                         {'method': getStyleScoresPG,
+                          'data_path': ('results', 'preprosto'),
+                          'out_path': ('results', 'preprosto')},
+                         {'method': getStyleScoresPG,
+                          'data_path': ('results', 'problematicno'),
+                          'out_path': ('results', 'problematicno')},
+                         ]
         data = []
         for pg, members in pgs.items():
             if pg in allPGs and members:
                 pg_obj = {}
-                pg_obj["results"] = {}
+                pg_obj['results'] = {}
                 pg_id = pg
-                pg_obj["party"] = Organization.objects.get(id_parladata=pg).getOrganizationData()
-                try:
-                    pg_obj["results"]["presence_sessions"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["sessions"]["organization_value"]
-                    pg_obj["results"]["presence_votes"] = json.loads(getPercentOFAttendedSessionPG(None, pg_id, date_).content)["votes"]["organization_value"]
-                    pg_obj["results"]["intra_disunion"] = json.loads(getDisunionOrgID(None, pg_id).content)
-                
-                except:
-                    pg_obj["results"]["presence_sessions"] = None
-                    pg_obj["results"]["presence_votes"] = None
-                    pg_obj["results"]["intra_disunion"] = None
+                org = Organization.objects.get(id_parladata=pg)
+                pg_obj['party'] = org.getOrganizationData()
 
-                try:
-                    pg_obj["results"]["vocabulary_size"] = json.loads(getVocabularySize(None, pg_id, date_).content)["results"]["score"]
-                except:
-                    pg_obj["results"]["vocabulary_size"] = None
-                try:
-                    pg_obj["results"]["number_of_questions"] = json.loads(getNumberOfQuestions(None, pg_id, date_).content)["results"]["score"]
-                except:
-                    pg_obj["results"]["number_of_questions"] = None
-                try:
-                    pg_obj["results"]["number_of_amendments"] = json.loads(getNumberOfAmendmetsOfPG(None, pg_id, date_).content)
-                except:
-                    pg_obj["results"]["number_of_amendments"] = None
+                # load data from cards
+                for card in list_of_cards:
+                    print card
+                    setCardData(pg_obj,
+                                card['method'],
+                                pg_id,
+                                date_,
+                                card['data_path'],
+                                card['out_path'])
 
-                try:
-                    styleScores = json.loads(getStyleScoresPG(None, pg_id, date_).content)
-                except:
-                    styleScores = None
-
-                pg_obj["results"]["privzdignjeno"] = styleScores["results"]["privzdignjeno"] if styleScores else None
-                pg_obj["results"]["preprosto"] = styleScores["results"]["preprosto"] if styleScores else None
-                pg_obj["results"]["problematicno"] = styleScores["results"]["problematicno"] if styleScores else None
-                pg_obj["results"]["seat_count"] = len(members)
-                
-
+                pg_obj['results']['seat_count'] = len(members)
 
                 data.append(pg_obj)
-        data = sorted(data, key=lambda k: k['results']["seat_count"], reverse=True)
-        cache.set("pg_list_" + key, data, 60 * 60 * 48) 
+        data = sorted(data,
+                      key=lambda k: k['results']['seat_count'],
+                      reverse=True)
+        cache.set('pg_list_' + key, data, 60 * 60 * 48)
 
-    return JsonResponse({"data": data})
+    return JsonResponse({'data': data})
 
 
 @lockSetter
@@ -1805,7 +1756,7 @@ def setPresenceThroughTime(request, party_id, date_=None):
                            created_for=fdate,
                            data=data_for_save)
 
-    return JsonResponse({'alliswell': True, "status": 'OK', "saved": saved})
+    return JsonResponse({'alliswell': True, 'status': 'OK', 'saved': saved})
 
 
 def getPresenceThroughTime(request, party_id, date_=None):
@@ -1828,10 +1779,10 @@ def getIntraDisunion(request):
     out = {}
     votesData = {}
     tab = []
-    ob =  {}
-    obs =  {}
-    dataOut =  {}
-    paginator = Paginator(Vote.objects.all().order_by('start_time'), 50)                                                          
+    ob = {}
+    obs = {}
+    dataOut = {}
+    paginator = Paginator(Vote.objects.all().order_by('start_time'), 50)
     page = request.GET.get('page', 1)
     try:
         votespag = paginator.page(page)
@@ -1839,14 +1790,14 @@ def getIntraDisunion(request):
         votespag = paginator.page(1)
     except EmptyPage:
         votespag = paginator.page(paginator.num_pages)
-    
+
     for vote in votespag:
-        votesData[vote.id_parladata] = {'text':vote.motion,
-                                        'result':vote.result,
-                                        'date':vote.start_time,
-                                        'tag':vote.tags,
-                                        'id_parladata':vote.id_parladata}
-    
+        votesData[vote.id_parladata] = {'text': vote.motion,
+                                        'result': vote.result,
+                                        'date': vote.start_time,
+                                        'tag': vote.tags,
+                                        'id_parladata': vote.id_parladata}
+
     for vote in votespag:
         intraD = vote.vote_intradisunion.all()
         for intra in intraD:
@@ -1862,17 +1813,18 @@ def getIntraDisunion(request):
                 ob['votes'].append(obj)
                 out[intra.organization.acronym] = ob
                 ob = {}
-        tab.append({'text':vote.motion,
-                    'result':vote.result,
-                    'date':vote.start_time,
-                    'tag':vote.tags,
-                    'maximum':vote.intra_disunion,
-                    'id_parladata':vote.id_parladata})
+        tab.append({'text': vote.motion,
+                    'result': vote.result,
+                    'date': vote.start_time,
+                    'tag': vote.tags,
+                    'maximum': vote.intra_disunion,
+                    'id_parladata': vote.id_parladata})
 
     out['DZ'] = {'organization': 'dz',
                  'votes': tab}
     dataOut['results'] = out
-    dataOut['all_tags'] = list(Tag.objects.all().values_list('name', flat=True))
+    dataOut['all_tags'] = list(Tag.objects.all().values_list('name',
+                                                             flat=True))
     return JsonResponse(dataOut, safe=False)
 
 
@@ -1883,7 +1835,8 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     obj = {}
     ob['votes'] = []
     tab = []
-    acr = Organization.objects.get(id_parladata=org_id).acronym
+    org = Organization.objects.get(id_parladata=org_id)
+    acr = org.acronym
     votes = Vote.objects.all().order_by('start_time')
     for vote in votes:
         votesData[vote.id_parladata] = {'text': vote.motion,
@@ -1892,7 +1845,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                                         'tag': vote.tags,
                                         'id_parladata': vote.id_parladata}
 
-    c_data = cache.get("pg_disunion" + org_id)
+    c_data = cache.get('pg_disunion' + org_id)
     if c_data and not force_render:
         out = c_data
     else:
@@ -1906,10 +1859,12 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                             'id_parladata': vote.id_parladata})
                 out['DZ'] = {'organization': 'dz',
                              'votes': tab}
-            
-            out[str(acr)] = sorted(out[str(acr)]['votes'], key=lambda k: k['maximum'])
-            out['all_tags'] = list(Tag.objects.all().values_list('name', flat=True))
-            cache.set("pg_disunion" + org_id, out, 60 * 60 * 48)
+
+            out[str(acr)] = sorted(out[str(acr)]['votes'],
+                                   key=lambda k: k['maximum'])
+            out['all_tags'] = list(Tag.objects.all().values_list('name',
+                                                                 flat=True))
+            cache.set('pg_disunion' + org_id, out, 60 * 60 * 48)
         else:
             for vote in votes:
                 intraD = IntraDisunion.objects.filter(vote=vote,
@@ -1918,12 +1873,14 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                     obj = votesData[vote.id_parladata].copy()
                     obj['maximum'] = float(intra.maximum)
                     ob['votes'].append(obj)
-                    ob['organization'] = Organization.objects.get(id_parladata=org_id).getOrganizationData()
+                    ob['organization'] = org.getOrganizationData()
                 out[Organization.objects.get(id_parladata=org_id).acronym] = ob
 
-            out[str(acr)] = sorted(out[str(acr)]['votes'], key=lambda k: k['maximum'])
-            out['all_tags'] = list(Tag.objects.all().values_list('name', flat=True))
-            cache.set("pg_disunion" + org_id, out, 60 * 60 * 48)
+            out[str(acr)] = sorted(out[str(acr)]['votes'],
+                                   key=lambda k: k['maximum'])
+            out['all_tags'] = list(Tag.objects.all().values_list('name',
+                                                                 flat=True))
+            cache.set('pg_disunion' + org_id, out, 60 * 60 * 48)
 
     return JsonResponse(out, safe=False)
 
@@ -1938,23 +1895,24 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
     amendments = org.amendments.filter(start_time__lte=date_of).order_by('-start_time')
     amendments = amendments.extra(select={'start_time_date': 'DATE(start_time)'})
     sessionsData = json.loads(getAllStaticData(None).content)['sessions']
-    dates = list(set(list(amendments.values_list("start_time_date", flat=True))))
+    dates = list(set(list(amendments.values_list('start_time_date', flat=True))))
     dates.sort()
     data = {date: [] for date in dates}
     out = []
     for vote in amendments:
-        data[vote.start_time_date].append({'session': sessionsData[str(vote.session.id_parladata)],
-                                           'results': {'motion_id': vote.id_parladata,
-                                                       'text': vote.motion,
-                                                       'votes_for': vote.votes_for,
-                                                       'against': vote.against,
-                                                       'abstain': vote.abstain,
-                                                       'not_present': vote.not_present,
-                                                       'result': vote.result,
-                                                       'is_outlier': vote.is_outlier,
-                                                       'tags': vote.tags,
-                                                       'has_outliers': vote.has_outlier_voters
-                                                       }
+        results = {'motion_id': vote.id_parladata,
+                   'text': vote.motion,
+                   'votes_for': vote.votes_for,
+                   'against': vote.against,
+                   'abstain': vote.abstain,
+                   'not_present': vote.not_present,
+                   'result': vote.result,
+                   'is_outlier': vote.is_outlier,
+                   'tags': vote.tags,
+                   'has_outliers': vote.has_outlier_voters}
+        thisSession = sessionsData[str(vote.session.id_parladata)]
+        data[vote.start_time_date].append({'session': thisSession,
+                                           'results': results
                                            })
     out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
             'votes': data[date]}
@@ -1971,25 +1929,34 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
-def getDisunionOrg(request, force_render=False):
+def getDisunionOrg(request):
     result = []
     data = tryHard(API_URL + '/getAllPGs/').json()
     for org in data:
-        el = IntraDisunion.objects.filter(organization__id_parladata=org).values_list("maximum", flat=True)
+        ids = IntraDisunion.objects.filter(organization__id_parladata=org)
+        el = ids.values_list('maximum', flat=True)
         if len(el) != 0:
             suma = sum(map(float, el))/el.count()
         else:
             suma = 0
+        org_ = Organization.objects.get(id_parladata=org)
         out = {
-        'organization': Organization.objects.get(id_parladata=org).getOrganizationData(),
-        'sum': suma
+            'organization': org_.getOrganizationData(),
+            'sum': suma
         }
         result.append(out)
     return JsonResponse(result, safe=False)
 
 
-def getDisunionOrgID(request, pg_id):
-    el = IntraDisunion.objects.filter(organization__id_parladata=pg_id).values_list("maximum", flat=True)
+def getDisunionOrgID(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = ''
+    ids = IntraDisunion.objects.filter(organization__id_parladata=pg_id,
+                                       vote__start_time__lte=date_of)
+    el = ids.values_list('maximum', flat=True)
     if len(el) != 0:
         suma = sum(map(float, el))/el.count()
     else:

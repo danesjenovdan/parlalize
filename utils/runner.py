@@ -255,6 +255,9 @@ def updateWB():
             setWorkingBodies(request_with_key,
                              str(wb['id']),
                              datetime.now().date().strftime(API_DATE_FORMAT))
+            requests.get(GLEJ_URL + '/wb/getWorkingBodies/' + str(wb['id']) + '?frame=true&altHeader=true&forceRender=true')
+            requests.get(GLEJ_URL + '/wb/getWorkingBodies/' + str(wb['id']) + '?embed=true&altHeader=true&forceRender=true')
+            requests.get(GLEJ_URL + '/wb/getWorkingBodies/' + str(wb['id']) + '?altHeader=true&forceRender=true')
         except:
             client.captureException()
 
@@ -549,6 +552,9 @@ def fastUpdate(fast=True, date_=None):
     if s_update:
         print 'recache'
         updatePagesS(list(set(s_update)))
+        requests.get('https://parlameter.si/fetch/sps?t=vkSzv8Nu4eDkLBk7kUw4BBhyLjysJm')
+        if not fast:
+            updateWB()
 
     p_update += list(speeches.values_list("person__id_parladata", flat=True))
 
