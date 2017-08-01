@@ -4,10 +4,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
+from django.db.models.expressions import Date
 
 from collections import Counter
 from scipy.stats.stats import pearsonr
 from scipy.spatial.distance import euclidean
+from itertools import groupby
 
 import requests
 import json
@@ -992,69 +994,45 @@ def getSpeechesOfPG(request, pg_id, date_=False):
         date_ = date_of.strftime(API_DATE_FORMAT)
 
     speeches_q = Speech.getValidSpeeches(date_of + timedelta(days=1))
-    url = API_URL+'/getMembersOfPGsRanges' + ('/'+date_ if date_ else '')
-    membersOfPGRanges = reversed(tryHard(url).json())
+    staticData = json.loads(getAllStaticData(None).content)
+    sessionsData = staticData['sessions']
+    personsData = staticData['persons']
     out = []
-    for pgMembersRange in membersOfPGRanges:
-        startTime = datetime.strptime(pgMembersRange['start_date'],
-                                      API_DATE_FORMAT)
-        endTime = datetime.strptime(pgMembersRange['end_date'],
-                                    API_DATE_FORMAT) + timedelta(hours=23,
-                                                                 minutes=59)
-        members = pgMembersRange['members'][pg_id]
-        speeches = [[speech
-                     for speech
-                     in speeches_q.filter(person__id_parladata__in=members,
-                                          start_time__range=[t_date, t_date+timedelta(days=1)]).order_by('-id_parladata')]
-                    for t_date
-                    in speeches_q.filter(start_time__lte=endTime,
-                                         start_time__gte=startTime,
-                                         person__id_parladata__in=members).datetimes('start_time', 'day')]
-        for day in reversed(speeches):
-            #dayData = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT), 'sessions':[]}
-            dayDataDict = {'date': day[0].start_time.strftime(API_OUT_DATE_FORMAT), 'sessions':{}}
-            addedPersons = []
-            addedSessions = []
-            for speech in day:
-                if speech.session.id_parladata in dayDataDict['sessions'].keys():
-                    if speech.person.id_parladata in dayDataDict['sessions'][speech.session.id_parladata]['speakers'].keys():
-                        session = dayDataDict['sessions'][speech.session.id_parladata]
-                        speaker = session['speakers'][speech.person.id_parladata]
-                        speaker['speeches'].append(speech.id_parladata)
-                    else:
-                        session = dayDataDict['sessions'][speech.session.id_parladata]
-                        session['speakers'][speech.person.id_parladata] = {
-                            'speeches': [speech.id_parladata],
-                            'person': getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))
-                        }
-                else:
-                    dayDataDict['sessions'][speech.session.id_parladata] = {
-                        'session_name': speech.session.name,
-                        'session_org': speech.session.organization.name,
-                        'session_id': speech.session.id_parladata,
-                        'speakers': {
-                            speech.person.id_parladata: {
-                                'speeches': [speech.id_parladata],
-                                'person': getPersonData(speech.person.id_parladata, startTime.strftime(API_DATE_FORMAT))
-                            }
-                        }
-                    }
-            out.append(dayDataDict)
-            if len(out) > 14:
-                break
-        if len(out) > 14:
+    speeches = speeches_q.filter(organization__id_parladata=pg_id)
+
+    speeches = speeches.annotate(day=Date("start_time",
+                                          "day")).values('day',
+                                                         'id_parladata',
+                                                         'session__id_parladata',
+                                                         'person__id_parladata',
+                                                         'start_time',
+                                                         'order')
+    speeches = speeches.order_by('-day', 'session__id_parladata', 'start_time', 'order')
+
+    out = []
+
+    for day, group in groupby(speeches, lambda x: x['day']):
+        day_objs = []
+        for sessions_id, inner_group in groupby(group, lambda x: x['session__id_parladata']):
+            thisSession = sessionsData[str(sessions_id)]
+            session_obj = {'session_name': thisSession['name'],
+                           'session_org': thisSession['org']['name'],
+                           'session_id': thisSession['id'],
+                           'speakers': []}
+            #print list(inner_group)
+            for person_id, inner_inner_group in groupby(inner_group, lambda x: x['person__id_parladata']):
+                person_obj = {'person': personsData[str(person_id)].copy(),
+                              'speeches': [s['id_parladata'] for s in inner_inner_group]}
+                session_obj['speakers'].append(person_obj)
+            #out[day][sessions_id][person_id] = [s['id_parladata'] for s in inner_inner_group]
+            day_objs.append(session_obj)
+        out.append({'date': day.strftime(API_OUT_DATE_FORMAT),
+                    'sessions': day_objs})
+        #print len(out)
+        if len(out) > 50:
             break
 
-    #dict to list for sorting in front
-    for day in out:
-        ses_ids = day['sessions'].keys()
-        for session in ses_ids:
-            day['sessions'][session]['speakers'] = sorted(day['sessions'][session]['speakers'].values(), key=lambda k,: k['person']['name'], reverse=False)
-        ses_order_ids = Session.objects.filter(id_parladata__in=ses_ids).order_by('-start_time').values_list('id_parladata', flat=True)
-        temp_day_order = [day['sessions'][s_id] for s_id in ses_order_ids]
-        day['sessions'] = temp_day_order
 
-    # WORKAROUND: created_at is today.
     result = {
         'results': out,
         'created_for': out[-1]['date'],
