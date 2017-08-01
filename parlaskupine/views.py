@@ -1007,7 +1007,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
                                                          'person__id_parladata',
                                                          'start_time',
                                                          'order')
-    speeches = speeches.order_by('-day', 'session__id_parladata', 'start_time', 'order')
+    speeches = speeches.order_by('-day', 'session__id_parladata', 'person__id_parladata')
 
     out = []
 
