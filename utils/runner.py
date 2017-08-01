@@ -624,8 +624,8 @@ def recacheActivities(activity, mps_ids):
     for mp in mps_ids:
         print mp
         url = base_url + str(mp)
-        print requests.get(url + '/?frame=true&altHeader=true&forceRender=true')
-        print requests.get(url + '/?embed=true&altHeader=true&forceRender=true')
+        print requests.get(url + '?frame=true&altHeader=true&forceRender=true')
+        print requests.get(url + '?embed=true&altHeader=true&forceRender=true')
         print requests.get(url + '?forceRender=true')
 
     print 'recache orgs ', activity[1], orgs
@@ -633,8 +633,8 @@ def recacheActivities(activity, mps_ids):
     for org in orgs:
         print org
         url = base_url + str(org)
-        print requests.get(url + '/?frame=true&altHeader=true&forceRender=true')
-        print requests.get(url + '/?embed=true&altHeader=true&forceRender=true')
+        print requests.get(url + '?frame=true&altHeader=true&forceRender=true')
+        print requests.get(url + '?embed=true&altHeader=true&forceRender=true')
         print requests.get(url + '?forceRender=true')
 
 
