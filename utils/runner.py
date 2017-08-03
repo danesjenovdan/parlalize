@@ -18,7 +18,7 @@ from parlaseje.models import Session, Vote, Ballot, Speech, Question, Tag, Prese
 
 from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
 from parlaseje.utils import idsOfSession, getSesDates
-from utils.recache import updatePagesS
+from utils.recache import updatePagesS, updateLastActivity, recacheActivities, recacheWBs
 from utils.imports import update, updateDistricts, updateTags, updatePersonStatus
 from utils.votes_outliers import setMotionAnalize, setOutliers
 
@@ -607,40 +607,4 @@ def setListOfMembers(date_time):
     start_date = start_date - timedelta(days=1)
     setListOfMembersTickers(request_with_key, start_time.strftime(API_DATE_FORMAT))
 
-
-def updateLastActivity(mps_ids):
-    print 'set last activity for: ', mps_ids
-    for mp in mps_ids:
-        print mp
-        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?frame=true&altHeader=true&forceRender=true')
-        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?embed=true&altHeader=true&forceRender=true')
-        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?forceRender=true')
-
-
-def recacheActivities(activity, mps_ids):
-    print 'recache ', activity[0], mps_ids
-    orgs = list(set([getPersonData(mp)['party']['id'] for mp in mps_ids]))
-    base_url = GLEJ_URL + '/p/' + activity[0] + '/'
-    for mp in mps_ids:
-        print mp
-        url = base_url + str(mp)
-        print requests.get(url + '?frame=true&altHeader=true&forceRender=true')
-        print requests.get(url + '?embed=true&altHeader=true&forceRender=true')
-        print requests.get(url + '?forceRender=true')
-
-    print 'recache orgs ', activity[1], orgs
-    base_url = GLEJ_URL + '/ps/' + activity[1] + '/'
-    for org in orgs:
-        print org
-        url = base_url + str(org)
-        print requests.get(url + '?frame=true&altHeader=true&forceRender=true')
-        print requests.get(url + '?embed=true&altHeader=true&forceRender=true')
-        print requests.get(url + '?forceRender=true')
-
-
-def recacheWBs():
-    wbs = tryHard(API_URL + '/getOrganizatonsByClassification').json()['working_bodies']
-    for wb in wbs:
-        print wb
-        print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?frame=true&altHeader=true&forceRender=true')
 
