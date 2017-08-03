@@ -643,4 +643,6 @@ def recacheWBs():
     for wb in wbs:
         print wb
         print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?frame=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?embed=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?forceRender=true')
 
