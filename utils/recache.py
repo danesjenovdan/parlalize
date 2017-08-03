@@ -11,7 +11,7 @@ from parlaseje.views import getSessionsList
 from parlaseje.models import Session
 from parlaskupine.models import Organization
 from parlalize.settings import API_DATE_FORMAT, BASE_URL, API_URL, GLEJ_URL, PAGE_URL, slack_token
-from parlalize.utils import getAllStaticData, tryHard, printProgressBar
+from parlalize.utils import getAllStaticData, tryHard, printProgressBar, getPersonData
 from django.db.models import Q
 from slackclient import SlackClient
 
@@ -182,3 +182,42 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[]):
         printProgressBar(votes_of_s.index(s),
                          len(votes_of_s),
                          prefix='Session: ')
+
+
+def updateLastActivity(mps_ids):
+    print 'set last activity for: ', mps_ids
+    for mp in mps_ids:
+        print mp
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?frame=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?embed=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/p/zadnje-aktivnosti/' + str(mp) + '?forceRender=true')
+
+
+def recacheActivities(activity, mps_ids):
+    print 'recache ', activity[0], mps_ids
+    orgs = list(set([getPersonData(mp)['party']['id'] for mp in mps_ids]))
+    base_url = GLEJ_URL + '/p/' + activity[0] + '/'
+    for mp in mps_ids:
+        print mp
+        url = base_url + str(mp)
+        print requests.get(url + '?frame=true&altHeader=true&forceRender=true')
+        print requests.get(url + '?embed=true&altHeader=true&forceRender=true')
+        print requests.get(url + '?forceRender=true')
+
+    print 'recache orgs ', activity[1], orgs
+    base_url = GLEJ_URL + '/ps/' + activity[1] + '/'
+    for org in orgs:
+        print org
+        url = base_url + str(org)
+        print requests.get(url + '?frame=true&altHeader=true&forceRender=true')
+        print requests.get(url + '?embed=true&altHeader=true&forceRender=true')
+        print requests.get(url + '?forceRender=true')
+
+
+def recacheWBs():
+    wbs = tryHard(API_URL + '/getOrganizatonsByClassification').json()['working_bodies']
+    for wb in wbs:
+        print wb
+        print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?frame=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?embed=true&altHeader=true&forceRender=true')
+        print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?forceRender=true')
