@@ -4110,6 +4110,14 @@ def setListOfMembersTickers(request, date_=None):
             privzdignjeno = 0
             problematicno = 0
 
+        try:
+            mismatch = getPersonCardModelNew(MismatchOfPG,
+                                              int(person_id),
+                                              date_)
+        except:
+            mismatch = None
+        person_obj['results']['mismatch_of_pg'] = mismatch.data
+
         person_obj['results']['privzdignjeno'] = {}
         person_obj['results']['privzdignjeno']['score'] = privzdignjeno
         rank_data['privzdignjeno'].append(value)
@@ -4417,3 +4425,13 @@ def getListOfMembersTickers(request, date_=None):
                          'districts': [{dist.id_parladata: dist.name}
                                        for dist in District.objects.all()]},
                         safe=False)
+
+
+def getMismatchWithPG(request, person_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = ''
+    missmatch = getPersonCardModelNew(MismatchOfPG, int(person_id), date_)
+    return JsonResponse(missmatch.data, safe=False)
