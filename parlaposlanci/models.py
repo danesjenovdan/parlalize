@@ -356,7 +356,8 @@ class MPsWhichFitsToPG(Timestampable, models.Model):
 
 class MPStaticPL(Timestampable, models.Model):
     person = models.ForeignKey('Person', help_text=_(
-        'Person foreign key relationship'))
+                               'Person foreign key relationship'),
+                               related_name='static_data')
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -757,3 +758,16 @@ class MembersList(Timestampable, models.Model):
                                    help_text=_('date of analize'))
 
     data = JSONField(blank=True, null=True)
+
+
+class MismatchOfPG(Timestampable, models.Model):
+    person = models.ForeignKey('Person',
+                               blank=True, null=True,
+                               help_text=_('MP'))
+    created_for = models.DateField(_('date of activity'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of analize'))
+    data = models.FloatField(_('Percentage of the same vote as his parlimentary group'),
+                             blank=True, null=True,
+                             help_text=_('Percentage of the same vote as his parlimentary group'))
