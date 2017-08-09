@@ -4113,10 +4113,10 @@ def setListOfMembersTickers(request, date_=None):
         try:
             mismatch = getPersonCardModelNew(MismatchOfPG,
                                               int(person_id),
-                                              date_)
+                                              '').data
         except:
             mismatch = None
-        person_obj['results']['mismatch_of_pg'] = mismatch.data
+        person_obj['results']['mismatch_of_pg'] = mismatch
 
         person_obj['results']['privzdignjeno'] = {}
         person_obj['results']['privzdignjeno']['score'] = privzdignjeno
