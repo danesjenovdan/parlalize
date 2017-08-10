@@ -43,3 +43,4 @@ traitlets==4.2.2
 Unidecode==0.4.19
 wcwidth==0.1.7
 websocket-client==0.40.0
+django-tinymce==2.6.0
