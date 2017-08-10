@@ -1515,7 +1515,7 @@ def setNumberOfQuestionsAll(request, date_=None):
     date_s = date_of.strftime(API_DATE_FORMAT)
 
     url = API_URL + '/getAllQuestions/' + date_s
-    data = tryHard(url).json()
+    data = getDataFromPagerApi(url)
     url_pgs = API_URL + '/getAllPGs/' + date_s
     pgs_on_date = tryHard(url_pgs).json()
     url = API_URL + '/getMPs/' + date_s
