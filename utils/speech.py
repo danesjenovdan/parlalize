@@ -7,7 +7,7 @@ from collections import Counter
 from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from itertools import groupby
 
-from parlalize.utils import tryHard
+from parlalize.utils import tryHard, getDataFromPagerApi
 
 
 class WordAnalysis(object):
@@ -137,7 +137,7 @@ class WordAnalysis(object):
                                                     in speeches])
             print '[INFO] counting avg words of members'
             url = API_URL + '/getAllMPsSpeeches/' + self.date_
-            all_speeches = tryHard(url).json()
+            all_speeches = getDataFromPagerApi(url)
             text = ''.join([speech['content'] for speech in all_speeches])
             total_words = numberOfWords(text)
             self.average_words = total_words/len(self.allTimeMembers)

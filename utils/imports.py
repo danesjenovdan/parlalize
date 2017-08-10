@@ -1,4 +1,4 @@
-from parlalize.utils import tryHard
+from parlalize.utils import tryHard, getDataFromPagerApi
 from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
@@ -101,7 +101,8 @@ def updateSpeeches():
 
 
 def updateQuestions():
-    data = tryHard(API_URL + '/getAllQuestions').json()
+    url = API_URL + '/getAllQuestions'
+    data = getDataFromPagerApi(url)
     existingISs = list(Question.objects.all().values_list("id_parladata",
                                                           flat=True))
     for dic in data:
