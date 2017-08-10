@@ -60,7 +60,7 @@ def getMPsList(request, date_=None):
 
 
 # returns MP static data like PoliticalParty, age, ....
-@lockSetter
+
 def setMPStaticPL(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -79,9 +79,10 @@ def setMPStaticPL(request, person_id, date_=None):
     result = saveOrAbortNew(model=MPStaticPL,
                             created_for=date_of,
                             person=person,
-                            voters=data['voters'], age=data['age'],
+                            voters=data['voters'],
+                            age=data['age'],
                             mandates=data['mandates'],
-                            party_id=data['party_id'],
+                            party=Organization.objects.get(id_parladata=int(data['party_id'])),
                             education=data['education'],
                             previous_occupation=data['previous_occupation'],
                             name=data['name'],
@@ -238,7 +239,7 @@ def getMPStaticPL(request, person_id, date_=None):
             'voters': card.voters,
             'age': card.age,
             'mandates': card.mandates,
-            'party_id': card.party_id,
+            'party_id': card.party.id_parladata,
             'acronym': card.acronym,
             'education': card.education,
             'previous_occupation': card.previous_occupation,

@@ -367,8 +367,8 @@ def getPersonData(id_parladata, date_=None):
                     'is_active': None,
                     'has_function': False,
                     }
-    party = Organization.objects.get(id_parladata=data.party_id)
-    partyData = party.getOrganizationData()
+
+    partyData = data.party.getOrganizationData()
     return {
             'type': 'mp',
             'name': data.person.name,
