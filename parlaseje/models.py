@@ -6,6 +6,7 @@ from jsonfield import JSONField
 from behaviors.models import Timestampable, Versionable
 from parlalize.settings import API_OUT_DATE_FORMAT, API_DATE_FORMAT
 from datetime import datetime
+from tinymce.models import HTMLField
 
 
 class PopoloDateTimeField(models.DateTimeField):
@@ -290,6 +291,12 @@ class Vote(Timestampable, models.Model):
 
     amendment_of = models.ManyToManyField('parlaskupine.Organization',
                                           related_name='amendments')
+
+    note = HTMLField(blank=True,
+                     null=True)
+
+    def __str__(self):
+        return self.session.name + ' | ' + self.motion
 
 
 class VoteDetailed(Timestampable, models.Model):
