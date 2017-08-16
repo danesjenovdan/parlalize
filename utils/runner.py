@@ -11,8 +11,8 @@ from django.test.client import RequestFactory
 from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass, MinisterStatic
 
-from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG
-from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic
+from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
+from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, PGMismatch
 
 from parlaseje.models import Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
 
@@ -125,6 +125,7 @@ def onDatePGCardRunner(date_=None):
         setMPsOfPG,
         setBasicInfOfPG,
         setPresenceThroughTimePG,
+        setPGMismatch,
     ]
 
     membersOfPGsRanges = tryHard(
