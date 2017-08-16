@@ -86,6 +86,9 @@ urlpatterns = patterns('',
     url(r'^getAmendmentsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getAmendmentsOfPG),
     url(r'^getAmendmentsOfPG/(?P<pg_id>\d+)', getAmendmentsOfPG),
 
+    url(r'^getPGMismatch/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getPGMismatch),
+    url(r'^getPGMismatch/(?P<pg_id>\d+)/', getPGMismatch),
+
     ####################################################################################
     #POST setters
     url(r'^setAllPGsStyleScoresFromSearch/', setAllPGsStyleScoresFromSearch),

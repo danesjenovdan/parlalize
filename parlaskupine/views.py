@@ -19,12 +19,12 @@ import numpy as np
 from utils.speech import WordAnalysis
 from parlalize.utils import *
 from parlalize.utils import (tryHard, lockSetter, prepareTaggedBallots,
-                             getAllStaticData, setCardData)
+                             getAllStaticData, setCardData, getPersonCardModelNew)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY)
 from parlaskupine.models import *
 from parlaseje.models import Activity, Session, Vote, Speech, Question
-from parlaposlanci.models import Person
+from parlaposlanci.models import Person, MismatchOfPG
 from parlaposlanci.views import getMPsList
 from kvalifikatorji.scripts import (countWords, getCountListPG, getScores,
                                     problematicno, privzdignjeno, preprosto)
@@ -1960,3 +1960,53 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
     org = Organization.objects.get(id_parladata=pg_id)
     count = org.amendments.filter(start_time__lte=date_of).count()
     return JsonResponse(count, safe=False)
+
+
+@lockSetter
+def setPGMismatch(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date()
+        date_ = ''
+    staticData = json.loads(getAllStaticData(None).content)
+    personsData = staticData['persons']
+
+    org = Organization.objects.get(id_parladata=pg_id)
+    url = API_URL + '/getMembersOfPGsOnDate/' + date_
+    memsOfPGs = tryHard(url).json()
+    data = []
+    for member in memsOfPGs[str(pg_id)]:
+        mismatch = getPersonCardModelNew(MismatchOfPG, int(member), date_)
+        data.append({'id': member,
+                     'ratio': mismatch.data})
+    
+    saved = saveOrAbortNew(model=PGMismatch,
+                           organization=org,
+                           created_for=date_of,
+                           data=data)
+    return JsonResponse({'alliswell': True})
+
+
+def getPGMismatch(request, pg_id, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = ''
+    org = Organization.objects.get(id_parladata=pg_id)
+    mismatch = getPGCardModelNew(PGMismatch, pg_id, date_)
+    staticData = json.loads(getAllStaticData(None).content)
+    personsData = staticData['persons']
+    data = []
+    for result in mismatch.data:
+        data.append({'person': personsData[str(result['id'])],
+                     'ratio': result['ratio']})
+    data = sorted(data, key=lambda k: k['ratio'], reverse=True)
+    out = {
+        'organization': org.getOrganizationData(),
+        'created_at': mismatch.created_at.strftime(API_DATE_FORMAT),
+        'created_for': mismatch.created_for.strftime(API_DATE_FORMAT),
+        'results': data
+    }
+    return JsonResponse(out, safe=False)
