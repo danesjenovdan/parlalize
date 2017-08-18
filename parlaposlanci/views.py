@@ -4014,6 +4014,7 @@ def setListOfMembersTickers(request, date_=None):
                  'privzdignjeno': [],
                  'preprosto': [],
                  'problematicno': [],
+                 'mismatch_of_pg': [],
                  }
 
     data = []
@@ -4084,6 +4085,29 @@ def setListOfMembersTickers(request, date_=None):
         rank_data['number_of_questions'].append(value)
 
         try:
+            mpStatic = getPersonCardModelNew(MPStaticPL,
+                                             int(person_id),
+                                             date_)
+            age = mpStatic.age
+            mandates = mpStatic.mandates
+            education = mpStatic.education
+            gender = mpStatic.gender
+        except:
+            age = None
+            mandates = None
+            education = None
+            gender = None
+
+        person_obj['results']['age'] = {}
+        person_obj['results']['age']['score'] = age
+        person_obj['results']['mandates'] = {}
+        person_obj['results']['mandates']['score'] = mandates
+        person_obj['results']['education'] = {}
+        person_obj['results']['education']['score'] = education
+        person_obj['results']['gender'] = {}
+        person_obj['results']['gender']['score'] = gender
+
+        try:
             styleScores = getPersonCardModelNew(StyleScores,
                                                 int(person_id),
                                                 date_)
@@ -4116,7 +4140,9 @@ def setListOfMembersTickers(request, date_=None):
                                               date_)
         except:
             mismatch = None
-        person_obj['results']['mismatch_of_pg'] = mismatch.data
+        person_obj['results']['mismatch_of_pg'] = {}
+        person_obj['results']['mismatch_of_pg']['score'] = mismatch.data
+        rank_data['mismatch_of_pg'].append(value)
 
         person_obj['results']['privzdignjeno'] = {}
         person_obj['results']['privzdignjeno']['score'] = privzdignjeno

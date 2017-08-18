@@ -92,7 +92,6 @@ def onDateMPCardRunner(date_=None):
                        '' + str(membership['id']) + ''
                        '' + ENDC + '')
                 print msg
-        setLastActivity(request_with_key, str(membership['id']))
 
     # Runner for setters ALL
     all_in_one_setters = [
