@@ -4091,7 +4091,7 @@ def setListOfMembersTickers(request, date_=None):
                                              date_)
             age = mpStatic.age
             mandates = mpStatic.mandates
-            education = mpStatic.education
+            education = mpStatic.education_level
             gender = mpStatic.gender
         except:
             age = None
