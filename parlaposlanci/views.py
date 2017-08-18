@@ -83,6 +83,7 @@ def setMPStaticPL(request, person_id, date_=None):
                             mandates=data['mandates'],
                             party_id=data['party_id'],
                             education=data['education'],
+                            education_level=data['education_level'],
                             previous_occupation=data['previous_occupation'],
                             name=data['name'],
                             district=data['district'],
