@@ -4137,7 +4137,7 @@ def setListOfMembersTickers(request, date_=None):
         try:
             mismatch = getPersonCardModelNew(MismatchOfPG,
                                               int(person_id),
-                                              date_).data
+                                              None).data
         except:
             mismatch = None
         person_obj['results']['mismatch_of_pg'] = {}
@@ -4189,10 +4189,13 @@ def setListOfMembersTickers(request, date_=None):
         for key in rank_data.keys():
             cPerson['results'][key]['rank'] = ranking[key][idx]
             if is_prev:
-                prevSocre = prevPerson['results'][key]['score']
-                currentScore = cPerson['results'][key]['score']
-                diff = currentScore - prevSocre
-                cPerson['results'][key]['diff'] = diff
+                if key in prevPerson['results'].keys():
+                    prevSocre = prevPerson['results'][key]['score']
+                    currentScore = cPerson['results'][key]['score']
+                    diff = currentScore - prevSocre
+                    cPerson['results'][key]['diff'] = diff
+                else:
+                    cPerson['results'][key]['diff'] = 0
             else:
                 cPerson['results'][key]['diff'] = 0
 
