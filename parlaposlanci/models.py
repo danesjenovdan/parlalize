@@ -382,6 +382,9 @@ class MPStaticPL(Timestampable, models.Model):
     education = models.TextField(
         blank=True, null=True, help_text=_('Person\'s education'))
 
+    education_level = models.TextField(
+        blank=True, null=True, help_text=_('Person\'s education level'))
+
     previous_occupation = models.TextField(
         blank=True, null=True, help_text=_('Person\'s previous occupation'))
 
