@@ -292,6 +292,9 @@ class Vote(Timestampable, models.Model):
     amendment_of = models.ManyToManyField('parlaskupine.Organization',
                                           related_name='amendments')
 
+    abstractVisible = models.NullBooleanField(default=False,
+                                              help_text='has outlier voters')
+
     note = HTMLField(blank=True,
                      null=True)
 
