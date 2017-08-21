@@ -1344,7 +1344,8 @@ def getMotionAnalize(request, motion_id):
            'gov_side': {'coalition': json.loads(model.coal_opts),
                         'opposition': json.loads(model.oppo_opts)},
            'all': options,
-           'note': vote.note}
+           'abstractVisible': vote.abstractVisible,
+           'abstract': vote.note}
     return JsonResponse(out, safe=False)
 
 
