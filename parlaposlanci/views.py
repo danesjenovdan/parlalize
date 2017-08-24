@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 from django.core.cache import cache
