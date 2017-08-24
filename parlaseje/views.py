@@ -1,19 +1,21 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
-from parlalize.utils import *
-import json
-from django.http import JsonResponse, HttpResponse
-from parlaseje.models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
-from parlaseje.utils import *
 from collections import defaultdict, Counter
+
+from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
-import re
 from django.db.models import Q, F
 from django.core.cache import cache
-from parlalize.utils import tryHard, lockSetter, getAllStaticData
 from django.views.decorators.csrf import csrf_exempt
+
+from parlalize.utils import tryHard, lockSetter, getAllStaticData, getPersonData
+from parlaseje.models import *
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
+from parlaskupine.models import Organization
+
+import json
+import re
 
 
 def getSpeech(request, speech_id):

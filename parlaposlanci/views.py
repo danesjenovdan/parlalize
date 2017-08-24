@@ -4,18 +4,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 from django.core.cache import cache
 
-from scipy.stats.stats import pearsonr
 from scipy.stats import rankdata
-from scipy.spatial.distance import euclidean
 from datetime import date, datetime, timedelta
 from collections import Counter
 from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
 
-from parlalize.utils import *
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
-                                SETTER_KEY, LAST_ACTIVITY_COUNT)
-from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
+                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL)
+from parlalize.utils import (tryHard, lockSetter, prepareTaggedBallots,
+                             getPersonData, getPersonCardModelNew)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)
@@ -23,6 +21,7 @@ from parlaseje.models import Session, Tag, Question
 from utils.speech import WordAnalysis
 from utils.compass import getData as getCompassData
 from .models import *
+from parlaskupine.models import Organization
 
 import numpy
 import requests
