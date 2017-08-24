@@ -4023,7 +4023,7 @@ def setListOfMembersTickers(request, date_=None):
         person_obj = {}
         person_obj['results'] = {}
         person_id = mp['id']
-        person_obj['person'] = getPersonData(person_id, date_)
+        person_obj['person'] = getPersonData(person_id)
 
         try:
             value = getPersonCardModelNew(Presence,
@@ -4087,8 +4087,7 @@ def setListOfMembersTickers(request, date_=None):
 
         try:
             mpStatic = getPersonCardModelNew(MPStaticPL,
-                                             int(person_id),
-                                             date_)
+                                             int(person_id))
             age = mpStatic.age
             mandates = mpStatic.mandates
             education = mpStatic.education_level
@@ -4193,7 +4192,10 @@ def setListOfMembersTickers(request, date_=None):
                 if key in prevPerson['results'].keys():
                     prevSocre = prevPerson['results'][key]['score']
                     currentScore = cPerson['results'][key]['score']
-                    diff = currentScore - prevSocre
+                    try:
+                        diff = currentScore - prevSocre
+                    except:
+                        diff = 0
                     cPerson['results'][key]['diff'] = diff
                 else:
                     cPerson['results'][key]['diff'] = 0
