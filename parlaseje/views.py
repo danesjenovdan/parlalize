@@ -2,7 +2,7 @@
 from datetime import datetime
 from collections import defaultdict, Counter
 
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, F
