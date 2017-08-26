@@ -198,7 +198,7 @@ def getBasicInfOfPG(request, pg_id, date=None):
         }]
     }
     """
-    card = getPGCardModel(PGStatic, pg_id, date)
+    card = getPGCardModelNew(PGStatic, pg_id, date)
     headOfPG = 0
     viceOfPG = []
     if card.headOfPG:
