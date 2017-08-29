@@ -2,7 +2,7 @@
 import requests
 from parlaposlanci.views import setMPStaticPL
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY
-from parlalize.utils import getPGIDs, findDatesFromLastCard
+from parlalize.utils_ import getPGIDs, findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
 from raven.contrib.django.raven_compat.models import client
@@ -24,7 +24,7 @@ from utils.votes_outliers import setMotionAnalize, setOutliers
 
 from .votes import VotesAnalysis
 
-from parlalize.utils import tryHard, datesGenerator, printProgressBar, getPersonData
+from parlalize.utils_ import tryHard, datesGenerator, printProgressBar, getPersonData
 
 import json
 from slackclient import SlackClient

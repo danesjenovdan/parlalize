@@ -12,10 +12,9 @@ from collections import Counter
 from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
 
-from parlalize.utils import *
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 SETTER_KEY, LAST_ACTIVITY_COUNT)
-from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
+from parlalize.utils_ import tryHard, lockSetter, prepareTaggedBallots
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)

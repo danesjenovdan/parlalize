@@ -11,7 +11,7 @@ from parlaseje.views import getSessionsList
 from parlaseje.models import Session
 from parlaskupine.models import Organization
 from parlalize.settings import API_DATE_FORMAT, BASE_URL, API_URL, GLEJ_URL, PAGE_URL, slack_token
-from parlalize.utils import getAllStaticData, tryHard, printProgressBar, getPersonData
+from parlalize.utils_ import getAllStaticData, tryHard, printProgressBar, getPersonData
 from django.db.models import Q
 from slackclient import SlackClient
 
@@ -124,7 +124,7 @@ def updateCacheIntraDisunion():
     return 1
 
 
-def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[]):
+def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[], sender=None, status_id=None):
     def cardRecache(card_url):
         url = card_url + '?forceRender=true'
         print url
@@ -149,23 +149,35 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[]):
                 # the dirtiest workaround
                 card_url = base_url + 'pg/' + pgCard + '/' + str(pg)
                 cardRecache(card_url)
-            printProgressBar(pg_ids.index(pg), len(pg_ids), prefix='Orgs: ')
+            # return progres to dashboard or print progresbar
+            if sender:
+                sender(status_id, "Running" , str(int(pg_ids.index(pg)/90.*100)) + "%", '[]')
+            else:
+                printProgressBar(pg_ids.index(pg), len(pg_ids), prefix='Orgs: ')
 
     if mpCards:
         for mp in mps_ids:
             for mpCard in mpCards:
                 card_url = base_url + 'p/' + mpCard + '/' + str(mp)
                 cardRecache(card_url)
-            printProgressBar(mps_ids.index(mp),
-                             len(mps_ids),
-                             prefix='Members: ')
+            # return progres to dashboard or print progresbar
+            if sender:
+                sender(status_id, "Running" , str(int(mps_ids.index(mp)/float(len(mps_ids))*100)) + "%", '[]')
+            else:
+                printProgressBar(mps_ids.index(mp),
+                                 len(mps_ids),
+                                 prefix='Members: ')
 
     if sessions:
         for s in sessions['sessions']:
             for sCard in sessions['cards']:
                 card_url = base_url + 's/' + sCard + '/' + str(s)
                 cardRecache(card_url)
-            printProgressBar(mps_ids.index(mp),
+            # return progres to dashboard or print progresbar
+            if sender:
+                sender(status_id, "Running" , str(int(mps_ids.index(mp)/float(len(mps_ids))*100)) + "%", '[]')
+            else:
+                printProgressBar(mps_ids.index(mp),
                              len(mps_ids),
                              prefix='Session: ')
 
@@ -179,9 +191,15 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[]):
             for v in votes.values_list("id_parladata", flat=True):
                 card_url = base_url + 's/' + 'glasovanje-layered-2' + '/' + str(v)
                 cardRecache(card_url)
-        printProgressBar(votes_of_s.index(s),
-                         len(votes_of_s),
-                         prefix='Session: ')
+        # return progres to dashboard or print progresbar
+        if sender:
+            sender(status_id, "Running" , str(int(pg_ids.index(pg)/90.*100)) + "%", '[]')
+        else:
+            printProgressBar(votes_of_s.index(s),
+                             len(votes_of_s),
+                             prefix='Session: ')
+    if sender:
+        sender(status_id, "Done" , str(datetime.now()), '[]')
 
 
 def updateLastActivity(mps_ids):

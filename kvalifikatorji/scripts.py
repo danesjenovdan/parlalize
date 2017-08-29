@@ -11,7 +11,7 @@ from math import log
 import tfidf
 from itertools import repeat
 
-from parlalize.utils import tryHard
+from parlalize.utils_ import tryHard
 from parlalize.settings import ISCI_URL
 
 import requests
