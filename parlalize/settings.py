@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     'raven.contrib.django.raven_compat',
     'corsheaders',
     'tinymce',
+    'utils',
 )
 
 MIDDLEWARE_CLASSES = (
