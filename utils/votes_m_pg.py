@@ -7,7 +7,7 @@ import itertools
 from collections import Counter
 from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
-from parlalize.utils import saveOrAbortNew
+from parlalize.utils_ import saveOrAbortNew
 
 def set_mismatch_of_pg():
     print 'prepare date'

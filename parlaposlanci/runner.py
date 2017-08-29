@@ -1,9 +1,8 @@
 import requests, json
 import logging
 from parlalize.settings import BASE_URL, API_URL
-from parlalize.utils import update
+from parlalize.utils_ import update, tryHard
 
-from parlalize.utils import tryHard
 
 logger = logging.getLogger(__name__)
 
