@@ -1,6 +1,5 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
-from parlalize.utils import *
 import json
 from django.http import JsonResponse, HttpResponse
 from parlaseje.models import *
@@ -12,7 +11,7 @@ from django.shortcuts import get_object_or_404
 import re
 from django.db.models import Q, F
 from django.core.cache import cache
-from parlalize.utils import tryHard, lockSetter, getAllStaticData
+from parlalize.utils_ import tryHard, lockSetter, getAllStaticData
 from django.views.decorators.csrf import csrf_exempt
 
 

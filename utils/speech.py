@@ -7,7 +7,7 @@ from collections import Counter
 from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from itertools import groupby
 
-from parlalize.utils import tryHard
+from parlalize.utils_ import tryHard
 
 
 class WordAnalysis(object):
