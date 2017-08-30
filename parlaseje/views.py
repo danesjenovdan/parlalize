@@ -9,7 +9,7 @@ from django.db.models import Q, F
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 
-from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData
+from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew
 from parlaseje.models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
 from parlaskupine.models import Organization
