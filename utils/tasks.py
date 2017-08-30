@@ -11,12 +11,14 @@ from django.test.client import RequestFactory
 from parlalize.utils_ import getAllStaticData, tryHard
 from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic
 from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
-from parlalize.settings import API_URL, SETTER_KEY
+from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL
 
 from utils.recache import recacheCards
 
 import requests
 import json
+
+status_api = DASHBOARD_URL + '/api/status/'
 
 factory = RequestFactory()
 request_with_key = factory.get('?key=' + SETTER_KEY)
@@ -167,7 +169,7 @@ def runPartysSetters():
 
 
 def sendStatus(status_id, type_, note, data):
-    requests.put('http://localhost:8888/api/status/'+str(status_id)+'/',
+    requests.put(status_api + str(status_id)+'/',
                  data= {
                             "status_type": type_,
                             "status_note": note,
