@@ -1955,15 +1955,16 @@ def getSessionsByClassification(request):
     }
     }
     """
+    sessions = json.loads(getAllStaticData(None).content)['sessions']
     COUNCIL_ID = 9
     DZ = 95
     working_bodies = ["odbor", "komisija", "preiskovalna komisija"]
-    out = {"kolegij": [session.getSessionData() for session in Session.objects.filter(organizations__id_parladata=COUNCIL_ID).order_by("-start_time")],
-           "dz": [session.getSessionData() for session in Session.objects.filter(organizations__id_parladata=DZ).order_by("-start_time")],
+    out = {"kolegij": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=COUNCIL_ID).order_by("-start_time")],
+           "dz": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=DZ).order_by("-start_time")],
            "dt": [org.getOrganizationData() for org in Organization.objects.filter(classification__in=working_bodies)]}
 
     for dt in out["dt"]:
-        dt["sessions"] = [session.getSessionData() for session in Session.objects.filter(organizations__id_parladata=dt["id"]).order_by("-start_time")]
+        dt["sessions"] = [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=dt["id"]).order_by("-start_time")]
         for session in dt["sessions"]:
             session.update({"votes": True if Vote.objects.filter(session__id_parladata=session["id"]) else False,
                             "speeches": True if Speech.objects.filter(session__id_parladata=session["id"]) else False})
