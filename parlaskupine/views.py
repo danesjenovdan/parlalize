@@ -18,9 +18,9 @@ import math
 import numpy as np
 
 from utils.speech import WordAnalysis
-from parlalize.utils import (tryHard, lockSetter, prepareTaggedBallots,
-                             getAllStaticData, setCardData, getPersonCardModelNew,
-                             getPGCardModelNew, getPersonData)
+from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
+                              getAllStaticData, setCardData, getPersonCardModelNew,
+                              getPGCardModelNew, getPersonData, saveOrAbortNew)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY)
 from parlaskupine.models import *
@@ -198,7 +198,7 @@ def getBasicInfOfPG(request, pg_id, date=None):
         }]
     }
     """
-    card = getPGCardModel(PGStatic, pg_id, date)
+    card = getPGCardModelNew(PGStatic, pg_id, date)
     headOfPG = 0
     viceOfPG = []
     if card.headOfPG:

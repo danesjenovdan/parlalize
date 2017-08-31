@@ -12,8 +12,8 @@ from slugify import slugify
 
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL)
-from parlalize.utils import (tryHard, lockSetter, prepareTaggedBallots,
-                             getPersonData, getPersonCardModelNew)
+from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
+                              getPersonData, getPersonCardModelNew, saveOrAbortNew)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)
@@ -4022,7 +4022,7 @@ def setListOfMembersTickers(request, date_=None):
         person_obj = {}
         person_obj['results'] = {}
         person_id = mp['id']
-        person_obj['person'] = getPersonData(person_id, date_)
+        person_obj['person'] = getPersonData(person_id)
 
         try:
             value = getPersonCardModelNew(Presence,
@@ -4086,8 +4086,7 @@ def setListOfMembersTickers(request, date_=None):
 
         try:
             mpStatic = getPersonCardModelNew(MPStaticPL,
-                                             int(person_id),
-                                             date_)
+                                             int(person_id))
             age = mpStatic.age
             mandates = mpStatic.mandates
             education = mpStatic.education_level
@@ -4137,7 +4136,7 @@ def setListOfMembersTickers(request, date_=None):
         try:
             mismatch = getPersonCardModelNew(MismatchOfPG,
                                               int(person_id),
-                                              date_).data
+                                              None).data
         except:
             mismatch = None
         person_obj['results']['mismatch_of_pg'] = {}
@@ -4189,10 +4188,16 @@ def setListOfMembersTickers(request, date_=None):
         for key in rank_data.keys():
             cPerson['results'][key]['rank'] = ranking[key][idx]
             if is_prev:
-                prevSocre = prevPerson['results'][key]['score']
-                currentScore = cPerson['results'][key]['score']
-                diff = currentScore - prevSocre
-                cPerson['results'][key]['diff'] = diff
+                if key in prevPerson['results'].keys():
+                    prevSocre = prevPerson['results'][key]['score']
+                    currentScore = cPerson['results'][key]['score']
+                    try:
+                        diff = currentScore - prevSocre
+                    except:
+                        diff = 0
+                    cPerson['results'][key]['diff'] = diff
+                else:
+                    cPerson['results'][key]['diff'] = 0
             else:
                 cPerson['results'][key]['diff'] = 0
 
