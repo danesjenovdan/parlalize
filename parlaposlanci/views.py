@@ -13,7 +13,7 @@ from slugify import slugify
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
-                              getPersonData, getPersonCardModelNew)
+                              getPersonData, getPersonCardModelNew, saveOrAbortNew)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)
