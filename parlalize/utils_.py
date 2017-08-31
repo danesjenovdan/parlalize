@@ -714,3 +714,16 @@ def setCardData(dic, method, pg_id, date_, path, out_keys):
     for key in out_keys[:-1]:
         dic = dic.setdefault(key, {})
     dic[out_keys[-1]] = card_data
+
+
+def getDataFromPagerApi(url):
+    data = []
+    end = False
+    page = 1
+    while not end:
+        response = requests.get(url + '?page=' + str(page)).json()
+        data += response['data']
+        if page >= response['pages']:
+            break
+        page += 1
+    return data
