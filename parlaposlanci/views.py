@@ -3077,7 +3077,7 @@ def setNumberOfQuestionsAll(request, date_=None):
         date_of = datetime.now().date()
 
     url = API_URL + '/getAllQuestions/' + date_of.strftime(API_DATE_FORMAT)
-    data = tryHard(url).json()
+    data = getDataFromPagerApi(url)
     mps = tryHard(API_URL+'/getMPs/'+date_of.strftime(API_DATE_FORMAT)).json()
     mps_ids = [mp['id'] for mp in mps]
     authors = []
