@@ -1,4 +1,4 @@
-from parlalize.utils import tryHard
+from parlalize.utils_ import tryHard
 from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization

@@ -14,7 +14,7 @@ from parlaseje.models import Vote_analysis
 from parlalize.settings import API_URL
 from parlaskupine.models import Organization, IntraDisunion
 
-from parlalize.utils import printProgressBar
+from parlalize.utils_ import printProgressBar
 
 
 def setOutliers():

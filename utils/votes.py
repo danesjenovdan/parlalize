@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 from parlalize.settings import API_URL, API_DATE_FORMAT
-from parlalize.utils import tryHard, saveOrAbortNew
+from parlalize.utils_ import tryHard, saveOrAbortNew
 
 from parlaseje.models import Session
 from parlaposlanci.models import Person, EqualVoters, LessEqualVoters, Presence
