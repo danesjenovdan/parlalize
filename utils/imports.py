@@ -1,4 +1,4 @@
-from parlalize.utils import tryHard, getDataFromPagerApi
+from parlalize.utils_ import tryHard, getDataFromPagerApi
 from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
@@ -14,7 +14,8 @@ request_with_key = factory.get('?key=' + SETTER_KEY)
 
 
 def updatePeople():
-    data = tryHard(API_URL + '/getAllPeople/').json()
+    url = API_URL + '/getAllPeople/'
+    data = getDataFromPagerApi(url)
     mps = tryHard(API_URL + '/getMPs/').json()
     mps_ids = [mp['id'] for mp in mps]
     for mp in data:
@@ -62,14 +63,16 @@ def updateOrganizations():
 
 
 def deleteUnconnectedSpeeches():
-    data = tryHard(API_URL + '/getAllSpeeches').json()
+    url = API_URL + '/getAllSpeeches'
+    data = getDataFromPagerApi(url)
     idsInData = [speech['id'] for speech in data]
     blindSpeeches = Speech.objects.all().exclude(id_parladata__in=idsInData)
     blindSpeeches.delete()
 
 
 def updateSpeeches():
-    data = tryHard(API_URL + '/getAllAllSpeeches').json()
+    url = API_URL + '/getAllAllSpeeches'
+    data = getDataFromPagerApi(url)
     existingISs = list(Speech.objects.all().values_list('id_parladata',
                                                         flat=True))
     for dic in data:
@@ -187,7 +190,8 @@ def updateMotionOfSession():
 
 
 def updateBallots():
-    data = tryHard(API_URL + '/getAllBallots').json()
+    url = (API_URL + '/getAllBallots')
+    data = getDataFromPagerApi(url)
     existingISs = Ballot.objects.all().values_list('id_parladata', flat=True)
     for dic in data:
         # Ballot.objects.filter(id_parladata=dic['id']):

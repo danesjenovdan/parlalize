@@ -13,7 +13,7 @@ from slugify import slugify
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
-                              getPersonData, getPersonCardModelNew, saveOrAbortNew)
+                              getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)
@@ -618,7 +618,8 @@ def setNumberOfSpokenWordsALL(request, date_=None):
     mps_sorted = sorted(mp_results, key=lambda k: k['wordcount'])
 
     print '[INFO] Getting all speeches'
-    all_speeches = tryHard(API_URL+'/getAllSpeeches/'+date_).json()
+    url = API_URL+'/getAllSpeeches/' + date_
+    all_speeches = getDataFromPagerApi(url)
     print '[INFO] Joining all speeches'
     text = ''.join([speech['content'] for speech in all_speeches])
 

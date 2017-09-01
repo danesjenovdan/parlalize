@@ -7,14 +7,15 @@ import itertools
 from collections import Counter
 from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
-from parlalize.utils_ import saveOrAbortNew
+from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi
 
 def set_mismatch_of_pg():
     print 'prepare date'
     date_ = ''
     API_URL = 'https://data.parlameter.si/v1'
     url = API_URL + '/getVotesTableExtended'
-    data = pd.read_json(url)
+    data = getDataFromPagerApi(url)
+    data = pd.DataFrame(data)
     url = API_URL + '/getMPs/' + date_
     mps = requests.get(url).json()
     members = [mp['id'] for mp in mps]

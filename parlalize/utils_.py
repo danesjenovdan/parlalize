@@ -299,20 +299,6 @@ def getSCardModel(model, id_se, date=None):
     return modelObject
 
 
-# get all parliament member ID's
-def getIDs():
-    # create persons
-    result = []
-    # getAllPeople
-    data = tryHard(API_URL+'/getAllPeople').json()
-    # data = tryHard(API_URL+'/getMPs').json()
-
-    for mp in data:
-        result.append(mp['id'])
-
-    return result
-
-
 # get all PG ID's
 def getPGIDs():
     data = tryHard(API_URL+'/getAllPGsExt/').json()
@@ -715,15 +701,18 @@ def setCardData(dic, method, pg_id, date_, path, out_keys):
         dic = dic.setdefault(key, {})
     dic[out_keys[-1]] = card_data
 
-
-def getDataFromPagerApi(url):
+import time
+def getDataFromPagerApi(url, per_page = None):
+    start = time.time()
     data = []
     end = False
     page = 1
     while not end:
-        response = requests.get(url + '?page=' + str(page)).json()
+        response = requests.get(url + '?page=' + str(page) + ('&per_page='+str(per_page) if per_page else '')).json()
         data += response['data']
         if page >= response['pages']:
             break
         page += 1
+    end = time.time()
+    print("TIME: ", end - start)
     return data
