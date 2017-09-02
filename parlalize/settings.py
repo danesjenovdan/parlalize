@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     'raven.contrib.django.raven_compat',
     'corsheaders',
     'tinymce',
+    'utils',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -147,14 +148,18 @@ VOTE_MAP = {
 if DEVELOPMENT:
     API_URL = "http://localhost:8000/v1"
     ISCI_URL = "http://localhost:8888"
+    BASE_URL = 'http://localhost:8080/v1'
+    DASHBOARD_URL = 'http://localhost:8881'
 
 else:
     API_URL = "https://data.parlameter.si/v1"
     ISCI_URL = "https://isci.parlameter.si"
+    BASE_URL = 'https://analize.parlameter.si/v1'
+    DASHBOARD_URL = 'https://dashboard.parlameter.si'
 
-BASE_URL = 'https://analize.parlameter.si/v1'
 GLEJ_URL = 'https://glej.parlameter.si'
 PAGE_URL = 'https://parlameter.si'
+    
 
 
 LOGGING = {

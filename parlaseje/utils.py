@@ -5,7 +5,7 @@ from parlaposlanci.models import LastActivity
 from parlaseje.models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT
 from django.http import JsonResponse
-from parlalize.utils import tryHard
+from parlalize.utils_ import tryHard
 
 
 def getGraphCardModel(model, id, date=None):

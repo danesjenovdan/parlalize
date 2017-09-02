@@ -1,5 +1,4 @@
 # -*- coding: UTF-8 -*-
-import numpy
 from datetime import datetime, timedelta
 from django.http import Http404, JsonResponse, HttpResponse
 import requests
@@ -23,7 +22,6 @@ from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
 from django.contrib.contenttypes.models import ContentType
 import requests
 import json
-import numpy as np
 import time
 import csv
 import itertools

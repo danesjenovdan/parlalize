@@ -289,6 +289,20 @@ class DeviationInOrganization(Timestampable, models.Model):
                                    help_text=_('date of activity'))
 
 
+class PGMismatch(Timestampable, models.Model):
+    organization = models.ForeignKey('Organization',
+                                     blank=True, null=True,
+                                     related_name='mismatches',
+                                     help_text=_('PG'))
+
+    data = JSONField(blank=True, null=True)
+
+    created_for = models.DateField(_('date of analize'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of activity'))
+
+
 class CutVotes(Timestampable, models.Model):
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
