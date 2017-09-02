@@ -2,7 +2,7 @@
 import requests
 from parlaposlanci.views import setMPStaticPL
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY
-from parlalize.utils import getPGIDs, findDatesFromLastCard
+from parlalize.utils_ import getPGIDs, findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
 from raven.contrib.django.raven_compat.models import client
@@ -11,8 +11,8 @@ from django.test.client import RequestFactory
 from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass, MinisterStatic
 
-from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG
-from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic
+from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
+from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, PGMismatch
 
 from parlaseje.models import Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
 
@@ -24,7 +24,7 @@ from utils.votes_outliers import setMotionAnalize, setOutliers
 
 from .votes import VotesAnalysis
 
-from parlalize.utils import tryHard, datesGenerator, printProgressBar, getPersonData
+from parlalize.utils_ import tryHard, datesGenerator, printProgressBar, getPersonData
 
 import json
 from slackclient import SlackClient
@@ -92,7 +92,6 @@ def onDateMPCardRunner(date_=None):
                        '' + str(membership['id']) + ''
                        '' + ENDC + '')
                 print msg
-        setLastActivity(request_with_key, str(membership['id']))
 
     # Runner for setters ALL
     all_in_one_setters = [
@@ -125,6 +124,7 @@ def onDatePGCardRunner(date_=None):
         setMPsOfPG,
         setBasicInfOfPG,
         setPresenceThroughTimePG,
+        setPGMismatch,
     ]
 
     membersOfPGsRanges = tryHard(

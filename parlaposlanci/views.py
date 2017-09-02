@@ -1,21 +1,19 @@
 # -*- coding: UTF-8 -*-
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 from django.core.cache import cache
 
-from scipy.stats.stats import pearsonr
 from scipy.stats import rankdata
-from scipy.spatial.distance import euclidean
 from datetime import date, datetime, timedelta
 from collections import Counter
 from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
 
-from parlalize.utils import *
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
-                                SETTER_KEY, LAST_ACTIVITY_COUNT)
-from parlalize.utils import tryHard, lockSetter, prepareTaggedBallots
+                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL)
+from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
+                              getPersonData, getPersonCardModelNew, saveOrAbortNew)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)
@@ -23,6 +21,7 @@ from parlaseje.models import Session, Tag, Question
 from utils.speech import WordAnalysis
 from utils.compass import getData as getCompassData
 from .models import *
+from parlaskupine.models import Organization
 
 import numpy
 import requests
@@ -84,6 +83,7 @@ def setMPStaticPL(request, person_id, date_=None):
                             mandates=data['mandates'],
                             party=Organization.objects.get(id_parladata=int(data['party_id'])),
                             education=data['education'],
+                            education_level=data['education_level'],
                             previous_occupation=data['previous_occupation'],
                             name=data['name'],
                             district=data['district'],
@@ -4015,6 +4015,7 @@ def setListOfMembersTickers(request, date_=None):
                  'privzdignjeno': [],
                  'preprosto': [],
                  'problematicno': [],
+                 'mismatch_of_pg': [],
                  }
 
     data = []
@@ -4022,7 +4023,7 @@ def setListOfMembersTickers(request, date_=None):
         person_obj = {}
         person_obj['results'] = {}
         person_id = mp['id']
-        person_obj['person'] = getPersonData(person_id, date_)
+        person_obj['person'] = getPersonData(person_id)
 
         try:
             value = getPersonCardModelNew(Presence,
@@ -4085,6 +4086,28 @@ def setListOfMembersTickers(request, date_=None):
         rank_data['number_of_questions'].append(value)
 
         try:
+            mpStatic = getPersonCardModelNew(MPStaticPL,
+                                             int(person_id))
+            age = mpStatic.age
+            mandates = mpStatic.mandates
+            education = mpStatic.education_level
+            gender = mpStatic.gender
+        except:
+            age = None
+            mandates = None
+            education = None
+            gender = None
+
+        person_obj['results']['age'] = {}
+        person_obj['results']['age']['score'] = age
+        person_obj['results']['mandates'] = {}
+        person_obj['results']['mandates']['score'] = mandates
+        person_obj['results']['education'] = {}
+        person_obj['results']['education']['score'] = education
+        person_obj['results']['gender'] = {}
+        person_obj['results']['gender']['score'] = gender
+
+        try:
             styleScores = getPersonCardModelNew(StyleScores,
                                                 int(person_id),
                                                 date_)
@@ -4114,10 +4137,12 @@ def setListOfMembersTickers(request, date_=None):
         try:
             mismatch = getPersonCardModelNew(MismatchOfPG,
                                               int(person_id),
-                                              '').data
+                                              None).data
         except:
             mismatch = None
-        person_obj['results']['mismatch_of_pg'] = mismatch
+        person_obj['results']['mismatch_of_pg'] = {}
+        person_obj['results']['mismatch_of_pg']['score'] = mismatch
+        rank_data['mismatch_of_pg'].append(value)
 
         person_obj['results']['privzdignjeno'] = {}
         person_obj['results']['privzdignjeno']['score'] = privzdignjeno
@@ -4164,10 +4189,16 @@ def setListOfMembersTickers(request, date_=None):
         for key in rank_data.keys():
             cPerson['results'][key]['rank'] = ranking[key][idx]
             if is_prev:
-                prevSocre = prevPerson['results'][key]['score']
-                currentScore = cPerson['results'][key]['score']
-                diff = currentScore - prevSocre
-                cPerson['results'][key]['diff'] = diff
+                if key in prevPerson['results'].keys():
+                    prevSocre = prevPerson['results'][key]['score']
+                    currentScore = cPerson['results'][key]['score']
+                    try:
+                        diff = currentScore - prevSocre
+                    except:
+                        diff = 0
+                    cPerson['results'][key]['diff'] = diff
+                else:
+                    cPerson['results'][key]['diff'] = 0
             else:
                 cPerson['results'][key]['diff'] = 0
 

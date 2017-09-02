@@ -1,19 +1,21 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
-from parlalize.utils import *
-import json
-from django.http import JsonResponse, HttpResponse
-from parlaseje.models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
-from parlaseje.utils import *
 from collections import defaultdict, Counter
+
+from django.http import JsonResponse, HttpResponse, Http404
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
-import re
 from django.db.models import Q, F
 from django.core.cache import cache
-from parlalize.utils import tryHard, lockSetter, getAllStaticData
 from django.views.decorators.csrf import csrf_exempt
+
+from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew
+from parlaseje.models import *
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
+from parlaskupine.models import Organization
+
+import json
+import re
 
 
 def getSpeech(request, speech_id):
@@ -1343,7 +1345,9 @@ def getMotionAnalize(request, motion_id):
            'parties': orgs_data,
            'gov_side': {'coalition': json.loads(model.coal_opts),
                         'opposition': json.loads(model.oppo_opts)},
-           'all': options}
+           'all': options,
+           'abstractVisible': vote.abstractVisible,
+           'abstract': vote.note}
     return JsonResponse(out, safe=False)
 
 

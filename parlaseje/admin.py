@@ -18,9 +18,9 @@ class VoteNote(Vote):
         proxy = True
 
 class VoteNotes(admin.ModelAdmin):
-    search_fields = ['session__name', 'motion']
+    search_fields = ['session__name', 'motion', 'abstractVisible']
     readonly_fields=('motion',)
-    fields = ('motion', 'note')
+    fields = ('motion', 'note', 'abstractVisible')
 
 
 admin.site.register(Session, SessionAdmin)
