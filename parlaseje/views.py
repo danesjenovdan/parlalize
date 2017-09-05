@@ -9,7 +9,7 @@ from django.db.models import Q, F
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 
-from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew
+from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
 from parlaskupine.models import Organization
@@ -1355,7 +1355,8 @@ def getMotionAnalize(request, motion_id):
 def setPresenceOfPG(request, session_id):
     """ Stores presence of PGs on specific session
     """
-    votes = tryHard(API_URL + '/getBallotsOfSession/' + str(session_id) + '/').json()
+    url = API_URL + '/getBallotsOfSession/' + str(session_id) + '/'
+    votes = getDataFromPagerApi(url)
     motions = tryHard(API_URL + '/motionOfSession/' + str(session_id) + '/').json()
     session = Session.objects.get(id_parladata=session_id)
     membersOfPG = tryHard(API_URL + '/getMembersOfPGsOnDate/' + session.start_time.strftime(API_DATE_FORMAT)).json()
