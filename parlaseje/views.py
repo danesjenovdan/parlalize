@@ -9,7 +9,7 @@ from django.db.models import Q, F
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 
-from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew
+from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
 from parlaskupine.models import Organization
@@ -1355,7 +1355,8 @@ def getMotionAnalize(request, motion_id):
 def setPresenceOfPG(request, session_id):
     """ Stores presence of PGs on specific session
     """
-    votes = tryHard(API_URL + '/getBallotsOfSession/' + str(session_id) + '/').json()
+    url = API_URL + '/getBallotsOfSession/' + str(session_id) + '/'
+    votes = getDataFromPagerApi(url)
     motions = tryHard(API_URL + '/motionOfSession/' + str(session_id) + '/').json()
     session = Session.objects.get(id_parladata=session_id)
     membersOfPG = tryHard(API_URL + '/getMembersOfPGsOnDate/' + session.start_time.strftime(API_DATE_FORMAT)).json()
@@ -1955,15 +1956,16 @@ def getSessionsByClassification(request):
     }
     }
     """
+    sessions = json.loads(getAllStaticData(None).content)['sessions']
     COUNCIL_ID = 9
     DZ = 95
     working_bodies = ["odbor", "komisija", "preiskovalna komisija"]
-    out = {"kolegij": [session.getSessionData() for session in Session.objects.filter(organizations__id_parladata=COUNCIL_ID).order_by("-start_time")],
-           "dz": [session.getSessionData() for session in Session.objects.filter(organizations__id_parladata=DZ).order_by("-start_time")],
+    out = {"kolegij": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=COUNCIL_ID).order_by("-start_time")],
+           "dz": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=DZ).order_by("-start_time")],
            "dt": [org.getOrganizationData() for org in Organization.objects.filter(classification__in=working_bodies)]}
 
     for dt in out["dt"]:
-        dt["sessions"] = [session.getSessionData() for session in Session.objects.filter(organizations__id_parladata=dt["id"]).order_by("-start_time")]
+        dt["sessions"] = [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=dt["id"]).order_by("-start_time")]
         for session in dt["sessions"]:
             session.update({"votes": True if Vote.objects.filter(session__id_parladata=session["id"]) else False,
                             "speeches": True if Speech.objects.filter(session__id_parladata=session["id"]) else False})
