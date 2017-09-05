@@ -7,11 +7,12 @@ from raven.contrib.django.raven_compat.models import client
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.test.client import RequestFactory
+from django.core.exceptions import PermissionDenied
 
 from parlalize.utils_ import getAllStaticData, tryHard
 from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic
 from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
-from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL
+from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL, SETTER_KEY
 
 from utils.recache import recacheCards
 
@@ -69,26 +70,19 @@ recache = {
     'kompas'
 }
 
-@csrf_exempt
-def runAsyncRecacheCards(request):
-    print('ivan')
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        print data
-        status_id = data.pop('status_id')
-
-        
-
-
 
 @csrf_exempt
 def runAsyncSetter(request):
-    print('ivan')
     if request.method == 'POST':
         data = json.loads(request.body)
         print data
         status_id = data.pop('status_id')
-
+        auth_key = request.META['HTTP_AUTHORIZATION']
+        if auth_key != SETTER_KEY:
+            print("auth fail")
+            sendStatus(status_id, "Fail", "Authorization fails", ['buuu'])
+            raise PermissionDenied
+        print("auth OK")
         if data['type'] == 'recache':
             print 'recache'
             recache.apply_async((data['setters'], status_id), queue='parlalize')
