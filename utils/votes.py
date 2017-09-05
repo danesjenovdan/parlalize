@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 from parlalize.settings import API_URL, API_DATE_FORMAT
-from parlalize.utils_ import tryHard, saveOrAbortNew
+from parlalize.utils_ import tryHard, saveOrAbortNew, getDataFromPagerApi
 
 from parlaseje.models import Session
 from parlaposlanci.models import Person, EqualVoters, LessEqualVoters, Presence
@@ -59,8 +59,9 @@ class VotesAnalysis(object):
             self.data = pd.read_pickle('backup_baze.pkl')
         else:
             url = API_URL + '/getVotesTable/' + self.date_
+            data = getDataFromPagerApi(url)
+            self.data = pd.DataFrame(data)
             print url
-            self.data = pd.read_json(url)
             # before debug load data to backup_baze.pkl file (uncoment next line)
             # self.data.to_pickle('backup_baze.pkl')
         url = API_URL + '/getMPs/' + self.date_

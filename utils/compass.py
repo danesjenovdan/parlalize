@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
-from parlalize.utils_ import tryHard
+from parlalize.utils_ import tryHard, getDataFromPagerApi
 
 
 def showCompass():
@@ -78,7 +78,7 @@ def getData(date_of):
     group balots for each person and calculate SVD
     """
     # getting all the necessary data
-    allballots = tryHard(API_URL+'/getAllBallots/'+date_of.strftime(API_DATE_FORMAT)).json()
+    allballots = getDataFromPagerApi(API_URL+'/getAllBallots/'+date_of.strftime(API_DATE_FORMAT))
     people = tryHard(API_URL+'/getMPs/'+date_of.strftime(API_DATE_FORMAT)).json()
 
     # sort people's ids
@@ -136,6 +136,7 @@ def getData(date_of):
     # transform numerical ballot values to numpy array
     thearray = np.array(people_ballots_sorted_list)
 
+    print len(people_ballots_sorted_list)
     # generate similarity matrix by adding +1 each time two people's ballots match
     similarities = makeSimilarities(people_ballots_sorted_list)
     u, s, vT = np.linalg.svd(similarities)
