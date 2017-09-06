@@ -31,9 +31,10 @@ from kvalifikatorji.scripts import (countWords, getCountListPG, getScores,
                                     problematicno, privzdignjeno, preprosto)
 
 
-# Create your views here.
 @lockSetter
 def setBasicInfOfPG(request, pg_id, date_):
+    """Set method for basic information for PGs.
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
         url = API_URL + '/getBasicInfOfPG/' + str(pg_id) + '/' + date_
@@ -1043,15 +1044,104 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     return JsonResponse(result, safe=False)
 
 
-def getMPStaticPersonData(id_, date_):
-    try:
-        url = BASE_URL + '/p/getMPStatic/' + str(id_) + '/' + date_
-        return tryHard(url).json()['person']
-    except:
-        return {'id': id_}
-
-
 def getMostMatchingThem(request, pg_id, date_=None):
+    """
+    * @api {get} getMostMatchingThem/{pg_id}/{?date} Gets persons who can join specific organization
+    * @apiName getMostMatchingThem
+    * @apiGroup PGs
+    * @apiDescription This function returns the list of 5 MPs who can join specific organization.
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+
+    * @apiSuccess {Object} organization The PG with the most attended voting events.
+    * @apiSuccess {String} organization.acronym PG's acronym
+    * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} organization.id PG's Parladata id.
+    * @apiSuccess {String} organization.name PG's name.
+
+    * @apiSuccess {Object[]} results.person List of MPs.
+    * @apiSuccess {Boolean} results.person.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} results.person.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} results.person.name MP's full name.
+    * @apiSuccess {String} results.person.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} results.person.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} results.person.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} results.person.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} results.person.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} results.person.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} results.person.party.name The party's name.
+    * @apiSuccess {String} results.person.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} results.person.id The person's Parladata id.
+    * @apiSuccess {Boolean} results.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    * @apiSuccess {Float} results.ratio Ratio of how the persoin can join the organization.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getLessMatchingThem/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getLessMatchingThem/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+    {  
+   "organization":{  
+      "acronym":"SMC",
+      "is_coalition":true,
+      "id":1,
+      "name":"PS Stranka modernega centra"
+   },
+   "created_at":"18.08.2017",
+   "created_for":"14.07.2017",
+   "results":[  
+      {  
+         "person":{  
+
+         },
+         "ratio":16.3235536544989
+      },
+      {  
+         "person":{  
+
+         },
+         "ratio":18.674046697835
+      },
+      {  
+         "person":{  
+            "is_active":false,
+            "district":[  
+               19
+            ],
+            "name":"Franc Jurša",
+            "gov_id":"P122",
+            "gender":"m",
+            "party":{  
+               "acronym":"DeSUS",
+               "is_coalition":true,
+               "id":3,
+               "name":"PS Demokratska Stranka Upokojencev Slovenije"
+            },
+            "type":"mp",
+            "id":37,
+            "has_function":false
+         },
+         "ratio":18.7601237281406
+      },
+      {  
+         "person":{  
+
+         },
+         "ratio":18.9207916020778
+      },
+      {  
+         "person":{  
+
+         },
+         "ratio":19.6466650769119
+      }
+   ]
+}
+    """
     mostMatching = getPGCardModelNew(MostMatchingThem, pg_id, date_)
     if not date_:
         date_ = ''
@@ -1093,6 +1183,163 @@ def getMostMatchingThem(request, pg_id, date_=None):
 
 
 def getLessMatchingThem(request, pg_id, date_=None):
+    """
+    * @api {get} getLessMatchingThem/{pg_id}/{?date} Gets persons who can not join specific organization
+    * @apiName getLessMatchingThem
+    * @apiGroup PGs
+    * @apiDescription This function returns the list of 5 MPs who can not join specific organization.
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+
+    * @apiSuccess {Object} organization The PG with the most attended voting events.
+    * @apiSuccess {String} organization.acronym PG's acronym
+    * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} organization.id PG's Parladata id.
+    * @apiSuccess {String} organization.name PG's name.
+
+    * @apiSuccess {Object[]} results.person List of MPs.
+    * @apiSuccess {Boolean} results.person.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} results.person.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} results.person.name MP's full name.
+    * @apiSuccess {String} results.person.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} results.person.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} results.person.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} results.person.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} results.person.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} results.person.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} results.person.party.name The party's name.
+    * @apiSuccess {String} results.person.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} results.person.id The person's Parladata id.
+    * @apiSuccess {Boolean} results.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    * @apiSuccess {Float} results.ratio Ratio of how the persoin can join the organization.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getLessMatchingThem/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getLessMatchingThem/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+  {
+  "organization": {
+    "acronym": "SMC",
+    "is_coalition": true,
+    "id": 1,
+    "name": "PS Stranka modernega centra"
+  },
+  "created_at": "18.08.2017",
+  "created_for": "14.07.2017",
+  "results": [
+    {
+      "person": {
+        "is_active": false,
+        "district": [
+          64
+        ],
+        "name": "Marko Pogačnik",
+        "gov_id": "P196",
+        "gender": "m",
+        "party": {
+          "acronym": "SDS",
+          "is_coalition": false,
+          "id": 5,
+          "name": "PS Slovenska Demokratska Stranka"
+        },
+        "type": "mp",
+        "id": 65,
+        "has_function": false
+      },
+      "ratio": 64.7270144386353
+    },
+    {
+      "person": {
+        "is_active": false,
+        "district": [
+          70
+        ],
+        "name": "Jože Tanko",
+        "gov_id": "P077",
+        "gender": "m",
+        "party": {
+          "acronym": "SDS",
+          "is_coalition": false,
+          "id": 5,
+          "name": "PS Slovenska Demokratska Stranka"
+        },
+        "type": "mp",
+        "id": 78,
+        "has_function": false
+      },
+      "ratio": 63.9854485386366
+    },
+    {
+      "person": {
+        "is_active": false,
+        "district": [
+          9
+        ],
+        "name": "Zvonko Lah",
+        "gov_id": "P129",
+        "gender": "m",
+        "party": {
+          "acronym": "NSI",
+          "is_coalition": false,
+          "id": 6,
+          "name": "PS Nova Slovenija"
+        },
+        "type": "mp",
+        "id": 49,
+        "has_function": false
+      },
+      "ratio": 63.2064857978416
+    },
+    {
+      "person": {
+        "is_active": false,
+        "district": [
+          55
+        ],
+        "name": "Danijel Krivec",
+        "gov_id": "P040",
+        "gender": "m",
+        "party": {
+          "acronym": "SDS",
+          "is_coalition": false,
+          "id": 5,
+          "name": "PS Slovenska Demokratska Stranka"
+        },
+        "type": "mp",
+        "id": 47,
+        "has_function": false
+      },
+      "ratio": 62.9069432744623
+    },
+    {
+      "person": {
+        "is_active": false,
+        "district": [
+          92
+        ],
+        "name": "Andrej Šircelj",
+        "gov_id": "P201",
+        "gender": "m",
+        "party": {
+          "acronym": "SDS",
+          "is_coalition": false,
+          "id": 5,
+          "name": "PS Slovenska Demokratska Stranka"
+        },
+        "type": "mp",
+        "id": 75,
+        "has_function": false
+      },
+      "ratio": 62.2074947335552
+    }
+  ]
+}
+    """
     mostMatching = getPGCardModelNew(LessMatchingThem, pg_id, date_)
     if not date_:
         date_ = ''
@@ -1134,6 +1381,799 @@ def getLessMatchingThem(request, pg_id, date_=None):
 
 
 def getDeviationInOrg(request, pg_id, date_=None):
+    """
+    * @api {get} getDeviationInOrg/{pg_id}/{?date} Gets persons who are most deviant from specific organization
+    * @apiName getDeviationInOrg
+    * @apiGroup PGs
+    * @apiDescription This function returns the list of 35 MPs who are the most deviant specific organization.
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} organization The PG with the most attended voting events.
+    * @apiSuccess {String} organization.acronym PG's acronym
+    * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} organization.id PG's Parladata id.
+    * @apiSuccess {String} organization.name PG's name.
+
+    * @apiSuccess {Object[]} results.person List of MPs.
+    * @apiSuccess {Boolean} results.person.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} results.person.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} results.person.name MP's full name.
+    * @apiSuccess {String} results.person.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} results.person.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} results.person.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} results.person.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} results.person.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} results.person.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} results.person.party.name The party's name.
+    * @apiSuccess {String} results.person.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} results.person.id The person's Parladata id.
+    * @apiSuccess {Boolean} results.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    * @apiSuccess {Object} results.person.party The PG with the most attended voting events.
+    * @apiSuccess {String} results.person.party.acronym PG's acronym
+    * @apiSuccess {Boolean} results.person.party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} results.person.party.id PG's Parladata id.
+    * @apiSuccess {String} results.person.party.name PG's name.
+    * @apiSuccess {Float} results.ratio Ratio of how the persoin can join the organization.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getDeviationInOrg/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getDeviationInOrg/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+ {
+  "organization": {
+    "acronym": "SMC",
+    "is_coalition": true,
+    "id": 1,
+    "name": "PS Stranka modernega centra"
+  },
+  "created_at": "18.08.2017",
+  "created_for": "14.07.2017",
+  "results": [
+    {
+      "person": {
+        "name": "Vlasta Počkaj",
+        "gov_id": "P303",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          84
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 2934,
+        "has_function": false
+      },
+      "ratio": 36.0512436698802
+    },
+    {
+      "person": {
+        "name": "Teja Ljubič",
+        "gov_id": "P304",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          85
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 2933,
+        "has_function": false
+      },
+      "ratio": 36.002711015257
+    },
+    {
+      "person": {
+        "name": "Jani Möderndorfer",
+        "gov_id": "P191",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          76
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 59,
+        "has_function": false
+      },
+      "ratio": 31.734442710212402
+    },
+    {
+      "person": {
+        "name": "Saša Tabaković",
+        "gov_id": "P302",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          37
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 1355,
+        "has_function": false
+      },
+      "ratio": 22.427593095333137
+    },
+    {
+      "person": {
+        "name": "Dušan Radič",
+        "gov_id": "P300",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          20
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 1357,
+        "has_function": false
+      },
+      "ratio": 20.93523559306155
+    },
+    {
+      "person": {
+        "name": "Ksenija Korenjak Kramar",
+        "gov_id": "P263",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          51
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 43,
+        "has_function": false
+      },
+      "ratio": 17.99934959184607
+    },
+    {
+      "person": {
+        "name": "Irena Grošelj Košnik",
+        "gov_id": "P253",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          15
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 27,
+        "has_function": false
+      },
+      "ratio": 17.655594582820587
+    },
+    {
+      "person": {
+        "name": "Marjan Dolinšek",
+        "gov_id": "P249",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          16
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 19,
+        "has_function": false
+      },
+      "ratio": 17.585842803652334
+    },
+    {
+      "person": {
+        "name": "Bojan Krajnc",
+        "gov_id": "P299",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          50,
+          49
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 1354,
+        "has_function": false
+      },
+      "ratio": 17.551461087518824
+    },
+    {
+      "person": {
+        "name": "Aleksander Kavčič",
+        "gov_id": "P259",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          19
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 39,
+        "has_function": false
+      },
+      "ratio": 17.32965220279231
+    },
+    {
+      "person": {
+        "name": "Tanja Cink",
+        "gov_id": "P246",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          101
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 14,
+        "has_function": false
+      },
+      "ratio": 16.594257160905816
+    },
+    {
+      "person": {
+        "name": "Erika Dekleva",
+        "gov_id": "P247",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          86
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 16,
+        "has_function": false
+      },
+      "ratio": 16.35900773488519
+    },
+    {
+      "person": {
+        "name": "Marko Ferluga",
+        "gov_id": "P250",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          83
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 21,
+        "has_function": false
+      },
+      "ratio": 14.706894551387961
+    },
+    {
+      "person": {
+        "name": "Ivan Prelog",
+        "gov_id": "P279",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          52
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 68,
+        "has_function": false
+      },
+      "ratio": 14.501852094012353
+    },
+    {
+      "person": {
+        "name": "Kamal Izidor Shaker",
+        "gov_id": "P283",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          78
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 72,
+        "has_function": false
+      },
+      "ratio": 13.832124492664402
+    },
+    {
+      "person": {
+        "name": "Irena Kotnik",
+        "gov_id": "P264",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          58
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 44,
+        "has_function": false
+      },
+      "ratio": 13.814284277057219
+    },
+    {
+      "person": {
+        "name": "Mitja Horvat",
+        "gov_id": "P257",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          96
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 33,
+        "has_function": false
+      },
+      "ratio": 13.48735573274696
+    },
+    {
+      "person": {
+        "name": "Jasna Murgel",
+        "gov_id": "P274",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          48
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 60,
+        "has_function": false
+      },
+      "ratio": 13.32646868257553
+    },
+    {
+      "person": {
+        "name": "Dragan Matić",
+        "gov_id": "P272",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          74
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 57,
+        "has_function": false
+      },
+      "ratio": 13.086501748344569
+    },
+    {
+      "person": {
+        "name": "Igor Zorčič",
+        "gov_id": "P294",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          10
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 88,
+        "has_function": false
+      },
+      "ratio": 12.891850838910404
+    },
+    {
+      "person": {
+        "name": "Janja Sluga",
+        "gov_id": "P284",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          31
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 73,
+        "has_function": false
+      },
+      "ratio": 12.832013420093741
+    },
+    {
+      "person": {
+        "name": "Branko Zorman",
+        "gov_id": "P295",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          62
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 89,
+        "has_function": false
+      },
+      "ratio": 12.352061007229072
+    },
+    {
+      "person": {
+        "name": "Andreja Potočnik",
+        "gov_id": "P278",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          63
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 67,
+        "has_function": false
+      },
+      "ratio": 11.911371475765034
+    },
+    {
+      "person": {
+        "name": "Milan Brglez",
+        "gov_id": "P243",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          76
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 11,
+        "has_function": true
+      },
+      "ratio": 11.30216454453848
+    },
+    {
+      "person": {
+        "name": "Dušan Verbič",
+        "gov_id": "P296",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          99
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 92,
+        "has_function": false
+      },
+      "ratio": 11.1829643883718
+    },
+    {
+      "person": {
+        "name": "Simona Kustec Lipicer",
+        "gov_id": "P266",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          102
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 48,
+        "has_function": false
+      },
+      "ratio": 10.916545150543616
+    },
+    {
+      "person": {
+        "name": "Maruša Škopac",
+        "gov_id": "P287",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          57
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 77,
+        "has_function": false
+      },
+      "ratio": 10.787410084033878
+    },
+    {
+      "person": {
+        "name": "Vesna Vervega",
+        "gov_id": "P291",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          25
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 84,
+        "has_function": false
+      },
+      "ratio": 10.246385623297465
+    },
+    {
+      "person": {
+        "name": "Branislav Rajić",
+        "gov_id": "P281",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          46
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 70,
+        "has_function": false
+      },
+      "ratio": 9.824085747058634
+    },
+    {
+      "person": {
+        "name": "Ivan Škodnik",
+        "gov_id": "P286",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          40
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 76,
+        "has_function": false
+      },
+      "ratio": 9.332086644515307
+    },
+    {
+      "person": {
+        "name": "Anita Koleša",
+        "gov_id": "P260",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          30
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 40,
+        "has_function": false
+      },
+      "ratio": 9.12137760716163
+    },
+    {
+      "person": {
+        "name": "Danilo Anton Ranc",
+        "gov_id": "P282",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          39
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 71,
+        "has_function": false
+      },
+      "ratio": 8.908754543638938
+    },
+    {
+      "person": {
+        "name": "Vojka Šergan",
+        "gov_id": "P285",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          14
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 74,
+        "has_function": false
+      },
+      "ratio": 8.90565216946745
+    },
+    {
+      "person": {
+        "name": "Simon Zajc",
+        "gov_id": "P293",
+        "gender": "m",
+        "is_active": false,
+        "district": [
+          100
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 87,
+        "has_function": false
+      },
+      "ratio": 8.320134474726908
+    },
+    {
+      "person": {
+        "name": "Urška Ban",
+        "gov_id": "P240",
+        "gender": "f",
+        "is_active": false,
+        "district": [
+          8
+        ],
+        "party": {
+          "acronym": "SMC",
+          "is_coalition": true,
+          "name": "PS Stranka modernega centra",
+          "id": 1
+        },
+        "type": "mp",
+        "id": 3,
+        "has_function": false
+      },
+      "ratio": 7.1179380243116706
+    }
+  ]
+}
+    """
     mostMatching = getPGCardModelNew(DeviationInOrganization, pg_id, date_)
     if not date_:
         date_ = ''
@@ -1155,6 +2195,8 @@ def getDeviationInOrg(request, pg_id, date_=None):
 
 
 def setWorkingBodies(request, org_id, date_=None):
+    """The method for seting the working bodies.
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
