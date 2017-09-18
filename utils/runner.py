@@ -21,6 +21,7 @@ from parlaseje.utils import idsOfSession, getSesDates
 from utils.recache import updatePagesS, updateLastActivity, recacheActivities, recacheWBs
 from utils.imports import update, updateDistricts, updateTags, updatePersonStatus
 from utils.votes_outliers import setMotionAnalize, setOutliers
+from utils.votes_pg import set_mismatch_of_pg
 
 from .votes import VotesAnalysis
 
@@ -153,6 +154,8 @@ def onDatePGCardRunner(date_=None):
             setter(request_with_key, date_)
         except:
             print FAIL + 'FAIL on: ' + str(setter) + ENDC
+
+    set_mismatch_of_pg()
 
     # updateWB()
 
