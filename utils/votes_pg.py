@@ -35,8 +35,6 @@ def set_mismatch_of_pg():
     data.loc[data['option'] == 'proti', 'option_proti'] = 1
     data.loc[data['option'] == 'kvorum', 'option_kvorum'] = 1
     data['voter_unit'] = 1
-    data['is_coalition'] = 0
-    data.loc[data['voterparty'].isin(coalition), 'is_coalition'] = 1
 
     print 'start analyze'
 
@@ -87,7 +85,6 @@ def set_mismatch_of_pg():
         else:
             return 2
 
-    #equal_indexes = result[['option', 'partyoption']].apply(pd.Series.nunique, axis=1).reindex()
     equal_indexes = result[['option', 'partyoption']].apply(lambda x: is_equal(x), axis=1).reindex()
     result['ivan'] = result[['option', 'partyoption']].apply(lambda x: is_equal(x), axis=1).reindex()
 
