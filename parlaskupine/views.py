@@ -2195,7 +2195,7 @@ def getDeviationInOrg(request, pg_id, date_=None):
 
 
 def setWorkingBodies(request, org_id, date_=None):
-    """The method for seting the working bodies.
+    """The method for setting working bodies.
     """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -2370,6 +2370,83 @@ def getWorkingBodies_live(request, org_id, date_=None):
 
 
 def getTaggedBallots(request, pg_id, date_=None):
+    """
+    * @api {get} getTaggedBallots/{pg_id}/{?date} Gets all tagged ballots for specific organization
+    * @apiName getTaggedBallots
+    * @apiGroup PGs
+    * @apiDescription This function returns the list of all tagged ballots for specific organization.
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} organization The PG with the most attended voting events.
+    * @apiSuccess {String} organization.acronym PG's acronym
+    * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} organization.id PG's Parladata id.
+    * @apiSuccess {String} organization.name PG's name.
+
+    * @apiSuccess {Object[]} results List of ballots.
+    * @apiSuccess {date} results.date The date in question.
+    * @apiSuccess {Object[]} results.ballots Ballots the MP submitted on that day.
+    * @apiSuccess {Integer} results.ballots.ballot_id Ballot's Parladata id.
+    * @apiSuccess {String} results.ballots.option The ballot option ("za"/"proti"/"ni"/"kvorum").
+    * @apiSuccess {String[]} results.ballots.tags List of tags this ballot was tagged with.
+    * @apiSuccess {Integer} results.ballots.session_id Parladata id of the session where this ballot was submitted.
+    * @apiSuccess {String} results.ballots.motion The text of the motion (what was the vote about).
+    * @apiSuccess {Boolean} results.ballots.result Answers the question: Did the motion pass?
+    * @apiSuccess {Integer} results.ballots.vote_id Parladata id of the vote this ballot belongs to.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+    {  
+   "party":{  
+      "acronym":"SMC",
+      "is_coalition":true,
+      "id":1,
+      "name":"PS Stranka modernega centra"
+   },
+   "created_at":"18.09.2017",
+   "created_for":"18.09.2017",
+   "results":[  
+      {  
+         "date":"18. 9. 2017",
+         "ballots":[  
+            {  
+               "option":"za",
+               "tags":[  
+                  "Proceduralna glasovanja"
+               ],
+               "session_id":9743,
+               "motion":"Dnevni red v celoti",
+               "result":true,
+               "vote_id":7416
+            }
+         ]
+      },
+      {  
+         "date":"14. 9. 2017",
+         "ballots":[  
+            {  
+               "option":"proti",
+               "tags":[  
+                  "Interpelacija"
+               ],
+               "session_id":9724,
+               "motion":"Interpelacija o delu in odgovornosti ministrice za zdravje, Milojke Kolar Celarc - Glasovanje o interpelaciji - MZ Milojka Kolar Celarc",
+               "result":false,
+               "vote_id":7404
+            }
+         ]
+      }
+   ]
+}
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
@@ -2391,6 +2468,8 @@ def getTaggedBallots(request, pg_id, date_=None):
 
 @lockSetter
 def setVocabularySizeALL(request, date_=None):
+    """Setter function for analysis of vocabulary size of PG.
+    """
     sw = WordAnalysis(count_of='groups', date_=date_)
 
     if not sw.isNewSpeech:
@@ -2419,9 +2498,66 @@ def setVocabularySizeALL(request, date_=None):
 
 
 def getVocabularySize(request, pg_id, date_=None):
+    """
+    * @api {get} getVocabularySize/{pg_id}/{?date} Gets data of analysis size of vocabulary for specific organization
+    * @apiName getTaggedBallots
+    * @apiGroup PGs
+    * @apiDescription This function returns the size of vocabulary for specific organization.
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
 
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {String} party.acronym PG's acronym
+    * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} party.id PG's Parladata id.
+    * @apiSuccess {String} party.name PG's name.
+
+    * @apiSuccess {Object} results List of ballots.
+    * @apiSuccess {Object} results.max Object for maximum size of vocabulary.
+    * @apiSuccess {Float} results.max.score Maximum size of vocabulary.
+    * @apiSuccess {Object} results.max.parties The PG with the maximum size of vocabulary.
+    * @apiSuccess {String} results.max.parties.acronym PG's acronym
+    * @apiSuccess {Boolean} results.max.parties.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} results.max.parties.id PG's Parladata id.
+    * @apiSuccess {String} results.max.parties.name PG's name.
+    * @apiSuccess {Float} results.average Average size of vocabulary.
+    * @apiSuccess {Integer} results.score Score
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getVocabularySize/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getVocabularySize/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+    {  
+   "party":{  
+      "acronym":"NeP - AČ",
+      "is_coalition":false,
+      "id":108,
+      "name":"Nepovezani poslanec Andrej Čuš"
+   },
+   "created_at":"01.12.2016",
+   "created_for":"14.11.2016",
+   "results":{  
+      "max":{  
+         "score":127.347517730496,
+         "parties":[  
+            {  
+               "acronym":"NeP - MBK",
+               "is_coalition":false,
+               "id":107,
+               "name":"Nepovezana poslanka Mirjam Bon Klanjšček"
+            }
+         ]
+      },
+      "average":104.095736759989,
+      "score":118
+   }
+}
+    """
     card = getPGCardModelNew(VocabularySize, pg_id, date_)
-
     out = {
         'party': card.organization.getOrganizationData(),
         'created_at': card.created_at.strftime(API_DATE_FORMAT),
@@ -2439,8 +2575,33 @@ def getVocabularySize(request, pg_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
-# get PGs IDs
 def getPGsIDs(request):
+    """
+    * @api {get} getTaggedBallots/{pg_id}/{?date} Gets all ids of all parlament groups
+    * @apiName getPGsIDs
+    * @apiGroup PGs
+    * @apiDescription This function returns all ids of all parlament groups.
+    * @apiSuccess {date} lastDate The date the last update of parlament groups
+    * @apiSuccess {List[]} List List of all ids of parlament group.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getPGsIDs
+
+    * @apiSuccessExample {json} Example response:
+    {  
+   "lastDate":"18.09.2017",
+   "list":[  
+      "109",
+      "1",
+      "3",
+      "2",
+      "5",
+      "7",
+      "6",
+      "8"
+   ]
+}
+    """
     output = []
     data = tryHard(API_URL+'/getAllPGs/')
     data = data.json()
@@ -2454,6 +2615,8 @@ def getPGsIDs(request):
 @csrf_exempt
 @lockSetter
 def setAllPGsStyleScoresFromSearch(request):
+    """Setter for analysis style score.
+    """
     if request.method == 'POST':
         post_data = json.loads(request.body)
         print post_data
@@ -2482,6 +2645,50 @@ def setAllPGsStyleScoresFromSearch(request):
 
 
 def getStyleScoresPG(request, pg_id, date_=None):
+    """
+    * @api {get} getStyleScores/{pg_id}/{?date} Gets all style socre for specific organization
+    * @apiName getStyleScores
+    * @apiGroup PGs
+    * @apiDescription This function returns style socre for specific organization.
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {String} party.acronym PG's acronym
+    * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} party.id PG's Parladata id.
+    * @apiSuccess {String} party.name PG's name.
+
+    * @apiSuccess {Object[]} results List of ballots.
+    * @apiSuccess {Float} results.problematicno The resoult of style score "problematic".
+    * @apiSuccess {Float} results.preprosto  The resoult of style score "simple".
+    * @apiSuccess {Float} results.privzdignjeno The resoult of style score "raised".
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getStyleScores/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getStyleScores/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+{  
+   "party":{  
+      "acronym":"SMC",
+      "is_coalition":true,
+      "id":1,
+      "name":"PS Stranka modernega centra"
+   },
+   "created_at":"01.03.2017",
+   "created_for":"01.03.2017",
+   "results":{  
+      "problematicno":0.01409816852772803,
+      "preprosto":0.061039753160307866,
+      "privzdignjeno":0.055465651048477935
+   }
+}
+    """
     card = getPGCardModelNew(StyleScores, int(pg_id), date_)
 
     privzdignjeno = 0
@@ -2513,6 +2720,8 @@ def getStyleScoresPG(request, pg_id, date_=None):
 @csrf_exempt
 @lockSetter
 def setAllPGsTFIDFsFromSearch(request):
+    """Setter for analysis TFIDF
+    """
     if request.method == 'POST':
         post_data = json.loads(request.body)
         if post_data:
@@ -2535,7 +2744,65 @@ def setAllPGsTFIDFsFromSearch(request):
 
 
 def getTFIDF(request, party_id, date_=None):
+    """
+    * @api {get} getTFIDF/{pg_id}/{?date} Gets TFIDF scores.
+    * @apiName getTFIDF
+    * @apiGroup PGs
+    * @apiDescription This function returns the list of TFIDF scores for specific organization.
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
 
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {String} party.acronym PG's acronym
+    * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} party.id PG's Parladata id.
+    * @apiSuccess {String} party.name PG's name.
+
+    * @apiSuccess {Object[]} results List of ballots.
+    * @apiSuccess {String} results.term Term of TFIDF
+    * @apiSuccess {Object} results.scores
+    * @apiSuccess {Integer} results.tf
+    * @apiSuccess {Integer} results.df
+    * @apiSuccess {Float} results.tf-idf
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getTFIDF/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getTFIDF/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+    {  
+   "party":{  
+      "acronym":"SMC",
+      "is_coalition":true,
+      "id":1,
+      "name":"PS Stranka modernega centra"
+   },
+   "created_at":"27.02.2017",
+   "created_for":"27.02.2017",
+   "results":[  
+      {  
+         "term":"ZDoh",
+         "scores":{  
+            "tf":11,
+            "df":7,
+            "tf-idf":1.5714285714285714
+         }
+      },
+      {  
+         "term":"porotnica",
+         "scores":{  
+            "tf":24,
+            "df":19,
+            "tf-idf":1.263157894736842
+         }
+      }
+   ]
+}
+    """
     card = getPGCardModelNew(Tfidf, int(party_id), is_visible=True, date=date_)
 
     out = {
@@ -2550,6 +2817,8 @@ def getTFIDF(request, party_id, date_=None):
 
 @lockSetter
 def setNumberOfQuestionsAll(request, date_=None):
+    """Setts the number of parliamentary questions for all parlament groups
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
@@ -2612,9 +2881,68 @@ def setNumberOfQuestionsAll(request, date_=None):
 
 
 def getNumberOfQuestions(request, pg_id, date_=None):
-    card = getPGCardModelNew(NumberOfQuestions,
-                             pg_id,
-                             date_)
+    """
+    * @api {get} getNumberOfQuestions/{pg_id}/{?date} Gets all tagged ballots for specific organization
+    * @apiName getNumberOfQuestions
+    * @apiGroup PGs
+    * @apiDescription This function returns the list of all tagged ballots for specific organization.
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {String} party.acronym PG's acronym
+    * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} party.id PG's Parladata id.
+    * @apiSuccess {String} party.name PG's name.
+
+    * @apiSuccess {Object} results
+    * @apiSuccess {Object} results.max Object of maximum of parliamentary questions.
+    * @apiSuccess {Float} results.max.score Maximum size of parliamentary questions.
+    * @apiSuccess {Object} results.max.parties The PG with the maximum size of vocabulary.
+    * @apiSuccess {String} results.max.parties.acronym PG's acronym
+    * @apiSuccess {Boolean} results.max.parties.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} results.max.parties.id PG's Parladata id.
+    * @apiSuccess {String} results.max.parties.name PG's name.
+    * @apiSuccess {Float} results.average Average of parliamentary questions.
+    * @apiSuccess {Integer} results.score Score
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfQuestions/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfQuestions/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+   {  
+   "party":{  
+      "acronym":"SMC",
+      "is_coalition":true,
+      "id":1,
+      "name":"PS Stranka modernega centra"
+   },
+   "created_at":"18.07.2017",
+   "created_for":"18.07.2017",
+   "results":{  
+      "max":{  
+         "score":2817,
+         "parties":[  
+            {  
+               "acronym":"SDS",
+               "is_coalition":false,
+               "id":5,
+               "name":"PS Slovenska Demokratska Stranka"
+            }
+         ]
+      },
+      "average":581.375,
+      "score":254
+   }
+}
+    """
+    card = getPGCardModelNew(NumberOfQuestions, pg_id, date_)
+
     card_date = card.created_for.strftime(API_DATE_FORMAT)
 
     max_orgs = []
@@ -2640,6 +2968,445 @@ def getNumberOfQuestions(request, pg_id, date_=None):
 
 
 def getQuestionsOfPG(request, pg_id, date_=False):
+    """
+    * @api {get} getQuestionsOfPG/{pg_id}/{?date} Gets all parliamentary questions of specific parlament group
+    * @apiName getQuestionsOfPG
+    * @apiGroup PGs
+    * @apiDescription This function returns all parliamentary questions of specific parlament group
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} organization The PG with the most attended voting events.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+    {  
+ {  
+   "created_for":"7. 7. 2017",
+   "all_recipients":[  
+      "minister za infrastrukturo",
+      "ministrica za izobraževanje znanost in šport",
+      "ministrica za delo družino socialne zadeve in enake možnosti",
+      "minister za obrambo",
+      "ministrica za delo družino socialne zadeve in enake možnosti, minister za kmetijstvo gozdarstvo in prehrano",
+      "ministrica za obrambo",
+      "ministrica za zdravje, ministrica za delo družino socialne zadeve in enake možnosti",
+      "minister za pravosodje",
+      "ministrica za okolje in prostor",
+      "ministrica za kulturo",
+      "minister za gospodarski razvoj in tehnologijo",
+      "ministrica za delo družino socialne zadeve in enake možnosti, minister za pravosodje",
+      "ministrica za izobraževanje znanost in šport, minister za kulturo",
+      "ministrica za notranje zadeve",
+      "minister za kmetijstvo gozdarstvo in prehrano",
+      "minister za finance",
+      "ministrica za delo družino socialne zadeve in enake možnosti, minister za zunanje zadeve",
+      "minister za javno upravo",
+      "ministrica za zdravje, ministrica za obrambo",
+      "minister za kmetijstvo gozdarstvo in prehrano, ministrica za okolje in prostor",
+      "ministrica brez resorja pristojna za razvoj strateške projekte in kohezijo",
+      "ministrica za finance",
+      "minister za gospodarski razvoj in tehnologijo, ministrica za finance",
+      "minister za infrastrukturo, ministrica za okolje in prostor",
+      "minister za finance v funkciji ministra za gospodarski razvoj in tehnologijo",
+      "minister za zunanje zadeve",
+      "predsednik Vlade",
+      "ministrica za okolje in prostor, minister za kmetijstvo gozdarstvo in prehrano",
+      "minister za kulturo",
+      "ministrica za zdravje"
+   ],
+   "all_authors":[  
+      {  
+         "name":"Klavdija Markež",
+         "district":[  
+            26
+         ],
+         "gender":"f",
+         "is_active":false,
+         "party":{  
+            "acronym":"SMC",
+            "id":1,
+            "is_coalition":true,
+            "name":"PS Stranka modernega centra"
+         },
+         "type":"mp",
+         "id":56,
+         "gov_id":"P271",
+         "has_function":false
+      },
+      {  
+         "name":"Franc Laj",
+         "district":[  
+            17
+         ],
+         "gender":"m",
+         "is_active":false,
+         "party":{  
+            "acronym":"PS NP",
+            "id":109,
+            "is_coalition":false,
+            "name":"PS nepovezanih poslancev "
+         },
+         "type":"mp",
+         "id":50,
+         "gov_id":"P267",
+         "has_function":false
+      },
+      {  
+         "name":"Mitja Horvat",
+         "district":[  
+            96
+         ],
+         "gender":"m",
+         "is_active":false,
+         "party":{  
+            "acronym":"SMC",
+            "id":1,
+            "is_coalition":true,
+            "name":"PS Stranka modernega centra"
+         },
+         "type":"mp",
+         "id":33,
+         "gov_id":"P257",
+         "has_function":false
+      }
+   ],
+   "created_at":"20.09.2017",
+   "results":[  
+      {  
+         "date":"7. 7. 2017",
+         "questions":[  
+            {  
+               "person":{  
+                  "name":"Erika Dekleva",
+                  "district":[  
+                     86
+                  ],
+                  "gender":"f",
+                  "is_active":false,
+                  "party":{  
+                     "acronym":"SMC",
+                     "id":1,
+                     "is_coalition":true,
+                     "name":"PS Stranka modernega centra"
+                  },
+                  "type":"mp",
+                  "id":16,
+                  "gov_id":"P247",
+                  "has_function":false
+               },
+               "recipient_orgs":[  
+
+               ],
+               "recipient_text":"ministrica za obrambo",
+               "title":"v zvezi z onesnaževanjem na Osrednjem vadišču slovenske vojske Poček",
+               "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005ed427c0ac5acb7598a32f500418261a7cb0e0a062cde3585a20ad690",
+               "session_name":"Unknown",
+               "recipient_persons":[  
+                  {  
+                     "name":"Andreja Katič",
+                     "district":[  
+                        37
+                     ],
+                     "ministry":{  
+                        "acronym":"MO",
+                        "id":136,
+                        "is_coalition":true,
+                        "name":"Ministrstvo za obrambo"
+                     },
+                     "gender":"f",
+                     "is_active":false,
+                     "party":{  
+                        "acronym":"SD",
+                        "id":7,
+                        "is_coalition":true,
+                        "name":"PS Socialni Demokrati"
+                     },
+                     "type":"ministry",
+                     "id":38,
+                     "gov_id":"P258",
+                     "has_function":false
+                  }
+               ],
+               "id":10658,
+               "session_id":"Unknown"
+            },
+            {  
+               "person":{  
+                  "name":"Marko Ferluga",
+                  "district":[  
+                     83
+                  ],
+                  "gender":"m",
+                  "is_active":false,
+                  "party":{  
+                     "acronym":"SMC",
+                     "id":1,
+                     "is_coalition":true,
+                     "name":"PS Stranka modernega centra"
+                  },
+                  "type":"mp",
+                  "id":21,
+                  "gov_id":"P250",
+                  "has_function":false
+               },
+               "recipient_orgs":[  
+
+               ],
+               "recipient_text":"ministrica za notranje zadeve",
+               "title":"v zvezi s spodbujanjem gospodarske dejavnosti na turističnih območjih",
+               "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005f525f759c12be98eb8d9125ec275748bf814765fe11cc4c30420155e",
+               "session_name":"Unknown",
+               "recipient_persons":[  
+                  {  
+                     "name":"Vesna Györkös Žnidar",
+                     "district":null,
+                     "ministry":{  
+                        "acronym":"MNZ",
+                        "id":135,
+                        "is_coalition":true,
+                        "name":"Ministrstvo za notranje zadeve"
+                     },
+                     "gender":"f",
+                     "is_active":false,
+                     "party":null,
+                     "type":"ministry",
+                     "id":1302,
+                     "gov_id":"G1302",
+                     "has_function":false
+                  }
+               ],
+               "id":10659,
+               "session_id":"Unknown"
+            },
+            {  
+               "person":{  
+                  "name":"Dragan Matić",
+                  "district":[  
+                     74
+                  ],
+                  "gender":"m",
+                  "is_active":false,
+                  "party":{  
+                     "acronym":"SMC",
+                     "id":1,
+                     "is_coalition":true,
+                     "name":"PS Stranka modernega centra"
+                  },
+                  "type":"mp",
+                  "id":57,
+                  "gov_id":"P272",
+                  "has_function":false
+               },
+               "recipient_orgs":[  
+
+               ],
+               "recipient_text":"predsednik Vlade",
+               "title":"v zvezi s kulturnim turizmom v Republiki Sloveniji",
+               "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005e495ebf9d9a4e20d6fc4ced02738eb20f85e833f50134245f1cfcd05",
+               "session_name":"Unknown",
+               "recipient_persons":[  
+                  {  
+                     "name":"Miro Cerar",
+                     "district":[  
+                        103
+                     ],
+                     "ministry":{  
+                        "acronym":"Vlada",
+                        "id":126,
+                        "is_coalition":true,
+                        "name":"Vlada"
+                     },
+                     "gender":"m",
+                     "is_active":false,
+                     "party":{  
+                        "acronym":"SMC",
+                        "id":1,
+                        "is_coalition":true,
+                        "name":"PS Stranka modernega centra"
+                     },
+                     "type":"ministry",
+                     "id":13,
+                     "gov_id":"G13",
+                     "has_function":false
+                  }
+               ],
+               "id":10657,
+               "session_id":"Unknown"
+            },
+            {  
+               "person":{  
+                  "name":"Marko Ferluga",
+                  "district":[  
+                     83
+                  ],
+                  "gender":"m",
+                  "is_active":false,
+                  "party":{  
+                     "acronym":"SMC",
+                     "id":1,
+                     "is_coalition":true,
+                     "name":"PS Stranka modernega centra"
+                  },
+                  "type":"mp",
+                  "id":21,
+                  "gov_id":"P250",
+                  "has_function":false
+               },
+               "recipient_orgs":[  
+
+               ],
+               "recipient_text":"minister za pravosodje",
+               "title":"v zvezi z odgovornostjo za izpustitev storilca kaznivega dejanja Preprečitve uradnega dejanja uradni osebi in kršitev pravil cestnega prometa z dne 5. 7. 2017",
+               "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005fe4ca106b0e69211de15cafbf4db7850b7bef83cb15544ab3f8a975a",
+               "session_name":"Unknown",
+               "recipient_persons":[  
+                  {  
+                     "name":"Goran Klemenčič",
+                     "district":null,
+                     "ministry":{  
+                        "acronym":"MP",
+                        "id":138,
+                        "is_coalition":true,
+                        "name":"Ministrstvo za pravosodje"
+                     },
+                     "gender":"m",
+                     "is_active":false,
+                     "party":null,
+                     "type":"ministry",
+                     "id":1303,
+                     "gov_id":"G1303",
+                     "has_function":false
+                  }
+               ],
+               "id":10660,
+               "session_id":"Unknown"
+            }
+         ]
+      },
+      {  
+
+      },
+      {  
+
+      },
+      {  
+
+      },
+      {  
+
+      },
+      {  
+         "date":"18. 4. 2017",
+         "questions":[  
+            {  
+               "person":{  
+                  "name":"Ivan Škodnik",
+                  "district":[  
+                     40
+                  ],
+                  "gender":"m",
+                  "is_active":false,
+                  "party":{  
+                     "acronym":"SMC",
+                     "id":1,
+                     "is_coalition":true,
+                     "name":"PS Stranka modernega centra"
+                  },
+                  "type":"mp",
+                  "id":76,
+                  "gov_id":"P286",
+                  "has_function":false
+               },
+               "recipient_orgs":[  
+
+               ],
+               "recipient_text":"minister za kmetijstvo gozdarstvo in prehrano",
+               "title":"v zvezi z zagotavljanjem možnosti za predelavo hlodovine v Sloveniji",
+               "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e0050996dabab771a034b87412f2d5e511bdecb7167295f4b359f69b6435",
+               "session_name":"Unknown",
+               "recipient_persons":[  
+                  {  
+                     "name":"Dejan Židan",
+                     "district":null,
+                     "ministry":{  
+                        "acronym":"MKGP",
+                        "id":134,
+                        "is_coalition":true,
+                        "name":"Ministrstvo za kmetijstvo, gozdarstvo in prehrano"
+                     },
+                     "gender":"m",
+                     "is_active":false,
+                     "party":null,
+                     "type":"ministry",
+                     "id":90,
+                     "gov_id":"G90",
+                     "has_function":false
+                  }
+               ],
+               "id":10334,
+               "session_id":"Unknown"
+            },
+            {  
+               "person":{  
+                  "name":"Marko Ferluga",
+                  "district":[  
+                     83
+                  ],
+                  "gender":"m",
+                  "is_active":false,
+                  "party":{  
+                     "acronym":"SMC",
+                     "id":1,
+                     "is_coalition":true,
+                     "name":"PS Stranka modernega centra"
+                  },
+                  "type":"mp",
+                  "id":21,
+                  "gov_id":"P250",
+                  "has_function":false
+               },
+               "recipient_orgs":[  
+
+               ],
+               "recipient_text":"minister za kulturo",
+               "title":"v zvezi s strategijo upravljanja kulturne dediščine",
+               "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e0051b277dfb0926c5817e2903247d0e4b985c5e2c2b22fa3383ff748dc7",
+               "session_name":"Unknown",
+               "recipient_persons":[  
+                  {  
+                     "name":"Anton Peršak",
+                     "district":null,
+                     "ministry":{  
+                        "acronym":"MK",
+                        "id":133,
+                        "is_coalition":true,
+                        "name":"Ministrstvo za kulturo"
+                     },
+                     "gender":"m",
+                     "is_active":false,
+                     "party":null,
+                     "type":"ministry",
+                     "id":1432,
+                     "gov_id":"G1432",
+                     "has_function":false
+                  }
+               ],
+               "id":10336,
+               "session_id":"Unknown"
+            }
+         ]
+      }
+   ]
+}
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -2687,6 +3454,201 @@ def getQuestionsOfPG(request, pg_id, date_=False):
 
 
 def getListOfPGs(request, date_=None, force_render=False):
+    """
+    * @api {get} getListOfPGs Gets all parlament groups
+    * @apiName getListOfPGs
+    * @apiGroup PGs
+    * @apiDescription This function returns all parlament groups.
+
+    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {String} party.acronym PG's acronym
+    * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} party.id PG's Parladata id.
+    * @apiSuccess {String} party.name PG's name.
+
+    * @apiSuccess {Object[]} results
+    * @apiSuccess {Float} results.intra_disunion Result of analysis of inta-disunion
+    * @apiSuccess {Integer} results.number_of_amendments Result of analysis number of amendments
+    * @apiSuccess {Float} results.privzdignjeno Result of analysis style score "rise"
+    * @apiSuccess {Integer} results.vocabulary_size Result of analysis vocabulary size
+    * @apiSuccess {Integer} results.number_of_questions Result of analysis number of questions
+    * @apiSuccess {Integer} results.seat_count Result of number of seats in parlament
+    * @apiSuccess {Float} results.presence_votes Result of analysis of presence on votes
+    * @apiSuccess {Float} results.presence_sessions Result of analysis of presence on sessions
+    * @apiSuccess {Float} results.problematicno Result of analysis of style score "problematic"
+    * @apiSuccess {Float} results.preprosto Result of analysis of style score "simple"
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getListOfPGs
+
+
+    * @apiSuccessExample {json} Example response:
+    {  
+   "data":[  
+      {  
+         "party":{  
+            "acronym":"SMC",
+            "is_coalition":true,
+            "name":"PS Stranka modernega centra",
+            "id":1
+         },
+         "results":{  
+            "intra_disunion":0.5813533236000595,
+            "number_of_amendments":135,
+            "privzdignjeno":0.055465651048477935,
+            "vocabulary_size":124,
+            "number_of_questions":254,
+            "seat_count":35,
+            "presence_votes":92.7684051599534,
+            "presence_sessions":94.2167236078696,
+            "problematicno":0.01409816852772803,
+            "preprosto":0.061039753160307866
+         }
+      },
+      {  
+         "party":{  
+            "acronym":"SDS",
+            "is_coalition":false,
+            "name":"PS Slovenska Demokratska Stranka",
+            "id":5
+         },
+         "results":{  
+            "intra_disunion":2.19689804102997,
+            "number_of_amendments":280,
+            "privzdignjeno":0.04106208331786034,
+            "vocabulary_size":102,
+            "number_of_questions":2817,
+            "seat_count":19,
+            "presence_votes":66.4733604862916,
+            "presence_sessions":83.7104723531316,
+            "problematicno":0.01582043604458103,
+            "preprosto":0.06005854467272461
+         }
+      },
+      {  
+         "party":{  
+            "acronym":"DeSUS",
+            "is_coalition":true,
+            "name":"PS Demokratska Stranka Upokojencev Slovenije",
+            "id":3
+         },
+         "results":{  
+            "intra_disunion":2.8766187998167894,
+            "number_of_amendments":9,
+            "privzdignjeno":0.11774129845219254,
+            "vocabulary_size":126,
+            "number_of_questions":123,
+            "seat_count":11,
+            "presence_votes":88.5897572483105,
+            "presence_sessions":94.3135320470314,
+            "problematicno":0.03600796232003048,
+            "preprosto":0.14625485569575708
+         }
+      },
+      {  
+         "party":{  
+            "acronym":"SD",
+            "is_coalition":true,
+            "name":"PS Socialni Demokrati",
+            "id":7
+         },
+         "results":{  
+            "intra_disunion":3.861954387556319,
+            "number_of_amendments":12,
+            "privzdignjeno":0.11489519477220245,
+            "vocabulary_size":125,
+            "number_of_questions":165,
+            "seat_count":6,
+            "presence_votes":87.0055447001267,
+            "presence_sessions":90.6800348040434,
+            "problematicno":0.03194953607315688,
+            "preprosto":0.12539864696681088
+         }
+      },
+      {  
+         "party":{  
+            "acronym":"NSI",
+            "is_coalition":false,
+            "name":"PS Nova Slovenija",
+            "id":6
+         },
+         "results":{  
+            "intra_disunion":0.6328349191963298,
+            "number_of_amendments":75,
+            "privzdignjeno":0.09300856518783383,
+            "vocabulary_size":122,
+            "number_of_questions":283,
+            "seat_count":6,
+            "presence_votes":66.8784029038112,
+            "presence_sessions":85.7142857142857,
+            "problematicno":0.02936898259144798,
+            "preprosto":0.12645125272103677
+         }
+      },
+      {  
+         "party":{  
+            "acronym":"Levica",
+            "is_coalition":false,
+            "name":"PS Levica",
+            "id":8
+         },
+         "results":{  
+            "intra_disunion":4.326385742334801,
+            "number_of_amendments":181,
+            "privzdignjeno":0.10688668819409212,
+            "vocabulary_size":117,
+            "number_of_questions":516,
+            "seat_count":5,
+            "presence_votes":71.2885662431942,
+            "presence_sessions":81.5584415584416,
+            "problematicno":0.039053541047179265,
+            "preprosto":0.1494215397402997
+         }
+      },
+      {  
+         "party":{  
+            "acronym":"PS NP",
+            "is_coalition":false,
+            "name":"PS nepovezanih poslancev ",
+            "id":109
+         },
+         "results":{  
+            "intra_disunion":7.026884156470127,
+            "number_of_amendments":5,
+            "privzdignjeno":0.23519830984664467,
+            "vocabulary_size":104,
+            "number_of_questions":126,
+            "seat_count":4,
+            "presence_votes":61.8307622504537,
+            "presence_sessions":83.1168831168831,
+            "problematicno":0.08006720551803538,
+            "preprosto":0.28066606227414975
+         }
+      },
+      {  
+         "party":{  
+            "acronym":"IMNS",
+            "is_coalition":false,
+            "name":"PS italijanske in madžarske narodne skupnosti",
+            "id":2
+         },
+         "results":{  
+            "intra_disunion":7.58948799275034,
+            "number_of_amendments":5,
+            "privzdignjeno":0.4560700680451448,
+            "vocabulary_size":102,
+            "number_of_questions":28,
+            "seat_count":2,
+            "presence_votes":80.1043557168784,
+            "presence_sessions":78.5714285714286,
+            "problematicno":0.10991231475909181,
+            "preprosto":0.47794791242129137
+         }
+      }
+   ]
+}
+
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
         key = date_
@@ -2762,6 +3724,8 @@ def getListOfPGs(request, date_=None, force_render=False):
 
 @lockSetter
 def setPresenceThroughTime(request, party_id, date_=None):
+    """Setter for analysis presence through time
+    """
     if date_:
         fdate = datetime.strptime(date_, '%d.%m.%Y').date()
     else:
@@ -2790,6 +3754,183 @@ def setPresenceThroughTime(request, party_id, date_=None):
 
 
 def getPresenceThroughTime(request, party_id, date_=None):
+    """
+    * @api {get} getPresenceThroughTime/{pg_id}/{?date} Gets presence on sessions through time for specific organization
+    * @apiName getPresenceThroughTime
+    * @apiGroup PGs
+    * @apiDescription This function returns presence on sessions through time for specific organization
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {String} party.acronym PG's acronym
+    * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} party.id PG's Parladata id.
+    * @apiSuccess {String} party.name PG's name.
+
+    * @apiSuccess {Object[]} results
+    * @apiSuccess {date} results.date_ts Date of analysis.
+    * @apiSuccess {Float} results.presence Percent of presence of time on specific date.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getPresenceThroughTime/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getPresenceThroughTime/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+    {  
+{  
+   "party":{  
+      "acronym":"SMC",
+      "is_coalition":true,
+      "id":1,
+      "name":"PS Stranka modernega centra"
+   },
+   "created_at":"21.08.2017",
+   "created_for":"21.08.2017",
+   "results":[  
+      {  
+         "date_ts":"2014-08-01T00:00:00",
+         "presence":96.07843137254902
+      },
+      {  
+         "date_ts":"2014-09-01T00:00:00",
+         "presence":93.7037037037037
+      },
+      {  
+         "date_ts":"2014-10-01T00:00:00",
+         "presence":93.05555555555556
+      },
+      {  
+         "date_ts":"2014-11-01T00:00:00",
+         "presence":96.0727969348659
+      },
+      {  
+         "date_ts":"2014-12-01T00:00:00",
+         "presence":93.12386156648452
+      },
+      {  
+         "date_ts":"2015-01-01T00:00:00",
+         "presence":92.52645502645503
+      },
+      {  
+         "date_ts":"2015-02-01T00:00:00",
+         "presence":94.94535519125684
+      },
+      {  
+         "date_ts":"2015-03-01T00:00:00",
+         "presence":88.62745098039215
+      },
+      {  
+         "date_ts":"2015-04-01T00:00:00",
+         "presence":87.72609819121448
+      },
+      {  
+         "date_ts":"2015-05-01T00:00:00",
+         "presence":90.42145593869732
+      },
+      {  
+         "date_ts":"2015-06-01T00:00:00",
+         "presence":91.22574955908289
+      },
+      {  
+         "date_ts":"2015-07-01T00:00:00",
+         "presence":98.47619047619047
+      },
+      {  
+         "date_ts":"2015-09-01T00:00:00",
+         "presence":94.28571428571428
+      },
+      {  
+         "date_ts":"2015-10-01T00:00:00",
+         "presence":90.10989010989012
+      },
+      {  
+         "date_ts":"2015-11-01T00:00:00",
+         "presence":94.80243161094225
+      },
+      {  
+         "date_ts":"2015-12-01T00:00:00",
+         "presence":95.33527696793003
+      },
+      {  
+         "date_ts":"2016-01-01T00:00:00",
+         "presence":89.1891891891892
+      },
+      {  
+         "date_ts":"2016-02-01T00:00:00",
+         "presence":92.06349206349206
+      },
+      {  
+         "date_ts":"2016-03-01T00:00:00",
+         "presence":90.53360125027908
+      },
+      {  
+         "date_ts":"2016-04-01T00:00:00",
+         "presence":91.27272727272727
+      },
+      {  
+         "date_ts":"2016-05-01T00:00:00",
+         "presence":91.4868804664723
+      },
+      {  
+         "date_ts":"2016-06-01T00:00:00",
+         "presence":89.07142857142857
+      },
+      {  
+         "date_ts":"2016-07-01T00:00:00",
+         "presence":96.67189952904238
+      },
+      {  
+         "date_ts":"2016-09-01T00:00:00",
+         "presence":91.32996632996633
+      },
+      {  
+         "date_ts":"2016-10-01T00:00:00",
+         "presence":94.5
+      },
+      {  
+         "date_ts":"2016-11-01T00:00:00",
+         "presence":94.18367346938776
+      },
+      {  
+         "date_ts":"2016-12-01T00:00:00",
+         "presence":96.03174603174604
+      },
+      {  
+         "date_ts":"2017-01-01T00:00:00",
+         "presence":88.57142857142857
+      },
+      {  
+         "date_ts":"2017-02-01T00:00:00",
+         "presence":92.62548262548262
+      },
+      {  
+         "date_ts":"2017-03-01T00:00:00",
+         "presence":92.66846361185983
+      },
+      {  
+         "date_ts":"2017-04-01T00:00:00",
+         "presence":91.49425287356323
+      },
+      {  
+         "date_ts":"2017-05-01T00:00:00",
+         "presence":95.13553657630895
+      },
+      {  
+         "date_ts":"2017-06-01T00:00:00",
+         "presence":89.45783132530121
+      },
+      {  
+         "date_ts":"2017-07-01T00:00:00",
+         "presence":92.52525252525253
+      }
+   ]
+}
+    """     
     card = getPGCardModelNew(PresenceThroughTime,
                              party_id,
                              date_)
@@ -2806,6 +3947,211 @@ def getPresenceThroughTime(request, party_id, date_=None):
 
 
 def getIntraDisunion(request):
+    """
+    * @api {get} getIntraDisunion/ Gets all data for analysis intra-disunion
+    * @apiName getIntraDisunion
+    * @apiGroup PGs
+    * @apiDescription This function returns all data for analysis intra-disunion
+   
+    * @apiSuccess {Object} results 
+    * @apiSuccess {Object} Name of PG 
+    * @apiSuccess {String} results.organization.acronym PG's acronym
+    * @apiSuccess {Boolean} results.organization.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} results.organization.id PG's Parladata id.
+    * @apiSuccess {String} results.organization.name PG's name.
+
+    * @apiSuccess {Object[]} votes List of votes
+    * @apiSuccess {String} votes.text Text of vote
+    * @apiSuccess {Integer} votes.id_parladata Id of the database parladata
+    * @apiSuccess {String} votes.maximum Majority required for voting
+    * @apiSuccess {List[]} votes.tag Tags of vote
+    * @apiSuccess {Boolean} votes.result Result of vote
+    * @apiSuccess {Date} votes.date Date of vote
+
+    * @apiSuccess {List[]} all_tags All tags for votes
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getIntraDisunion
+
+    * @apiSuccessExample {json} Example response:
+{  
+   "results":{  
+      "NSI":{  
+         "organization":{  
+            "acronym":"NSI",
+            "is_coalition":false,
+            "id":6,
+            "name":"PS Nova Slovenija"
+         },
+         "votes":[  
+            {  
+               "text":"Dnevni red v celoti",
+               "id_parladata":6513,
+               "maximum":"0.0",
+               "tag":[  
+                  "Proceduralna glasovanja"
+               ],
+               "result":true,
+               "date":"2014-08-01T12:16:54"
+            },
+            {  
+               "text":"Proceduralni predlog za prekinitev 1. točke dnevnega reda",
+               "id_parladata":6512,
+               "maximum":"0.0",
+               "tag":[  
+                  "Proceduralna glasovanja"
+               ],
+               "result":false,
+               "date":"2014-08-01T12:43:48"
+            },
+            {  
+               "text":"Sklep o imenovanju predsednika in podpredsednika Mandatno-volilne komisije - Sklep",
+               "id_parladata":6511,
+               "maximum":"0.0",
+               "tag":[  
+                  "Mandatno-volilna komisija"
+               ],
+               "result":true,
+               "date":"2014-08-01T12:49:10"
+            },
+            {  
+               "text":"Poročilo o izidu predčasnih volitev v Državni zbor Republike Slovenije - Glasovanje o predlogu sklepa",
+               "id_parladata":6510,
+               "maximum":"0.0",
+               "tag":[  
+                  "Proceduralna glasovanja"
+               ],
+               "result":true,
+               "date":"2014-08-01T14:18:26"
+            },
+            {  
+               "text":"Predlog za izvolitev predsednika Državnega zbora Republike Slovenije - Glasovanje o sestavi komisije",
+               "id_parladata":6509,
+               "maximum":"0.0",
+               "tag":[  
+                  "Mandatno-volilna komisija"
+               ],
+               "result":true,
+               "date":"2014-08-01T15:54:29"
+            },
+            {  
+               "text":"Dnevni red v celoti",
+               "id_parladata":6639,
+               "maximum":"0.0",
+               "tag":[  
+                  "Proceduralna glasovanja"
+               ],
+               "result":true,
+               "date":"2014-08-25T12:06:57"
+            },
+            {  
+               "text":"Predlog za izvolitev podpredsednika Državnega zbora - Glasovanje o sestavi komisije za tajno glasovanje (EPA 12 - VII, EPA 15 - VII)",
+               "id_parladata":6638,
+               "maximum":"0.0",
+               "tag":[  
+                  "Mandatno-volilna komisija"
+               ],
+               "result":true,
+               "date":"2014-08-25T12:26:05"
+            },
+            {  
+               "text":"Odlok o ustanovitvi in nalogah delovnih teles Državnega zbora - Glasovanje",
+               "id_parladata":6637,
+               "maximum":"0.0",
+               "tag":[  
+                  "Proceduralna glasovanja"
+               ],
+               "result":true,
+               "date":"2014-08-25T20:16:36"
+            },
+            {  
+               "text":"Sklep o imenovanju generalne sekretarke Državnega zbora - Glasovanje",
+               "id_parladata":6636,
+               "maximum":"0.0",
+               "tag":[  
+                  "Mandatno-volilna komisija"
+               ],
+               "result":true,
+               "date":"2014-08-25T20:37:48"
+            },
+            {  
+               "text":"Sklep o imenovanju predsednikov in podpredsednikov delovnih teles Državnega zbora - Glasovanje",
+               "id_parladata":6635,
+               "maximum":"0.0",
+               "tag":[  
+                  "Mandatno-volilna komisija"
+               ],
+               "result":true,
+               "date":"2014-08-25T21:00:14"
+            },
+            {  
+               "text":"Sklep o izvolitvi predsednika, podpredsednika in članov Komisije za nadzor obveščevalnih in varnostnih služb - Sklep o prestavitvi obravnave in odločanja na naslednjo sejo",
+               "id_parladata":6634,
+               "maximum":"0.0",
+               "tag":[  
+                  "Mandatno-volilna komisija"
+               ],
+               "result":true,
+               "date":"2014-08-25T21:09:06"
+            },
+            {  
+               "text":"Dnevni red v celoti",
+               "id_parladata":6633,
+               "maximum":"0.0",
+               "tag":[  
+                  "Proceduralna glasovanja"
+               ],
+               "result":true,
+               "date":"2014-08-28T12:04:07"
+            },
+            {  
+               "text":"Obvestilo s Sklepom o pravici nadomeščanja poslanca Državnega zbora - Glasovanje",
+               "id_parladata":6632,
+               "maximum":"0.0",
+               "tag":[  
+                  "Mandatno-volilna komisija"
+               ],
+               "result":true,
+               "date":"2014-08-28T12:06:27"
+            }
+         ]
+      }
+   },
+   "all_tags": [
+    "Komisija za nadzor javnih financ",
+    "Kolegij predsednika Državnega zbora",
+    "Komisija za narodni skupnosti",
+    "Komisija za odnose s Slovenci v zamejstvu in po svetu",
+    "Komisija za poslovnik",
+    "Mandatno-volilna komisija",
+    "Odbor za delo, družino, socialne zadeve in invalide",
+    "Odbor za finance in monetarno politiko",
+    "Odbor za gospodarstvo",
+    "Odbor za infrastrukturo, okolje in prostor",
+    "Odbor za izobraževanje, znanost, šport in mladino",
+    "Odbor za kmetijstvo, gozdarstvo in prehrano",
+    "Odbor za kulturo",
+    "Odbor za notranje zadeve, javno upravo in lokalno samoupravo",
+    "Odbor za obrambo",
+    "Odbor za pravosodje",
+    "Odbor za zadeve Evropske unije",
+    "Odbor za zdravstvo",
+    "Odbor za zunanjo politiko",
+    "Preiskovalna komisija o ugotavljanju zlorab v slovenskem bančnem sistemu ter ugotavljanju vzrokov in",
+    "Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investiciji",
+    "Ustavna komisija",
+    "Proceduralna glasovanja",
+    "Zunanja imenovanja",
+    "Poslanska vprašanja",
+    "Komisija za nadzor obveščevalnih in varnostnih služb",
+    "Preiskovalne komisije",
+    "Komisija za peticije ter za človekove pravice in enake možnosti",
+    "Interpelacija",
+    " Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investicij"
+    ]
+    }
+}
+    """     
     out = {}
     votesData = {}
     tab = []
@@ -2859,6 +4205,83 @@ def getIntraDisunion(request):
 
 
 def getIntraDisunionOrg(request, org_id, force_render=False):
+    """
+    * @api {get} getIntraDisunionOrg/{pg_id}/{?date} Gets all data for analysis intra-disunion for specific parlament group
+    * @apiName getIntraDisunionOrg
+    * @apiGroup PGs
+    * @apiDescription This function returns data for analysis intra-disunion for specific parlament group
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+
+    * @apiSuccess {Object[]} votes List of votes
+    * @apiSuccess {String} votes.text Text of vote
+    * @apiSuccess {Integer} votes.id_parladata Id of the database parladata
+    * @apiSuccess {String} votes.maximum Majority required for voting
+    * @apiSuccess {List[]} votes.tag Tags of vote
+    * @apiSuccess {Boolean} votes.result Result of vote
+    * @apiSuccess {Date} votes.date Date of vote
+
+    * @apiSuccess {List[]} all_tags All tags for votes
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getIntraDisunionOrg/1
+
+    * @apiSuccessExample {json} Example response:
+    {  
+   "SMC":[  
+      {  
+         "text":"Dnevni red v celoti",
+         "id_parladata":6513,
+         "maximum":0,
+         "tag":[  
+            "Proceduralna glasovanja"
+         ],
+         "result":true,
+         "date":"2014-08-01T12:16:54"
+      },
+      {  
+         "text":"Proceduralni predlog za prekinitev 1. točke dnevnega reda",
+         "id_parladata":6512,
+         "maximum":0,
+         "tag":[  
+            "Proceduralna glasovanja"
+         ],
+         "result":false,
+         "date":"2014-08-01T12:43:48"
+      }
+   ],
+   "all_tags":[  
+      "Komisija za nadzor javnih financ",
+      "Kolegij predsednika Državnega zbora",
+      "Komisija za narodni skupnosti",
+      "Komisija za odnose s Slovenci v zamejstvu in po svetu",
+      "Komisija za poslovnik",
+      "Mandatno-volilna komisija",
+      "Odbor za delo, družino, socialne zadeve in invalide",
+      "Odbor za finance in monetarno politiko",
+      "Odbor za gospodarstvo",
+      "Odbor za infrastrukturo, okolje in prostor",
+      "Odbor za izobraževanje, znanost, šport in mladino",
+      "Odbor za kmetijstvo, gozdarstvo in prehrano",
+      "Odbor za kulturo",
+      "Odbor za notranje zadeve, javno upravo in lokalno samoupravo",
+      "Odbor za obrambo",
+      "Odbor za pravosodje",
+      "Odbor za zadeve Evropske unije",
+      "Odbor za zdravstvo",
+      "Odbor za zunanjo politiko",
+      "Preiskovalna komisija o ugotavljanju zlorab v slovenskem bančnem sistemu ter ugotavljanju vzrokov in",
+      "Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investiciji",
+      "Ustavna komisija",
+      "Proceduralna glasovanja",
+      "Zunanja imenovanja",
+      "Poslanska vprašanja",
+      "Komisija za nadzor obveščevalnih in varnostnih služb",
+      "Preiskovalne komisije",
+      "Komisija za peticije ter za človekove pravice in enake možnosti",
+      "Interpelacija",
+      " Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investicij"
+   ]
+}"""
     out = {}
     votesData = {}
     ob = {}
