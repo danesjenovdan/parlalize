@@ -308,7 +308,7 @@ def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
     * @apiSuccess {date} created_at The date on which this card was created
 
     * @apiSuccess {Object} votes Presence at voting events
-    * @apiSuccess {Object[]} votes.maxPG The PG with the most attended voting events.
+    * @apiSuccess {Object[]} votes.maxPG The The organization object.
     * @apiSuccess {String} votes.maxPG.acronym PG's acronym
     * @apiSuccess {Boolean} votes.maxPG.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} votes.maxPG.id PG's Parladata id.
@@ -425,7 +425,7 @@ def getMPsOfPG(request, pg_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
 
-    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {Object} party The The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} party.id PG's Parladata id.
@@ -525,7 +525,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
 
-    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} party.id PG's Parladata id.
@@ -1056,7 +1056,7 @@ def getMostMatchingThem(request, pg_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
 
-    * @apiSuccess {Object} organization The PG with the most attended voting events.
+    * @apiSuccess {Object} organization The organization object.
     * @apiSuccess {String} organization.acronym PG's acronym
     * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} organization.id PG's Parladata id.
@@ -1194,7 +1194,7 @@ def getLessMatchingThem(request, pg_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
 
-    * @apiSuccess {Object} organization The PG with the most attended voting events.
+    * @apiSuccess {Object} organization The organization object.
     * @apiSuccess {String} organization.acronym PG's acronym
     * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} organization.id PG's Parladata id.
@@ -1392,7 +1392,7 @@ def getDeviationInOrg(request, pg_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
     
-    * @apiSuccess {Object} organization The PG with the most attended voting events.
+    * @apiSuccess {Object} organization The organization object.
     * @apiSuccess {String} organization.acronym PG's acronym
     * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} organization.id PG's Parladata id.
@@ -1412,7 +1412,7 @@ def getDeviationInOrg(request, pg_id, date_=None):
     * @apiSuccess {String} results.person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} results.person.id The person's Parladata id.
     * @apiSuccess {Boolean} results.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    * @apiSuccess {Object} results.person.party The PG with the most attended voting events.
+    * @apiSuccess {Object} results.person.party The organization object.
     * @apiSuccess {String} results.person.party.acronym PG's acronym
     * @apiSuccess {Boolean} results.person.party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} results.person.party.id PG's Parladata id.
@@ -1455,679 +1455,6 @@ def getDeviationInOrg(request, pg_id, date_=None):
         "has_function": false
       },
       "ratio": 36.0512436698802
-    },
-    {
-      "person": {
-        "name": "Teja Ljubič",
-        "gov_id": "P304",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          85
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 2933,
-        "has_function": false
-      },
-      "ratio": 36.002711015257
-    },
-    {
-      "person": {
-        "name": "Jani Möderndorfer",
-        "gov_id": "P191",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          76
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 59,
-        "has_function": false
-      },
-      "ratio": 31.734442710212402
-    },
-    {
-      "person": {
-        "name": "Saša Tabaković",
-        "gov_id": "P302",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          37
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 1355,
-        "has_function": false
-      },
-      "ratio": 22.427593095333137
-    },
-    {
-      "person": {
-        "name": "Dušan Radič",
-        "gov_id": "P300",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          20
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 1357,
-        "has_function": false
-      },
-      "ratio": 20.93523559306155
-    },
-    {
-      "person": {
-        "name": "Ksenija Korenjak Kramar",
-        "gov_id": "P263",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          51
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 43,
-        "has_function": false
-      },
-      "ratio": 17.99934959184607
-    },
-    {
-      "person": {
-        "name": "Irena Grošelj Košnik",
-        "gov_id": "P253",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          15
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 27,
-        "has_function": false
-      },
-      "ratio": 17.655594582820587
-    },
-    {
-      "person": {
-        "name": "Marjan Dolinšek",
-        "gov_id": "P249",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          16
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 19,
-        "has_function": false
-      },
-      "ratio": 17.585842803652334
-    },
-    {
-      "person": {
-        "name": "Bojan Krajnc",
-        "gov_id": "P299",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          50,
-          49
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 1354,
-        "has_function": false
-      },
-      "ratio": 17.551461087518824
-    },
-    {
-      "person": {
-        "name": "Aleksander Kavčič",
-        "gov_id": "P259",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          19
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 39,
-        "has_function": false
-      },
-      "ratio": 17.32965220279231
-    },
-    {
-      "person": {
-        "name": "Tanja Cink",
-        "gov_id": "P246",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          101
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 14,
-        "has_function": false
-      },
-      "ratio": 16.594257160905816
-    },
-    {
-      "person": {
-        "name": "Erika Dekleva",
-        "gov_id": "P247",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          86
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 16,
-        "has_function": false
-      },
-      "ratio": 16.35900773488519
-    },
-    {
-      "person": {
-        "name": "Marko Ferluga",
-        "gov_id": "P250",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          83
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 21,
-        "has_function": false
-      },
-      "ratio": 14.706894551387961
-    },
-    {
-      "person": {
-        "name": "Ivan Prelog",
-        "gov_id": "P279",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          52
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 68,
-        "has_function": false
-      },
-      "ratio": 14.501852094012353
-    },
-    {
-      "person": {
-        "name": "Kamal Izidor Shaker",
-        "gov_id": "P283",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          78
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 72,
-        "has_function": false
-      },
-      "ratio": 13.832124492664402
-    },
-    {
-      "person": {
-        "name": "Irena Kotnik",
-        "gov_id": "P264",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          58
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 44,
-        "has_function": false
-      },
-      "ratio": 13.814284277057219
-    },
-    {
-      "person": {
-        "name": "Mitja Horvat",
-        "gov_id": "P257",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          96
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 33,
-        "has_function": false
-      },
-      "ratio": 13.48735573274696
-    },
-    {
-      "person": {
-        "name": "Jasna Murgel",
-        "gov_id": "P274",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          48
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 60,
-        "has_function": false
-      },
-      "ratio": 13.32646868257553
-    },
-    {
-      "person": {
-        "name": "Dragan Matić",
-        "gov_id": "P272",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          74
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 57,
-        "has_function": false
-      },
-      "ratio": 13.086501748344569
-    },
-    {
-      "person": {
-        "name": "Igor Zorčič",
-        "gov_id": "P294",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          10
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 88,
-        "has_function": false
-      },
-      "ratio": 12.891850838910404
-    },
-    {
-      "person": {
-        "name": "Janja Sluga",
-        "gov_id": "P284",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          31
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 73,
-        "has_function": false
-      },
-      "ratio": 12.832013420093741
-    },
-    {
-      "person": {
-        "name": "Branko Zorman",
-        "gov_id": "P295",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          62
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 89,
-        "has_function": false
-      },
-      "ratio": 12.352061007229072
-    },
-    {
-      "person": {
-        "name": "Andreja Potočnik",
-        "gov_id": "P278",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          63
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 67,
-        "has_function": false
-      },
-      "ratio": 11.911371475765034
-    },
-    {
-      "person": {
-        "name": "Milan Brglez",
-        "gov_id": "P243",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          76
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 11,
-        "has_function": true
-      },
-      "ratio": 11.30216454453848
-    },
-    {
-      "person": {
-        "name": "Dušan Verbič",
-        "gov_id": "P296",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          99
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 92,
-        "has_function": false
-      },
-      "ratio": 11.1829643883718
-    },
-    {
-      "person": {
-        "name": "Simona Kustec Lipicer",
-        "gov_id": "P266",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          102
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 48,
-        "has_function": false
-      },
-      "ratio": 10.916545150543616
-    },
-    {
-      "person": {
-        "name": "Maruša Škopac",
-        "gov_id": "P287",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          57
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 77,
-        "has_function": false
-      },
-      "ratio": 10.787410084033878
-    },
-    {
-      "person": {
-        "name": "Vesna Vervega",
-        "gov_id": "P291",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          25
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 84,
-        "has_function": false
-      },
-      "ratio": 10.246385623297465
-    },
-    {
-      "person": {
-        "name": "Branislav Rajić",
-        "gov_id": "P281",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          46
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 70,
-        "has_function": false
-      },
-      "ratio": 9.824085747058634
-    },
-    {
-      "person": {
-        "name": "Ivan Škodnik",
-        "gov_id": "P286",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          40
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 76,
-        "has_function": false
-      },
-      "ratio": 9.332086644515307
-    },
-    {
-      "person": {
-        "name": "Anita Koleša",
-        "gov_id": "P260",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          30
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 40,
-        "has_function": false
-      },
-      "ratio": 9.12137760716163
-    },
-    {
-      "person": {
-        "name": "Danilo Anton Ranc",
-        "gov_id": "P282",
-        "gender": "m",
-        "is_active": false,
-        "district": [
-          39
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 71,
-        "has_function": false
-      },
-      "ratio": 8.908754543638938
-    },
-    {
-      "person": {
-        "name": "Vojka Šergan",
-        "gov_id": "P285",
-        "gender": "f",
-        "is_active": false,
-        "district": [
-          14
-        ],
-        "party": {
-          "acronym": "SMC",
-          "is_coalition": true,
-          "name": "PS Stranka modernega centra",
-          "id": 1
-        },
-        "type": "mp",
-        "id": 74,
-        "has_function": false
-      },
-      "ratio": 8.90565216946745
     },
     {
       "person": {
@@ -2275,6 +1602,399 @@ def setWorkingBodies(request, org_id, date_=None):
 
 
 def getWorkingBodies(request, org_id, date_=None):
+    """
+    * @api {get} getWorkingBodies/{org_id}/{?date} Gets specific working bodie
+    * @apiName getWorkingBodies
+    * @apiGroup PGs
+    * @apiDescription This function returns detailed data about specific working bodie
+    * @apiParam {Integer} org_id Parladata id for working bodie
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} info
+    * @apiSuccess {Object[]} info.vice_president Vice presidents of working bodie
+    * @apiSuccess {Boolean} info.vice_president.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} info.vice_president.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} info.vice_president.name MP's full name.
+    * @apiSuccess {String} info.vice_president.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} info.vice_president.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} info.vice_president.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} info.vice_president.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} info.vice_president.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} info.vice_president.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} info.vice_president.party.name The party's name.
+    * @apiSuccess {String} info.vice_president.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} info.vice_president.id The person's Parladata id.
+    * @apiSuccess {Boolean} info.vice_president.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    * @apiSuccess {Object} info.vice_president.party The organization object.
+    * @apiSuccess {String} info.vice_president.party.acronym PG's acronym
+    * @apiSuccess {Boolean} info.vice_president.party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} info.vice_president.party.id PG's Parladata id.
+    * @apiSuccess {String} info.vice_president.party.name PG's name
+
+    * @apiSuccess {Object} info.president President of working bodie
+    * @apiSuccess {Boolean} info.president.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} info.president.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} info.president.name MP's full name.
+    * @apiSuccess {String} info.president.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} info.president.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} info.president.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} info.president.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} info.president.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} info.president.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} info.president.party.name The party's name.
+    * @apiSuccess {String} info.president.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} info.president.id The person's Parladata id.
+    * @apiSuccess {Boolean} info.president.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    * @apiSuccess {Object} info.president.party The organization object.
+    * @apiSuccess {String} info.president.party.acronym PG's acronym
+    * @apiSuccess {Boolean} info.president.party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} info.president.party.id PG's Parladata id.
+    * @apiSuccess {String} info.president.party.name PG's name
+
+    * @apiSuccess {Object[]} info.members Members of working bodie
+    * @apiSuccess {Boolean} info.members.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} info.members.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} info.members.name MP's full name.
+    * @apiSuccess {String} info.members.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} info.members.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} info.members.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} info.members.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} info.members.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} info.members.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} info.members.party.name The party's name.
+    * @apiSuccess {String} info.members.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} info.members.id The person's Parladata id.
+    * @apiSuccess {Boolean} info.members.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    * @apiSuccess {Object} info.members.party The organization object.
+    * @apiSuccess {String} info.members.party.acronym PG's acronym
+    * @apiSuccess {Boolean} info.members.party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} info.members.party.id PG's Parladata id.
+    * @apiSuccess {String} info.members.party.name PG's name
+
+    * @apiSuccess {Object} organization The organization object.
+    * @apiSuccess {String} organization.acronym PG's acronym
+    * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} organization.id PG's Parladata id.
+    * @apiSuccess {String} organization.name PG's name.
+
+    * @apiSuccess {Object} ratio Ratio of percentage of coalition and opposition.
+    * @apiSuccess {String} ratio.coalition Percentage of coalition members
+    * @apiSuccess {String} ratio.opposition Opposition of coalition members
+
+    * @apiSuccess {Object[]} seats_per_pg The organization object.
+    * @apiSuccess {String} seats_per_pg.party.acronym PG's acronym
+    * @apiSuccess {Boolean} seats_per_pg.party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} seats_per_pg.party.id PG's Parladata id.
+    * @apiSuccess {String} seats_per_pg.party.name PG's name.
+    
+    * @apiSuccess {Object[]} session The session object.
+    * @apiSuccess {String} session.name Name of session.
+    * @apiSuccess {Date} session.date_ts Date and time of session.
+    * @apiSuccess {Date} session.date Date of session.
+    * @apiSuccess {Date} session.updated_at Date of last update.
+    * @apiSuccess {Integer} session.session.id Id of session.
+    * @apiSuccess {Boolean} session.session.in_review Return true or false if session is in review.
+    * @apiSuccess {Object[]} session.orgs Organization object
+    * @apiSuccess {String} session.orgs.acronym Organization acronym
+    * @apiSuccess {Boolean} session.orgs.is_coalition True of False if organization is in coalition
+    * @apiSuccess {Integer} session.orgs.id Id of organization
+    * @apiSuccess {Integer} session.orgs.name Name of organization
+    * @apiSuccess {Object[]} session.org Organization object
+    * @apiSuccess {String} session.org.acronym Organization acronym
+    * @apiSuccess {Boolean} session.org.is_coalition True of False if organization is in coalition
+    * @apiSuccess {Integer} session.org.id Id of organization
+    * @apiSuccess {Integer} session.org.name Name of organization
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getWorkingBodies/21
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getWorkingBodies/21/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+
+    {  
+   "info":{  
+      "vice_president":[  
+         {  
+            "is_active":false,
+            "district":[  
+               100
+            ],
+            "name":"Simon Zajc",
+            "gov_id":"P293",
+            "gender":"m",
+            "party":{  
+               "acronym":"SMC",
+               "is_coalition":true,
+               "id":1,
+               "name":"PS Stranka modernega centra"
+            },
+            "type":"mp",
+            "id":87,
+            "has_function":false
+         },
+         {  
+            "is_active":false,
+            "district":[  
+               103
+            ],
+            "name":"Violeta Tomić",
+            "gov_id":"P289",
+            "gender":"f",
+            "party":{  
+               "acronym":"Levica",
+               "is_coalition":false,
+               "id":8,
+               "name":"PS Levica"
+            },
+            "type":"mp",
+            "id":80,
+            "has_function":false
+         }
+      ],
+      "president":{  
+         "is_active":false,
+         "district":[  
+            12
+         ],
+         "name":"Tomaž Lisec",
+         "gov_id":"P187",
+         "gender":"m",
+         "party":{  
+            "acronym":"SDS",
+            "is_coalition":false,
+            "id":5,
+            "name":"PS Slovenska Demokratska Stranka"
+         },
+         "type":"mp",
+         "id":53,
+         "has_function":false
+      },
+      "members":[  
+         {  
+            "is_active":false,
+            "district":[  
+               40
+            ],
+            "name":"Benedikt Kopmajer",
+            "gov_id":"P261",
+            "gender":"m",
+            "party":{  
+               "acronym":"DeSUS",
+               "is_coalition":true,
+               "id":3,
+               "name":"PS Demokratska Stranka Upokojencev Slovenije"
+            },
+            "type":"mp",
+            "id":41,
+            "has_function":false
+         },
+         {  
+            "is_active":false,
+            "district":[  
+               44
+            ],
+            "name":"Bojan Podkrajšek",
+            "gov_id":"P277",
+            "gender":"m",
+            "party":{  
+               "acronym":"SDS",
+               "is_coalition":false,
+               "id":5,
+               "name":"PS Slovenska Demokratska Stranka"
+            },
+            "type":"mp",
+            "id":64,
+            "has_function":false
+         },
+         {  
+            "is_active":false,
+            "district":[  
+               14
+            ],
+            "name":"Vojka Šergan",
+            "gov_id":"P285",
+            "gender":"f",
+            "party":{  
+               "acronym":"SMC",
+               "is_coalition":true,
+               "id":1,
+               "name":"PS Stranka modernega centra"
+            },
+            "type":"mp",
+            "id":74,
+            "has_function":false
+         }
+      ],
+      "viceMember":[  
+
+      ]
+   },
+   "created_for":"20.09.2017",
+   "ratio":{  
+      "coalition":58.8235294117647,
+      "opposition":41.1764705882353
+   },
+   "sessions":[  
+      {  
+         "votes":false,
+         "name":"22. redna seja",
+         "orgs":[  
+            {  
+               "acronym":"",
+               "is_coalition":false,
+               "id":21,
+               "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+            }
+         ],
+         "date":"7. 9. 2017",
+         "org":{  
+            "acronym":"",
+            "is_coalition":false,
+            "id":21,
+            "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+         },
+         "date_ts":"2017-09-07T02:00:00",
+         "speeches":false,
+         "updated_at":[  
+            "7. 9. 2017"
+         ],
+         "in_review":false,
+         "id":9719
+      },
+      {  
+         "votes":false,
+         "name":"64. nujna seja",
+         "orgs":[  
+            {  
+               "acronym":"",
+               "is_coalition":false,
+               "id":21,
+               "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+            }
+         ],
+         "date":"5. 9. 2017",
+         "org":{  
+            "acronym":"",
+            "is_coalition":false,
+            "id":21,
+            "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+         },
+         "date_ts":"2017-09-05T02:00:00",
+         "speeches":false,
+         "updated_at":[  
+            "5. 9. 2017"
+         ],
+         "in_review":false,
+         "id":9707
+      },
+      {  
+         "votes":false,
+         "name":"63. nujna seja",
+         "orgs":[  
+            {  
+               "acronym":"",
+               "is_coalition":false,
+               "id":21,
+               "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+            }
+         ],
+         "date":"5. 7. 2017",
+         "org":{  
+            "acronym":"",
+            "is_coalition":false,
+            "id":21,
+            "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+         },
+         "date_ts":"2017-07-05T02:00:00",
+         "speeches":true,
+         "updated_at":"21. 7. 2017",
+         "in_review":false,
+         "id":9672
+      },
+      {  
+         "votes":false,
+         "name":"62. nujna seja",
+         "orgs":[  
+            {  
+               "acronym":"",
+               "is_coalition":false,
+               "id":21,
+               "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+            }
+         ],
+         "date":"29. 6. 2017",
+         "org":{  
+            "acronym":"",
+            "is_coalition":false,
+            "id":21,
+            "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+         },
+         "date_ts":"2017-06-29T02:00:00",
+         "speeches":true,
+         "updated_at":"21. 7. 2017",
+         "in_review":false,
+         "id":9654
+      }
+      {  
+         "votes":false,
+         "name":"1. nujna seja",
+         "orgs":[  
+            {  
+               "acronym":"",
+               "is_coalition":false,
+               "id":21,
+               "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+            }
+         ],
+         "date":"12. 9. 2014",
+         "org":{  
+            "acronym":"",
+            "is_coalition":false,
+            "id":21,
+            "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+         },
+         "date_ts":"2014-09-12T02:00:00",
+         "speeches":true,
+         "updated_at":"8. 1. 2017",
+         "in_review":false,
+         "id":6415
+      }
+   ],
+   "created_at":"20.09.2017",
+   "seats_per_pg":[  
+      {  
+         "party":{  
+            "acronym":"SMC",
+            "is_coalition":true,
+            "name":"PS Stranka modernega centra",
+            "id":1
+         },
+         "coalition":"coalition",
+         "seats":7
+      },
+      {  
+         "party":{  
+            "acronym":"SDS",
+            "is_coalition":false,
+            "name":"PS Slovenska Demokratska Stranka",
+            "id":5
+         },
+         "coalition":"opposition",
+         "seats":4
+      }
+   ],
+   "organization":{  
+      "acronym":"",
+      "is_coalition":false,
+      "id":21,
+      "name":"Odbor za kmetijstvo, gozdarstvo in prehrano"
+   }
+}
+    """
     workingBodies = getPGCardModelNew(WorkingBodies, org_id, date_)
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -2381,7 +2101,7 @@ def getTaggedBallots(request, pg_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
     
-    * @apiSuccess {Object} organization The PG with the most attended voting events.
+    * @apiSuccess {Object} organization The organization object.
     * @apiSuccess {String} organization.acronym PG's acronym
     * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} organization.id PG's Parladata id.
@@ -2509,7 +2229,7 @@ def getVocabularySize(request, pg_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
     
-    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} party.id PG's Parladata id.
@@ -2656,7 +2376,7 @@ def getStyleScoresPG(request, pg_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
     
-    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} party.id PG's Parladata id.
@@ -2755,7 +2475,7 @@ def getTFIDF(request, party_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
     
-    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} party.id PG's Parladata id.
@@ -2892,7 +2612,7 @@ def getNumberOfQuestions(request, pg_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
     
-    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} party.id PG's Parladata id.
@@ -2979,8 +2699,45 @@ def getQuestionsOfPG(request, pg_id, date_=False):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
     
-    * @apiSuccess {Object} organization The PG with the most attended voting events.
+    * @apiSuccess {Object} party The organization object.
+    * @apiSuccess {String} party.acronym PG's acronym
+    * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} party.id PG's Parladata id.
+    * @apiSuccess {String} party.name PG's name.
 
+    * @apiSuccess {Object[]} all_authors 
+    * @apiSuccess {Boolean} all_authors.person.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} all_authors.person.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} all_authors.person.name MP's full name.
+    * @apiSuccess {String} all_authors.person.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} all_authors.person.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} all_authors.person.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} all_authors.person.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} all_authors.person.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} all_authors.person.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} all_authors.person.party.name The party's name.
+    * @apiSuccess {String} all_authors.person.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} all_authors.person.id The person's Parladata id.
+    * @apiSuccess {Boolean} all_authors.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    
+    * @apiSuccess {Object[]} results
+    * @apiSuccess {date} date The date of question
+    * @apiSuccess {Object[]} question
+    * @apiSuccess {Object[]} question.person
+    * @apiSuccess {Boolean} question.person.person.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} question.person.person.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} question.person.person.name MP's full name.
+    * @apiSuccess {String} question.person.person.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} question.person.person.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} question.person.person.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} question.person.person.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} question.person.person.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} question.person.person.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} question.person.person.party.name The party's name.
+    * @apiSuccess {String} question.person.person.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} question.person.person.id The person's Parladata id.
+    * @apiSuccess {Boolean} question.person.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1
     * @apiExample {curl} Example with date:
@@ -3292,18 +3049,6 @@ def getQuestionsOfPG(request, pg_id, date_=False):
          ]
       },
       {  
-
-      },
-      {  
-
-      },
-      {  
-
-      },
-      {  
-
-      },
-      {  
          "date":"18. 4. 2017",
          "questions":[  
             {  
@@ -3460,7 +3205,7 @@ def getListOfPGs(request, date_=None, force_render=False):
     * @apiGroup PGs
     * @apiDescription This function returns all parlament groups.
 
-    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} party.id PG's Parladata id.
@@ -3765,7 +3510,7 @@ def getPresenceThroughTime(request, party_id, date_=None):
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
     
-    * @apiSuccess {Object} party The PG with the most attended voting events.
+    * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} party.id PG's Parladata id.
@@ -4339,6 +4084,167 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
 
 
 def getAmendmentsOfPG(request, pg_id, date_=None):
+    """
+    * @api {get} getAmendmentsOfPG/{pg_id}/{?date} Gets all data for amendments for specific parlament group
+    * @apiName getAmendmentsOfPG
+    * @apiGroup PGs
+    * @apiDescription This function returns data for amendments for specific parlament group
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} party The organization object.
+    * @apiSuccess {String} party.acronym PG's acronym
+    * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} party.id PG's Parladata id.
+    * @apiSuccess {String} party.name PG's name.
+
+    * @apiSuccess {Object[]} results
+    * @apiSuccess {date} results.date The date of last update.
+    * @apiSuccess {Object[]} results.votes
+    * @apiSuccess {Object} results.votes.session
+    * @apiSuccess {String} results.votes.session.name Name of session.
+    * @apiSuccess {Date} results.votes.session.date_ts Date and time of session.
+    * @apiSuccess {Date} results.votes.session.date Date of session.
+    * @apiSuccess {Date} results.votes.session.updated_at Date of last update.
+    * @apiSuccess {Integer} results.votes.session.session.id Id of session.
+    * @apiSuccess {Boolean} results.votes.session.session.in_review Return true or false if session is in review.
+    * @apiSuccess {Object[]} results.votes.session.orgs Organization object
+    * @apiSuccess {String} results.votes.session.orgs.acronym Organization acronym
+    * @apiSuccess {Boolean} results.votes.session.orgs.is_coalition True of False if organization is in coalition
+    * @apiSuccess {Integer} results.votes.session.orgs.id Id of organization
+    * @apiSuccess {Integer} results.votes.session.orgs.name Name of organization
+    * @apiSuccess {Object[]} results.votes.session.org Organization object
+    * @apiSuccess {String} results.votes.session.org.acronym Organization acronym
+    * @apiSuccess {Boolean} results.votes.session.org.is_coalition True of False if organization is in coalition
+    * @apiSuccess {Integer} results.votes.session.org.id Id of organization
+    * @apiSuccess {Integer} results.votes.session.org.name Name of organization
+
+    * @apiSuccess {Object} results.votes.results
+    * @apiSuccess {Integer} results.votes.results.abstain Number of MPs that abstain on voting.
+    * @apiSuccess {Integer} results.votes.results.against Number of MPs that are against on voting.
+    * @apiSuccess {Integer} results.votes.results.motion_id ID of motion.
+    * @apiSuccess {String} results.votes.results.text Text of motion
+    * @apiSuccess {String[]} results.votes.results.tags Array of tags of motion.
+    * @apiSuccess {Boolean} results.votes.results.is_outlier Analaysis if person is outlier.
+    * @apiSuccess {Boolean} results.votes.results.has_outliers Analaysis if session have outliers.
+    * @apiSuccess {Integer} results.votes.results.not_present Number of MPs that were not present.
+    * @apiSuccess {Integer} results.votes.results.votes_for Number of MPs that voted with yes.
+    * @apiSuccess {Boolean} results.votes.results.result True or False if the motion was successful.
+
+    * @apiSuccess {List[]} all_tags All tags for votes
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getAmendmentsOfPG/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getAmendmentsOfPG/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+    {  
+  {  
+   "party":{  
+      "acronym":"SMC",
+      "is_coalition":true,
+      "id":1,
+      "name":"PS Stranka modernega centra"
+   },
+   "created_at":"19.09.2017",
+   "created_for":"19.09.2017",
+   "results":[  
+      {  
+         "date":"19. 9. 2017",
+         "votes":[  
+            {  
+               "session":{  
+                  "name":"33. redna seja",
+                  "date_ts":"2017-09-18T02:00:00",
+                  "updated_at":"19. 9. 2017",
+                  "orgs":[  
+                     {  
+                        "acronym":"DZ",
+                        "id":95,
+                        "is_coalition":false,
+                        "name":"Državni zbor"
+                     }
+                  ],
+                  "date":"18. 9. 2017",
+                  "org":{  
+                     "acronym":"DZ",
+                     "id":95,
+                     "is_coalition":false,
+                     "name":"Državni zbor"
+                  },
+                  "id":9743,
+                  "in_review":false
+               },
+               "results":{  
+
+               }
+            },
+            {  
+               "session":{  
+                  "name":"33. redna seja",
+                  "date_ts":"2017-09-18T02:00:00",
+                  "updated_at":"19. 9. 2017",
+                  "orgs":[  
+                     {  
+                        "acronym":"DZ",
+                        "id":95,
+                        "is_coalition":false,
+                        "name":"Državni zbor"
+                     }
+                  ],
+                  "date":"18. 9. 2017",
+                  "org":{  
+                     "acronym":"DZ",
+                     "id":95,
+                     "is_coalition":false,
+                     "name":"Državni zbor"
+                  },
+                  "id":9743,
+                  "in_review":false
+               }
+            }
+         ]
+      }
+   ],
+   "all_tags":[  
+      "Komisija za nadzor javnih financ",
+      "Kolegij predsednika Državnega zbora",
+      "Komisija za narodni skupnosti",
+      "Komisija za odnose s Slovenci v zamejstvu in po svetu",
+      "Komisija za poslovnik",
+      "Mandatno-volilna komisija",
+      "Odbor za delo, družino, socialne zadeve in invalide",
+      "Odbor za finance in monetarno politiko",
+      "Odbor za gospodarstvo",
+      "Odbor za infrastrukturo, okolje in prostor",
+      "Odbor za izobraževanje, znanost, šport in mladino",
+      "Odbor za kmetijstvo, gozdarstvo in prehrano",
+      "Odbor za kulturo",
+      "Odbor za notranje zadeve, javno upravo in lokalno samoupravo",
+      "Odbor za obrambo",
+      "Odbor za pravosodje",
+      "Odbor za zadeve Evropske unije",
+      "Odbor za zdravstvo",
+      "Odbor za zunanjo politiko",
+      "Preiskovalna komisija o ugotavljanju zlorab v slovenskem bančnem sistemu ter ugotavljanju vzrokov in",
+      "Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investiciji",
+      "Ustavna komisija",
+      "Proceduralna glasovanja",
+      "Zunanja imenovanja",
+      "Poslanska vprašanja",
+      "Komisija za nadzor obveščevalnih in varnostnih služb",
+      "Preiskovalne komisije",
+      "Komisija za peticije ter za človekove pravice in enake možnosti",
+      "Interpelacija",
+      " Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investicij"
+   ]
+}
+}
+"""
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
@@ -4383,6 +4289,100 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
 
 
 def getDisunionOrg(request):
+    """
+    * @api {get} getDisunionOrg Gets the data for analysis disunion for all parlament groups
+    * @apiName getDisunionOrg
+    * @apiGroup PGs
+    * @apiDescription This function returns the data for analysis disunion for all parlament groups
+    
+    * @apiSuccess {Object} organization The organization object.
+    * @apiSuccess {String} organization.acronym PG's acronym
+    * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} organization.id PG's Parladata id.
+    * @apiSuccess {String} organization.name PG's name.
+
+    * @apiSuccess {Float} sum The resoult of analysis disunion for parlament group
+
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1
+
+    * @apiSuccessExample {json} Example response:
+  [  
+   {  
+      "organization":{  
+         "acronym":"PS NP",
+         "is_coalition":false,
+         "id":109,
+         "name":"PS nepovezanih poslancev "
+      },
+      "sum":7.095302214241279
+   },
+   {  
+      "organization":{  
+         "acronym":"SMC",
+         "is_coalition":true,
+         "id":1,
+         "name":"PS Stranka modernega centra"
+      },
+      "sum":0.5816681918410643
+   },
+   {  
+      "organization":{  
+         "acronym":"DeSUS",
+         "is_coalition":true,
+         "id":3,
+         "name":"PS Demokratska Stranka Upokojencev Slovenije"
+      },
+      "sum":2.912466548013221
+   },
+   {  
+      "organization":{  
+         "acronym":"IMNS",
+         "is_coalition":false,
+         "id":2,
+         "name":"PS italijanske in madžarske narodne skupnosti"
+      },
+      "sum":7.719928186714542
+   },
+   {  
+      "organization":{  
+         "acronym":"SDS",
+         "is_coalition":false,
+         "id":5,
+         "name":"PS Slovenska Demokratska Stranka"
+      },
+      "sum":2.19749942730155
+   },
+   {  
+      "organization":{  
+         "acronym":"SD",
+         "is_coalition":true,
+         "id":7,
+         "name":"PS Socialni Demokrati"
+      },
+      "sum":3.8524835427903024
+   },
+   {  
+      "organization":{  
+         "acronym":"NSI",
+         "is_coalition":false,
+         "id":6,
+         "name":"PS Nova Slovenija"
+      },
+      "sum":0.6268701376419659
+   },
+   {  
+      "organization":{  
+         "acronym":"Levica",
+         "is_coalition":false,
+         "id":8,
+         "name":"PS Levica"
+      },
+      "sum":4.345451825254088
+   }
+]
+    """     
     result = []
     data = tryHard(API_URL + '/getAllPGs/').json()
     for org in data:
@@ -4402,6 +4402,43 @@ def getDisunionOrg(request):
 
 
 def getDisunionOrgID(request, pg_id, date_=None):
+    """
+    * @api {get} getDisunionOrg Gets the data for analysis disunion for specific parlament groups
+    * @apiName getDisunionOrg
+    * @apiGroup PGs
+    * @apiDescription This function returns the data for analysis disunion for specific parlament groups
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    * @apiSuccess {Object} organization The organization object.
+    * @apiSuccess {String} organization.acronym PG's acronym
+    * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} organization.id PG's Parladata id.
+    * @apiSuccess {String} organization.name PG's name.
+
+    * @apiSuccess {Float} sum The resoult of analysis disunion for parlament group
+
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+  [  
+   {  
+      "organization":{  
+         "acronym":"PS NP",
+         "is_coalition":false,
+         "id":109,
+         "name":"PS nepovezanih poslancev "
+      },
+      "sum":7.095302214241279
+   }
+   ]
+    """     
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
@@ -4418,6 +4455,19 @@ def getDisunionOrgID(request, pg_id, date_=None):
 
 
 def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
+    """
+    * @api {get} getNumberOfAmendmetsOfPG/{pg_id}/{?date} Gets number of amendments of specific organization 
+    * @apiName getNumberOfAmendmetsOfPG
+    * @apiGroup PGs
+    * @apiDescription This function returns number of amendments of specific organization
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfPG/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfPG/1/12.12.2015    
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
@@ -4430,6 +4480,8 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
 
 @lockSetter
 def setPGMismatch(request, pg_id, date_=None):
+    """Setter for analysis mismatch of parlament group
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
@@ -4455,6 +4507,109 @@ def setPGMismatch(request, pg_id, date_=None):
 
 
 def getPGMismatch(request, pg_id, date_=None):
+    """
+    * @api {get} getPGMismatch/{pg_id}/{?date} Gets the all MPs of specific organization and returns the ratio of mismatch of PG
+    * @apiName getPGMismatch
+    * @apiGroup PGs
+    * @apiDescription This function returns all MPs of specific organization and returns the ratio of mismatch of PG
+    * @apiParam {Integer} pg_id Parladata id for the PG in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiSuccess {date} created_for The date this card was created for
+    * @apiSuccess {date} created_at The date on which this card was created
+    
+    * @apiSuccess {Object} organization The organization object.
+    * @apiSuccess {String} organization.acronym PG's acronym
+    * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
+    * @apiSuccess {Integer} organization.id PG's Parladata id.
+    * @apiSuccess {String} organization.name PG's name.
+
+    * @apiSuccess {Object[]} results 
+    * @apiSuccess {Object} results.person MP's person object
+    * @apiSuccess {Boolean} results.person.is_active Answer the question: Is this MP currently active?
+    * @apiSuccess {Integer[]} results.person.district List of Parladata ids for districts this person was elected in.
+    * @apiSuccess {String} results.person.name MP's full name.
+    * @apiSuccess {String} results.person.gov_id MP's id on www.dz-rs.si
+    * @apiSuccess {String} results.person.gender MP's gender (f/m) used for grammar
+    * @apiSuccess {Object} results.person.party This MP's standard party objects (comes with most calls).
+    * @apiSuccess {String} results.person.party.acronym The MP's party's acronym.
+    * @apiSuccess {Boolean} results.person.party.is_coalition Answers the question: Is this party in coalition with the government?
+    * @apiSuccess {Integer} results.person.party.id This party's Parladata (organization) id.
+    * @apiSuccess {String} results.person.party.name The party's name.
+    * @apiSuccess {String} results.person.type The person's parlalize type. Always "mp" for MPs.
+    * @apiSuccess {Integer} results.person.id The person's Parladata id.
+    * @apiSuccess {Boolean} results.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+    
+    * @apiSuccess {Float} results.ratio Ratio of MP, how does mismatch from PG
+    
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getPGMismatch/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getPGMismatch/1/12.12.2015
+
+    * @apiSuccessExample {json} Example response:
+  {  
+   "organization":{  
+      "acronym":"SMC",
+      "is_coalition":true,
+      "id":1,
+      "name":"PS Stranka modernega centra"
+   },
+   "created_at":"16.08.2017",
+   "created_for":"16.08.2017",
+   "results":[  
+      {  
+         "person":{  
+
+         },
+         "ratio":2.17821782178218
+      },
+      {  
+         "person":{  
+            "name":"Ivan Prelog",
+            "district":[  
+               52
+            ],
+            "gender":"m",
+            "is_active":false,
+            "party":{  
+               "acronym":"SMC",
+               "id":1,
+               "is_coalition":true,
+               "name":"PS Stranka modernega centra"
+            },
+            "type":"mp",
+            "id":68,
+            "gov_id":"P279",
+            "has_function":false
+         },
+         "ratio":2.01972757162987
+      },
+      {  
+         "person":{  
+            "name":"Branko Zorman",
+            "district":[  
+               62
+            ],
+            "gender":"m",
+            "is_active":false,
+            "party":{  
+               "acronym":"SMC",
+               "id":1,
+               "is_coalition":true,
+               "name":"PS Stranka modernega centra"
+            },
+            "type":"mp",
+            "id":89,
+            "gov_id":"P295",
+            "has_function":false
+         },
+         "ratio":1.63382988947622
+      }
+   ]
+}
+    """     
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
