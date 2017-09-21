@@ -713,7 +713,7 @@ def getMotionOfSession(request, session_id, date=False):
         if cards:
             dates = []
             for card in cards:
-                if not card.result:
+                if card.result == None:
                     continue
                 out.append({'session': sessionData,
                             'results': {'motion_id': card.id_parladata,
