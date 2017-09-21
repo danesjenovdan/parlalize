@@ -709,7 +709,7 @@ def getMotionOfSession(request, session_id, date=False):
     session = Session.objects.get(id_parladata=int(session_id))
     if session:
         sessionData = session.getSessionData()
-        cards = Vote.objects.filter(session__id_parladata=session_id)
+        cards = Vote.objects.filter(session__id_parladata=session_id).order_by("start_time")
         if cards:
             dates = []
             for card in cards:
