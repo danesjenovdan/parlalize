@@ -298,6 +298,10 @@ class Vote(Timestampable, models.Model):
     note = HTMLField(blank=True,
                      null=True)
 
+    epa = models.CharField(blank=True, null=True,
+                           max_length=255,
+                           help_text='EPA number')
+
     def __str__(self):
         return self.session.name + ' | ' + self.motion
 
@@ -469,3 +473,31 @@ class Tag(models.Model):
     name = models.TextField(blank=True,
                             null=True,
                             help_text=_('tag name'))
+
+
+class Legislation(Timestampable, models.Model):
+    session = models.ForeignKey('Session',
+                                blank=True, null=True,
+                                help_text='The legislative session in which the motion was proposed')
+
+    text = models.TextField(blank=True, null=True,
+                            help_text='The text of the motion')
+
+    epa = models.CharField(blank=True, null=True,
+                           max_length=255,
+                           help_text='EPA number')
+
+    mdt = models.CharField(blank=True, null=True,
+                           max_length=255,
+                           help_text='Working body')
+
+    result = models.CharField(blank=True, null=True,
+                               max_length=255,
+                               help_text='result of law')
+
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))
+

@@ -28,7 +28,7 @@ import itertools
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from parlalize.settings import SETTER_KEY
-
+from requests.auth import HTTPBasicAuth
 
 def lockSetter(function):
     def wrap(request, *args, **kwargs):
