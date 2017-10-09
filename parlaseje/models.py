@@ -302,6 +302,11 @@ class Vote(Timestampable, models.Model):
                            max_length=255,
                            help_text='EPA number')
 
+    law = models.ForeignKey('Legislation',
+                            blank=True, null=True,
+                            related_name='legislation',
+                            help_text=_('Legislation foreign key'))
+
     def __str__(self):
         return self.session.name + ' | ' + self.motion
 
@@ -501,3 +506,5 @@ class Legislation(Timestampable, models.Model):
                                        null=True,
                                        help_text=_('id parladata'))
 
+    note = HTMLField(blank=True,
+                     null=True)

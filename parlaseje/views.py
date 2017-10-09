@@ -471,7 +471,8 @@ def setMotionOfSession(request, session_id):
                         result=result,
                         id_parladata=mot['vote_id'],
                         document_url=mot['doc_url'],
-                        epa=mot['epa']
+                        epa=mot['epa'],
+                        law=Legislation.objects.get(epa=mot['epa'])
                         )
             vote[0].amendment_of.add(*a_orgs)
         else:
@@ -488,7 +489,8 @@ def setMotionOfSession(request, session_id):
                                     result=result,
                                     id_parladata=mot['vote_id'],
                                     document_url=mot['doc_url'],
-                                    epa=mot['epa']
+                                    epa=mot['epa'],
+                                    law=Legislation.objects.get(epa=mot['epa'])
                                     )
             if a_orgs:
                 vote = Vote.objects.get(id_parladata=mot['vote_id'])
@@ -3083,12 +3085,14 @@ def getVotesData(request, votes):
 
 def legislationList(requests, session_id):
     out = []
+    session = Session.objects.get(id_parladata=int(session_id))
     laws = Legislation.objects.filter(session__id_parladata=session_id)
     for law in laws:
         out.append({'text': law.text,
                     'result': law.result,
                     'id_parladata': law.id_parladata,
                     'mdt': law.mdt,
+                    "session": session.getSessionData() 
                     })
 
     return JsonResponse(out, safe=False)
@@ -3096,6 +3100,7 @@ def legislationList(requests, session_id):
 
 def legislation(requests, session_id, law_id):
     out  = []
+    created_at = None
     law = Legislation.objects.get(id_parladata=law_id)
     session = Session.objects.get(id_parladata=int(session_id))
     if session:
@@ -3113,22 +3118,22 @@ def legislation(requests, session_id, law_id):
                                       'is_outlier': vote.is_outlier,
                                       'tags': vote.tags,
                                       'has_outliers': vote.has_outlier_voters,
-                                      'note': vote.note,
                                       'documents': vote.document_url
                                        }                           
                             
                             })
                 dates.append(vote.created_at)
-                created_at = max(dates).strftime(API_DATE_FORMAT)
+            created_at = max(dates).strftime(API_DATE_FORMAT)
         else:
             out = []
-            ses_date = session.start_time.strftime(API_DATE_FORMAT)
-            tags = list(Tag.objects.all().values_list('name', flat=True))
+        ses_date = session.start_time.strftime(API_DATE_FORMAT)
+        tags = list(Tag.objects.all().values_list('name', flat=True))
         return JsonResponse({"results": out,
                              "session": session.getSessionData(),
                              "tags": tags,
-                             "result": law.request,
+                             "result": law.result,
                              "text": law.text,
+                             "note": law.note,
                              "created_for": ses_date,
                              "created_at": created_at}, safe=False)
 

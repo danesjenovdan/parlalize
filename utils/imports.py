@@ -371,7 +371,8 @@ def updateLegislation(request):
                                  epa=law['epa'],
                                  result=law['result'],
                                  mdt=law['mdt'],
-                                 id_parladata=law['id']
+                                 id_parladata=law['id'],
+                                 note=law['note']
                                  )      
             result.save()
         count = count + 1
