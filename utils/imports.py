@@ -1,11 +1,13 @@
+from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, PARSER_PASS
 from parlalize.utils_ import tryHard, getDataFromPagerApi
-from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
 from parlaposlanci.views import setMinsterStatic
-from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag
+from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag, Legislation
 from datetime import datetime, timedelta
 from django.test.client import RequestFactory
+from requests.auth import HTTPBasicAuth
+import requests
 # parlalize initial runner methods #
 
 DZ = 95
@@ -357,3 +359,25 @@ def update():
     updatePersonFunctions()
 
     return 1
+
+
+def updateLegislation(request):
+
+    laws = requests.get(API_URL + '/law/',
+                       auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
+    count = 1
+    while laws['next'] != 'null':
+        laws = requests.get(API_URL + '/law/?page=' + str(count),
+                            auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
+
+        for law in laws['results']:
+            result = Legislation(session=Session.objects.get(id_parladata=int(law['session'])),
+                                 text=law['text'],
+                                 epa=law['epa'],
+                                 result=law['result'],
+                                 mdt=law['mdt'],
+                                 id_parladata=law['id'],
+                                 note=law['note']
+                                 )      
+            result.save()
+        count = count + 1
