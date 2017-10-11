@@ -373,8 +373,9 @@ class MPStaticPL(Timestampable, models.Model):
     mandates = models.IntegerField(
         blank=True, null=True, help_text=_('Number of mandates'))
 
-    party_id = models.IntegerField(
-        blank=True, null=True, help_text=_('Parladata party id'))
+    party = models.ForeignKey('parlaskupine.Organization',
+                                 help_text=_('Parladata party id'),
+                                 related_name='static_party')
 
     acronym = models.TextField(
         blank=True, null=True, help_text=_('Parliament group\'s acronym'))
