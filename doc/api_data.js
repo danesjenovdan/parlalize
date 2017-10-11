@@ -6069,6 +6069,335 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "getAmendmentsOfPG/{pg_id}/{?date}",
+    "title": "Gets all data for amendments for specific parlament group",
+    "name": "getAmendmentsOfPG",
+    "group": "PGs",
+    "description": "<p>This function returns data for amendments for specific parlament group</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "results.date",
+            "description": "<p>The date of last update.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results.votes",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.votes.session",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.votes.session.name",
+            "description": "<p>Name of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "results.votes.session.date_ts",
+            "description": "<p>Date and time of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "results.votes.session.date",
+            "description": "<p>Date of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "results.votes.session.updated_at",
+            "description": "<p>Date of last update.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.session.session.id",
+            "description": "<p>Id of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.votes.session.session.in_review",
+            "description": "<p>Return true or false if session is in review.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results.votes.session.orgs",
+            "description": "<p>Organization object</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.votes.session.orgs.acronym",
+            "description": "<p>Organization acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.votes.session.orgs.is_coalition",
+            "description": "<p>True of False if organization is in coalition</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.session.orgs.id",
+            "description": "<p>Id of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.session.orgs.name",
+            "description": "<p>Name of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results.votes.session.org",
+            "description": "<p>Organization object</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.votes.session.org.acronym",
+            "description": "<p>Organization acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.votes.session.org.is_coalition",
+            "description": "<p>True of False if organization is in coalition</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.session.org.id",
+            "description": "<p>Id of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.session.org.name",
+            "description": "<p>Name of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.votes.results",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.results.abstain",
+            "description": "<p>Number of MPs that abstain on voting.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.results.against",
+            "description": "<p>Number of MPs that are against on voting.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.results.motion_id",
+            "description": "<p>ID of motion.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.votes.results.text",
+            "description": "<p>Text of motion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "results.votes.results.tags",
+            "description": "<p>Array of tags of motion.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.votes.results.is_outlier",
+            "description": "<p>Analaysis if person is outlier.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.votes.results.has_outliers",
+            "description": "<p>Analaysis if session have outliers.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.results.not_present",
+            "description": "<p>Number of MPs that were not present.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.votes.results.votes_for",
+            "description": "<p>Number of MPs that voted with yes.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.votes.results.result",
+            "description": "<p>True or False if the motion was successful.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "List[]",
+            "optional": false,
+            "field": "all_tags",
+            "description": "<p>All tags for votes</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n  {  \n   \"party\":{  \n      \"acronym\":\"SMC\",\n      \"is_coalition\":true,\n      \"id\":1,\n      \"name\":\"PS Stranka modernega centra\"\n   },\n   \"created_at\":\"19.09.2017\",\n   \"created_for\":\"19.09.2017\",\n   \"results\":[  \n      {  \n         \"date\":\"19. 9. 2017\",\n         \"votes\":[  \n            {  \n               \"session\":{  \n                  \"name\":\"33. redna seja\",\n                  \"date_ts\":\"2017-09-18T02:00:00\",\n                  \"updated_at\":\"19. 9. 2017\",\n                  \"orgs\":[  \n                     {  \n                        \"acronym\":\"DZ\",\n                        \"id\":95,\n                        \"is_coalition\":false,\n                        \"name\":\"Državni zbor\"\n                     }\n                  ],\n                  \"date\":\"18. 9. 2017\",\n                  \"org\":{  \n                     \"acronym\":\"DZ\",\n                     \"id\":95,\n                     \"is_coalition\":false,\n                     \"name\":\"Državni zbor\"\n                  },\n                  \"id\":9743,\n                  \"in_review\":false\n               },\n               \"results\":{  \n\n               }\n            },\n            {  \n               \"session\":{  \n                  \"name\":\"33. redna seja\",\n                  \"date_ts\":\"2017-09-18T02:00:00\",\n                  \"updated_at\":\"19. 9. 2017\",\n                  \"orgs\":[  \n                     {  \n                        \"acronym\":\"DZ\",\n                        \"id\":95,\n                        \"is_coalition\":false,\n                        \"name\":\"Državni zbor\"\n                     }\n                  ],\n                  \"date\":\"18. 9. 2017\",\n                  \"org\":{  \n                     \"acronym\":\"DZ\",\n                     \"id\":95,\n                     \"is_coalition\":false,\n                     \"name\":\"Državni zbor\"\n                  },\n                  \"id\":9743,\n                  \"in_review\":false\n               }\n            }\n         ]\n      }\n   ],\n   \"all_tags\":[  \n      \"Komisija za nadzor javnih financ\",\n      \"Kolegij predsednika Državnega zbora\",\n      \"Komisija za narodni skupnosti\",\n      \"Komisija za odnose s Slovenci v zamejstvu in po svetu\",\n      \"Komisija za poslovnik\",\n      \"Mandatno-volilna komisija\",\n      \"Odbor za delo, družino, socialne zadeve in invalide\",\n      \"Odbor za finance in monetarno politiko\",\n      \"Odbor za gospodarstvo\",\n      \"Odbor za infrastrukturo, okolje in prostor\",\n      \"Odbor za izobraževanje, znanost, šport in mladino\",\n      \"Odbor za kmetijstvo, gozdarstvo in prehrano\",\n      \"Odbor za kulturo\",\n      \"Odbor za notranje zadeve, javno upravo in lokalno samoupravo\",\n      \"Odbor za obrambo\",\n      \"Odbor za pravosodje\",\n      \"Odbor za zadeve Evropske unije\",\n      \"Odbor za zdravstvo\",\n      \"Odbor za zunanjo politiko\",\n      \"Preiskovalna komisija o ugotavljanju zlorab v slovenskem bančnem sistemu ter ugotavljanju vzrokov in\",\n      \"Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investiciji\",\n      \"Ustavna komisija\",\n      \"Proceduralna glasovanja\",\n      \"Zunanja imenovanja\",\n      \"Poslanska vprašanja\",\n      \"Komisija za nadzor obveščevalnih in varnostnih služb\",\n      \"Preiskovalne komisije\",\n      \"Komisija za peticije ter za človekove pravice in enake možnosti\",\n      \"Interpelacija\",\n      \" Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investicij\"\n   ]\n}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getAmendmentsOfPG/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getAmendmentsOfPG/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
     "url": "getBasicInfOfPG/{pg_id}",
     "title": "Get basic info of a PG",
     "name": "getBasicInfOfPG",
@@ -6400,6 +6729,1673 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "getDeviationInOrg/{pg_id}/{?date}",
+    "title": "Gets persons who are most deviant from specific organization",
+    "name": "getDeviationInOrg",
+    "group": "PGs",
+    "description": "<p>This function returns the list of 35 MPs who are the most deviant specific organization.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "organization",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "organization.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "organization.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results.person",
+            "description": "<p>List of MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "results.person.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.person.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.person.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.person.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.ratio",
+            "description": "<p>Ratio of how the persoin can join the organization.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": " {\n  \"organization\": {\n    \"acronym\": \"SMC\",\n    \"is_coalition\": true,\n    \"id\": 1,\n    \"name\": \"PS Stranka modernega centra\"\n  },\n  \"created_at\": \"18.08.2017\",\n  \"created_for\": \"14.07.2017\",\n  \"results\": [\n    {\n      \"person\": {\n        \"name\": \"Vlasta Počkaj\",\n        \"gov_id\": \"P303\",\n        \"gender\": \"f\",\n        \"is_active\": false,\n        \"district\": [\n          84\n        ],\n        \"party\": {\n          \"acronym\": \"SMC\",\n          \"is_coalition\": true,\n          \"name\": \"PS Stranka modernega centra\",\n          \"id\": 1\n        },\n        \"type\": \"mp\",\n        \"id\": 2934,\n        \"has_function\": false\n      },\n      \"ratio\": 36.0512436698802\n    },\n    {\n      \"person\": {\n        \"name\": \"Simon Zajc\",\n        \"gov_id\": \"P293\",\n        \"gender\": \"m\",\n        \"is_active\": false,\n        \"district\": [\n          100\n        ],\n        \"party\": {\n          \"acronym\": \"SMC\",\n          \"is_coalition\": true,\n          \"name\": \"PS Stranka modernega centra\",\n          \"id\": 1\n        },\n        \"type\": \"mp\",\n        \"id\": 87,\n        \"has_function\": false\n      },\n      \"ratio\": 8.320134474726908\n    },\n    {\n      \"person\": {\n        \"name\": \"Urška Ban\",\n        \"gov_id\": \"P240\",\n        \"gender\": \"f\",\n        \"is_active\": false,\n        \"district\": [\n          8\n        ],\n        \"party\": {\n          \"acronym\": \"SMC\",\n          \"is_coalition\": true,\n          \"name\": \"PS Stranka modernega centra\",\n          \"id\": 1\n        },\n        \"type\": \"mp\",\n        \"id\": 3,\n        \"has_function\": false\n      },\n      \"ratio\": 7.1179380243116706\n    }\n  ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getDeviationInOrg/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getDeviationInOrg/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getDisunionOrg",
+    "title": "Gets the data for analysis disunion for specific parlament groups",
+    "name": "getDisunionOrg",
+    "group": "PGs",
+    "description": "<p>This function returns the data for analysis disunion for specific parlament groups</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "organization",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "organization.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "organization.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "sum",
+            "description": "<p>The resoult of analysis disunion for parlament group</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "[  \n {  \n    \"organization\":{  \n       \"acronym\":\"PS NP\",\n       \"is_coalition\":false,\n       \"id\":109,\n       \"name\":\"PS nepovezanih poslancev \"\n    },\n    \"sum\":7.095302214241279\n }\n ]",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getDisunionOrg",
+    "title": "Gets the data for analysis disunion for all parlament groups",
+    "name": "getDisunionOrg",
+    "group": "PGs",
+    "description": "<p>This function returns the data for analysis disunion for all parlament groups</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "organization",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "organization.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "organization.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "sum",
+            "description": "<p>The resoult of analysis disunion for parlament group</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "  [  \n   {  \n      \"organization\":{  \n         \"acronym\":\"PS NP\",\n         \"is_coalition\":false,\n         \"id\":109,\n         \"name\":\"PS nepovezanih poslancev \"\n      },\n      \"sum\":7.095302214241279\n   },\n   {  \n      \"organization\":{  \n         \"acronym\":\"SMC\",\n         \"is_coalition\":true,\n         \"id\":1,\n         \"name\":\"PS Stranka modernega centra\"\n      },\n      \"sum\":0.5816681918410643\n   },\n   {  \n      \"organization\":{  \n         \"acronym\":\"DeSUS\",\n         \"is_coalition\":true,\n         \"id\":3,\n         \"name\":\"PS Demokratska Stranka Upokojencev Slovenije\"\n      },\n      \"sum\":2.912466548013221\n   },\n   {  \n      \"organization\":{  \n         \"acronym\":\"IMNS\",\n         \"is_coalition\":false,\n         \"id\":2,\n         \"name\":\"PS italijanske in madžarske narodne skupnosti\"\n      },\n      \"sum\":7.719928186714542\n   },\n   {  \n      \"organization\":{  \n         \"acronym\":\"SDS\",\n         \"is_coalition\":false,\n         \"id\":5,\n         \"name\":\"PS Slovenska Demokratska Stranka\"\n      },\n      \"sum\":2.19749942730155\n   },\n   {  \n      \"organization\":{  \n         \"acronym\":\"SD\",\n         \"is_coalition\":true,\n         \"id\":7,\n         \"name\":\"PS Socialni Demokrati\"\n      },\n      \"sum\":3.8524835427903024\n   },\n   {  \n      \"organization\":{  \n         \"acronym\":\"NSI\",\n         \"is_coalition\":false,\n         \"id\":6,\n         \"name\":\"PS Nova Slovenija\"\n      },\n      \"sum\":0.6268701376419659\n   },\n   {  \n      \"organization\":{  \n         \"acronym\":\"Levica\",\n         \"is_coalition\":false,\n         \"id\":8,\n         \"name\":\"PS Levica\"\n      },\n      \"sum\":4.345451825254088\n   }\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getIntraDisunion/",
+    "title": "Gets all data for analysis intra-disunion",
+    "name": "getIntraDisunion",
+    "group": "PGs",
+    "description": "<p>This function returns all data for analysis intra-disunion</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "Name",
+            "description": "<p>of PG</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.organization.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.organization.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.organization.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.organization.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "votes",
+            "description": "<p>List of votes</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes.text",
+            "description": "<p>Text of vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "votes.id_parladata",
+            "description": "<p>Id of the database parladata</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes.maximum",
+            "description": "<p>Majority required for voting</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "List[]",
+            "optional": false,
+            "field": "votes.tag",
+            "description": "<p>Tags of vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "votes.result",
+            "description": "<p>Result of vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "votes.date",
+            "description": "<p>Date of vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "List[]",
+            "optional": false,
+            "field": "all_tags",
+            "description": "<p>All tags for votes</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "{  \n   \"results\":{  \n      \"NSI\":{  \n         \"organization\":{  \n            \"acronym\":\"NSI\",\n            \"is_coalition\":false,\n            \"id\":6,\n            \"name\":\"PS Nova Slovenija\"\n         },\n         \"votes\":[  \n            {  \n               \"text\":\"Dnevni red v celoti\",\n               \"id_parladata\":6513,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Proceduralna glasovanja\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-01T12:16:54\"\n            },\n            {  \n               \"text\":\"Proceduralni predlog za prekinitev 1. točke dnevnega reda\",\n               \"id_parladata\":6512,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Proceduralna glasovanja\"\n               ],\n               \"result\":false,\n               \"date\":\"2014-08-01T12:43:48\"\n            },\n            {  \n               \"text\":\"Sklep o imenovanju predsednika in podpredsednika Mandatno-volilne komisije - Sklep\",\n               \"id_parladata\":6511,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Mandatno-volilna komisija\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-01T12:49:10\"\n            },\n            {  \n               \"text\":\"Poročilo o izidu predčasnih volitev v Državni zbor Republike Slovenije - Glasovanje o predlogu sklepa\",\n               \"id_parladata\":6510,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Proceduralna glasovanja\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-01T14:18:26\"\n            },\n            {  \n               \"text\":\"Predlog za izvolitev predsednika Državnega zbora Republike Slovenije - Glasovanje o sestavi komisije\",\n               \"id_parladata\":6509,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Mandatno-volilna komisija\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-01T15:54:29\"\n            },\n            {  \n               \"text\":\"Dnevni red v celoti\",\n               \"id_parladata\":6639,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Proceduralna glasovanja\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-25T12:06:57\"\n            },\n            {  \n               \"text\":\"Predlog za izvolitev podpredsednika Državnega zbora - Glasovanje o sestavi komisije za tajno glasovanje (EPA 12 - VII, EPA 15 - VII)\",\n               \"id_parladata\":6638,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Mandatno-volilna komisija\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-25T12:26:05\"\n            },\n            {  \n               \"text\":\"Odlok o ustanovitvi in nalogah delovnih teles Državnega zbora - Glasovanje\",\n               \"id_parladata\":6637,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Proceduralna glasovanja\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-25T20:16:36\"\n            },\n            {  \n               \"text\":\"Sklep o imenovanju generalne sekretarke Državnega zbora - Glasovanje\",\n               \"id_parladata\":6636,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Mandatno-volilna komisija\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-25T20:37:48\"\n            },\n            {  \n               \"text\":\"Sklep o imenovanju predsednikov in podpredsednikov delovnih teles Državnega zbora - Glasovanje\",\n               \"id_parladata\":6635,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Mandatno-volilna komisija\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-25T21:00:14\"\n            },\n            {  \n               \"text\":\"Sklep o izvolitvi predsednika, podpredsednika in članov Komisije za nadzor obveščevalnih in varnostnih služb - Sklep o prestavitvi obravnave in odločanja na naslednjo sejo\",\n               \"id_parladata\":6634,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Mandatno-volilna komisija\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-25T21:09:06\"\n            },\n            {  \n               \"text\":\"Dnevni red v celoti\",\n               \"id_parladata\":6633,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Proceduralna glasovanja\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-28T12:04:07\"\n            },\n            {  \n               \"text\":\"Obvestilo s Sklepom o pravici nadomeščanja poslanca Državnega zbora - Glasovanje\",\n               \"id_parladata\":6632,\n               \"maximum\":\"0.0\",\n               \"tag\":[  \n                  \"Mandatno-volilna komisija\"\n               ],\n               \"result\":true,\n               \"date\":\"2014-08-28T12:06:27\"\n            }\n         ]\n      }\n   },\n   \"all_tags\": [\n    \"Komisija za nadzor javnih financ\",\n    \"Kolegij predsednika Državnega zbora\",\n    \"Komisija za narodni skupnosti\",\n    \"Komisija za odnose s Slovenci v zamejstvu in po svetu\",\n    \"Komisija za poslovnik\",\n    \"Mandatno-volilna komisija\",\n    \"Odbor za delo, družino, socialne zadeve in invalide\",\n    \"Odbor za finance in monetarno politiko\",\n    \"Odbor za gospodarstvo\",\n    \"Odbor za infrastrukturo, okolje in prostor\",\n    \"Odbor za izobraževanje, znanost, šport in mladino\",\n    \"Odbor za kmetijstvo, gozdarstvo in prehrano\",\n    \"Odbor za kulturo\",\n    \"Odbor za notranje zadeve, javno upravo in lokalno samoupravo\",\n    \"Odbor za obrambo\",\n    \"Odbor za pravosodje\",\n    \"Odbor za zadeve Evropske unije\",\n    \"Odbor za zdravstvo\",\n    \"Odbor za zunanjo politiko\",\n    \"Preiskovalna komisija o ugotavljanju zlorab v slovenskem bančnem sistemu ter ugotavljanju vzrokov in\",\n    \"Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investiciji\",\n    \"Ustavna komisija\",\n    \"Proceduralna glasovanja\",\n    \"Zunanja imenovanja\",\n    \"Poslanska vprašanja\",\n    \"Komisija za nadzor obveščevalnih in varnostnih služb\",\n    \"Preiskovalne komisije\",\n    \"Komisija za peticije ter za človekove pravice in enake možnosti\",\n    \"Interpelacija\",\n    \" Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investicij\"\n    ]\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getIntraDisunion",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getIntraDisunionOrg/{pg_id}/{?date}",
+    "title": "Gets all data for analysis intra-disunion for specific parlament group",
+    "name": "getIntraDisunionOrg",
+    "group": "PGs",
+    "description": "<p>This function returns data for analysis intra-disunion for specific parlament group</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "votes",
+            "description": "<p>List of votes</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes.text",
+            "description": "<p>Text of vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "votes.id_parladata",
+            "description": "<p>Id of the database parladata</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes.maximum",
+            "description": "<p>Majority required for voting</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "List[]",
+            "optional": false,
+            "field": "votes.tag",
+            "description": "<p>Tags of vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "votes.result",
+            "description": "<p>Result of vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "votes.date",
+            "description": "<p>Date of vote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "List[]",
+            "optional": false,
+            "field": "all_tags",
+            "description": "<p>All tags for votes</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n   \"SMC\":[  \n      {  \n         \"text\":\"Dnevni red v celoti\",\n         \"id_parladata\":6513,\n         \"maximum\":0,\n         \"tag\":[  \n            \"Proceduralna glasovanja\"\n         ],\n         \"result\":true,\n         \"date\":\"2014-08-01T12:16:54\"\n      },\n      {  \n         \"text\":\"Proceduralni predlog za prekinitev 1. točke dnevnega reda\",\n         \"id_parladata\":6512,\n         \"maximum\":0,\n         \"tag\":[  \n            \"Proceduralna glasovanja\"\n         ],\n         \"result\":false,\n         \"date\":\"2014-08-01T12:43:48\"\n      }\n   ],\n   \"all_tags\":[  \n      \"Komisija za nadzor javnih financ\",\n      \"Kolegij predsednika Državnega zbora\",\n      \"Komisija za narodni skupnosti\",\n      \"Komisija za odnose s Slovenci v zamejstvu in po svetu\",\n      \"Komisija za poslovnik\",\n      \"Mandatno-volilna komisija\",\n      \"Odbor za delo, družino, socialne zadeve in invalide\",\n      \"Odbor za finance in monetarno politiko\",\n      \"Odbor za gospodarstvo\",\n      \"Odbor za infrastrukturo, okolje in prostor\",\n      \"Odbor za izobraževanje, znanost, šport in mladino\",\n      \"Odbor za kmetijstvo, gozdarstvo in prehrano\",\n      \"Odbor za kulturo\",\n      \"Odbor za notranje zadeve, javno upravo in lokalno samoupravo\",\n      \"Odbor za obrambo\",\n      \"Odbor za pravosodje\",\n      \"Odbor za zadeve Evropske unije\",\n      \"Odbor za zdravstvo\",\n      \"Odbor za zunanjo politiko\",\n      \"Preiskovalna komisija o ugotavljanju zlorab v slovenskem bančnem sistemu ter ugotavljanju vzrokov in\",\n      \"Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investiciji\",\n      \"Ustavna komisija\",\n      \"Proceduralna glasovanja\",\n      \"Zunanja imenovanja\",\n      \"Poslanska vprašanja\",\n      \"Komisija za nadzor obveščevalnih in varnostnih služb\",\n      \"Preiskovalne komisije\",\n      \"Komisija za peticije ter za človekove pravice in enake možnosti\",\n      \"Interpelacija\",\n      \" Preiskovalna komisija za ugotavljanje politične odgovornosti nosilcev javnih funkcij pri investicij\"\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getIntraDisunionOrg/1",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getLessMatchingThem/{pg_id}/{?date}",
+    "title": "Gets persons who can not join specific organization",
+    "name": "getLessMatchingThem",
+    "group": "PGs",
+    "description": "<p>This function returns the list of 5 MPs who can not join specific organization.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "organization",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "organization.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "organization.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results.person",
+            "description": "<p>List of MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "results.person.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.person.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.person.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.person.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.ratio",
+            "description": "<p>Ratio of how the persoin can join the organization.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "  {\n  \"organization\": {\n    \"acronym\": \"SMC\",\n    \"is_coalition\": true,\n    \"id\": 1,\n    \"name\": \"PS Stranka modernega centra\"\n  },\n  \"created_at\": \"18.08.2017\",\n  \"created_for\": \"14.07.2017\",\n  \"results\": [\n    {\n      \"person\": {\n        \"is_active\": false,\n        \"district\": [\n          64\n        ],\n        \"name\": \"Marko Pogačnik\",\n        \"gov_id\": \"P196\",\n        \"gender\": \"m\",\n        \"party\": {\n          \"acronym\": \"SDS\",\n          \"is_coalition\": false,\n          \"id\": 5,\n          \"name\": \"PS Slovenska Demokratska Stranka\"\n        },\n        \"type\": \"mp\",\n        \"id\": 65,\n        \"has_function\": false\n      },\n      \"ratio\": 64.7270144386353\n    },\n    {\n      \"person\": {\n        \"is_active\": false,\n        \"district\": [\n          70\n        ],\n        \"name\": \"Jože Tanko\",\n        \"gov_id\": \"P077\",\n        \"gender\": \"m\",\n        \"party\": {\n          \"acronym\": \"SDS\",\n          \"is_coalition\": false,\n          \"id\": 5,\n          \"name\": \"PS Slovenska Demokratska Stranka\"\n        },\n        \"type\": \"mp\",\n        \"id\": 78,\n        \"has_function\": false\n      },\n      \"ratio\": 63.9854485386366\n    },\n    {\n      \"person\": {\n        \"is_active\": false,\n        \"district\": [\n          9\n        ],\n        \"name\": \"Zvonko Lah\",\n        \"gov_id\": \"P129\",\n        \"gender\": \"m\",\n        \"party\": {\n          \"acronym\": \"NSI\",\n          \"is_coalition\": false,\n          \"id\": 6,\n          \"name\": \"PS Nova Slovenija\"\n        },\n        \"type\": \"mp\",\n        \"id\": 49,\n        \"has_function\": false\n      },\n      \"ratio\": 63.2064857978416\n    },\n    {\n      \"person\": {\n        \"is_active\": false,\n        \"district\": [\n          55\n        ],\n        \"name\": \"Danijel Krivec\",\n        \"gov_id\": \"P040\",\n        \"gender\": \"m\",\n        \"party\": {\n          \"acronym\": \"SDS\",\n          \"is_coalition\": false,\n          \"id\": 5,\n          \"name\": \"PS Slovenska Demokratska Stranka\"\n        },\n        \"type\": \"mp\",\n        \"id\": 47,\n        \"has_function\": false\n      },\n      \"ratio\": 62.9069432744623\n    },\n    {\n      \"person\": {\n        \"is_active\": false,\n        \"district\": [\n          92\n        ],\n        \"name\": \"Andrej Šircelj\",\n        \"gov_id\": \"P201\",\n        \"gender\": \"m\",\n        \"party\": {\n          \"acronym\": \"SDS\",\n          \"is_coalition\": false,\n          \"id\": 5,\n          \"name\": \"PS Slovenska Demokratska Stranka\"\n        },\n        \"type\": \"mp\",\n        \"id\": 75,\n        \"has_function\": false\n      },\n      \"ratio\": 62.2074947335552\n    }\n  ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getLessMatchingThem/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getLessMatchingThem/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getListOfPGs",
+    "title": "Gets all parlament groups",
+    "name": "getListOfPGs",
+    "group": "PGs",
+    "description": "<p>This function returns all parlament groups.</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.intra_disunion",
+            "description": "<p>Result of analysis of inta-disunion</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.number_of_amendments",
+            "description": "<p>Result of analysis number of amendments</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.privzdignjeno",
+            "description": "<p>Result of analysis style score &quot;rise&quot;</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.vocabulary_size",
+            "description": "<p>Result of analysis vocabulary size</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.number_of_questions",
+            "description": "<p>Result of analysis number of questions</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.seat_count",
+            "description": "<p>Result of number of seats in parlament</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.presence_votes",
+            "description": "<p>Result of analysis of presence on votes</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.presence_sessions",
+            "description": "<p>Result of analysis of presence on sessions</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.problematicno",
+            "description": "<p>Result of analysis of style score &quot;problematic&quot;</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.preprosto",
+            "description": "<p>Result of analysis of style score &quot;simple&quot;</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n   \"data\":[  \n      {  \n         \"party\":{  \n            \"acronym\":\"SMC\",\n            \"is_coalition\":true,\n            \"name\":\"PS Stranka modernega centra\",\n            \"id\":1\n         },\n         \"results\":{  \n            \"intra_disunion\":0.5813533236000595,\n            \"number_of_amendments\":135,\n            \"privzdignjeno\":0.055465651048477935,\n            \"vocabulary_size\":124,\n            \"number_of_questions\":254,\n            \"seat_count\":35,\n            \"presence_votes\":92.7684051599534,\n            \"presence_sessions\":94.2167236078696,\n            \"problematicno\":0.01409816852772803,\n            \"preprosto\":0.061039753160307866\n         }\n      },\n      {  \n         \"party\":{  \n            \"acronym\":\"SDS\",\n            \"is_coalition\":false,\n            \"name\":\"PS Slovenska Demokratska Stranka\",\n            \"id\":5\n         },\n         \"results\":{  \n            \"intra_disunion\":2.19689804102997,\n            \"number_of_amendments\":280,\n            \"privzdignjeno\":0.04106208331786034,\n            \"vocabulary_size\":102,\n            \"number_of_questions\":2817,\n            \"seat_count\":19,\n            \"presence_votes\":66.4733604862916,\n            \"presence_sessions\":83.7104723531316,\n            \"problematicno\":0.01582043604458103,\n            \"preprosto\":0.06005854467272461\n         }\n      },\n      {  \n         \"party\":{  \n            \"acronym\":\"DeSUS\",\n            \"is_coalition\":true,\n            \"name\":\"PS Demokratska Stranka Upokojencev Slovenije\",\n            \"id\":3\n         },\n         \"results\":{  \n            \"intra_disunion\":2.8766187998167894,\n            \"number_of_amendments\":9,\n            \"privzdignjeno\":0.11774129845219254,\n            \"vocabulary_size\":126,\n            \"number_of_questions\":123,\n            \"seat_count\":11,\n            \"presence_votes\":88.5897572483105,\n            \"presence_sessions\":94.3135320470314,\n            \"problematicno\":0.03600796232003048,\n            \"preprosto\":0.14625485569575708\n         }\n      },\n      {  \n         \"party\":{  \n            \"acronym\":\"SD\",\n            \"is_coalition\":true,\n            \"name\":\"PS Socialni Demokrati\",\n            \"id\":7\n         },\n         \"results\":{  \n            \"intra_disunion\":3.861954387556319,\n            \"number_of_amendments\":12,\n            \"privzdignjeno\":0.11489519477220245,\n            \"vocabulary_size\":125,\n            \"number_of_questions\":165,\n            \"seat_count\":6,\n            \"presence_votes\":87.0055447001267,\n            \"presence_sessions\":90.6800348040434,\n            \"problematicno\":0.03194953607315688,\n            \"preprosto\":0.12539864696681088\n         }\n      },\n      {  \n         \"party\":{  \n            \"acronym\":\"NSI\",\n            \"is_coalition\":false,\n            \"name\":\"PS Nova Slovenija\",\n            \"id\":6\n         },\n         \"results\":{  \n            \"intra_disunion\":0.6328349191963298,\n            \"number_of_amendments\":75,\n            \"privzdignjeno\":0.09300856518783383,\n            \"vocabulary_size\":122,\n            \"number_of_questions\":283,\n            \"seat_count\":6,\n            \"presence_votes\":66.8784029038112,\n            \"presence_sessions\":85.7142857142857,\n            \"problematicno\":0.02936898259144798,\n            \"preprosto\":0.12645125272103677\n         }\n      },\n      {  \n         \"party\":{  \n            \"acronym\":\"Levica\",\n            \"is_coalition\":false,\n            \"name\":\"PS Levica\",\n            \"id\":8\n         },\n         \"results\":{  \n            \"intra_disunion\":4.326385742334801,\n            \"number_of_amendments\":181,\n            \"privzdignjeno\":0.10688668819409212,\n            \"vocabulary_size\":117,\n            \"number_of_questions\":516,\n            \"seat_count\":5,\n            \"presence_votes\":71.2885662431942,\n            \"presence_sessions\":81.5584415584416,\n            \"problematicno\":0.039053541047179265,\n            \"preprosto\":0.1494215397402997\n         }\n      },\n      {  \n         \"party\":{  \n            \"acronym\":\"PS NP\",\n            \"is_coalition\":false,\n            \"name\":\"PS nepovezanih poslancev \",\n            \"id\":109\n         },\n         \"results\":{  \n            \"intra_disunion\":7.026884156470127,\n            \"number_of_amendments\":5,\n            \"privzdignjeno\":0.23519830984664467,\n            \"vocabulary_size\":104,\n            \"number_of_questions\":126,\n            \"seat_count\":4,\n            \"presence_votes\":61.8307622504537,\n            \"presence_sessions\":83.1168831168831,\n            \"problematicno\":0.08006720551803538,\n            \"preprosto\":0.28066606227414975\n         }\n      },\n      {  \n         \"party\":{  \n            \"acronym\":\"IMNS\",\n            \"is_coalition\":false,\n            \"name\":\"PS italijanske in madžarske narodne skupnosti\",\n            \"id\":2\n         },\n         \"results\":{  \n            \"intra_disunion\":7.58948799275034,\n            \"number_of_amendments\":5,\n            \"privzdignjeno\":0.4560700680451448,\n            \"vocabulary_size\":102,\n            \"number_of_questions\":28,\n            \"seat_count\":2,\n            \"presence_votes\":80.1043557168784,\n            \"presence_sessions\":78.5714285714286,\n            \"problematicno\":0.10991231475909181,\n            \"preprosto\":0.47794791242129137\n         }\n      }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getListOfPGs",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getMostMatchingThem/{pg_id}/{?date}",
+    "title": "Gets persons who can join specific organization",
+    "name": "getMostMatchingThem",
+    "group": "PGs",
+    "description": "<p>This function returns the list of 5 MPs who can join specific organization.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "organization",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "organization.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "organization.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results.person",
+            "description": "<p>List of MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "results.person.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.person.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.person.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.person.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.ratio",
+            "description": "<p>Ratio of how the persoin can join the organization.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n   \"organization\":{  \n      \"acronym\":\"SMC\",\n      \"is_coalition\":true,\n      \"id\":1,\n      \"name\":\"PS Stranka modernega centra\"\n   },\n   \"created_at\":\"18.08.2017\",\n   \"created_for\":\"14.07.2017\",\n   \"results\":[  \n      {  \n         \"person\":{  \n\n         },\n         \"ratio\":16.3235536544989\n      },\n      {  \n         \"person\":{  \n\n         },\n         \"ratio\":18.674046697835\n      },\n      {  \n         \"person\":{  \n            \"is_active\":false,\n            \"district\":[  \n               19\n            ],\n            \"name\":\"Franc Jurša\",\n            \"gov_id\":\"P122\",\n            \"gender\":\"m\",\n            \"party\":{  \n               \"acronym\":\"DeSUS\",\n               \"is_coalition\":true,\n               \"id\":3,\n               \"name\":\"PS Demokratska Stranka Upokojencev Slovenije\"\n            },\n            \"type\":\"mp\",\n            \"id\":37,\n            \"has_function\":false\n         },\n         \"ratio\":18.7601237281406\n      },\n      {  \n         \"person\":{  \n\n         },\n         \"ratio\":18.9207916020778\n      },\n      {  \n         \"person\":{  \n\n         },\n         \"ratio\":19.6466650769119\n      }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getLessMatchingThem/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getLessMatchingThem/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getNumberOfAmendmetsOfPG/{pg_id}/{?date}",
+    "title": "Gets number of amendments of specific organization",
+    "name": "getNumberOfAmendmetsOfPG",
+    "group": "PGs",
+    "description": "<p>This function returns number of amendments of specific organization</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfPG/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfPG/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getNumberOfQuestions/{pg_id}/{?date}",
+    "title": "Gets all tagged ballots for specific organization",
+    "name": "getNumberOfQuestions",
+    "group": "PGs",
+    "description": "<p>This function returns the list of all tagged ballots for specific organization.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.max",
+            "description": "<p>Object of maximum of parliamentary questions.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.max.score",
+            "description": "<p>Maximum size of parliamentary questions.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.max.parties",
+            "description": "<p>The PG with the maximum size of vocabulary.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.max.parties.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.max.parties.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.max.parties.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.max.parties.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.average",
+            "description": "<p>Average of parliamentary questions.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.score",
+            "description": "<p>Score</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "   {  \n   \"party\":{  \n      \"acronym\":\"SMC\",\n      \"is_coalition\":true,\n      \"id\":1,\n      \"name\":\"PS Stranka modernega centra\"\n   },\n   \"created_at\":\"18.07.2017\",\n   \"created_for\":\"18.07.2017\",\n   \"results\":{  \n      \"max\":{  \n         \"score\":2817,\n         \"parties\":[  \n            {  \n               \"acronym\":\"SDS\",\n               \"is_coalition\":false,\n               \"id\":5,\n               \"name\":\"PS Slovenska Demokratska Stranka\"\n            }\n         ]\n      },\n      \"average\":581.375,\n      \"score\":254\n   }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getNumberOfQuestions/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getNumberOfQuestions/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getPGMismatch/{pg_id}/{?date}",
+    "title": "Gets the all MPs of specific organization and returns the ratio of mismatch of PG",
+    "name": "getPGMismatch",
+    "group": "PGs",
+    "description": "<p>This function returns all MPs of specific organization and returns the ratio of mismatch of PG</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "organization",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "organization.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "organization.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.person",
+            "description": "<p>MP's person object</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "results.person.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.person.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.person.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.person.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.person.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.person.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.ratio",
+            "description": "<p>Ratio of MP, how does mismatch from PG</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "  {  \n   \"organization\":{  \n      \"acronym\":\"SMC\",\n      \"is_coalition\":true,\n      \"id\":1,\n      \"name\":\"PS Stranka modernega centra\"\n   },\n   \"created_at\":\"16.08.2017\",\n   \"created_for\":\"16.08.2017\",\n   \"results\":[  \n      {  \n         \"person\":{  \n\n         },\n         \"ratio\":2.17821782178218\n      },\n      {  \n         \"person\":{  \n            \"name\":\"Ivan Prelog\",\n            \"district\":[  \n               52\n            ],\n            \"gender\":\"m\",\n            \"is_active\":false,\n            \"party\":{  \n               \"acronym\":\"SMC\",\n               \"id\":1,\n               \"is_coalition\":true,\n               \"name\":\"PS Stranka modernega centra\"\n            },\n            \"type\":\"mp\",\n            \"id\":68,\n            \"gov_id\":\"P279\",\n            \"has_function\":false\n         },\n         \"ratio\":2.01972757162987\n      },\n      {  \n         \"person\":{  \n            \"name\":\"Branko Zorman\",\n            \"district\":[  \n               62\n            ],\n            \"gender\":\"m\",\n            \"is_active\":false,\n            \"party\":{  \n               \"acronym\":\"SMC\",\n               \"id\":1,\n               \"is_coalition\":true,\n               \"name\":\"PS Stranka modernega centra\"\n            },\n            \"type\":\"mp\",\n            \"id\":89,\n            \"gov_id\":\"P295\",\n            \"has_function\":false\n         },\n         \"ratio\":1.63382988947622\n      }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getPGMismatch/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getPGMismatch/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getTaggedBallots/{pg_id}/{?date}",
+    "title": "Gets all ids of all parlament groups",
+    "name": "getPGsIDs",
+    "group": "PGs",
+    "description": "<p>This function returns all ids of all parlament groups.</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "lastDate",
+            "description": "<p>The date the last update of parlament groups</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "List[]",
+            "optional": false,
+            "field": "List",
+            "description": "<p>List of all ids of parlament group.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n   \"lastDate\":\"18.09.2017\",\n   \"list\":[  \n      \"109\",\n      \"1\",\n      \"3\",\n      \"2\",\n      \"5\",\n      \"7\",\n      \"6\",\n      \"8\"\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getPGsIDs",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
     "url": "getPercentOFAttendedSessionPG/{pg_id}/{?date}",
     "title": "Get percentage of attended sessions",
     "name": "getPercentOFAttendedSessionPG",
@@ -6447,7 +8443,7 @@ define({ "api": [
             "type": "Object",
             "optional": false,
             "field": "party",
-            "description": "<p>The PG with the most attended voting events.</p>"
+            "description": "<p>The The organization object.</p>"
           },
           {
             "group": "Success 200",
@@ -6657,7 +8653,7 @@ define({ "api": [
             "type": "Object[]",
             "optional": false,
             "field": "votes.maxPG",
-            "description": "<p>The PG with the most attended voting events.</p>"
+            "description": "<p>The The organization object.</p>"
           },
           {
             "group": "Success 200",
@@ -6799,6 +8795,454 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "getPresenceThroughTime/{pg_id}/{?date}",
+    "title": "Gets presence on sessions through time for specific organization",
+    "name": "getPresenceThroughTime",
+    "group": "PGs",
+    "description": "<p>This function returns presence on sessions through time for specific organization</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "results.date_ts",
+            "description": "<p>Date of analysis.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.presence",
+            "description": "<p>Percent of presence of time on specific date.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n{  \n   \"party\":{  \n      \"acronym\":\"SMC\",\n      \"is_coalition\":true,\n      \"id\":1,\n      \"name\":\"PS Stranka modernega centra\"\n   },\n   \"created_at\":\"21.08.2017\",\n   \"created_for\":\"21.08.2017\",\n   \"results\":[  \n      {  \n         \"date_ts\":\"2014-08-01T00:00:00\",\n         \"presence\":96.07843137254902\n      },\n      {  \n         \"date_ts\":\"2014-09-01T00:00:00\",\n         \"presence\":93.7037037037037\n      },\n      {  \n         \"date_ts\":\"2014-10-01T00:00:00\",\n         \"presence\":93.05555555555556\n      },\n      {  \n         \"date_ts\":\"2014-11-01T00:00:00\",\n         \"presence\":96.0727969348659\n      },\n      {  \n         \"date_ts\":\"2014-12-01T00:00:00\",\n         \"presence\":93.12386156648452\n      },\n      {  \n         \"date_ts\":\"2015-01-01T00:00:00\",\n         \"presence\":92.52645502645503\n      },\n      {  \n         \"date_ts\":\"2015-02-01T00:00:00\",\n         \"presence\":94.94535519125684\n      },\n      {  \n         \"date_ts\":\"2015-03-01T00:00:00\",\n         \"presence\":88.62745098039215\n      },\n      {  \n         \"date_ts\":\"2015-04-01T00:00:00\",\n         \"presence\":87.72609819121448\n      },\n      {  \n         \"date_ts\":\"2015-05-01T00:00:00\",\n         \"presence\":90.42145593869732\n      },\n      {  \n         \"date_ts\":\"2015-06-01T00:00:00\",\n         \"presence\":91.22574955908289\n      },\n      {  \n         \"date_ts\":\"2015-07-01T00:00:00\",\n         \"presence\":98.47619047619047\n      },\n      {  \n         \"date_ts\":\"2015-09-01T00:00:00\",\n         \"presence\":94.28571428571428\n      },\n      {  \n         \"date_ts\":\"2015-10-01T00:00:00\",\n         \"presence\":90.10989010989012\n      },\n      {  \n         \"date_ts\":\"2015-11-01T00:00:00\",\n         \"presence\":94.80243161094225\n      },\n      {  \n         \"date_ts\":\"2015-12-01T00:00:00\",\n         \"presence\":95.33527696793003\n      },\n      {  \n         \"date_ts\":\"2016-01-01T00:00:00\",\n         \"presence\":89.1891891891892\n      },\n      {  \n         \"date_ts\":\"2016-02-01T00:00:00\",\n         \"presence\":92.06349206349206\n      },\n      {  \n         \"date_ts\":\"2016-03-01T00:00:00\",\n         \"presence\":90.53360125027908\n      },\n      {  \n         \"date_ts\":\"2016-04-01T00:00:00\",\n         \"presence\":91.27272727272727\n      },\n      {  \n         \"date_ts\":\"2016-05-01T00:00:00\",\n         \"presence\":91.4868804664723\n      },\n      {  \n         \"date_ts\":\"2016-06-01T00:00:00\",\n         \"presence\":89.07142857142857\n      },\n      {  \n         \"date_ts\":\"2016-07-01T00:00:00\",\n         \"presence\":96.67189952904238\n      },\n      {  \n         \"date_ts\":\"2016-09-01T00:00:00\",\n         \"presence\":91.32996632996633\n      },\n      {  \n         \"date_ts\":\"2016-10-01T00:00:00\",\n         \"presence\":94.5\n      },\n      {  \n         \"date_ts\":\"2016-11-01T00:00:00\",\n         \"presence\":94.18367346938776\n      },\n      {  \n         \"date_ts\":\"2016-12-01T00:00:00\",\n         \"presence\":96.03174603174604\n      },\n      {  \n         \"date_ts\":\"2017-01-01T00:00:00\",\n         \"presence\":88.57142857142857\n      },\n      {  \n         \"date_ts\":\"2017-02-01T00:00:00\",\n         \"presence\":92.62548262548262\n      },\n      {  \n         \"date_ts\":\"2017-03-01T00:00:00\",\n         \"presence\":92.66846361185983\n      },\n      {  \n         \"date_ts\":\"2017-04-01T00:00:00\",\n         \"presence\":91.49425287356323\n      },\n      {  \n         \"date_ts\":\"2017-05-01T00:00:00\",\n         \"presence\":95.13553657630895\n      },\n      {  \n         \"date_ts\":\"2017-06-01T00:00:00\",\n         \"presence\":89.45783132530121\n      },\n      {  \n         \"date_ts\":\"2017-07-01T00:00:00\",\n         \"presence\":92.52525252525253\n      }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getPresenceThroughTime/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getPresenceThroughTime/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getQuestionsOfPG/{pg_id}/{?date}",
+    "title": "Gets all parliamentary questions of specific parlament group",
+    "name": "getQuestionsOfPG",
+    "group": "PGs",
+    "description": "<p>This function returns all parliamentary questions of specific parlament group</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "all_authors",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "all_authors.person.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "all_authors.person.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "all_authors.person.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "all_authors.person.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "all_authors.person.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "all_authors.person.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "all_authors.person.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "all_authors.person.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "all_authors.person.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "all_authors.person.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "all_authors.person.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "all_authors.person.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "all_authors.person.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>The date of question</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "question",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "question.person",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "question.person.person.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "question.person.person.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "question.person.person.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "question.person.person.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "question.person.person.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "question.person.person.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "question.person.person.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "question.person.person.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "question.person.person.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "question.person.person.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "question.person.person.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "question.person.person.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "question.person.person.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n {  \n   \"created_for\":\"7. 7. 2017\",\n   \"all_recipients\":[  \n      \"minister za infrastrukturo\",\n      \"ministrica za izobraževanje znanost in šport\",\n      \"ministrica za delo družino socialne zadeve in enake možnosti\",\n      \"minister za obrambo\",\n      \"ministrica za delo družino socialne zadeve in enake možnosti, minister za kmetijstvo gozdarstvo in prehrano\",\n      \"ministrica za obrambo\",\n      \"ministrica za zdravje, ministrica za delo družino socialne zadeve in enake možnosti\",\n      \"minister za pravosodje\",\n      \"ministrica za okolje in prostor\",\n      \"ministrica za kulturo\",\n      \"minister za gospodarski razvoj in tehnologijo\",\n      \"ministrica za delo družino socialne zadeve in enake možnosti, minister za pravosodje\",\n      \"ministrica za izobraževanje znanost in šport, minister za kulturo\",\n      \"ministrica za notranje zadeve\",\n      \"minister za kmetijstvo gozdarstvo in prehrano\",\n      \"minister za finance\",\n      \"ministrica za delo družino socialne zadeve in enake možnosti, minister za zunanje zadeve\",\n      \"minister za javno upravo\",\n      \"ministrica za zdravje, ministrica za obrambo\",\n      \"minister za kmetijstvo gozdarstvo in prehrano, ministrica za okolje in prostor\",\n      \"ministrica brez resorja pristojna za razvoj strateške projekte in kohezijo\",\n      \"ministrica za finance\",\n      \"minister za gospodarski razvoj in tehnologijo, ministrica za finance\",\n      \"minister za infrastrukturo, ministrica za okolje in prostor\",\n      \"minister za finance v funkciji ministra za gospodarski razvoj in tehnologijo\",\n      \"minister za zunanje zadeve\",\n      \"predsednik Vlade\",\n      \"ministrica za okolje in prostor, minister za kmetijstvo gozdarstvo in prehrano\",\n      \"minister za kulturo\",\n      \"ministrica za zdravje\"\n   ],\n   \"all_authors\":[  \n      {  \n         \"name\":\"Klavdija Markež\",\n         \"district\":[  \n            26\n         ],\n         \"gender\":\"f\",\n         \"is_active\":false,\n         \"party\":{  \n            \"acronym\":\"SMC\",\n            \"id\":1,\n            \"is_coalition\":true,\n            \"name\":\"PS Stranka modernega centra\"\n         },\n         \"type\":\"mp\",\n         \"id\":56,\n         \"gov_id\":\"P271\",\n         \"has_function\":false\n      },\n      {  \n         \"name\":\"Franc Laj\",\n         \"district\":[  \n            17\n         ],\n         \"gender\":\"m\",\n         \"is_active\":false,\n         \"party\":{  \n            \"acronym\":\"PS NP\",\n            \"id\":109,\n            \"is_coalition\":false,\n            \"name\":\"PS nepovezanih poslancev \"\n         },\n         \"type\":\"mp\",\n         \"id\":50,\n         \"gov_id\":\"P267\",\n         \"has_function\":false\n      },\n      {  \n         \"name\":\"Mitja Horvat\",\n         \"district\":[  \n            96\n         ],\n         \"gender\":\"m\",\n         \"is_active\":false,\n         \"party\":{  \n            \"acronym\":\"SMC\",\n            \"id\":1,\n            \"is_coalition\":true,\n            \"name\":\"PS Stranka modernega centra\"\n         },\n         \"type\":\"mp\",\n         \"id\":33,\n         \"gov_id\":\"P257\",\n         \"has_function\":false\n      }\n   ],\n   \"created_at\":\"20.09.2017\",\n   \"results\":[  \n      {  \n         \"date\":\"7. 7. 2017\",\n         \"questions\":[  \n            {  \n               \"person\":{  \n                  \"name\":\"Erika Dekleva\",\n                  \"district\":[  \n                     86\n                  ],\n                  \"gender\":\"f\",\n                  \"is_active\":false,\n                  \"party\":{  \n                     \"acronym\":\"SMC\",\n                     \"id\":1,\n                     \"is_coalition\":true,\n                     \"name\":\"PS Stranka modernega centra\"\n                  },\n                  \"type\":\"mp\",\n                  \"id\":16,\n                  \"gov_id\":\"P247\",\n                  \"has_function\":false\n               },\n               \"recipient_orgs\":[  \n\n               ],\n               \"recipient_text\":\"ministrica za obrambo\",\n               \"title\":\"v zvezi z onesnaževanjem na Osrednjem vadišču slovenske vojske Poček\",\n               \"url\":\"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005ed427c0ac5acb7598a32f500418261a7cb0e0a062cde3585a20ad690\",\n               \"session_name\":\"Unknown\",\n               \"recipient_persons\":[  \n                  {  \n                     \"name\":\"Andreja Katič\",\n                     \"district\":[  \n                        37\n                     ],\n                     \"ministry\":{  \n                        \"acronym\":\"MO\",\n                        \"id\":136,\n                        \"is_coalition\":true,\n                        \"name\":\"Ministrstvo za obrambo\"\n                     },\n                     \"gender\":\"f\",\n                     \"is_active\":false,\n                     \"party\":{  \n                        \"acronym\":\"SD\",\n                        \"id\":7,\n                        \"is_coalition\":true,\n                        \"name\":\"PS Socialni Demokrati\"\n                     },\n                     \"type\":\"ministry\",\n                     \"id\":38,\n                     \"gov_id\":\"P258\",\n                     \"has_function\":false\n                  }\n               ],\n               \"id\":10658,\n               \"session_id\":\"Unknown\"\n            },\n            {  \n               \"person\":{  \n                  \"name\":\"Marko Ferluga\",\n                  \"district\":[  \n                     83\n                  ],\n                  \"gender\":\"m\",\n                  \"is_active\":false,\n                  \"party\":{  \n                     \"acronym\":\"SMC\",\n                     \"id\":1,\n                     \"is_coalition\":true,\n                     \"name\":\"PS Stranka modernega centra\"\n                  },\n                  \"type\":\"mp\",\n                  \"id\":21,\n                  \"gov_id\":\"P250\",\n                  \"has_function\":false\n               },\n               \"recipient_orgs\":[  \n\n               ],\n               \"recipient_text\":\"ministrica za notranje zadeve\",\n               \"title\":\"v zvezi s spodbujanjem gospodarske dejavnosti na turističnih območjih\",\n               \"url\":\"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005f525f759c12be98eb8d9125ec275748bf814765fe11cc4c30420155e\",\n               \"session_name\":\"Unknown\",\n               \"recipient_persons\":[  \n                  {  \n                     \"name\":\"Vesna Györkös Žnidar\",\n                     \"district\":null,\n                     \"ministry\":{  \n                        \"acronym\":\"MNZ\",\n                        \"id\":135,\n                        \"is_coalition\":true,\n                        \"name\":\"Ministrstvo za notranje zadeve\"\n                     },\n                     \"gender\":\"f\",\n                     \"is_active\":false,\n                     \"party\":null,\n                     \"type\":\"ministry\",\n                     \"id\":1302,\n                     \"gov_id\":\"G1302\",\n                     \"has_function\":false\n                  }\n               ],\n               \"id\":10659,\n               \"session_id\":\"Unknown\"\n            },\n            {  \n               \"person\":{  \n                  \"name\":\"Dragan Matić\",\n                  \"district\":[  \n                     74\n                  ],\n                  \"gender\":\"m\",\n                  \"is_active\":false,\n                  \"party\":{  \n                     \"acronym\":\"SMC\",\n                     \"id\":1,\n                     \"is_coalition\":true,\n                     \"name\":\"PS Stranka modernega centra\"\n                  },\n                  \"type\":\"mp\",\n                  \"id\":57,\n                  \"gov_id\":\"P272\",\n                  \"has_function\":false\n               },\n               \"recipient_orgs\":[  \n\n               ],\n               \"recipient_text\":\"predsednik Vlade\",\n               \"title\":\"v zvezi s kulturnim turizmom v Republiki Sloveniji\",\n               \"url\":\"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005e495ebf9d9a4e20d6fc4ced02738eb20f85e833f50134245f1cfcd05\",\n               \"session_name\":\"Unknown\",\n               \"recipient_persons\":[  \n                  {  \n                     \"name\":\"Miro Cerar\",\n                     \"district\":[  \n                        103\n                     ],\n                     \"ministry\":{  \n                        \"acronym\":\"Vlada\",\n                        \"id\":126,\n                        \"is_coalition\":true,\n                        \"name\":\"Vlada\"\n                     },\n                     \"gender\":\"m\",\n                     \"is_active\":false,\n                     \"party\":{  \n                        \"acronym\":\"SMC\",\n                        \"id\":1,\n                        \"is_coalition\":true,\n                        \"name\":\"PS Stranka modernega centra\"\n                     },\n                     \"type\":\"ministry\",\n                     \"id\":13,\n                     \"gov_id\":\"G13\",\n                     \"has_function\":false\n                  }\n               ],\n               \"id\":10657,\n               \"session_id\":\"Unknown\"\n            },\n            {  \n               \"person\":{  \n                  \"name\":\"Marko Ferluga\",\n                  \"district\":[  \n                     83\n                  ],\n                  \"gender\":\"m\",\n                  \"is_active\":false,\n                  \"party\":{  \n                     \"acronym\":\"SMC\",\n                     \"id\":1,\n                     \"is_coalition\":true,\n                     \"name\":\"PS Stranka modernega centra\"\n                  },\n                  \"type\":\"mp\",\n                  \"id\":21,\n                  \"gov_id\":\"P250\",\n                  \"has_function\":false\n               },\n               \"recipient_orgs\":[  \n\n               ],\n               \"recipient_text\":\"minister za pravosodje\",\n               \"title\":\"v zvezi z odgovornostjo za izpustitev storilca kaznivega dejanja Preprečitve uradnega dejanja uradni osebi in kršitev pravil cestnega prometa z dne 5. 7. 2017\",\n               \"url\":\"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005fe4ca106b0e69211de15cafbf4db7850b7bef83cb15544ab3f8a975a\",\n               \"session_name\":\"Unknown\",\n               \"recipient_persons\":[  \n                  {  \n                     \"name\":\"Goran Klemenčič\",\n                     \"district\":null,\n                     \"ministry\":{  \n                        \"acronym\":\"MP\",\n                        \"id\":138,\n                        \"is_coalition\":true,\n                        \"name\":\"Ministrstvo za pravosodje\"\n                     },\n                     \"gender\":\"m\",\n                     \"is_active\":false,\n                     \"party\":null,\n                     \"type\":\"ministry\",\n                     \"id\":1303,\n                     \"gov_id\":\"G1303\",\n                     \"has_function\":false\n                  }\n               ],\n               \"id\":10660,\n               \"session_id\":\"Unknown\"\n            }\n         ]\n      },\n      {  \n         \"date\":\"18. 4. 2017\",\n         \"questions\":[  \n            {  \n               \"person\":{  \n                  \"name\":\"Ivan Škodnik\",\n                  \"district\":[  \n                     40\n                  ],\n                  \"gender\":\"m\",\n                  \"is_active\":false,\n                  \"party\":{  \n                     \"acronym\":\"SMC\",\n                     \"id\":1,\n                     \"is_coalition\":true,\n                     \"name\":\"PS Stranka modernega centra\"\n                  },\n                  \"type\":\"mp\",\n                  \"id\":76,\n                  \"gov_id\":\"P286\",\n                  \"has_function\":false\n               },\n               \"recipient_orgs\":[  \n\n               ],\n               \"recipient_text\":\"minister za kmetijstvo gozdarstvo in prehrano\",\n               \"title\":\"v zvezi z zagotavljanjem možnosti za predelavo hlodovine v Sloveniji\",\n               \"url\":\"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e0050996dabab771a034b87412f2d5e511bdecb7167295f4b359f69b6435\",\n               \"session_name\":\"Unknown\",\n               \"recipient_persons\":[  \n                  {  \n                     \"name\":\"Dejan Židan\",\n                     \"district\":null,\n                     \"ministry\":{  \n                        \"acronym\":\"MKGP\",\n                        \"id\":134,\n                        \"is_coalition\":true,\n                        \"name\":\"Ministrstvo za kmetijstvo, gozdarstvo in prehrano\"\n                     },\n                     \"gender\":\"m\",\n                     \"is_active\":false,\n                     \"party\":null,\n                     \"type\":\"ministry\",\n                     \"id\":90,\n                     \"gov_id\":\"G90\",\n                     \"has_function\":false\n                  }\n               ],\n               \"id\":10334,\n               \"session_id\":\"Unknown\"\n            },\n            {  \n               \"person\":{  \n                  \"name\":\"Marko Ferluga\",\n                  \"district\":[  \n                     83\n                  ],\n                  \"gender\":\"m\",\n                  \"is_active\":false,\n                  \"party\":{  \n                     \"acronym\":\"SMC\",\n                     \"id\":1,\n                     \"is_coalition\":true,\n                     \"name\":\"PS Stranka modernega centra\"\n                  },\n                  \"type\":\"mp\",\n                  \"id\":21,\n                  \"gov_id\":\"P250\",\n                  \"has_function\":false\n               },\n               \"recipient_orgs\":[  \n\n               ],\n               \"recipient_text\":\"minister za kulturo\",\n               \"title\":\"v zvezi s strategijo upravljanja kulturne dediščine\",\n               \"url\":\"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e0051b277dfb0926c5817e2903247d0e4b985c5e2c2b22fa3383ff748dc7\",\n               \"session_name\":\"Unknown\",\n               \"recipient_persons\":[  \n                  {  \n                     \"name\":\"Anton Peršak\",\n                     \"district\":null,\n                     \"ministry\":{  \n                        \"acronym\":\"MK\",\n                        \"id\":133,\n                        \"is_coalition\":true,\n                        \"name\":\"Ministrstvo za kulturo\"\n                     },\n                     \"gender\":\"m\",\n                     \"is_active\":false,\n                     \"party\":null,\n                     \"type\":\"ministry\",\n                     \"id\":1432,\n                     \"gov_id\":\"G1432\",\n                     \"has_function\":false\n                  }\n               ],\n               \"id\":10336,\n               \"session_id\":\"Unknown\"\n            }\n         ]\n      }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
     "url": "getSpeechesOfPG/{pg_id}/{?date}",
     "title": "Get PG's speeches",
     "name": "getSpeechesOfPG",
@@ -6846,7 +9290,7 @@ define({ "api": [
             "type": "Object",
             "optional": false,
             "field": "party",
-            "description": "<p>The PG with the most attended voting events.</p>"
+            "description": "<p>The organization object.</p>"
           },
           {
             "group": "Success 200",
@@ -7049,6 +9493,1217 @@ define({ "api": [
       {
         "title": "Example with date:",
         "content": "curl -i https://analize.parlameter.si/v1/pg/getSpeechesOfPG/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getStyleScores/{pg_id}/{?date}",
+    "title": "Gets all style socre for specific organization",
+    "name": "getStyleScores",
+    "group": "PGs",
+    "description": "<p>This function returns style socre for specific organization.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": "<p>List of ballots.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.problematicno",
+            "description": "<p>The resoult of style score &quot;problematic&quot;.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.preprosto",
+            "description": "<p>The resoult of style score &quot;simple&quot;.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.privzdignjeno",
+            "description": "<p>The resoult of style score &quot;raised&quot;.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "{  \n   \"party\":{  \n      \"acronym\":\"SMC\",\n      \"is_coalition\":true,\n      \"id\":1,\n      \"name\":\"PS Stranka modernega centra\"\n   },\n   \"created_at\":\"01.03.2017\",\n   \"created_for\":\"01.03.2017\",\n   \"results\":{  \n      \"problematicno\":0.01409816852772803,\n      \"preprosto\":0.061039753160307866,\n      \"privzdignjeno\":0.055465651048477935\n   }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getStyleScores/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getStyleScores/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getTFIDF/{pg_id}/{?date}",
+    "title": "Gets TFIDF scores.",
+    "name": "getTFIDF",
+    "group": "PGs",
+    "description": "<p>This function returns the list of TFIDF scores for specific organization.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": "<p>List of ballots.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.term",
+            "description": "<p>Term of TFIDF</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.scores",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.tf",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.df",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.tf-idf",
+            "description": ""
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n   \"party\":{  \n      \"acronym\":\"SMC\",\n      \"is_coalition\":true,\n      \"id\":1,\n      \"name\":\"PS Stranka modernega centra\"\n   },\n   \"created_at\":\"27.02.2017\",\n   \"created_for\":\"27.02.2017\",\n   \"results\":[  \n      {  \n         \"term\":\"ZDoh\",\n         \"scores\":{  \n            \"tf\":11,\n            \"df\":7,\n            \"tf-idf\":1.5714285714285714\n         }\n      },\n      {  \n         \"term\":\"porotnica\",\n         \"scores\":{  \n            \"tf\":24,\n            \"df\":19,\n            \"tf-idf\":1.263157894736842\n         }\n      }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getTFIDF/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getTFIDF/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getTaggedBallots/{pg_id}/{?date}",
+    "title": "Gets all tagged ballots for specific organization",
+    "name": "getTaggedBallots",
+    "group": "PGs",
+    "description": "<p>This function returns the list of all tagged ballots for specific organization.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "organization",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "organization.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "organization.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results",
+            "description": "<p>List of ballots.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "results.date",
+            "description": "<p>The date in question.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "results.ballots",
+            "description": "<p>Ballots the MP submitted on that day.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.ballots.ballot_id",
+            "description": "<p>Ballot's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.ballots.option",
+            "description": "<p>The ballot option (&quot;za&quot;/&quot;proti&quot;/&quot;ni&quot;/&quot;kvorum&quot;).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "results.ballots.tags",
+            "description": "<p>List of tags this ballot was tagged with.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.ballots.session_id",
+            "description": "<p>Parladata id of the session where this ballot was submitted.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.ballots.motion",
+            "description": "<p>The text of the motion (what was the vote about).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.ballots.result",
+            "description": "<p>Answers the question: Did the motion pass?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.ballots.vote_id",
+            "description": "<p>Parladata id of the vote this ballot belongs to.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n   \"party\":{  \n      \"acronym\":\"SMC\",\n      \"is_coalition\":true,\n      \"id\":1,\n      \"name\":\"PS Stranka modernega centra\"\n   },\n   \"created_at\":\"18.09.2017\",\n   \"created_for\":\"18.09.2017\",\n   \"results\":[  \n      {  \n         \"date\":\"18. 9. 2017\",\n         \"ballots\":[  \n            {  \n               \"option\":\"za\",\n               \"tags\":[  \n                  \"Proceduralna glasovanja\"\n               ],\n               \"session_id\":9743,\n               \"motion\":\"Dnevni red v celoti\",\n               \"result\":true,\n               \"vote_id\":7416\n            }\n         ]\n      },\n      {  \n         \"date\":\"14. 9. 2017\",\n         \"ballots\":[  \n            {  \n               \"option\":\"proti\",\n               \"tags\":[  \n                  \"Interpelacija\"\n               ],\n               \"session_id\":9724,\n               \"motion\":\"Interpelacija o delu in odgovornosti ministrice za zdravje, Milojke Kolar Celarc - Glasovanje o interpelaciji - MZ Milojka Kolar Celarc\",\n               \"result\":false,\n               \"vote_id\":7404\n            }\n         ]\n      }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getVocabularySize/{pg_id}/{?date}",
+    "title": "Gets data of analysis size of vocabulary for specific organization",
+    "name": "getTaggedBallots",
+    "group": "PGs",
+    "description": "<p>This function returns the size of vocabulary for specific organization.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "pg_id",
+            "description": "<p>Parladata id for the PG in question.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "party",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results",
+            "description": "<p>List of ballots.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.max",
+            "description": "<p>Object for maximum size of vocabulary.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.max.score",
+            "description": "<p>Maximum size of vocabulary.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "results.max.parties",
+            "description": "<p>The PG with the maximum size of vocabulary.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.max.parties.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "results.max.parties.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.max.parties.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "results.max.parties.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Float",
+            "optional": false,
+            "field": "results.average",
+            "description": "<p>Average size of vocabulary.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "results.score",
+            "description": "<p>Score</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "    {  \n   \"party\":{  \n      \"acronym\":\"NeP - AČ\",\n      \"is_coalition\":false,\n      \"id\":108,\n      \"name\":\"Nepovezani poslanec Andrej Čuš\"\n   },\n   \"created_at\":\"01.12.2016\",\n   \"created_for\":\"14.11.2016\",\n   \"results\":{  \n      \"max\":{  \n         \"score\":127.347517730496,\n         \"parties\":[  \n            {  \n               \"acronym\":\"NeP - MBK\",\n               \"is_coalition\":false,\n               \"id\":107,\n               \"name\":\"Nepovezana poslanka Mirjam Bon Klanjšček\"\n            }\n         ]\n      },\n      \"average\":104.095736759989,\n      \"score\":118\n   }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getVocabularySize/1",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getVocabularySize/1/12.12.2015",
+        "type": "curl"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "./parlaskupine/views.py",
+    "groupTitle": "PGs"
+  },
+  {
+    "type": "get",
+    "url": "getWorkingBodies/{org_id}/{?date}",
+    "title": "Gets specific working bodie",
+    "name": "getWorkingBodies",
+    "group": "PGs",
+    "description": "<p>This function returns detailed data about specific working bodie</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "org_id",
+            "description": "<p>Parladata id for working bodie</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Optional date.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_for",
+            "description": "<p>The date this card was created for</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "date",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>The date on which this card was created</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "info",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "info.vice_president",
+            "description": "<p>Vice presidents of working bodie</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "info.vice_president.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "info.vice_president.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.vice_president.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.vice_president.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.vice_president.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "info.vice_president.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.vice_president.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "info.vice_president.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "info.vice_president.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.vice_president.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.vice_president.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "info.vice_president.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "info.vice_president.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "info.president",
+            "description": "<p>President of working bodie</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "info.president.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "info.president.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.president.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.president.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.president.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "info.president.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.president.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "info.president.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "info.president.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.president.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.president.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "info.president.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "info.president.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "info.members",
+            "description": "<p>Members of working bodie</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "info.members.is_active",
+            "description": "<p>Answer the question: Is this MP currently active?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer[]",
+            "optional": false,
+            "field": "info.members.district",
+            "description": "<p>List of Parladata ids for districts this person was elected in.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.members.name",
+            "description": "<p>MP's full name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.members.gov_id",
+            "description": "<p>MP's id on www.dz-rs.si</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.members.gender",
+            "description": "<p>MP's gender (f/m) used for grammar</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "info.members.party",
+            "description": "<p>This MP's standard party objects (comes with most calls).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.members.party.acronym",
+            "description": "<p>The MP's party's acronym.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "info.members.party.is_coalition",
+            "description": "<p>Answers the question: Is this party in coalition with the government?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "info.members.party.id",
+            "description": "<p>This party's Parladata (organization) id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.members.party.name",
+            "description": "<p>The party's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "info.members.type",
+            "description": "<p>The person's parlalize type. Always &quot;mp&quot; for MPs.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "info.members.id",
+            "description": "<p>The person's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "info.members.has_function",
+            "description": "<p>Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "organization",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "organization.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "organization.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "organization.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "ratio",
+            "description": "<p>Ratio of percentage of coalition and opposition.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "ratio.coalition",
+            "description": "<p>Percentage of coalition members</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "ratio.opposition",
+            "description": "<p>Opposition of coalition members</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "seats_per_pg",
+            "description": "<p>The organization object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "seats_per_pg.party.acronym",
+            "description": "<p>PG's acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "seats_per_pg.party.is_coalition",
+            "description": "<p>Is this PG a member of the coalition?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "seats_per_pg.party.id",
+            "description": "<p>PG's Parladata id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "seats_per_pg.party.name",
+            "description": "<p>PG's name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "session",
+            "description": "<p>The session object.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "session.name",
+            "description": "<p>Name of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "session.date_ts",
+            "description": "<p>Date and time of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "session.date",
+            "description": "<p>Date of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "session.updated_at",
+            "description": "<p>Date of last update.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "session.session.id",
+            "description": "<p>Id of session.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "session.session.in_review",
+            "description": "<p>Return true or false if session is in review.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "session.orgs",
+            "description": "<p>Organization object</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "session.orgs.acronym",
+            "description": "<p>Organization acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "session.orgs.is_coalition",
+            "description": "<p>True of False if organization is in coalition</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "session.orgs.id",
+            "description": "<p>Id of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "session.orgs.name",
+            "description": "<p>Name of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "session.org",
+            "description": "<p>Organization object</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "session.org.acronym",
+            "description": "<p>Organization acronym</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "session.org.is_coalition",
+            "description": "<p>True of False if organization is in coalition</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "session.org.id",
+            "description": "<p>Id of organization</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "session.org.name",
+            "description": "<p>Name of organization</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Example response:",
+          "content": "\n    {  \n   \"info\":{  \n      \"vice_president\":[  \n         {  \n            \"is_active\":false,\n            \"district\":[  \n               100\n            ],\n            \"name\":\"Simon Zajc\",\n            \"gov_id\":\"P293\",\n            \"gender\":\"m\",\n            \"party\":{  \n               \"acronym\":\"SMC\",\n               \"is_coalition\":true,\n               \"id\":1,\n               \"name\":\"PS Stranka modernega centra\"\n            },\n            \"type\":\"mp\",\n            \"id\":87,\n            \"has_function\":false\n         },\n         {  \n            \"is_active\":false,\n            \"district\":[  \n               103\n            ],\n            \"name\":\"Violeta Tomić\",\n            \"gov_id\":\"P289\",\n            \"gender\":\"f\",\n            \"party\":{  \n               \"acronym\":\"Levica\",\n               \"is_coalition\":false,\n               \"id\":8,\n               \"name\":\"PS Levica\"\n            },\n            \"type\":\"mp\",\n            \"id\":80,\n            \"has_function\":false\n         }\n      ],\n      \"president\":{  \n         \"is_active\":false,\n         \"district\":[  \n            12\n         ],\n         \"name\":\"Tomaž Lisec\",\n         \"gov_id\":\"P187\",\n         \"gender\":\"m\",\n         \"party\":{  \n            \"acronym\":\"SDS\",\n            \"is_coalition\":false,\n            \"id\":5,\n            \"name\":\"PS Slovenska Demokratska Stranka\"\n         },\n         \"type\":\"mp\",\n         \"id\":53,\n         \"has_function\":false\n      },\n      \"members\":[  \n         {  \n            \"is_active\":false,\n            \"district\":[  \n               40\n            ],\n            \"name\":\"Benedikt Kopmajer\",\n            \"gov_id\":\"P261\",\n            \"gender\":\"m\",\n            \"party\":{  \n               \"acronym\":\"DeSUS\",\n               \"is_coalition\":true,\n               \"id\":3,\n               \"name\":\"PS Demokratska Stranka Upokojencev Slovenije\"\n            },\n            \"type\":\"mp\",\n            \"id\":41,\n            \"has_function\":false\n         },\n         {  \n            \"is_active\":false,\n            \"district\":[  \n               44\n            ],\n            \"name\":\"Bojan Podkrajšek\",\n            \"gov_id\":\"P277\",\n            \"gender\":\"m\",\n            \"party\":{  \n               \"acronym\":\"SDS\",\n               \"is_coalition\":false,\n               \"id\":5,\n               \"name\":\"PS Slovenska Demokratska Stranka\"\n            },\n            \"type\":\"mp\",\n            \"id\":64,\n            \"has_function\":false\n         },\n         {  \n            \"is_active\":false,\n            \"district\":[  \n               14\n            ],\n            \"name\":\"Vojka Šergan\",\n            \"gov_id\":\"P285\",\n            \"gender\":\"f\",\n            \"party\":{  \n               \"acronym\":\"SMC\",\n               \"is_coalition\":true,\n               \"id\":1,\n               \"name\":\"PS Stranka modernega centra\"\n            },\n            \"type\":\"mp\",\n            \"id\":74,\n            \"has_function\":false\n         }\n      ],\n      \"viceMember\":[  \n\n      ]\n   },\n   \"created_for\":\"20.09.2017\",\n   \"ratio\":{  \n      \"coalition\":58.8235294117647,\n      \"opposition\":41.1764705882353\n   },\n   \"sessions\":[  \n      {  \n         \"votes\":false,\n         \"name\":\"22. redna seja\",\n         \"orgs\":[  \n            {  \n               \"acronym\":\"\",\n               \"is_coalition\":false,\n               \"id\":21,\n               \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n            }\n         ],\n         \"date\":\"7. 9. 2017\",\n         \"org\":{  \n            \"acronym\":\"\",\n            \"is_coalition\":false,\n            \"id\":21,\n            \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n         },\n         \"date_ts\":\"2017-09-07T02:00:00\",\n         \"speeches\":false,\n         \"updated_at\":[  \n            \"7. 9. 2017\"\n         ],\n         \"in_review\":false,\n         \"id\":9719\n      },\n      {  \n         \"votes\":false,\n         \"name\":\"64. nujna seja\",\n         \"orgs\":[  \n            {  \n               \"acronym\":\"\",\n               \"is_coalition\":false,\n               \"id\":21,\n               \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n            }\n         ],\n         \"date\":\"5. 9. 2017\",\n         \"org\":{  \n            \"acronym\":\"\",\n            \"is_coalition\":false,\n            \"id\":21,\n            \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n         },\n         \"date_ts\":\"2017-09-05T02:00:00\",\n         \"speeches\":false,\n         \"updated_at\":[  \n            \"5. 9. 2017\"\n         ],\n         \"in_review\":false,\n         \"id\":9707\n      },\n      {  \n         \"votes\":false,\n         \"name\":\"63. nujna seja\",\n         \"orgs\":[  \n            {  \n               \"acronym\":\"\",\n               \"is_coalition\":false,\n               \"id\":21,\n               \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n            }\n         ],\n         \"date\":\"5. 7. 2017\",\n         \"org\":{  \n            \"acronym\":\"\",\n            \"is_coalition\":false,\n            \"id\":21,\n            \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n         },\n         \"date_ts\":\"2017-07-05T02:00:00\",\n         \"speeches\":true,\n         \"updated_at\":\"21. 7. 2017\",\n         \"in_review\":false,\n         \"id\":9672\n      },\n      {  \n         \"votes\":false,\n         \"name\":\"62. nujna seja\",\n         \"orgs\":[  \n            {  \n               \"acronym\":\"\",\n               \"is_coalition\":false,\n               \"id\":21,\n               \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n            }\n         ],\n         \"date\":\"29. 6. 2017\",\n         \"org\":{  \n            \"acronym\":\"\",\n            \"is_coalition\":false,\n            \"id\":21,\n            \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n         },\n         \"date_ts\":\"2017-06-29T02:00:00\",\n         \"speeches\":true,\n         \"updated_at\":\"21. 7. 2017\",\n         \"in_review\":false,\n         \"id\":9654\n      }\n      {  \n         \"votes\":false,\n         \"name\":\"1. nujna seja\",\n         \"orgs\":[  \n            {  \n               \"acronym\":\"\",\n               \"is_coalition\":false,\n               \"id\":21,\n               \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n            }\n         ],\n         \"date\":\"12. 9. 2014\",\n         \"org\":{  \n            \"acronym\":\"\",\n            \"is_coalition\":false,\n            \"id\":21,\n            \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n         },\n         \"date_ts\":\"2014-09-12T02:00:00\",\n         \"speeches\":true,\n         \"updated_at\":\"8. 1. 2017\",\n         \"in_review\":false,\n         \"id\":6415\n      }\n   ],\n   \"created_at\":\"20.09.2017\",\n   \"seats_per_pg\":[  \n      {  \n         \"party\":{  \n            \"acronym\":\"SMC\",\n            \"is_coalition\":true,\n            \"name\":\"PS Stranka modernega centra\",\n            \"id\":1\n         },\n         \"coalition\":\"coalition\",\n         \"seats\":7\n      },\n      {  \n         \"party\":{  \n            \"acronym\":\"SDS\",\n            \"is_coalition\":false,\n            \"name\":\"PS Slovenska Demokratska Stranka\",\n            \"id\":5\n         },\n         \"coalition\":\"opposition\",\n         \"seats\":4\n      }\n   ],\n   \"organization\":{  \n      \"acronym\":\"\",\n      \"is_coalition\":false,\n      \"id\":21,\n      \"name\":\"Odbor za kmetijstvo, gozdarstvo in prehrano\"\n   }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getWorkingBodies/21",
+        "type": "curl"
+      },
+      {
+        "title": "Example with date:",
+        "content": "curl -i https://analize.parlameter.si/v1/pg/getWorkingBodies/21/12.12.2015",
         "type": "curl"
       }
     ],
@@ -10650,6 +14305,13 @@ define({ "api": [
           },
           {
             "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "session.link_to",
+            "description": "<p>votes (if session has votes)|transcript (if session has transcripts)|nothing.</p>"
+          },
+          {
+            "group": "Success 200",
             "type": "Object[]",
             "optional": false,
             "field": "session.orgs",
@@ -10688,7 +14350,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Example response:",
-          "content": "{\n\"created_at\": \"24.04.2017\",\n\"created_for\": \"24.04.2017\",\n\"sessions\": [\n{\n\"updated_at_ts\": \"2017-04-24T20:39:11.782\",\n\"speeches\": true,\n\"name\": \"29. redna seja\",\n\"date_ts\": \"2017-04-20T02:00:00\",\n\"votes\": true,\n\"updated_at\": \"24.04.2017\",\n\"org\": {\n\"acronym\": \"DZ\",\n\"is_coalition\": false,\n\"name\": \"Državni zbor\",\n\"id\": 95\n},\n\"date\": \"20. 4. 2017\",\n\"orgs\": [\n{\n\"acronym\": \"DZ\",\n\"is_coalition\": false,\n\"name\": \"Državni zbor\",\n\"id\": 95\n}\n],\n\"id\": 9427,\n\"in_review\": true\n},\n{\n\"updated_at_ts\": \"2017-04-20T01:26:40.675\",\n\"speeches\": true,\n\"name\": \"93. redna seja\",\n\"date_ts\": \"2017-04-19T02:00:00\",\n\"votes\": false,\n\"updated_at\": \"20.04.2017\",\n\"org\": {\n\"acronym\": \"\",\n\"is_coalition\": false,\n\"name\": \"Kolegij predsednika državnega zbora\",\n\"id\": 9\n},\n\"date\": \"19. 4. 2017\",\n\"orgs\": [\n{\n\"acronym\": \"\",\n\"is_coalition\": false,\n\"name\": \"Kolegij predsednika državnega zbora\",\n\"id\": 9\n}\n],\n\"id\": 9424,\n\"in_review\": true\n}\n}",
+          "content": "{\n\"created_at\": \"24.04.2017\",\n\"created_for\": \"24.04.2017\",\n\"sessions\": [\n{\n\"updated_at_ts\": \"2017-04-24T20:39:11.782\",\n\"speeches\": true,\n\"link_to\": \"votes\",\n\"name\": \"29. redna seja\",\n\"date_ts\": \"2017-04-20T02:00:00\",\n\"votes\": true,\n\"updated_at\": \"24.04.2017\",\n\"org\": {\n\"acronym\": \"DZ\",\n\"is_coalition\": false,\n\"name\": \"Državni zbor\",\n\"id\": 95\n},\n\"date\": \"20. 4. 2017\",\n\"orgs\": [\n{\n\"acronym\": \"DZ\",\n\"is_coalition\": false,\n\"name\": \"Državni zbor\",\n\"id\": 95\n}\n],\n\"id\": 9427,\n\"in_review\": true\n},\n{\n\"updated_at_ts\": \"2017-04-20T01:26:40.675\",\n\"speeches\": true,\n\"link_to\": \"transcript\",\n\"name\": \"93. redna seja\",\n\"date_ts\": \"2017-04-19T02:00:00\",\n\"votes\": false,\n\"updated_at\": \"20.04.2017\",\n\"org\": {\n\"acronym\": \"\",\n\"is_coalition\": false,\n\"name\": \"Kolegij predsednika državnega zbora\",\n\"id\": 9\n},\n\"date\": \"19. 4. 2017\",\n\"orgs\": [\n{\n\"acronym\": \"\",\n\"is_coalition\": false,\n\"name\": \"Kolegij predsednika državnega zbora\",\n\"id\": 9\n}\n],\n\"id\": 9424,\n\"in_review\": true\n}\n}",
           "type": "json"
         }
       ]
@@ -11661,8 +15323,8 @@ define({ "api": [
     "url": "",
     "version": "0.0.0",
     "filename": "./doc/main.js",
-    "group": "_home_muki_code_djnd_parlalize_doc_main_js",
-    "groupTitle": "_home_muki_code_djnd_parlalize_doc_main_js",
+    "group": "_home_t0mtom_Documents_pro_parlalize_doc_main_js",
+    "groupTitle": "_home_t0mtom_Documents_pro_parlalize_doc_main_js",
     "name": ""
   },
   {
@@ -11689,8 +15351,8 @@ define({ "api": [
     "url": "",
     "version": "0.0.0",
     "filename": "./doc/template/main.js",
-    "group": "_home_muki_code_djnd_parlalize_doc_template_main_js",
-    "groupTitle": "_home_muki_code_djnd_parlalize_doc_template_main_js",
+    "group": "_home_t0mtom_Documents_pro_parlalize_doc_template_main_js",
+    "groupTitle": "_home_t0mtom_Documents_pro_parlalize_doc_template_main_js",
     "name": ""
   }
 ] });
