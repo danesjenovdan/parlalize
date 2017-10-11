@@ -8,7 +8,7 @@ from django.apps import apps
 from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
 
-from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic
+from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass, MinisterStatic
 
 from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
@@ -76,11 +76,13 @@ def onDateMPCardRunner(date_=None):
     setters = [
         setMembershipsOfMember,
         setPresenceThroughTime,
+        setPercentOFAttendedSession,
     ]
 
     memberships = tryHard(API_URL + '/getMPs/' + date_).json()
 
     for membership in memberships:
+        print(membership['id'])
         for setter in setters:
             print 'running:' + str(setter)
             try:
@@ -97,7 +99,7 @@ def onDateMPCardRunner(date_=None):
     # Runner for setters ALL
     all_in_one_setters = [
         setAverageNumberOfSpeechesPerSessionAll,
-        #setVocabularySizeAndSpokenWords,
+        setNumberOfQuestionsAll,
         setCompass,
     ]
 
