@@ -1,10 +1,10 @@
 /* ------------------------------------------------------------------------------------------
  * Content
  * ------------------------------------------------------------------------------------------ */
-/*body {
+body {
   min-width: 980px;
   max-width: 1280px;
-}*/
+}
 
 body, p, a, div, th, td {
   font-family: "Source Sans Pro", sans-serif;
@@ -172,7 +172,6 @@ pre {
   border-radius: 6px;
   position: relative;
   margin: 10px 0 20px 0;
-  overflow-x: auto;
 }
 
 pre.prettyprint {
