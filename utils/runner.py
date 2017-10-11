@@ -8,13 +8,13 @@ from django.apps import apps
 from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
 
-from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic
+from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass, MinisterStatic
 
 from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
 from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, PGMismatch
 
-from parlaseje.models import Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
+from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
 
 from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
 from parlaseje.utils import idsOfSession, getSesDates
@@ -76,11 +76,13 @@ def onDateMPCardRunner(date_=None):
     setters = [
         setMembershipsOfMember,
         setPresenceThroughTime,
+        setPercentOFAttendedSession,
     ]
 
     memberships = tryHard(API_URL + '/getMPs/' + date_).json()
 
     for membership in memberships:
+        print(membership['id'])
         for setter in setters:
             print 'running:' + str(setter)
             try:
@@ -97,7 +99,7 @@ def onDateMPCardRunner(date_=None):
     # Runner for setters ALL
     all_in_one_setters = [
         setAverageNumberOfSpeechesPerSessionAll,
-        #setVocabularySizeAndSpokenWords,
+        setNumberOfQuestionsAll,
         setCompass,
     ]
 
@@ -286,6 +288,7 @@ def fastUpdate(fast=True, date_=None):
     lastVoteTime = Vote.objects.latest('updated_at').updated_at
     lastSpeechTime = Speech.objects.latest('updated_at').updated_at
     lastQustionTime = Question.objects.latest('updated_at').updated_at
+    lastLegislationTime = Legislation.objects.latest('updated_at').updated_at
 
     if date_:
         dates = [date_ + '_00:00' for i in range(5)]
@@ -296,6 +299,7 @@ def fastUpdate(fast=True, date_=None):
         dates.append(lastSpeechTime)
         dates.append(lastBallotTime)
         dates.append(Question.objects.latest('updated_at').updated_at)
+        dates.append(lastLegislationTime)
 
     # prepare url
     url = API_URL + '/getAllChangesAfter/'
@@ -310,12 +314,15 @@ def fastUpdate(fast=True, date_=None):
     print 'Sessions: ', len(data['sessions'])
     print 'Persons: ', len(data['persons'])
     print 'Questions: ', len(data['questions'])
+    print 'Legislation: ', len(data['laws'])
 
     text = ('Received data: \n'
             'Speeches: ' + str(len(data['speeches'])) + '\n'
             'Sessions: ' + str(len(data['sessions'])) + '\n'
             'Persons: ' + str(len(data['persons'])) + '\n'
-            'Questions: ' + str(len(data['questions'])) + '\n')
+            'Questions: ' + str(len(data['questions'])) + '\n'
+            'Legislation: ' + str(len(data['laws'])) + '\n'
+            )
     sc.api_call("chat.postMessage",
                 channel="#parlalize_notif",
                 text=text)
@@ -391,6 +398,18 @@ def fastUpdate(fast=True, date_=None):
                 session.save()
                 orgs = list(orgs)
                 session.organizations.add(*orgs)
+
+    # update Legislation
+    for law in data["laws"]:
+        result = Legislation(session=Session.objects.get(id_parladata=law['session']),
+                             text=law['text'],
+                             epa=law['epa'],
+                             result=law['result'],
+                             mdt=law['mdt'],
+                             id_parladata=law['id'],
+                             note=law['note']
+                             )      
+        result.save()
 
     # update speeches
     existingIDs = list(Speech.objects.all().values_list('id_parladata',

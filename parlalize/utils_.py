@@ -28,7 +28,7 @@ import itertools
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from parlalize.settings import SETTER_KEY
-
+from requests.auth import HTTPBasicAuth
 
 def lockSetter(function):
     def wrap(request, *args, **kwargs):
@@ -352,8 +352,8 @@ def getPersonData(id_parladata, date_=None):
                     'is_active': None,
                     'has_function': False,
                     }
-    party = Organization.objects.get(id_parladata=data.party_id)
-    partyData = party.getOrganizationData()
+
+    partyData = data.party.getOrganizationData()
     return {
             'type': 'mp',
             'name': data.person.name,
