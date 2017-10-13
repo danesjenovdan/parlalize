@@ -480,7 +480,7 @@ def setMotionOfSession(request, session_id):
                         epa=mot['epa'],
                         law=law
                         )
-            vote.amendment_of.add(*a_orgs)
+            vote[0].amendment_of.add(*a_orgs)
         else:
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
@@ -499,7 +499,8 @@ def setMotionOfSession(request, session_id):
                                     law=law
                                     )
             if a_orgs:
-                vote.amendment_of.add(*a_orgs)
+                vote = Vote.objects.filter(id_parladata=mot['vote_id'])
+                vote[0].amendment_of.add(*a_orgs)
 
         yes = 0
         no = 0
