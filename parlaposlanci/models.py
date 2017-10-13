@@ -374,8 +374,8 @@ class MPStaticPL(Timestampable, models.Model):
         blank=True, null=True, help_text=_('Number of mandates'))
 
     party = models.ForeignKey('parlaskupine.Organization',
-                                 help_text=_('Parladata party id'),
-                                 related_name='static_party')
+                              help_text=_('Parladata party id'),
+                              related_name='static_party', null=True)
 
     acronym = models.TextField(
         blank=True, null=True, help_text=_('Parliament group\'s acronym'))
