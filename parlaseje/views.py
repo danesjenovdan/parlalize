@@ -457,8 +457,14 @@ def setMotionOfSession(request, session_id):
         else:
             a_orgs = []
 
-        if Vote.objects.filter(id_parladata=mot['vote_id']):
-            vote = Vote.objects.filter(id_parladata=mot['vote_id'])
+        # TODO: replace try with: "if mot['epa']"
+        try:
+            law = Legislation.objects.get(epa=mot['epa'])
+        except:
+            law = None
+
+        vote = Vote.objects.filter(id_parladata=mot['vote_id'])
+        if vote:
             vote.update(created_for=session.start_time,
                         start_time=mot['start_time'],
                         session=session,
@@ -472,9 +478,9 @@ def setMotionOfSession(request, session_id):
                         id_parladata=mot['vote_id'],
                         document_url=mot['doc_url'],
                         epa=mot['epa'],
-                        law=Legislation.objects.get(epa=mot['epa'])
+                        law=law
                         )
-            vote[0].amendment_of.add(*a_orgs)
+            vote.amendment_of.add(*a_orgs)
         else:
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
@@ -490,10 +496,9 @@ def setMotionOfSession(request, session_id):
                                     id_parladata=mot['vote_id'],
                                     document_url=mot['doc_url'],
                                     epa=mot['epa'],
-                                    law=Legislation.objects.get(epa=mot['epa'])
+                                    law=law
                                     )
             if a_orgs:
-                vote = Vote.objects.get(id_parladata=mot['vote_id'])
                 vote.amendment_of.add(*a_orgs)
 
         yes = 0
