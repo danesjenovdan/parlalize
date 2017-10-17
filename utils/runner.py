@@ -289,7 +289,6 @@ def fastUpdate(fast=True, date_=None):
     lastSpeechTime = Speech.objects.latest('updated_at').updated_at
     lastQustionTime = Question.objects.latest('updated_at').updated_at
     lastLegislationTime = Legislation.objects.latest('updated_at').updated_at
-
     if date_:
         dates = [date_ + '_00:00' for i in range(5)]
     else:
@@ -407,7 +406,7 @@ def fastUpdate(fast=True, date_=None):
                              result=law['result'],
                              mdt=law['mdt'],
                              id_parladata=law['id'],
-                             note=law['note']
+                             #note=law['note']
                              )      
         result.save()
 
