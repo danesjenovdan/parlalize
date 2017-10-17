@@ -3095,46 +3095,48 @@ def getVotesData(request, votes):
 def legislationList(requests, session_id):
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
+    ses_date = session.start_time.strftime(API_DATE_FORMAT)
     laws = Legislation.objects.filter(session__id_parladata=session_id)
+    created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
         out.append({'text': law.text,
                     'result': law.result,
                     'id_parladata': law.id_parladata,
                     'mdt': law.mdt,
-                    "session": session.getSessionData() 
                     })
 
-    return JsonResponse(out, safe=False)
+    return JsonResponse({"results": out,
+                         "session": session.getSessionData(),
+                         "created_for": ses_date,
+                         "created_at": created_at}, safe=False)
 
 
-def legislation(requests, session_id, law_id):
+def legislation(requests, law_id):
     out  = []
     created_at = None
     law = Legislation.objects.get(id_parladata=law_id)
-    session = Session.objects.get(id_parladata=int(session_id))
-    if session:
-        votes = Vote.objects.filter(epa=law.epa)
-        if votes:
-            dates = []
-            for vote in votes:
-                out.append({'votes': {'motion_id': vote.id_parladata,
-                                      'text': vote.motion,
-                                      'votes_for': vote.votes_for,
-                                      'against': vote.against,
-                                      'abstain': vote.abstain,
-                                      'not_present': vote.not_present,
-                                      'result': vote.result,
-                                      'is_outlier': vote.is_outlier,
-                                      'tags': vote.tags,
-                                      'has_outliers': vote.has_outlier_voters,
-                                      'documents': vote.document_url
-                                       }                           
-                            
-                            })
-                dates.append(vote.created_at)
-            created_at = max(dates).strftime(API_DATE_FORMAT)
-        else:
-            out = []
+    session = law.session
+    votes = Vote.objects.filter(epa=law.epa)
+    if law.votes.all().order_by('start_time'):
+        dates = []
+        for vote in votes:
+            out.append({'votes': {'motion_id': vote.id_parladata,
+                                  'text': vote.motion,
+                                  'votes_for': vote.votes_for,
+                                  'against': vote.against,
+                                  'abstain': vote.abstain,
+                                  'not_present': vote.not_present,
+                                  'result': vote.result,
+                                  'is_outlier': vote.is_outlier,
+                                  'tags': vote.tags,
+                                  'has_outliers': vote.has_outlier_voters,
+                                  'documents': vote.document_url
+                                   }                           
+                        
+                        })
+            dates.append(vote.created_at)
+        created_at = max(dates).strftime(API_DATE_FORMAT)
+
         ses_date = session.start_time.strftime(API_DATE_FORMAT)
         tags = list(Tag.objects.all().values_list('name', flat=True))
         return JsonResponse({"results": out,
