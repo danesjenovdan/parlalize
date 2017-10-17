@@ -3101,7 +3101,7 @@ def legislationList(requests, session_id):
     for law in laws:
         out.append({'text': law.text,
                     'result': law.result,
-                    'id_parladata': law.id_parladata,
+                    'id': law.id_parladata,
                     'mdt': law.mdt,
                     })
 
