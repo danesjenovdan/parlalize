@@ -3095,16 +3095,20 @@ def getVotesData(request, votes):
 def legislationList(requests, session_id):
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
+    ses_date = session.start_time.strftime(API_DATE_FORMAT)
     laws = Legislation.objects.filter(session__id_parladata=session_id)
+    created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
         out.append({'text': law.text,
                     'result': law.result,
                     'id_parladata': law.id_parladata,
                     'mdt': law.mdt,
-                    "session": session.getSessionData() 
                     })
 
-    return JsonResponse(out, safe=False)
+    return JsonResponse({"results": out,
+                         "session": session.getSessionData(),
+                         "created_for": ses_date,
+                         "created_at": created_at}, safe=False)
 
 
 def legislation(requests, session_id, law_id):
