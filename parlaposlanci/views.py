@@ -12,7 +12,7 @@ from slugify import slugify
 
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL)
-from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
+from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard, 
                               getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
@@ -315,7 +315,7 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     else:
         date_of = findDatesFromLastCard(Presence,
                                         person_id,
-                                        datetime.now().date())[0]
+                                        datetime.now().date().strftime(API_DATE_FORMAT))[0]
         date_ = date_of.strftime(API_DATE_FORMAT)
 
     isNewVote = tryHard(API_URL + '/isVoteOnDay/'+date_).json()['isVote']
