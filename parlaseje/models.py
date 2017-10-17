@@ -304,7 +304,7 @@ class Vote(Timestampable, models.Model):
 
     law = models.ForeignKey('Legislation',
                             blank=True, null=True,
-                            related_name='legislation',
+                            related_name='votes',
                             help_text=_('Legislation foreign key'))
 
     def __str__(self):
