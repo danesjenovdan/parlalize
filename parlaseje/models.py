@@ -483,7 +483,8 @@ class Tag(models.Model):
 class Legislation(Timestampable, models.Model):
     session = models.ForeignKey('Session',
                                 blank=True, null=True,
-                                help_text='The legislative session in which the motion was proposed')
+                                help_text='The legislative session in which the motion was proposed',
+                                related_name='laws')
 
     text = models.TextField(blank=True, null=True,
                             help_text='The text of the motion')
