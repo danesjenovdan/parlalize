@@ -27,6 +27,7 @@ import numpy
 import requests
 import json
 import string
+import copy
 
 
 # get List of MPs
@@ -4004,7 +4005,12 @@ def setListOfMembersTickers(request, date_=None):
 
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
 
-    prevCard = getListOfMembersTickers(request, (date_of-timedelta(days=1)).strftime(API_DATE_FORMAT)).content
+    # get start_time of previous session and find older card of this date
+    prev_session = Session.objects.filter(start_time__lte=date_of,
+                                          organization__id_parladata=95)
+    session_time = prev_session.order_by("-start_time")[0].start_time
+
+    prevCard = getListOfMembersTickers(request, session_time.strftime(API_DATE_FORMAT)).content
     prevData = json.loads(prevCard)['data']
 
     rank_data = {'presence_sessions': [],
@@ -4018,6 +4024,8 @@ def setListOfMembersTickers(request, date_=None):
                  'problematicno': [],
                  'mismatch_of_pg': [],
                  }
+    
+    diffs = copy.deepcopy(rank_data)
 
     data = []
     for mp in mps:
@@ -4165,7 +4173,6 @@ def setListOfMembersTickers(request, date_=None):
         inverse = len(ranks) + 1
         ranking[key] = inverse - rankdata(ranks, method='max').astype(int)
 
-    print ranking
 
     # set rankings to persons data
     for idx, cPerson in enumerate(data):
@@ -4197,11 +4204,24 @@ def setListOfMembersTickers(request, date_=None):
                         diff = currentScore - prevSocre
                     except:
                         diff = 0
+                    diffs[key].append(abs(diff))
                     cPerson['results'][key]['diff'] = diff
+
                 else:
                     cPerson['results'][key]['diff'] = 0
             else:
                 cPerson['results'][key]['diff'] = 0
+
+    # check if some card haven't new data
+    key_without_data = []
+    for key, diff in diffs.items():
+        if not sum(diff):
+            print key, sum(diff)
+            key_without_data.append(key)
+
+    if key_without_data:
+        return JsonResponse({'status': 'failed',
+                             'cards_without_new_data': key_without_data}, safe=False)
 
     data = sorted(data, key=lambda k: k['person']['name'])
 
