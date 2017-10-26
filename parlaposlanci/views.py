@@ -2461,19 +2461,21 @@ def setAverageNumberOfSpeechesPerSessionAll(request, date_=None): # TODO refacto
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        date_of = findDatesFromLastCard(Presence, person_id, datetime.now().strftime(API_DATE_FORMAT))[0]
+        # dirty work around, TODO: fix findDatesFromLastCard for input without person_id
+        date_of = findDatesFromLastCard(Presence, '11', datetime.now().strftime(API_DATE_FORMAT))[0]
         date_ = ""
 
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
     mp_scores = []
 
     for mp in mps:
-        mp_no_of_speeches = len(tryHard(API_URL+'/getSpeechesOfMP/' + str(mp['id'])  + ("/"+date_) if date_ else "").json())
+        print(mp['id'])
+        mp_no_of_speeches = len(tryHard(API_URL+'/getSpeechesOfMP/' + str(mp['id'])  + (("/"+date_) if date_ else "")).json())
 
         # fix for "Dajem besedo"
         #mp_no_of_speeches = mp_no_of_speeches - int(tryHard(API_URL + '/getNumberOfFormalSpeeches/' + str(mp['id']) + ("/"+date_) if date_ else "").text)
 
-        mp_no_of_sessions = tryHard(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id']) + ("/"+date_) if date_ else "").json()['sessions_with_speech']
+        mp_no_of_sessions = tryHard(API_URL+ '/getNumberOfPersonsSessions/' + str(mp['id']) + (("/"+date_) if date_ else "")).json()['sessions_with_speech']
 
         if mp_no_of_sessions > 0:
             mp_scores.append({'id': mp['id'], 'score': mp_no_of_speeches/mp_no_of_sessions})
