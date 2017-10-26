@@ -10,7 +10,10 @@ from django.test.client import RequestFactory
 from django.core.exceptions import PermissionDenied
 
 from parlalize.utils_ import getAllStaticData, tryHard
-from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setPercentOFAttendedSession
+from parlaposlanci.views import (setMPStaticPL, setMembershipsOfMember, setLastActivity,
+                                 setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords,
+                                 setCompass, setListOfMembersTickers, setPresenceThroughTime,
+                                 setMinsterStatic, setPercentOFAttendedSession, setNumberOfQuestionsAll)
 from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
 from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL, SETTER_KEY
 
