@@ -10,7 +10,7 @@ from django.test.client import RequestFactory
 from django.core.exceptions import PermissionDenied
 
 from parlalize.utils_ import getAllStaticData, tryHard
-from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic
+from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setPercentOFAttendedSession
 from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
 from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL, SETTER_KEY
 
@@ -26,14 +26,16 @@ request_with_key = factory.get('?key=' + SETTER_KEY)
 
 setters = {
     # parlaposlanci
-    'setMPStaticPL': {'setter': setMPStaticPL, 'group': 'parlaposlanci'},
-    'setMembershipsOfMember': {'setter': setMembershipsOfMember, 'group': 'parlaposlanci'},
-    'setAverageNumberOfSpeechesPerSessionAll': {'setter': setAverageNumberOfSpeechesPerSessionAll, 'group': 'parlaposlanci'},
-    'setVocabularySizeAndSpokenWords': {'setter': setVocabularySizeAndSpokenWords, 'group': 'parlaposlanci'},
-    'setCompass': {'setter': setCompass, 'group': 'parlaposlanci'},
-    'setListOfMembersTickers': {'setter': setListOfMembersTickers, 'group': 'parlaposlanci'},
-    'setPresenceThroughTime': {'setter': setPresenceThroughTime, 'group': 'parlaposlanci'},
-    'setMinsterStatic': {'setter': setMinsterStatic, 'group': 'parlaposlanci'},
+    'setMPStaticPL': {'setter': setMPStaticPL, 'group': 'parlaposlanci', 'type': 'single'},
+    'setMembershipsOfMember': {'setter': setMembershipsOfMember, 'group': 'parlaposlanci', 'type': 'single'},
+    'setAverageNumberOfSpeechesPerSessionAll': {'setter': setAverageNumberOfSpeechesPerSessionAll, 'group': 'parlaposlanci', 'type': 'all'},
+    'setVocabularySizeAndSpokenWords': {'setter': setVocabularySizeAndSpokenWords, 'group': 'parlaposlanci', 'type': 'all'},
+    'setCompass': {'setter': setCompass, 'group': 'parlaposlanci', 'type': 'single'},
+    'setListOfMembersTickers': {'setter': setListOfMembersTickers, 'group': 'parlaposlanci', 'type': 'single'},
+    'setPresenceThroughTime': {'setter': setPresenceThroughTime, 'group': 'parlaposlanci', 'type': 'single'},
+    'setMinsterStatic': {'setter': setMinsterStatic, 'group': 'parlaposlanci', 'type': 'single'},
+    'setPercentOFAttendedSession': {'setter': setPercentOFAttendedSession, 'group': 'parlaposlanci', 'type': 'single'},
+    'setNumberOfQuestionsAll': {'setter': setPercentOFAttendedSession, 'group': 'parlaposlanci', 'type': 'all'},
 
     # parlaskupine
     'setMPsOfPG': {'setter': setMPsOfPG, 'group': 'parlaskupine'}, 
@@ -131,29 +133,41 @@ def recache(caches, status_id):
 @shared_task
 def runMembersSetters(methods, status_id):
     print 'members'
-    methods = [(setter, setters[setter]['setter']) for setter in methods]
+    methods_single = [(setter, setters[setter]['setter']) for setter in methods if setters[setter]['type'] == 'single']
+    methods_all = [(setter, setters[setter]['setter']) for setter in methods if setters[setter]['type'] == 'all']
     memberships = tryHard(API_URL + '/getMPs/').json()
     mIDs = [member['id'] for member in memberships]
 
+    # run setters for each member
     done = []
     i=1
-    try:
-        print mIDs
-        for m in mIDs:
-            print m
-            current = []
-            print methods
-            for setter in methods:
-                func = setter[1]
-                print func(request_with_key, str(m)).content
-                current.append(setter[0])
-            done.append({m: current})
-            sendStatus(status_id, "Running" , str(int(i/90.*100)) + "%", done)
-            i += 1
-    except:
-        print "except"
-        sendStatus(status_id, "Fails", "Look at the sentry log", done)
-        client.captureException()
+    if methods_single:
+        try:
+            print mIDs
+            for m in mIDs:
+                print m
+                current = []
+                print methods_single
+                for setter in methods_single:
+                    func = setter[1]
+                    print func(request_with_key, str(m)).content
+                    current.append(setter[0])
+                done.append({m: current})
+                sendStatus(status_id, "Running" , str(int(i/90.*100)) + "%", done)
+                i += 1
+        except:
+            print "except"
+            sendStatus(status_id, "Fails", "Look at the sentry log", done)
+            client.captureException()
+
+    # run all in one setters (one call for all members)
+    for i, setter in enumerate(methods_all):
+        print setter
+        sendStatus(status_id, "Start" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
+        func = setter[1]
+        sendStatus(status_id, "Running" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
+        print func(request_with_key)
+
     sendStatus(status_id, "Done", "It looks ok", done)
 
 
