@@ -35,7 +35,7 @@ setters = {
     'setPresenceThroughTime': {'setter': setPresenceThroughTime, 'group': 'parlaposlanci', 'type': 'single'},
     'setMinsterStatic': {'setter': setMinsterStatic, 'group': 'parlaposlanci', 'type': 'single'},
     'setPercentOFAttendedSession': {'setter': setPercentOFAttendedSession, 'group': 'parlaposlanci', 'type': 'single'},
-    'setNumberOfQuestionsAll': {'setter': setPercentOFAttendedSession, 'group': 'parlaposlanci', 'type': 'all'},
+    'setNumberOfQuestionsAll': {'setter': setNumberOfQuestionsAll, 'group': 'parlaposlanci', 'type': 'all'},
 
     # parlaskupine
     'setMPsOfPG': {'setter': setMPsOfPG, 'group': 'parlaskupine'}, 
