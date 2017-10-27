@@ -314,17 +314,8 @@ def setPercentOFAttendedSession(request, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
-        date_of = findDatesFromLastCard(Presence,
-                                        person_id,
-                                        datetime.now().date().strftime(API_DATE_FORMAT))[0]
+        date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
-
-    isNewVote = tryHard(API_URL + '/isVoteOnDay/'+date_).json()['isVote']
-    print isNewVote
-    if not isNewVote:
-        return JsonResponse({'alliswell': True,
-                             'status': 'Ni glasovanja na ta dan',
-                             'saved': False})
 
     data = tryHard(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
 
