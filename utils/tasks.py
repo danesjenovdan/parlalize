@@ -34,7 +34,7 @@ setters = {
     'setAverageNumberOfSpeechesPerSessionAll': {'setter': setAverageNumberOfSpeechesPerSessionAll, 'group': 'parlaposlanci', 'type': 'all'},
     'setVocabularySizeAndSpokenWords': {'setter': setVocabularySizeAndSpokenWords, 'group': 'parlaposlanci', 'type': 'all'},
     'setCompass': {'setter': setCompass, 'group': 'parlaposlanci', 'type': 'single'},
-    'setListOfMembersTickers': {'setter': setListOfMembersTickers, 'group': 'parlaposlanci', 'type': 'single'},
+    'setListOfMembersTickers': {'setter': setListOfMembersTickers, 'group': 'parlaposlanci', 'type': 'all'},
     'setPresenceThroughTime': {'setter': setPresenceThroughTime, 'group': 'parlaposlanci', 'type': 'single'},
     'setMinsterStatic': {'setter': setMinsterStatic, 'group': 'parlaposlanci', 'type': 'single'},
     'setPercentOFAttendedSession': {'setter': setPercentOFAttendedSession, 'group': 'parlaposlanci', 'type': 'single'},
