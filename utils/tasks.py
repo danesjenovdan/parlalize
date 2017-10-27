@@ -173,7 +173,7 @@ def runMembersSetters(methods, status_id):
         sendStatus(status_id, "Start" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
         func = setter[1]
         sendStatus(status_id, "Running" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
-        if len(inspect.getfullargspec(func).args):
+        if len(inspect.getargspec(func).args):
             print func(request_with_key)
         else:
             print func()
