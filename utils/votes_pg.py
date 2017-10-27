@@ -102,8 +102,8 @@ def set_mismatch_of_pg():
         print member
         value = 100 - row['percent']
         person = Person.objects.get(id_parladata=member)
-        party_id = person.static_data.latest('created_at').party_id
-        party_classification = Organization.objects.get(id_parladata=party_id).classification
+        party = person.static_data.latest('created_at').party
+        party_classification = party.classification
         if party_classification != 'poslanska skupina':
             value = None
         saveOrAbortNew(model=MismatchOfPG,
