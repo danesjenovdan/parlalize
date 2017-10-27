@@ -17,10 +17,13 @@ from parlaposlanci.views import (setMPStaticPL, setMembershipsOfMember, setLastA
 from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
 from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL, SETTER_KEY
 
+from utils.votes_pg import set_mismatch_of_pg
+
 from utils.recache import recacheCards
 
 import requests
 import json
+import inspect
 
 status_api = DASHBOARD_URL + '/api/status/'
 
@@ -39,6 +42,7 @@ setters = {
     'setMinsterStatic': {'setter': setMinsterStatic, 'group': 'parlaposlanci', 'type': 'single'},
     'setPercentOFAttendedSession': {'setter': setPercentOFAttendedSession, 'group': 'parlaposlanci', 'type': 'single'},
     'setNumberOfQuestionsAll': {'setter': setNumberOfQuestionsAll, 'group': 'parlaposlanci', 'type': 'all'},
+    'set_mismatch_of_pg': {'setter': set_mismatch_of_pg, 'group': 'parlaposlanci', 'type': 'all'},
 
     # parlaskupine
     'setMPsOfPG': {'setter': setMPsOfPG, 'group': 'parlaskupine'}, 
@@ -169,7 +173,10 @@ def runMembersSetters(methods, status_id):
         sendStatus(status_id, "Start" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
         func = setter[1]
         sendStatus(status_id, "Running" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
-        print func(request_with_key)
+        if len(inspect.getfullargspec(func).args):
+            print func(request_with_key)
+        else:
+            print func()
 
     sendStatus(status_id, "Done", "It looks ok", done)
 
