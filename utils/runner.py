@@ -403,10 +403,13 @@ def fastUpdate(fast=True, date_=None):
         result = Legislation(session=Session.objects.get(id_parladata=law['session']),
                              text=law['text'],
                              epa=law['epa'],
-                             result=law['result'],
+                             status=law['status'],
                              mdt=law['mdt'],
-                             id_parladata=law['id'],
-                             #note=law['note']
+                             proposer_text=law['proposer_text'],
+                             procedure_phase=law['procedure_phase'],
+                             procedure=law['procedure'],
+                             type_of_law=law['type_of_law'],
+                             mdt_fk=law['mdt_fk']
                              )      
         result.save()
 

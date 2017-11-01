@@ -362,22 +362,47 @@ def update():
 
 
 def updateLegislation(request):
-
+    allLaws = []
+    epas = []
     laws = requests.get(API_URL + '/law/',
                        auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
-    count = 1
-    while laws['next'] != 'null':
+    count = 144
+    while laws['next'] != None:
+        
         laws = requests.get(API_URL + '/law/?page=' + str(count),
                             auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
-
         for law in laws['results']:
-            result = Legislation(session=Session.objects.get(id_parladata=int(law['session'])),
-                                 text=law['text'],
-                                 epa=law['epa'],
-                                 result=law['result'],
-                                 mdt=law['mdt'],
-                                 id_parladata=law['id'],
-                                 note=law['note']
-                                 )      
-            result.save()
+            epas.append(str(law['epa']))
         count = count + 1
+    for epa in set(epas):
+        laws = requests.get(API_URL + '/law?epa=' + str(epa),
+                        auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
+        if int(laws['count']) > 1:
+            for law in laws['results']:
+                sorted_date = sorted(laws['results'], key=lambda x: datetime.strptime(x['date'].split('T')[0], '%Y-%m-%d'))
+                print sorted_date[0]
+                result = Legislation(#session=Session.objects.get(id_parladata=int(law['session'])),
+                                       text=sorted_date['text'],
+                                       epa=sorted_date['epa'],
+                                       status=sorted_date['status'],
+                                       mdt=sorted_date['mdt'],
+                                       proposer_text=sorted_date['proposer_text'],
+                                       procedure_phase=sorted_date['procedure_phase'],
+                                       procedure=sorted_date['procedure'],
+                                       type_of_law=sorted_date['type_of_law'],
+                                       mdt_fk=sorted_date['mdt_fk']
+                                       )      
+                result.save()
+        else:
+            result = Legislation(#session=Session.objects.get(id_parladata=int(law['session'])),
+                                       text=laws['results']['text'],
+                                       epa=laws['results']['epa'],
+                                       status=laws['results']['status'],
+                                       mdt=laws['results']['mdt'],
+                                       proposer_text=laws['results']['proposer_text'],
+                                       procedure_phase=laws['results']['procedure_phase'],
+                                       procedure=laws['results']['procedure'],
+                                       type_of_law=laws['results']['type_of_law'],
+                                       mdt_fk=laws['results']['mdt_fk']
+                                       )      
+            result.save()
