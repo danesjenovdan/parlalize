@@ -497,7 +497,13 @@ class Legislation(Timestampable, models.Model):
                            max_length=255,
                            help_text='Working body')
 
-    result = models.CharField(blank=True, null=True,
+    mdt_fk = models.ForeignKey('parlaskupine.Organization',
+                               related_name='laws',
+                               blank=True, null=True,
+                               max_length=255,
+                               help_text='MDT object')
+
+    status = models.CharField(blank=True, null=True,
                                max_length=255,
                                help_text='result of law')
 
@@ -506,6 +512,21 @@ class Legislation(Timestampable, models.Model):
                                        blank=True,
                                        null=True,
                                        help_text=_('id parladata'))
+
+    proposer_text = models.CharField(blank=True, null=True,
+                                     max_length=255,
+                                     help_text='Proposer of law')
+
+    procedure_phase = models.CharField(blank=True, null=True,
+                                       max_length=255,
+                                       help_text='Procedure phase of law')
+
+    procedure = models.CharField(blank=True, null=True,
+                                 max_length=255,
+                                 help_text='Procedure of law')
+
+    type_of_law = models.CharField(blank=True, null=True,
+                                   max_length=255)
 
     note = HTMLField(blank=True,
                      null=True)
