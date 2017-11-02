@@ -401,3 +401,9 @@ class VotesAnalysis(object):
         self.setPresenceOfPGs()
         self.setEqualVoters()
         self.setEqualVotesPG()
+
+
+def setAllVotesCards():
+    votesObj = VotesAnalysis()
+    votesObj.setAll()
+    return 'All is well'
