@@ -180,6 +180,7 @@ def runMembersSetters(methods, status_id):
             print func(request_with_key)
         else:
             print func()
+        done.append(setter[0])
 
     sendStatus(status_id, "Done", "It looks ok", done)
 
