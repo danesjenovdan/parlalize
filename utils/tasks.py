@@ -113,6 +113,7 @@ def runAsyncSetter(request):
 
 @shared_task
 def recache_cards(data, status_id):
+    sendStatus(status_id, "Running", "It looks ok", ['Running recaching'])
     args = {'pgCards':[],
             'mpCards':[],
             'sessions':{},
