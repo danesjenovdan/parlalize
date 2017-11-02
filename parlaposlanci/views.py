@@ -4000,10 +4000,12 @@ def setListOfMembersTickers(request, date_=None):
 
     # get start_time of previous session and find older card of this date
     prev_session = Session.objects.filter(start_time__lte=date_of,
-                                          organization__id_parladata=95)
+                                          organization__id_parladata=95,
+                                          name__icontains=' redna')
     session_time = prev_session.order_by("-start_time")[0].start_time
 
     prevCard = getListOfMembersTickers(request, session_time.strftime(API_DATE_FORMAT)).content
+    print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
     prevData = json.loads(prevCard)['data']
 
     rank_data = {'presence_sessions': [],
