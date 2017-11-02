@@ -18,6 +18,7 @@ from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, se
 from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL, SETTER_KEY
 
 from utils.votes_pg import set_mismatch_of_pg
+from utils.votes import setAllVotesCards
 
 from utils.recache import recacheCards
 
@@ -43,6 +44,7 @@ setters = {
     'setPercentOFAttendedSession': {'setter': setPercentOFAttendedSession, 'group': 'parlaposlanci', 'type': 'single'},
     'setNumberOfQuestionsAll': {'setter': setNumberOfQuestionsAll, 'group': 'parlaposlanci', 'type': 'all'},
     'set_mismatch_of_pg': {'setter': set_mismatch_of_pg, 'group': 'parlaposlanci', 'type': 'all'},
+    'setAllVotesCards': {'setter': setAllVotesCards, 'group': 'parlaposlanci', 'type': 'all'},
 
     # parlaskupine
     'setMPsOfPG': {'setter': setMPsOfPG, 'group': 'parlaskupine'}, 
