@@ -481,10 +481,10 @@ class Tag(models.Model):
 
 
 class Legislation(Timestampable, models.Model):
-    session = models.ForeignKey('Session',
-                                blank=True, null=True,
-                                help_text='The legislative session in which the motion was proposed',
-                                related_name='laws')
+    session = models.ManyToManyField('Session',
+                                     blank=True, null=True,
+                                     help_text='The legislative session in which the motion was proposed',
+                                     related_name='laws')
 
     text = models.TextField(blank=True, null=True,
                             help_text='The text of the motion')
@@ -507,6 +507,9 @@ class Legislation(Timestampable, models.Model):
                                max_length=255,
                                help_text='result of law')
 
+    result = models.CharField(blank=True, null=True,
+                              max_length=255,
+                              help_text='result of law')
 
     id_parladata = models.IntegerField(_('parladata id'),
                                        blank=True,
