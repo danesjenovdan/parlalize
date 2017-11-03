@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from django.apps import apps
 from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
+from itertools import groupby
 
 from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll, setPercentOFAttendedSession
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass, MinisterStatic
@@ -399,20 +400,49 @@ def fastUpdate(fast=True, date_=None):
                 session.organizations.add(*orgs)
 
     # update Legislation
-    for key, group in itertools.groupby(data["laws"], lambda item: item["epa"])
-    for law in data["laws"]:
-        result = Legislation(session=Session.objects.get(id_parladata=law['session']),
-                             text=law['text'],
-                             epa=law['epa'],
-                             status=law['status'],
-                             mdt=law['mdt'],
-                             proposer_text=law['proposer_text'],
-                             procedure_phase=law['procedure_phase'],
-                             procedure=law['procedure'],
-                             type_of_law=law['type_of_law'],
-                             mdt_fk=law['mdt_fk']
-                             )      
+    for epa, laws in groupby(data["laws"], lambda item: item["epa"]):
+        last_obj = None
+        sessions = []
+        for law in laws:
+            sessions.append(law['session'])
+            law['date'] = strptime(law['date'], '%Y-%m-%dT%X')
+            if last_obj:
+                if law['date'] > last_obj['date']:
+                    last_obj = law
+            else: 
+                last_obj = law
+        leg = Legislation.objects.filter(epa=epa)
+        if leg:
+            leg.update(text=last_obj['text'],
+                       epa=last_obj['epa'],
+                       status=last_obj['status'],
+                       result=last_obj['result'],
+                       mdt=last_obj['mdt'],
+                       proposer_text=last_obj['proposer_text'],
+                       procedure_phase=last_obj['procedure_phase'],
+                       procedure=last_obj['procedure'],
+                       type_of_law=last_obj['type_of_law'],
+                       mdt_fk=last_obj['mdt_fk'],
+                       id_parladata=last_obj['id'],
+                       date=date)
+        else:
+            result = Legislation(text=last_obj['text'],
+                                 epa=last_obj['epa'],
+                                 status=last_obj['status'],
+                                 result=last_obj['result'],
+                                 mdt=last_obj['mdt'],
+                                 proposer_text=last_obj['proposer_text'],
+                                 procedure_phase=last_obj['procedure_phase'],
+                                 procedure=last_obj['procedure'],
+                                 type_of_law=last_obj['type_of_law'],
+                                 mdt_fk=last_obj['mdt_fk'],
+                                 id_parladata=last_obj['id'],
+                                 date=date,
+                                 )
         result.save()
+        sessions = list(set(sessions))
+        sessions = list(Session.objects.fitler(id_parladata__in=sessions))
+        result.sessions.add(*sessions)
 
     # update speeches
     existingIDs = list(Speech.objects.all().values_list('id_parladata',
