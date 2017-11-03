@@ -289,7 +289,7 @@ def fastUpdate(fast=True, date_=None):
     lastVoteTime = Vote.objects.latest('updated_at').updated_at
     lastSpeechTime = Speech.objects.latest('updated_at').updated_at
     lastQustionTime = Question.objects.latest('updated_at').updated_at
-    lastLegislationTime = Legislation.objects.latest('updated_at').updated_at
+    #lastLegislationTime = Legislation.objects.latest('updated_at').updated_at
     if date_:
         dates = [date_ + '_00:00' for i in range(5)]
     else:
@@ -299,6 +299,8 @@ def fastUpdate(fast=True, date_=None):
         dates.append(lastSpeechTime)
         dates.append(lastBallotTime)
         dates.append(Question.objects.latest('updated_at').updated_at)
+        
+        lastLegislationTime=datetime.now()-timedelta(days=10)
         dates.append(lastLegislationTime)
 
     # prepare url
@@ -405,15 +407,16 @@ def fastUpdate(fast=True, date_=None):
         sessions = []
         for law in laws:
             sessions.append(law['session'])
-            law['date'] = strptime(law['date'], '%Y-%m-%dT%X')
+            law['date'] = datetime.strptime(law['date'], '%Y-%m-%dT%X')
             if last_obj:
                 if law['date'] > last_obj['date']:
                     last_obj = law
             else: 
                 last_obj = law
-        leg = Legislation.objects.filter(epa=epa)
-        if leg:
-            leg.update(text=last_obj['text'],
+        result = Legislation.objects.filter(epa=epa)
+        if result:
+            print 'update'
+            result.update(text=last_obj['text'],
                        epa=last_obj['epa'],
                        status=last_obj['status'],
                        result=last_obj['result'],
@@ -424,8 +427,10 @@ def fastUpdate(fast=True, date_=None):
                        type_of_law=last_obj['type_of_law'],
                        mdt_fk=last_obj['mdt_fk'],
                        id_parladata=last_obj['id'],
-                       date=date)
+                       date=last_obj['date'])
+            result = result[0]
         else:
+            print 'adding'
             result = Legislation(text=last_obj['text'],
                                  epa=last_obj['epa'],
                                  status=last_obj['status'],
@@ -437,13 +442,13 @@ def fastUpdate(fast=True, date_=None):
                                  type_of_law=last_obj['type_of_law'],
                                  mdt_fk=last_obj['mdt_fk'],
                                  id_parladata=last_obj['id'],
-                                 date=date,
+                                 date=last_obj['date'],
                                  )
-        result.save()
+            result.save()
         sessions = list(set(sessions))
-        sessions = list(Session.objects.fitler(id_parladata__in=sessions))
+        sessions = list(Session.objects.filter(id_parladata__in=sessions))
         result.sessions.add(*sessions)
-
+        print(epa)
     # update speeches
     existingIDs = list(Speech.objects.all().values_list('id_parladata',
                                                         flat=True))
