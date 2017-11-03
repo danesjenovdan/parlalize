@@ -47,13 +47,12 @@ setters = {
     'setAllVotesCards': {'setter': setAllVotesCards, 'group': 'parlaposlanci', 'type': 'all'},
 
     # parlaskupine
-    'setMPsOfPG': {'setter': setMPsOfPG, 'group': 'parlaskupine'}, 
-    'setBasicInfOfPG': {'setter': setBasicInfOfPG, 'group': 'parlaskupine'},
-    'setWorkingBodies': {'setter': setWorkingBodies, 'group': 'parlaskupine'},
-    'setVocabularySizeALL': {'setter': setVocabularySizeALL, 'group': 'parlaskupine'},
-    'getListOfPGs': {'setter': getListOfPGs, 'group': 'parlaskupine'},
-    'setPresenceThroughTimePG': {'setter': setPresenceThroughTimePG, 'group': 'parlaskupine'},
-    'setPGMismatch': {'setter': setPGMismatch, 'group': 'parlaskupine'},
+    'setMPsOfPG': {'setter': setMPsOfPG, 'group': 'parlaskupine', 'type': 'single'}, 
+    'setBasicInfOfPG': {'setter': setBasicInfOfPG, 'group': 'parlaskupine', 'type': 'single'},
+    'setWorkingBodies': {'setter': setWorkingBodies, 'group': 'parlaskupine', 'type': 'single'},
+    'setVocabularySizeALL': {'setter': setVocabularySizeALL, 'group': 'parlaskupine', 'type': 'all'},
+    'setPresenceThroughTimePG': {'setter': setPresenceThroughTimePG, 'group': 'parlaskupine', 'type': 'single'},
+    'setPGMismatch': {'setter': setPGMismatch, 'group': 'parlaskupine', 'type': 'single'},
 
     # utils
     'setAllStaticData': {'setter': getAllStaticData, 'group': 'recache'}, 
@@ -105,7 +104,7 @@ def runAsyncSetter(request):
         print 'group setter'
         methods = data['setters']
 
-        runMembersSetters.apply_async((methods, status_id), queue='parlalize')
+        runCardsSetters.apply_async((methods, status_id), queue='parlalize')
             
     else:
         return JsonResponse({'status': 'this isnt post'})
@@ -141,29 +140,48 @@ def recache(caches, status_id):
 
 
 @shared_task
-def runMembersSetters(methods, status_id):
+def runCardsSetters(methods, status_id):
     print 'members'
     methods_single = [(setter, setters[setter]['setter']) for setter in methods if setters[setter]['type'] == 'single']
     methods_all = [(setter, setters[setter]['setter']) for setter in methods if setters[setter]['type'] == 'all']
-    memberships = tryHard(API_URL + '/getMPs/').json()
-    mIDs = [member['id'] for member in memberships]
+
+    data = {'parlaposlanci': {},
+            'parlaskupine': {}}
+
+    # group setters by location and type
+    for key, group in groupby(methods_single.items(), lambda x: x[1]['group']):
+        for k, g in groupby(group, lambda x: x[1]['type']):
+            data[key][k] = [i for i in g]
+
+    if data['parlaposlanci']:
+        memberships = tryHard(API_URL + '/getMPs/').json()
+        oIDs = [member['id'] for member in memberships]
+        app = 'parlaposlanci'
+
+    elif data['parlaskupine']:
+        membersOfPGsRanges = tryHard(
+            'https://data.parlameter.si/v1/getMembersOfPGsRanges/').json()
+        oIDs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if len(value) > 1]
+        app = 'parlaskupine'
+
 
     # run setters for each member
     done = []
     i=1
-    if methods_single:
+    data_len = float(len(oIDs))
+    if 'single' in data[app].keys():
         try:
-            print mIDs
-            for m in mIDs:
+            print oIDs
+            for m in oIDs:
                 print m
                 current = []
-                print methods_single
-                for setter in methods_single:
-                    func = setter[1]
+                print data[app]['single']
+                for setter in data[app]['single']:
+                    func = setter[1]['setter']
                     print func(request_with_key, str(m)).content
                     current.append(setter[0])
                 done.append({m: current})
-                sendStatus(status_id, "Running" , str(int(i/90.*100)) + "%", done)
+                sendStatus(status_id, "Running" , str(int(i/data_len*100)) + "%", done)
                 i += 1
         except:
             print "except"
@@ -171,16 +189,17 @@ def runMembersSetters(methods, status_id):
             client.captureException()
 
     # run all in one setters (one call for all members)
-    for i, setter in enumerate(methods_all):
-        print setter
-        sendStatus(status_id, "Start" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
-        func = setter[1]
-        sendStatus(status_id, "Running" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
-        if len(inspect.getargspec(func).args):
-            print func(request_with_key)
-        else:
-            print func()
-        done.append(setter[0])
+    if 'all' in data[app].keys():
+        for i, setter in enumerate(data[app]['all']):
+            print setter
+            sendStatus(status_id, "Start" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
+            func = setter[1]['setter']
+            sendStatus(status_id, "Running" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
+            if len(inspect.getargspec(func).args):
+                print func(request_with_key)
+            else:
+                print func()
+            done.append(setter[0])
 
     sendStatus(status_id, "Done", "It looks ok", done)
 
