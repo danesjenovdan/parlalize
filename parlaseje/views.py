@@ -3104,6 +3104,7 @@ def legislationList(requests, session_id):
                     'result': law.result,
                     'type_of_law': law.type_of_law,
                     'id': law.id_parladata,
+                    'epa': law.epa,
                     'mdt': law.mdt,
                     })
 
