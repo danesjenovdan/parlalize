@@ -534,6 +534,9 @@ class Legislation(Timestampable, models.Model):
     note = HTMLField(blank=True,
                      null=True)
 
+    abstractVisible = models.BooleanField(default=False,
+                                          help_text='Is abstract visible')
+
     date = PopoloDateTimeField(blank=True,
                                null=True,
                                help_text='Time of last procudure')
