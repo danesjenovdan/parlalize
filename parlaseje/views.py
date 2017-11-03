@@ -3092,11 +3092,17 @@ def getVotesData(request, votes):
     return JsonResponse(out, safe=False)
 
 
-def legislationList(requests, session_id):
+def legislationList(request, session_id):
+    legislation_type = request.GET.get('type', None)
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
     laws = Legislation.objects.filter(sessions__id_parladata=session_id)
+    if legislation_type == 'zakon':
+        laws = laws.filter(text__icontains='zakon')
+    elif:
+        legislation_type == 'akt':
+        laws = laws.exclude(text__icontains='zakon')
     created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
         out.append({'text': law.text,
@@ -3114,7 +3120,7 @@ def legislationList(requests, session_id):
                          "created_at": created_at}, safe=False)
 
 
-def legislation(requests, epa):
+def legislation(request, epa):
     out  = []
     created_at = None
     law = Legislation.objects.get(epa=epa)
