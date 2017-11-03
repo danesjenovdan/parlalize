@@ -399,6 +399,7 @@ def fastUpdate(fast=True, date_=None):
                 session.organizations.add(*orgs)
 
     # update Legislation
+    for key, group in itertools.groupby(data["laws"], lambda item: item["epa"])
     for law in data["laws"]:
         result = Legislation(session=Session.objects.get(id_parladata=law['session']),
                              text=law['text'],
