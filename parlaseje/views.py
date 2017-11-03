@@ -3120,39 +3120,35 @@ def legislation(requests, epa):
     law = Legislation.objects.get(epa=epa)
     session = law.sessions.all().latest('start_time')
     votes = Vote.objects.filter(epa=law.epa)
-    if law.votes.all().order_by('start_time'):
-        dates = []
-        for vote in votes:
-            out.append({'votes': {'motion_id': vote.id_parladata,
-                                  'text': vote.motion,
-                                  'votes_for': vote.votes_for,
-                                  'against': vote.against,
-                                  'abstain': vote.abstain,
-                                  'not_present': vote.not_present,
-                                  'result': vote.result,
-                                  'is_outlier': vote.is_outlier,
-                                  'tags': vote.tags,
-                                  'has_outliers': vote.has_outlier_voters,
-                                  'documents': vote.document_url
-                                   }                           
-                        
-                        })
-            dates.append(vote.created_at)
-        created_at = max(dates).strftime(API_DATE_FORMAT)
+    dates = [law.date]
+    for vote in votes:
+        out.append({'votes': {'motion_id': vote.id_parladata,
+                              'text': vote.motion,
+                              'votes_for': vote.votes_for,
+                              'against': vote.against,
+                              'abstain': vote.abstain,
+                              'not_present': vote.not_present,
+                              'result': vote.result,
+                              'is_outlier': vote.is_outlier,
+                              'tags': vote.tags,
+                              'has_outliers': vote.has_outlier_voters,
+                              'documents': vote.document_url
+                               }                           
+                    
+                    })
+        dates.append(vote.created_at)
+    created_at = max(dates).strftime(API_DATE_FORMAT)
 
-        ses_date = session.start_time.strftime(API_DATE_FORMAT)
-        tags = list(Tag.objects.all().values_list('name', flat=True))
-        return JsonResponse({"results": out,
-                             "session": session.getSessionData(),
-                             "tags": tags,
-                             "status": law.status,
-                             "text": law.text,
-                             "note": law.note,
-                             "created_for": ses_date,
-                             "created_at": created_at}, safe=False)
-
-    else:
-        return JsonResponse({'result': 'No session'})
+    ses_date = session.start_time.strftime(API_DATE_FORMAT)
+    tags = list(Tag.objects.all().values_list('name', flat=True))
+    return JsonResponse({"results": out,
+                         "session": session.getSessionData(),
+                         "tags": tags,
+                         "status": law.status,
+                         "text": law.text,
+                         "note": law.note,
+                         "created_for": ses_date,
+                         "created_at": created_at}, safe=False)
 
 def otherVotes(requests, session_id):
     out = []
