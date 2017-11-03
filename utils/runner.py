@@ -416,19 +416,19 @@ def fastUpdate(fast=True, date_=None):
         result = Legislation.objects.filter(epa=epa)
         if result:
             print 'update'
-            result.update(text=last_obj['text'],
-                       epa=last_obj['epa'],
-                       status=last_obj['status'],
-                       result=last_obj['result'],
-                       mdt=last_obj['mdt'],
-                       proposer_text=last_obj['proposer_text'],
-                       procedure_phase=last_obj['procedure_phase'],
-                       procedure=last_obj['procedure'],
-                       type_of_law=last_obj['type_of_law'],
-                       mdt_fk=last_obj['mdt_fk'],
-                       id_parladata=last_obj['id'],
-                       date=last_obj['date'])
             result = result[0]
+            result.text=last_obj['text']
+            result.status=last_obj['status']
+            result.result=last_obj['result']
+            result.mdt=last_obj['mdt']
+            result.proposer_text=last_obj['proposer_text']
+            result.procedure_phase=last_obj['procedure_phase']
+            result.procedure=last_obj['procedure']
+            result.type_of_law=last_obj['type_of_law']
+            result.mdt_fk=last_obj['mdt_fk']
+            result.id_parladata=last_obj['id']
+            result.date=last_obj['date']
+            result.save()
         else:
             print 'adding'
             result = Legislation(text=last_obj['text'],
