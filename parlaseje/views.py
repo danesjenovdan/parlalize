@@ -3100,8 +3100,7 @@ def legislationList(request, session_id):
     laws = Legislation.objects.filter(sessions__id_parladata=session_id)
     if legislation_type == 'zakon':
         laws = laws.filter(text__icontains='zakon')
-    elif:
-        legislation_type == 'akt':
+    elif legislation_type == 'akt':
         laws = laws.exclude(text__icontains='zakon')
     created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
