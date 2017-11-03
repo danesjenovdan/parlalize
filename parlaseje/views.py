@@ -3096,11 +3096,13 @@ def legislationList(requests, session_id):
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
-    laws = Legislation.objects.filter(session__id_parladata=session_id)
+    laws = Legislation.objects.filter(sessions__id_parladata=session_id)
     created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
         out.append({'text': law.text,
-                    'result': law.status,
+                    'status': law.status,
+                    'result': law.result,
+                    'type_of_law': law.type_of_law,
                     'id': law.id_parladata,
                     'mdt': law.mdt,
                     })
@@ -3111,11 +3113,11 @@ def legislationList(requests, session_id):
                          "created_at": created_at}, safe=False)
 
 
-def legislation(requests, law_id):
+def legislation(requests, epa):
     out  = []
     created_at = None
-    law = Legislation.objects.get(id_parladata=law_id)
-    session = law.session
+    law = Legislation.objects.get(epa=epa)
+    session = law.sessions.all().latest('start_time')
     votes = Vote.objects.filter(epa=law.epa)
     if law.votes.all().order_by('start_time'):
         dates = []
