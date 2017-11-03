@@ -433,8 +433,6 @@ def fastUpdate(fast=True, date_=None):
             print 'adding'
             result = Legislation(text=last_obj['text'],
                                  epa=last_obj['epa'],
-                                 status=last_obj['status'],
-                                 result=last_obj['result'],
                                  mdt=last_obj['mdt'],
                                  proposer_text=last_obj['proposer_text'],
                                  procedure_phase=last_obj['procedure_phase'],

@@ -3159,6 +3159,7 @@ def otherVotes(requests, session_id):
     out = []
     dates = []
     session = Session.objects.get(id_parladata=int(session_id))
+    dates = [session.start_time]
     allVotes = Vote.objects.filter(session__id_parladata = session_id)
     for vote in allVotes:
         if vote.epa == None:
