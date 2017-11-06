@@ -4,7 +4,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from behaviors.models import Timestampable, Versionable
-from parlalize.settings import API_OUT_DATE_FORMAT, API_DATE_FORMAT
+from parlalize.settings import (API_OUT_DATE_FORMAT, API_DATE_FORMAT,
+                                LEGISLATION_STATUS, LEGISLATION_RESULT)
 from datetime import datetime
 from tinymce.models import HTMLField
 
@@ -504,12 +505,15 @@ class Legislation(Timestampable, models.Model):
                                help_text='MDT object')
 
     status = models.CharField(blank=True, null=True,
-                               max_length=255,
-                               help_text='result of law')
+                              max_length=255,
+                              help_text='result of law',
+                              default=LEGISLATION_STATUS[0][0],
+                              choices=LEGISLATION_STATUS)
 
     result = models.CharField(blank=True, null=True,
                               max_length=255,
-                              help_text='result of law')
+                              help_text='result of law',
+                              choices=LEGISLATION_RESULT)
 
     id_parladata = models.IntegerField(_('parladata id'),
                                        blank=True,
@@ -540,3 +544,7 @@ class Legislation(Timestampable, models.Model):
     date = PopoloDateTimeField(blank=True,
                                null=True,
                                help_text='Time of last procudure')
+
+
+    def __str__(self):
+        return ', '.join(self.sessions.all().values_list('name', flat=True)) + ' | ' + self.text

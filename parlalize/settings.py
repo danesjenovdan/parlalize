@@ -207,3 +207,7 @@ RAVEN_CONFIG = {
     # release based on the git info.
     #'release': raven.fetch_git_sha(os.path.dirname(__file__)),
 }
+
+LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
+
+LEGISLATION_RESULT = [(None, 'Prazno'), ('zakon sprejet', 'zakon sprejet'), ('zakon zavrnjen', 'zakon zavrnjen')]
