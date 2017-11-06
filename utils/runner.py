@@ -418,8 +418,6 @@ def fastUpdate(fast=True, date_=None):
             print 'update'
             result = result[0]
             result.text=last_obj['text']
-            result.status=last_obj['status']
-            result.result=last_obj['result']
             result.mdt=last_obj['mdt']
             result.proposer_text=last_obj['proposer_text']
             result.procedure_phase=last_obj['procedure_phase']

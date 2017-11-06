@@ -210,4 +210,4 @@ RAVEN_CONFIG = {
 
 LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
 
-LEGISLATION_RESULT = [(None, 'Prazno'), ('zakon sprejet', 'zakon sprejet'), ('zakon zavrnjen', 'zakon zavrnjen')]
+LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
