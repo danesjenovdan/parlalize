@@ -33,9 +33,11 @@ class LegislationNotes(admin.ModelAdmin):
                     'text',
                     'epa',
                     'date',
+                    'type_of_law',
                     'status',
                     'result',
-                    'abstractVisible')
+                    'abstractVisible',
+                    'mdt')
 
     list_editable = ('status', 'result')
     list_filter = ('result', 'status', 'date')
