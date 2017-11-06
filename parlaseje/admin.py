@@ -27,7 +27,7 @@ class VoteNotes(admin.ModelAdmin):
     fields = ('motion', 'note', 'abstractVisible')
 
 class LegislationNotes(admin.ModelAdmin):
-    search_fields = ['text', 'abstractVisible']
+    search_fields = ['text', 'epa', 'sessions__name']
     list_display = ('id',
                     'sessions_str',
                     'text',
@@ -35,15 +35,12 @@ class LegislationNotes(admin.ModelAdmin):
                     'date',
                     'status',
                     'result',
-                    'has_note')
+                    'abstractVisible')
 
     list_editable = ('status', 'result')
     list_filter = ('result', 'status', 'date')
     readonly_fields=('text',)
     fields = ('text', 'status', 'result', 'note', 'abstractVisible')
-
-    def has_note(self, obj):
-        return bool(obj.note)
 
     def sessions_str(self, obj):
         return ', '.join(obj.sessions.all().values_list('name', flat=True))
