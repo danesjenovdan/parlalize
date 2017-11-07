@@ -32,7 +32,7 @@ from kvalifikatorji.scripts import (countWords, getCountListPG, getScores,
 
 
 @lockSetter
-def setBasicInfOfPG(request, pg_id, date_):
+def setBasicInfOfPG(request, pg_id, date_=None):
     """Set method for basic information for PGs.
     """
     if date_:
