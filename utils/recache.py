@@ -98,18 +98,21 @@ def updateCacheforList(date_=None):
         if not date_:
             tomorrow = datetime.now() + timedelta(days=1)
             date_ = tomorrow.strftime(API_DATE_FORMAT)
+        getAllStaticData(None, force_render=True)
         getListOfMembers(None, date_, force_render=True)
         getListOfPGs(None, date_, force_render=True)
         getSessionsList(None, date_, force_render=True)
         updateCacheIntraDisunion()
         # store static data for search
-        getAllStaticData(None, force_render=True)
-    except:
-        client.captureException()
-
-    sc.api_call("chat.postMessage",
+        
+        sc.api_call("chat.postMessage",
                 channel="#parlalize_notif",
                 text='Zgeneriru sem cache za nasledn dan.')
+    except:
+        client.captureException()
+        sc.api_call("chat.postMessage",
+                channel="#parlalize_notif",
+                text='Upss neki je šlo narobe. Nisem zgeneriru cache-a.')
 
     return 1
 
