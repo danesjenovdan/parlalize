@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_CLASSIFICATIONS
 from parlaskupine.models import Organization
 
 
@@ -477,6 +477,7 @@ def setMotionOfSession(request, session_id):
                         result=result,
                         id_parladata=mot['vote_id'],
                         document_url=mot['doc_url'],
+                        classification=mot['classification'],
                         epa=mot['epa'],
                         law=law
                         )
@@ -495,6 +496,7 @@ def setMotionOfSession(request, session_id):
                                     result=result,
                                     id_parladata=mot['vote_id'],
                                     document_url=mot['doc_url'],
+                                    classification=mot['classification'],
                                     epa=mot['epa'],
                                     law=law
                                     )
@@ -736,7 +738,8 @@ def getMotionOfSession(request, session_id, date=False):
                                         'result': card.result,
                                         'is_outlier': card.is_outlier,
                                         'tags': card.tags,
-                                        'has_outliers': card.has_outlier_voters
+                                        'has_outliers': card.has_outlier_voters,
+                                        'classification': card.classification,
                                         }
                             })
                 dates.append(card.created_at)
@@ -748,6 +751,7 @@ def getMotionOfSession(request, session_id, date=False):
         return JsonResponse({"results": out,
                              "session": session.getSessionData(),
                              "tags": tags,
+                             "classifications": VOTE_CLASSIFICATIONS,
                              "created_for": ses_date,
                              "created_at": created_at}, safe=False)
     else:
@@ -3198,11 +3202,11 @@ def getExposedLegislation(request):
                          'accepted': [{'epa': legislation.epa,
                                        'icon': legislation.icon,
                                        'text': legislation.text,
-                                       'date': legislation.date,
+                                       'date': legislation.date.strftime(API_DATE_FORMAT),
                                       }for legislation in accepted],
                          'under_consideration': [{'epa': legislation.epa,
                                                   'icon': legislation.icon,
                                                   'text': legislation.text,
-                                                  'date': legislation.date,
+                                                  'date': legislation.date.strftime(API_DATE_FORMAT),
                                                  }for legislation in under_consideration],
                         })

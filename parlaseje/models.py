@@ -308,6 +308,10 @@ class Vote(Timestampable, models.Model):
                             related_name='votes',
                             help_text=_('Legislation foreign key'))
 
+    classification = models.CharField(blank=True, null=True,
+                                      max_length=255,
+                                      help_text='classification')
+
     def __str__(self):
         return self.session.name + ' | ' + self.motion
 
