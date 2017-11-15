@@ -3155,7 +3155,7 @@ def legislation(request, epa):
                          "created_for": ses_date,
                          "created_at": created_at}, safe=False)
 
-def otherVotes(requests, session_id):
+def otherVotes(request, session_id):
     out = []
     dates = []
     session = Session.objects.get(id_parladata=int(session_id))
@@ -3187,3 +3187,16 @@ def otherVotes(requests, session_id):
                              "tags": tags,
                              "created_for": ses_date,
                              "created_at": created_at}, safe=False)
+
+
+def get_exposed_legislations(request):
+    legislations = Legislation.objects.filter(is_exposed=True)
+    accepted = legislations.filter(result='sprejet').order_by('-updated_at')
+    under_consideration = legislations.filter(result=None).order_by('-updated_at')
+    return JsonResponse({'accepted': [{'epa': legislation.epa,
+                                       'icon': legislation.icon,
+                                      }for legislation in accepted],
+                         'under_consideration': [{'epa': legislation.epa,
+                                                  'icon': legislation.icon,
+                                                 }for legislation in under_consideration],
+                        })

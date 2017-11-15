@@ -545,6 +545,11 @@ class Legislation(Timestampable, models.Model):
                                null=True,
                                help_text='Time of last procudure')
 
+    is_exposed = models.BooleanField(default=False,
+                                     help_text='Is abstract visible')
+
+    icon = models.CharField(blank=True, null=True,
+                            max_length=255)
 
     def __str__(self):
         return ', '.join(self.sessions.all().values_list('name', flat=True)) + ' | ' + self.text
