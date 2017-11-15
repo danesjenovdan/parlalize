@@ -38,9 +38,10 @@ class LegislationNotes(admin.ModelAdmin):
                     'result',
                     'abstractVisible',
                     'mdt',
-                    'is_exposed')
+                    'is_exposed',
+                    'icon')
 
-    list_editable = ('status', 'result')
+    list_editable = ('status', 'result', 'is_exposed')
     list_filter = ('result', 'status', 'date', 'is_exposed')
     readonly_fields=('text',)
     fields = ('text', 'status', 'result', 'note', 'abstractVisible', 'is_exposed', 'icon')
