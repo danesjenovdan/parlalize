@@ -211,3 +211,20 @@ RAVEN_CONFIG = {
 LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
 
 LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
+
+VOTE_CLASSIFICATIONS = { 
+    '1': 'dnevni red',
+    '2': 'glasovanje o zakonu v celoti', 
+    '3': 'amandma', 
+    '4': 'interpelacija', 
+    '5': 'evidenčni sklep', 
+    '6': 'predlog sklepa', 
+    '7': 'zakon o ratifikaciji', 
+    '8': 'imenovanje',
+    '9': 'predlog za razpis', 
+    '10': 'priporočilo', 
+    '11': 'poročilo', 
+    '12': 'proceduralni predlog',
+    '13': 'odlok o načrtu ravnanja s stvarnim premoženjem',
+    '14': 'drugo'
+}
