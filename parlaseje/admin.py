@@ -24,7 +24,7 @@ class LegislationNote(Legislation):
 class VoteNotes(admin.ModelAdmin):
     search_fields = ['session__name', 'motion', 'abstractVisible']
     list_display = ('id',
-                    'text',
+                    'motion',
                     'session__name',
                     'epa',
                     'start_time')
