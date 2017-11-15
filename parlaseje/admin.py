@@ -25,7 +25,7 @@ class VoteNotes(admin.ModelAdmin):
     search_fields = ['session__name', 'motion', 'abstractVisible']
     list_display = ('id',
                     'motion',
-                    'session__name',
+                    'session',
                     'epa',
                     'start_time')
 
