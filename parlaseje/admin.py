@@ -23,6 +23,13 @@ class LegislationNote(Legislation):
 
 class VoteNotes(admin.ModelAdmin):
     search_fields = ['session__name', 'motion', 'abstractVisible']
+    list_display = ('id',
+                    'text',
+                    'session__name',
+                    'epa',
+                    'start_time')
+
+    list_filter = ('session__name', 'start_time', 'epa')
     readonly_fields=('motion',)
     fields = ('motion', 'note', 'abstractVisible')
 
