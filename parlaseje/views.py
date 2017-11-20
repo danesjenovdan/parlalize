@@ -3220,5 +3220,6 @@ def getAllLegislations(request):
                                       'text': legislation.text,
                                       'date': legislation.date.strftime(API_DATE_FORMAT),
                                       'mdt': legislation.mdt,
-                                      'result': legislation.result
+                                      'result': legislation.result,
+                                      'type_of_law': legislation.type_of_law
                                      }for legislation in legislations]})
