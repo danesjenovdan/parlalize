@@ -3210,3 +3210,15 @@ def getExposedLegislation(request):
                                                   'date': legislation.date.strftime(API_DATE_FORMAT),
                                                  }for legislation in under_consideration],
                         })
+
+
+def getAllLegislations(request):
+    legislations = Legislation.objects.all().order_by('date')
+    return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
+                         'created_at': datetime.now().strftime(API_DATE_FORMAT),
+                         'results': [{'epa': legislation.epa,
+                                      'text': legislation.text,
+                                      'date': legislation.date.strftime(API_DATE_FORMAT),
+                                      'mdt': legislation.mdt,
+                                      'result': legislation.result
+                                     }for legislation in under_consideration]})
