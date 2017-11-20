@@ -3221,4 +3221,4 @@ def getAllLegislations(request):
                                       'date': legislation.date.strftime(API_DATE_FORMAT),
                                       'mdt': legislation.mdt,
                                       'result': legislation.result
-                                     }for legislation in under_consideration]})
+                                     }for legislation in legislations]})
