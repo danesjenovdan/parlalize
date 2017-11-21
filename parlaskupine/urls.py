@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from parlaskupine.views import *
+from parlaskupine.admin import WBAutocomplete
 
 
 urlpatterns = patterns('',
@@ -103,4 +104,9 @@ urlpatterns = patterns('',
     url(r'^getListOfPGs/', getListOfPGs),
 
     url(r'^getWorkingBodiesLive/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies_live),
+
+
+    # autocomplete urls
+    url(r'^wb-autocomplete/$', WBAutocomplete.as_view(), name='wb-autocomplete'),
+
 )

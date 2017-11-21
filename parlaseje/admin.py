@@ -1,6 +1,8 @@
 import sys
 from django.contrib import admin
 from parlaseje.models import *
+from .forms import LegislationForm
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -34,6 +36,7 @@ class VoteNotes(admin.ModelAdmin):
     fields = ('motion', 'note', 'abstractVisible')
 
 class LegislationNotes(admin.ModelAdmin):
+    form = LegislationForm
     search_fields = ['text', 'epa', 'sessions__name']
     list_display = ('id',
                     'sessions_str',
@@ -51,7 +54,7 @@ class LegislationNotes(admin.ModelAdmin):
     list_editable = ('status', 'result', 'is_exposed')
     list_filter = ('result', 'status', 'date', 'is_exposed')
     readonly_fields=('text',)
-    fields = ('text', 'status', 'result', 'note', 'abstractVisible', 'is_exposed', 'icon')
+    #fields = ('text', 'status', 'result', 'note', 'abstractVisible', 'is_exposed', 'icon')
 
     def sessions_str(self, obj):
         return ', '.join(obj.sessions.all().values_list('name', flat=True))

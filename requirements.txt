@@ -44,3 +44,4 @@ Unidecode==0.4.19
 wcwidth==0.1.7
 websocket-client==0.40.0
 django-tinymce==2.6.0
+django-autocomplete-light==3.2.10
