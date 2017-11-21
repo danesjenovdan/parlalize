@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for parlalize project.
 
@@ -150,12 +151,14 @@ if DEVELOPMENT:
     ISCI_URL = "http://localhost:8888"
     BASE_URL = 'http://localhost:8080/v1'
     DASHBOARD_URL = 'http://localhost:8881'
+    SOLR_URL = 'http://127.0.0.1:8983/solr/knedl'
 
 else:
     API_URL = "https://data.parlameter.si/v1"
     ISCI_URL = "https://isci.parlameter.si"
     BASE_URL = 'https://analize.parlameter.si/v1'
     DASHBOARD_URL = 'https://dashboard.parlameter.si'
+    SOLR_URL = 'http://127.0.0.1:8983/solr/knedl'
 
 GLEJ_URL = 'https://glej.parlameter.si'
 PAGE_URL = 'https://parlameter.si'
