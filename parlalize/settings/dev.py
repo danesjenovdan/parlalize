@@ -49,3 +49,6 @@ RAVEN_CONFIG = {
 }
 
 slack_token = 'sdfsdf-234234234-234234-234234-wer23rwerr2r23rwer23'
+
+PARSER_UN = "parseruser"
+PARSER_PASS = "parserpassword"
