@@ -25,5 +25,4 @@ urlpatterns = patterns('',
     (r'^v1/utils/recacheLastSession/', recacheLastSession),
     (r'^v1/monitoring/', monitorMe),
     (r'^tinymce/', include('tinymce.urls')),
-
 )
