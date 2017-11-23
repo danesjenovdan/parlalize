@@ -3,12 +3,13 @@ from parlaseje.models import Legislation
 from django.conf import settings
 
 import requests
-
+import json
 
 def exportLegislations():
     i = 0
     output = []
     for legislation in Legislation.objects.all():
+        i += 1
         sessions = list(map(str, list(legislation.sessions.all().values_list('id_parladata', flat=True))))
         output.append({
             'id': legislation.epa,
