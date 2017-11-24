@@ -59,5 +59,5 @@ urlpatterns = patterns(
 
     url(r'^getExposedLegislation/', getExposedLegislation),
 
-    url(r'^getAllLegislations/', getAllLegislations),
+    url(r'^getAllLegislation/', getAllLegislation),
 )
