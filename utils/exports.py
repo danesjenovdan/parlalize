@@ -2,6 +2,8 @@ from parlaseje.models import Legislation
 
 from django.conf import settings
 
+from datetime import datetime
+
 import requests
 import json
 
@@ -39,3 +41,15 @@ def exportLegislations():
     print r.text
 
     return 1
+
+
+def backupNotes():
+    data = {}
+    file_name = 'notes/notes' + datetime.now().strftime('%d_%m_%Y') + '.json'
+    f = open(file_name, 'w')
+    for leg in Legislation.objects.all():
+        data[leg.epa] = leg.note
+
+    f.write(json.dumps(data))
+    f.close()
+
