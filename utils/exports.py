@@ -48,7 +48,8 @@ def backupNotes():
     file_name = 'notes/notes' + datetime.now().strftime('%d_%m_%Y') + '.json'
     f = open(file_name, 'w')
     for leg in Legislation.objects.all():
-        data[leg.epa] = leg.note
+        if leg.note:
+            data[leg.epa] = leg.note
 
     f.write(json.dumps(data))
     f.close()
