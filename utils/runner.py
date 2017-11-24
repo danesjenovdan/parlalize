@@ -411,7 +411,7 @@ def fastUpdate(fast=True, date_=None):
             sessions.append(law['session'])
             law['date'] = datetime.strptime(law['date'], '%Y-%m-%dT%X')
             if not is_ended:
-                if last_obj['procedure_ended']:
+                if law['procedure_ended']:
                     is_ended = True
             if last_obj:
                 if law['date'] > last_obj['date']:
@@ -422,10 +422,10 @@ def fastUpdate(fast=True, date_=None):
 
         # dont update Legislatin procedure_ended back to False
         if result:
+            result = result[0]
             if result.procedure_ended:
                 is_ended = True
             print 'update'
-            result = result[0]
             result.text = last_obj['text']
             result.mdt = last_obj['mdt']
             result.proposer_text = last_obj['proposer_text']
@@ -434,7 +434,7 @@ def fastUpdate(fast=True, date_=None):
             result.type_of_law = last_obj['type_of_law']
             result.id_parladata = last_obj['id']
             result.date = last_obj['date']
-            result.procedure_ended = last_obj['procedure_ended'] 
+            result.procedure_ended = is_ended 
             result.save()
         else:
             print 'adding'
