@@ -417,14 +417,15 @@ def fastUpdate(fast=True, date_=None):
         if result:
             print 'update'
             result = result[0]
-            result.text=last_obj['text']
-            result.mdt=last_obj['mdt']
-            result.proposer_text=last_obj['proposer_text']
-            result.procedure_phase=last_obj['procedure_phase']
-            result.procedure=last_obj['procedure']
-            result.type_of_law=last_obj['type_of_law']
-            result.id_parladata=last_obj['id']
-            result.date=last_obj['date']
+            result.text = last_obj['text']
+            result.mdt = last_obj['mdt']
+            result.proposer_text = last_obj['proposer_text']
+            result.procedure_phase = last_obj['procedure_phase']
+            result.procedure = last_obj['procedure']
+            result.type_of_law = last_obj['type_of_law']
+            result.id_parladata = last_obj['id']
+            result.date = last_obj['date']
+            result.procedure_ended = last_obj['procedure_ended'] 
             result.save()
         else:
             print 'adding'
@@ -437,6 +438,7 @@ def fastUpdate(fast=True, date_=None):
                                  type_of_law=last_obj['type_of_law'],
                                  id_parladata=last_obj['id'],
                                  date=last_obj['date'],
+                                 procedure_ended=last_obj['procedure_ended'],
                                  )
             result.save()
         sessions = list(set(sessions))
