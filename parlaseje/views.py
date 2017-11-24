@@ -3212,7 +3212,7 @@ def getExposedLegislation(request):
                         })
 
 
-def getAllLegislations(request):
+def getAllLegislation(request):
     legislations = Legislation.objects.all().order_by('date')
     return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': datetime.now().strftime(API_DATE_FORMAT),
