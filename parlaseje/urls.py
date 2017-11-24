@@ -60,4 +60,6 @@ urlpatterns = patterns(
     url(r'^getExposedLegislation/', getExposedLegislation),
 
     url(r'^getAllLegislation/', getAllLegislation),
+
+    url(r'^allActiveEpas/', getAllLegislationEpas),
 )
