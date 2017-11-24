@@ -3226,6 +3226,6 @@ def getAllLegislation(request):
 
 
 def getAllLegislationEpas(request):
-    legislations = Legislation.objects.all(procedure_ended=False)
+    legislations = Legislation.objects.filter(procedure_ended=False)
     epas = legislations.values_list('epa', flat=True)
-    return JsonResponse(epas, safe=False)
+    return JsonResponse(list(epas), safe=False)
