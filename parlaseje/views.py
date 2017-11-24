@@ -3223,3 +3223,9 @@ def getAllLegislations(request):
                                       'result': legislation.result,
                                       'type_of_law': legislation.type_of_law
                                      }for legislation in legislations]})
+
+
+def getAllLegislationEpas(request):
+    legislations = Legislation.objects.all(procedure_ended=False)
+    epas = legislations.values_list('epa', flat=True)
+    return JsonResponse(epas, safe=False)
