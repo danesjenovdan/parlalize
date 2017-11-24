@@ -23,6 +23,7 @@ from utils.recache import updatePagesS, updateLastActivity, recacheActivities, r
 from utils.imports import update, updateDistricts, updateTags, updatePersonStatus
 from utils.votes_outliers import setMotionAnalize, setOutliers
 from utils.votes_pg import set_mismatch_of_pg
+from utils.exports import exportLegislations
 
 from .votes import VotesAnalysis
 
@@ -402,7 +403,7 @@ def fastUpdate(fast=True, date_=None):
                 session.organizations.add(*orgs)
 
     # update Legislation
-    for epa, laws in groupby(data["laws"], lambda item: item["epa"]):
+    for epa, laws in groupby(data['laws'], lambda item: item['epa']):
         last_obj = None
         sessions = []
         is_ended = False
@@ -453,11 +454,15 @@ def fastUpdate(fast=True, date_=None):
         sessions = list(Session.objects.filter(id_parladata__in=sessions))
         result.sessions.add(*sessions)
         print(epa)
+    if data['laws']:
+        print 'legislation'
+        exportLegislations()
+
     # update speeches
     existingIDs = list(Speech.objects.all().values_list('id_parladata',
                                                         flat=True))
-    sc.api_call("chat.postMessage",
-                channel="#parlalize_notif",
+    sc.api_call('chat.postMessage',
+                channel='#parlalize_notif',
                 text='Start update speeches at: ' + str(datetime.now()))
     for dic in data['speeches']:
         if int(dic['id']) not in existingIDs:
