@@ -405,16 +405,24 @@ def fastUpdate(fast=True, date_=None):
     for epa, laws in groupby(data["laws"], lambda item: item["epa"]):
         last_obj = None
         sessions = []
+        is_ended = False
         for law in laws:
             sessions.append(law['session'])
             law['date'] = datetime.strptime(law['date'], '%Y-%m-%dT%X')
+            if not is_ended:
+                if last_obj['procedure_ended']:
+                    is_ended = True
             if last_obj:
                 if law['date'] > last_obj['date']:
                     last_obj = law
             else: 
                 last_obj = law
         result = Legislation.objects.filter(epa=epa)
+
+        # dont update Legislatin procedure_ended back to False
         if result:
+            if result.procedure_ended:
+                is_ended = True
             print 'update'
             result = result[0]
             result.text = last_obj['text']
@@ -438,7 +446,7 @@ def fastUpdate(fast=True, date_=None):
                                  type_of_law=last_obj['type_of_law'],
                                  id_parladata=last_obj['id'],
                                  date=last_obj['date'],
-                                 procedure_ended=last_obj['procedure_ended'],
+                                 procedure_ended=is_ended,
                                  )
             result.save()
         sessions = list(set(sessions))
