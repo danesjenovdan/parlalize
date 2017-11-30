@@ -62,7 +62,7 @@ setters = {
     'setAllStaticData': {'setter': getAllStaticData, 'group': 'recache'},
 
     # utils
-    'updateOrganizations': {'setter': updateOrganizations, 'group': 'utils', 'type': 'single'},
+    'updateOrganizations': {'setter': updateOrganizations, 'group': 'utils', 'type': 'all'},
 }
 #members cards
 recache = {
@@ -151,7 +151,8 @@ def runCardsSetters(methods, status_id):
     print 'running'
     methots_objs = {method: setters[method] for method in methods}
     data = {'parlaposlanci': {},
-            'parlaskupine': {}}
+            'parlaskupine': {},
+            'utils': {}}
 
     # group setters by location and type
     for key, group in groupby(methots_objs.items(), lambda x: x[1]['group']):
@@ -168,6 +169,8 @@ def runCardsSetters(methods, status_id):
             'https://data.parlameter.si/v1/getMembersOfPGsRanges/').json()
         oIDs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if len(value) > 1]
         app = 'parlaskupine'
+    elif data['utils']:
+        app = 'utils'
 
 
     # run setters for each member
