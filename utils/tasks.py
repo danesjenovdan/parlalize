@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from time import sleep
 from raven.contrib.django.raven_compat.models import client
+from itertools import groupby
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -14,7 +15,7 @@ from parlaposlanci.views import (setMPStaticPL, setMembershipsOfMember, setLastA
                                  setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords,
                                  setCompass, setListOfMembersTickers, setPresenceThroughTime,
                                  setMinsterStatic, setPercentOFAttendedSession, setNumberOfQuestionsAll)
-from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
+from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch, setNumberOfQuestionsAll as setNumberOfQuestionsAllPG
 from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL, SETTER_KEY
 
 from utils.votes_pg import set_mismatch_of_pg
@@ -55,6 +56,7 @@ setters = {
     'setVocabularySizeALL': {'setter': setVocabularySizeALL, 'group': 'parlaskupine', 'type': 'all'},
     'setPresenceThroughTimePG': {'setter': setPresenceThroughTimePG, 'group': 'parlaskupine', 'type': 'single'},
     'setPGMismatch': {'setter': setPGMismatch, 'group': 'parlaskupine', 'type': 'single'},
+    'setNumberOfQuestionsAllPG': {'setter': setNumberOfQuestionsAllPG, 'group': 'parlaskupine', 'type': 'all'},
 
     # recache
     'setAllStaticData': {'setter': getAllStaticData, 'group': 'recache'},
@@ -129,7 +131,7 @@ def recache_cards(data, status_id):
 
     if data['location'] == 'p':
         args['mpCards'] = data['setters']
-    if data['location'] == 'pg':
+    if data['location'] == 'ps':
         args['pgCards'] = data['setters']
     recacheCards(**args)
 
@@ -146,15 +148,13 @@ def recache(caches, status_id):
 
 @shared_task
 def runCardsSetters(methods, status_id):
-    print 'members'
-    methods_single = [(setter, setters[setter]['setter']) for setter in methods if setters[setter]['type'] == 'single']
-    methods_all = [(setter, setters[setter]['setter']) for setter in methods if setters[setter]['type'] == 'all']
-
+    print 'running'
+    methots_objs = {method: setters[method] for method in methods}
     data = {'parlaposlanci': {},
             'parlaskupine': {}}
 
     # group setters by location and type
-    for key, group in groupby(methods_single.items(), lambda x: x[1]['group']):
+    for key, group in groupby(methots_objs.items(), lambda x: x[1]['group']):
         for k, g in groupby(group, lambda x: x[1]['type']):
             data[key][k] = [i for i in g]
 
@@ -183,9 +183,9 @@ def runCardsSetters(methods, status_id):
                 print data[app]['single']
                 for setter in data[app]['single']:
                     func = setter[1]['setter']
-                    print func(request_with_key, str(m)).content
+                    done.append({str(m): func(request_with_key, str(m)).content})
                     current.append(setter[0])
-                done.append({m: current})
+                #done.append({m: current})
                 sendStatus(status_id, "Running" , str(int(i/data_len*100)) + "%", done)
                 i += 1
         except:
@@ -197,15 +197,15 @@ def runCardsSetters(methods, status_id):
     if 'all' in data[app].keys():
         for i, setter in enumerate(data[app]['all']):
             print setter
-            sendStatus(status_id, "Start" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
+            sendStatus(status_id, "Start" , str(int(float(i+1)/len(data[app]['all'])*100)) + "%", done)
             func = setter[1]['setter']
-            sendStatus(status_id, "Running" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
+            sendStatus(status_id, "Running" , str(int(float(i+1)/len(data[app]['all'])*100)) + "%", done)
             if len(inspect.getargspec(func).args):
-                print func(request_with_key)
+                done.append(func(request_with_key).content)
             else:
-                print func()
-            done.append(setter[0])
-
+                done.append(func())
+            #done.append(setter[0])
+    print done
     sendStatus(status_id, "Done", "It looks ok", done)
 
 
@@ -219,5 +219,5 @@ def sendStatus(status_id, type_, note, data):
                  data= {
                             "status_type": type_,
                             "status_note": note,
-                            "status_done": data
+                            "status_done": str(data)
                         })
