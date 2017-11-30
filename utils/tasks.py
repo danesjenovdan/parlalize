@@ -18,9 +18,11 @@ from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, se
 from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL, SETTER_KEY
 
 from utils.votes_pg import set_mismatch_of_pg
-from utils.votes import setAllVotesCards
 
+from utils.votes import setAllVotesCards
 from utils.recache import recacheCards
+from utils.imports import updateOrganizations
+
 
 import requests
 import json
@@ -54,8 +56,11 @@ setters = {
     'setPresenceThroughTimePG': {'setter': setPresenceThroughTimePG, 'group': 'parlaskupine', 'type': 'single'},
     'setPGMismatch': {'setter': setPGMismatch, 'group': 'parlaskupine', 'type': 'single'},
 
+    # recache
+    'setAllStaticData': {'setter': getAllStaticData, 'group': 'recache'},
+
     # utils
-    'setAllStaticData': {'setter': getAllStaticData, 'group': 'recache'}, 
+    'updateOrganizations': {'setter': updateOrganizations, 'group': 'utils', 'type': 'single'},
 }
 #members cards
 recache = {
