@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from django.test.client import RequestFactory
 from requests.auth import HTTPBasicAuth
 import requests
+import re
+import feedparser
 # parlalize initial runner methods #
 
 DZ = 95
