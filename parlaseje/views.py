@@ -3103,9 +3103,9 @@ def legislationList(request, session_id):
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
     laws = Legislation.objects.filter(sessions__id_parladata=session_id)
     if legislation_type == 'zakon':
-        laws = laws.filter(text__icontains='zakon')
+        laws = laws.filter(classification='zakon')
     elif legislation_type == 'akt':
-        laws = laws.exclude(text__icontains='zakon')
+        laws = laws.exclude(classification='zakon')
     created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
         out.append({'text': law.text,
@@ -3220,6 +3220,7 @@ def getAllLegislation(request):
                                       'text': legislation.text,
                                       'date': legislation.date.strftime(API_DATE_FORMAT),
                                       'mdt': legislation.mdt,
+                                      'classification': legislation.classification,
                                       'result': legislation.result,
                                       'type_of_law': legislation.type_of_law
                                      }for legislation in legislations]})
