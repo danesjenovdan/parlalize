@@ -176,8 +176,8 @@ def runCardsSetters(methods, status_id):
     # run setters for each member
     done = []
     i=1
-    data_len = float(len(oIDs))
     if 'single' in data[app].keys():
+        data_len = float(len(oIDs))
         try:
             print oIDs
             for m in oIDs:
