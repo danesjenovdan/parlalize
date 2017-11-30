@@ -558,5 +558,9 @@ class Legislation(Timestampable, models.Model):
     procedure_ended = models.BooleanField(default=False,
                                           help_text='Procedure phase of law')
 
+    classification = models.CharField(blank=True, null=True,
+                                      max_length=255,
+                                      help_text='Classification of law')
+
     def __str__(self):
         return ', '.join(self.sessions.all().values_list('name', flat=True)) + ' | ' + self.text
