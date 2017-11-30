@@ -434,7 +434,8 @@ def fastUpdate(fast=True, date_=None):
             result.type_of_law = last_obj['type_of_law']
             result.id_parladata = last_obj['id']
             result.date = last_obj['date']
-            result.procedure_ended = is_ended 
+            result.procedure_ended = is_ended
+            result.classification = classification
             result.save()
         else:
             print 'adding'
@@ -448,6 +449,7 @@ def fastUpdate(fast=True, date_=None):
                                  id_parladata=last_obj['id'],
                                  date=last_obj['date'],
                                  procedure_ended=is_ended,
+                                 classification=classification,
                                  )
             result.save()
         sessions = list(set(sessions))
