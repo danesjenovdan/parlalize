@@ -87,6 +87,9 @@ urlpatterns = patterns('',
     url(r'^getAmendmentsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getAmendmentsOfPG),
     url(r'^getAmendmentsOfPG/(?P<pg_id>\d+)', getAmendmentsOfPG),
 
+    url(r'^getNumberOfAmendmetsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getNumberOfAmendmetsOfPG),
+    url(r'^getNumberOfAmendmetsOfPG/(?P<pg_id>\d+)', getNumberOfAmendmetsOfPG),
+
     url(r'^getPGMismatch/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getPGMismatch),
     url(r'^getPGMismatch/(?P<pg_id>\d+)/', getPGMismatch),
 
