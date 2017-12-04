@@ -3425,7 +3425,7 @@ def getListOfPGs(request, date_=None, force_render=False):
                           'data_path': ('results', 'score'),
                           'out_path': ('results', 'number_of_questions')},
                          {'method': getNumberOfAmendmetsOfPG,
-                          'data_path': (),
+                          'data_path': ('count'),
                           'out_path': ('results', 'number_of_amendments')},
                          {'method': getStyleScoresPG,
                           'data_path': ('results', 'privzdignjeno'),
@@ -4477,7 +4477,9 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
         date_ = ''
     org = Organization.objects.get(id_parladata=pg_id)
     count = org.amendments.filter(start_time__lte=date_of).count()
-    return JsonResponse(count, safe=False)
+    out = {'organization': org.getOrganizationData(),
+           'count': count}
+    return JsonResponse(out, safe=False)
 
 
 @lockSetter
