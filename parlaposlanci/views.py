@@ -4480,4 +4480,9 @@ def getMismatchWithPG(request, person_id, date_=None):
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
     missmatch = getPersonCardModelNew(MismatchOfPG, int(person_id), date_)
-    return JsonResponse(missmatch.data, safe=False)
+
+    data = {'person': getPersonData(person_id, card_date),
+            'created_at': card.created_at.strftime(API_DATE_FORMAT),
+            'created_for': card.created_for.strftime(API_DATE_FORMAT),
+            'result': missmatch.data}
+    return JsonResponse(data)
