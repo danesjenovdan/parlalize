@@ -4481,7 +4481,7 @@ def getMismatchWithPG(request, person_id, date_=None):
         date_ = ''
     missmatch = getPersonCardModelNew(MismatchOfPG, int(person_id), date_)
 
-    data = {'person': getPersonData(person_id, missmatch.created_for),
+    data = {'person': getPersonData(person_id),
             'created_at': missmatch.created_at.strftime(API_DATE_FORMAT),
             'created_for': missmatch.created_for.strftime(API_DATE_FORMAT),
             'result': missmatch.data}
