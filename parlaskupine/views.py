@@ -4427,7 +4427,6 @@ def getDisunionOrgID(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-  [  
    {  
       "organization":{  
          "acronym":"PS NP",
@@ -4437,7 +4436,6 @@ def getDisunionOrgID(request, pg_id, date_=None):
       },
       "sum":7.095302214241279
    }
-   ]
     """     
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
@@ -4451,7 +4449,11 @@ def getDisunionOrgID(request, pg_id, date_=None):
         suma = sum(map(float, el))/el.count()
     else:
         suma = 0
-    return JsonResponse(suma, safe=False)
+
+    out = {'organization': ids[0].organization.getOrganizationData()
+                           if ids else {},
+           'sum': suma}
+    return JsonResponse(out, safe=False)
 
 
 def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
