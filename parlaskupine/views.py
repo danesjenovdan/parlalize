@@ -4476,9 +4476,11 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
     org = Organization.objects.get(id_parladata=pg_id)
-    count = org.amendments.filter(start_time__lte=date_of).count()
+    card = org.amendments.filter(start_time__lte=date_of)
     out = {'organization': org.getOrganizationData(),
-           'count': count}
+           'created_at': datetime.now().strftime(API_DATE_FORMAT),
+           'created_for': card.latest('created_for').created_for.strftime(API_DATE_FORMAT),
+           'count': card.count()}
     return JsonResponse(out, safe=False)
 
 
