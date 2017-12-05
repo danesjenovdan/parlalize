@@ -3098,6 +3098,10 @@ def getVotesData(request, votes):
 
 def legislationList(request, session_id):
     legislation_type = request.GET.get('type', None)
+    wbs_data = json.loads(getAllStaticData(None).content)['wbs']
+    wbs = {}
+    for wb in wbs_data:
+        wbs[wb['id']] = wb 
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
@@ -3114,7 +3118,8 @@ def legislationList(request, session_id):
                     'type_of_law': law.type_of_law,
                     'id': law.id_parladata,
                     'epa': law.epa,
-                    'mdt': law.mdt,
+                    'mdt': wbs[mdt_fk.id] if mdt_fk else {},
+                    'mdt_text': law.mdt
                     'classification': law.classification,
                     })
 
