@@ -3119,7 +3119,7 @@ def legislationList(request, session_id):
                     'id': law.id_parladata,
                     'epa': law.epa,
                     'mdt': wbs[mdt_fk.id] if mdt_fk else {},
-                    'mdt_text': law.mdt
+                    'mdt_text': law.mdt,
                     'classification': law.classification,
                     })
 
