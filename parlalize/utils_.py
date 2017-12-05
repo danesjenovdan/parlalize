@@ -18,7 +18,7 @@ from parlaskupine.models import (Organization, WorkingBodies,
 from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
                               PresenceOfPG, AbsentMPs, VoteDetailed, Quote, Question)
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
-                                DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL)
+                                DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL, ALL_STATIC_CACHE_AGE)
 from django.contrib.contenttypes.models import ContentType
 import requests
 import json
@@ -440,7 +440,7 @@ def getAllStaticData(request, force_render=False):
         out['wbs'] = [{'id': org.id_parladata,
                        'name': org.name} for org in orgs]
 
-        cache.set('all_statics', out, 60 * 60 * 48)
+        cache.set('all_statics', out, 60 * 60 * ALL_STATIC_CACHE_AGE)
 
     return JsonResponse(out)
 
