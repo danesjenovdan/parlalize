@@ -3115,12 +3115,13 @@ def legislationList(request, session_id):
                     'id': law.id_parladata,
                     'epa': law.epa,
                     'mdt': law.mdt,
+                    'classification': law.classification,
                     })
 
-    return JsonResponse({"results": out,
-                         "session": session.getSessionData(),
-                         "created_for": ses_date,
-                         "created_at": created_at}, safe=False)
+    return JsonResponse({'results': out,
+                         'session': session.getSessionData(),
+                         'created_for': ses_date,
+                         'created_at': created_at}, safe=False)
 
 
 def legislation(request, epa):
@@ -3150,14 +3151,15 @@ def legislation(request, epa):
 
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
-    return JsonResponse({"results": out,
-                         "session": session.getSessionData(),
-                         "tags": tags,
-                         "status": law.status,
-                         "text": law.text,
-                         "note": law.note,
-                         "created_for": ses_date,
-                         "created_at": created_at}, safe=False)
+    return JsonResponse({'results': out,
+                         'session': session.getSessionData(),
+                         'tags': tags,
+                         'status': law.status,
+                         'text': law.text,
+                         'note': law.note,
+                         'classification': law.classification,
+                         'created_for': ses_date,
+                         'created_at': created_at}, safe=False)
 
 def otherVotes(request, session_id):
     out = []
@@ -3186,11 +3188,11 @@ def otherVotes(request, session_id):
 
         ses_date = session.start_time.strftime(API_DATE_FORMAT)
         tags = list(Tag.objects.all().values_list('name', flat=True))
-        return JsonResponse({"results": out,
-                             "session": session.getSessionData(),
-                             "tags": tags,
-                             "created_for": ses_date,
-                             "created_at": created_at}, safe=False)
+        return JsonResponse({'results': out,
+                             'session': session.getSessionData(),
+                             'tags': tags,
+                             'created_for': ses_date,
+                             'created_at': created_at}, safe=False)
 
 
 def getExposedLegislation(request):
