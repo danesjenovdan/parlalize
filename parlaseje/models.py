@@ -4,7 +4,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from behaviors.models import Timestampable, Versionable
-from parlalize.settings import API_OUT_DATE_FORMAT, API_DATE_FORMAT
+from parlalize.settings import (API_OUT_DATE_FORMAT, API_DATE_FORMAT,
+                                LEGISLATION_STATUS, LEGISLATION_RESULT)
 from datetime import datetime
 from tinymce.models import HTMLField
 
@@ -307,6 +308,10 @@ class Vote(Timestampable, models.Model):
                             related_name='votes',
                             help_text=_('Legislation foreign key'))
 
+    classification = models.CharField(blank=True, null=True,
+                                      max_length=255,
+                                      help_text='classification')
+
     def __str__(self):
         return self.session.name + ' | ' + self.motion
 
@@ -481,10 +486,10 @@ class Tag(models.Model):
 
 
 class Legislation(Timestampable, models.Model):
-    session = models.ForeignKey('Session',
-                                blank=True, null=True,
-                                help_text='The legislative session in which the motion was proposed',
-                                related_name='laws')
+    sessions = models.ManyToManyField('Session',
+                                      blank=True, null=True,
+                                      help_text='The legislative session in which the motion was proposed',
+                                      related_name='laws')
 
     text = models.TextField(blank=True, null=True,
                             help_text='The text of the motion')
@@ -497,15 +502,65 @@ class Legislation(Timestampable, models.Model):
                            max_length=255,
                            help_text='Working body')
 
-    result = models.CharField(blank=True, null=True,
+    mdt_fk = models.ForeignKey('parlaskupine.Organization',
+                               related_name='laws',
+                               blank=True, null=True,
                                max_length=255,
-                               help_text='result of law')
+                               help_text='MDT object')
 
+    status = models.CharField(blank=True, null=True,
+                              max_length=255,
+                              help_text='result of law',
+                              default=LEGISLATION_STATUS[0][0],
+                              choices=LEGISLATION_STATUS)
+
+    result = models.CharField(blank=True, null=True,
+                              max_length=255,
+                              help_text='result of law',
+                              choices=LEGISLATION_RESULT)
 
     id_parladata = models.IntegerField(_('parladata id'),
                                        blank=True,
                                        null=True,
                                        help_text=_('id parladata'))
 
+    proposer_text = models.CharField(blank=True, null=True,
+                                     max_length=255,
+                                     help_text='Proposer of law')
+
+    procedure_phase = models.CharField(blank=True, null=True,
+                                       max_length=255,
+                                       help_text='Procedure phase of law')
+
+    procedure = models.CharField(blank=True, null=True,
+                                 max_length=255,
+                                 help_text='Procedure of law')
+
+    type_of_law = models.CharField(blank=True, null=True,
+                                   max_length=255)
+
     note = HTMLField(blank=True,
                      null=True)
+
+    abstractVisible = models.BooleanField(default=False,
+                                          help_text='Is abstract visible')
+
+    date = PopoloDateTimeField(blank=True,
+                               null=True,
+                               help_text='Time of last procudure')
+
+    is_exposed = models.BooleanField(default=False,
+                                     help_text='Is abstract visible')
+
+    icon = models.CharField(blank=True, null=True,
+                            max_length=255)
+
+    procedure_ended = models.BooleanField(default=False,
+                                          help_text='Procedure phase of law')
+
+    classification = models.CharField(blank=True, null=True,
+                                      max_length=255,
+                                      help_text='Classification of law')
+
+    def __str__(self):
+        return ', '.join(self.sessions.all().values_list('name', flat=True)) + ' | ' + self.text

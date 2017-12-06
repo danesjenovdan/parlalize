@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from parlaskupine.views import *
+from parlaskupine.admin import WBAutocomplete
 
 
 urlpatterns = patterns('',
@@ -78,13 +79,16 @@ urlpatterns = patterns('',
 
     url(r'^getIntraDisunionOrg/(?P<org_id>\d+)', getIntraDisunionOrg),
     url(r'^getIntraDisunion/', getIntraDisunion),
-    url(r'^getDisunionOrg/', getDisunionOrg),
     url(r'^getDisunionOrg/(?P<pg_id>\d+)', getDisunionOrgID),
+    url(r'^getDisunionOrg/', getDisunionOrg),
 
     url(r'^getPGsIDs', getPGsIDs),
 
     url(r'^getAmendmentsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getAmendmentsOfPG),
     url(r'^getAmendmentsOfPG/(?P<pg_id>\d+)', getAmendmentsOfPG),
+
+    url(r'^getNumberOfAmendmetsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getNumberOfAmendmetsOfPG),
+    url(r'^getNumberOfAmendmetsOfPG/(?P<pg_id>\d+)', getNumberOfAmendmetsOfPG),
 
     url(r'^getPGMismatch/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getPGMismatch),
     url(r'^getPGMismatch/(?P<pg_id>\d+)/', getPGMismatch),
@@ -103,4 +107,9 @@ urlpatterns = patterns('',
     url(r'^getListOfPGs/', getListOfPGs),
 
     url(r'^getWorkingBodiesLive/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies_live),
+
+
+    # autocomplete urls
+    url(r'^wb-autocomplete/$', WBAutocomplete.as_view(), name='wb-autocomplete'),
+
 )

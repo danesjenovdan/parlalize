@@ -53,5 +53,13 @@ urlpatterns = patterns(
     url(r'^getVotesData/(?P<votes>[\w,]+)$', getVotesData),
 
     url(r'^getLegislationList/(?P<session_id>\d+)$', legislationList),
-    url(r'^getLegislation/(?P<law_id>\d+)', legislation),
+    
+    url(r'^getLegislation/(?P<epa>[A-Z0-9 \-\+]+)', legislation),
+    url(r'^otherVotes/(?P<session_id>\d+)$', otherVotes),
+
+    url(r'^getExposedLegislation/', getExposedLegislation),
+
+    url(r'^getAllLegislation/', getAllLegislation),
+
+    url(r'^allActiveEpas/', getAllLegislationEpas),
 )
