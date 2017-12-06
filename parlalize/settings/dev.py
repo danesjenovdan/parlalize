@@ -60,4 +60,5 @@ PARSER_PASS = "parserpassword"
 
 ALL_STATIC_CACHE_AGE = 48
 
-FORCE_SCRIPT_NAME = '/analize'
+if not DEVELOPMENT:
+    FORCE_SCRIPT_NAME = '/analize'
