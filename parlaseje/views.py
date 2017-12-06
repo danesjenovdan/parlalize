@@ -3101,7 +3101,7 @@ def legislationList(request, session_id):
     wbs_data = json.loads(getAllStaticData(None).content)['wbs']
     wbs = {}
     for wb in wbs_data:
-        wbs[wb['id']] = wb 
+        wbs[str(wb['id'])] = wb 
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
@@ -3118,7 +3118,8 @@ def legislationList(request, session_id):
                     'type_of_law': law.type_of_law,
                     'id': law.id_parladata,
                     'epa': law.epa,
-                    'mdt': wbs[mdt_fk.id] if mdt_fk else {},
+                    'mdt': wbs[str(law.mdt_fk.id_parladata)] if law.mdt_fk else {'name': '',
+                                                                                 'id': None},
                     'mdt_text': law.mdt,
                     'classification': law.classification,
                     })
