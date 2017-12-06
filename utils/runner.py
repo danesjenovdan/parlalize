@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from django.apps import apps
 from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
+from itertools import groupby
 
 from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll, setPercentOFAttendedSession
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass, MinisterStatic
@@ -22,6 +23,7 @@ from utils.recache import updatePagesS, updateLastActivity, recacheActivities, r
 from utils.imports import update, updateDistricts, updateTags, updatePersonStatus
 from utils.votes_outliers import setMotionAnalize, setOutliers
 from utils.votes_pg import set_mismatch_of_pg
+from utils.exports import exportLegislations
 
 from .votes import VotesAnalysis
 
@@ -288,7 +290,7 @@ def fastUpdate(fast=True, date_=None):
     lastVoteTime = Vote.objects.latest('updated_at').updated_at
     lastSpeechTime = Speech.objects.latest('updated_at').updated_at
     lastQustionTime = Question.objects.latest('updated_at').updated_at
-    lastLegislationTime = Legislation.objects.latest('updated_at').updated_at
+    #lastLegislationTime = Legislation.objects.latest('updated_at').updated_at
     if date_:
         dates = [date_ + '_00:00' for i in range(5)]
     else:
@@ -298,6 +300,8 @@ def fastUpdate(fast=True, date_=None):
         dates.append(lastSpeechTime)
         dates.append(lastBallotTime)
         dates.append(Question.objects.latest('updated_at').updated_at)
+        
+        lastLegislationTime=datetime.now()-timedelta(days=10)
         dates.append(lastLegislationTime)
 
     # prepare url
@@ -399,22 +403,68 @@ def fastUpdate(fast=True, date_=None):
                 session.organizations.add(*orgs)
 
     # update Legislation
-    for law in data["laws"]:
-        result = Legislation(session=Session.objects.get(id_parladata=law['session']),
-                             text=law['text'],
-                             epa=law['epa'],
-                             result=law['result'],
-                             mdt=law['mdt'],
-                             id_parladata=law['id'],
-                             #note=law['note']
-                             )      
-        result.save()
+    for epa, laws in groupby(data['laws'], lambda item: item['epa']):
+        last_obj = None
+        sessions = []
+        is_ended = False
+        for law in laws:
+            sessions.append(law['session'])
+            law['date'] = datetime.strptime(law['date'], '%Y-%m-%dT%X')
+            if not is_ended:
+                if law['procedure_ended']:
+                    is_ended = True
+            if last_obj:
+                if law['date'] > last_obj['date']:
+                    last_obj = law
+            else: 
+                last_obj = law
+        result = Legislation.objects.filter(epa=epa)
+
+        # dont update Legislatin procedure_ended back to False
+        if result:
+            result = result[0]
+            if result.procedure_ended:
+                is_ended = True
+            print 'update'
+            result.text = last_obj['text']
+            result.mdt = last_obj['mdt']
+            result.proposer_text = last_obj['proposer_text']
+            result.procedure_phase = last_obj['procedure_phase']
+            result.procedure = last_obj['procedure']
+            result.type_of_law = last_obj['type_of_law']
+            result.id_parladata = last_obj['id']
+            result.date = last_obj['date']
+            result.procedure_ended = is_ended
+            result.classification = last_obj['classification']
+            result.save()
+        else:
+            print 'adding'
+            result = Legislation(text=last_obj['text'],
+                                 epa=last_obj['epa'],
+                                 mdt=last_obj['mdt'],
+                                 proposer_text=last_obj['proposer_text'],
+                                 procedure_phase=last_obj['procedure_phase'],
+                                 procedure=last_obj['procedure'],
+                                 type_of_law=last_obj['type_of_law'],
+                                 id_parladata=last_obj['id'],
+                                 date=last_obj['date'],
+                                 procedure_ended=is_ended,
+                                 classification=['classification'],
+                                 )
+            result.save()
+        sessions = list(set(sessions))
+        sessions = list(Session.objects.filter(id_parladata__in=sessions))
+        result.sessions.add(*sessions)
+        print(epa)
+    if data['laws']:
+        print 'legislation'
+        exportLegislations()
 
     # update speeches
     existingIDs = list(Speech.objects.all().values_list('id_parladata',
                                                         flat=True))
-    sc.api_call("chat.postMessage",
-                channel="#parlalize_notif",
+    sc.api_call('chat.postMessage',
+                channel='#parlalize_notif',
                 text='Start update speeches at: ' + str(datetime.now()))
     for dic in data['speeches']:
         if int(dic['id']) not in existingIDs:

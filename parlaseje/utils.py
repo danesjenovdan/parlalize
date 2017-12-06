@@ -3,7 +3,7 @@ from datetime import datetime
 from django.http import Http404
 from parlaposlanci.models import LastActivity
 from parlaseje.models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, LEGISLATION_STATUS, LEGISLATION_RESULT
 from django.http import JsonResponse
 from parlalize.utils_ import tryHard
 
@@ -97,3 +97,57 @@ def idsOfSession(model):
         return ids
     else:
         return list(set(ids) - set(mod))
+
+
+def set_status_of_laws():
+    legislations = Legislation.objects.all()
+    for legislation in legislations:
+        votes = Vote.objects.filter(epa=legislation.epa)
+        votes = votes.filter(motion__icontains='glasovanje o zakonu v celoti')
+        if votes:
+            if votes.count() > 1:
+                print "FAIL"
+                continue
+            vote = votes[0]
+            legislation.status = LEGISLATION_STATUS[1][0]
+            if vote.result:
+                legislation.result = LEGISLATION_RESULT[1][0]
+            else:
+                legislation.result = LEGISLATION_RESULT[2][0]
+            legislation.save()
+
+
+
+
+def set_status_of_akts():
+    legislations = Legislation.objects.all()
+    for legislation in legislations:
+        votes = Vote.objects.filter(epa=legislation.epa)
+        votes = votes.filter(motion__iregex=r'glasovanje o \w+ v celoti')
+        if votes:
+            if votes.count() > 1:
+                print "FAIL"
+                print votes.values_list("motion", flat=True)
+                continue
+            vote = votes[0]
+            print vote.motion
+            legislation.status = LEGISLATION_STATUS[1][0]
+            if vote.result:
+                legislation.result = LEGISLATION_RESULT[1][0]
+            else:
+                # zakon zavrnjen
+                legislation.result = LEGISLATION_RESULT[2][0]
+            legislation.save()
+
+def set_accepted_laws():
+    legislations = Legislation.objects.filter(procedure_phase__icontains='sprejet')
+    for legislation in legislations:
+        legislation.result = LEGISLATION_RESULT[1][0]
+        legislation.status = LEGISLATION_STATUS[1][0]
+        legislation.save()
+
+
+def get_votes_without_legislation():
+    v_e = set(list(Vote.objects.all().values_list("epa", flat=True)))
+    l_e = list(Legislation.objects.all().values_list("epa", flat=True))
+    print len(list((v_e-set(l_e)))) 

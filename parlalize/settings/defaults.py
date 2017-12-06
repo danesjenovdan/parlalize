@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for parlalize project.
 
@@ -21,13 +22,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'exkqi8xb2vnn4a*fyh@1y)z7*amz0!9p15ce9acqotf@y*wjn&'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEVELOPMENT = False
-DEBUG = DEVELOPMENT
-
 ALLOWED_HOSTS = ['*']
 
 
@@ -37,6 +31,8 @@ INSTALLED_APPS = (
     'taggit',
     'djgeojson',
     'leaflet',
+    'dal',
+    'dal_select2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,6 +47,7 @@ INSTALLED_APPS = (
     'corsheaders',
     'tinymce',
     'utils',
+
 )
 
 MIDDLEWARE_CLASSES = (
@@ -86,32 +83,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'parlalize.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-
-if not DEVELOPMENT:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'HOST': '192.168.110.31',
-            'NAME': 'parlalize',
-            'USER': 'parladaddy',
-            'PASSWORD': 'razvrat',
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'HOST': 'localhost',
-            'NAME': 'parlalize',
-            'USER': 'parladaddy',
-            'PASSWORD': 'razvrat',
-        }
-    }
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -126,13 +97,6 @@ USE_L10N = True
 USE_TZ = False
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
-
-STATIC_URL = '/static/'
-STATIC_ROOT = '/home/parladaddy/parlalize/static/'
-
-
 LAST_ACTIVITY_COUNT = 10
 
 
@@ -144,23 +108,6 @@ VOTE_MAP = {
     "ni": 0,
     "ni_poslanec": 0
 }
-
-if DEVELOPMENT:
-    API_URL = "http://localhost:8000/v1"
-    ISCI_URL = "http://localhost:8888"
-    BASE_URL = 'http://localhost:8080/v1'
-    DASHBOARD_URL = 'http://localhost:8881'
-
-else:
-    API_URL = "https://data.parlameter.si/v1"
-    ISCI_URL = "https://isci.parlameter.si"
-    BASE_URL = 'https://analize.parlameter.si/v1'
-    DASHBOARD_URL = 'https://dashboard.parlameter.si'
-
-GLEJ_URL = 'https://glej.parlameter.si'
-PAGE_URL = 'https://parlameter.si'
-    
-
 
 LOGGING = {
     'version': 1,
@@ -183,27 +130,30 @@ LOGGING = {
 
 
 API_DATE_FORMAT = '%d.%m.%Y'
+API_OUT_DATE_FORMAT = '%-d. %-m. %Y'
 
 # CORS config
 CORS_ORIGIN_ALLOW_ALL = True
-API_OUT_DATE_FORMAT = '%-d. %-m. %Y'
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
+LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
+
+LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
+
+VOTE_CLASSIFICATIONS = { 
+    '1': 'dnevni red',
+    '2': 'glasovanje o zakonu v celoti', 
+    '3': 'amandma', 
+    '4': 'interpelacija', 
+    '5': 'evidenčni sklep', 
+    '6': 'predlog sklepa', 
+    '7': 'zakon o ratifikaciji', 
+    '8': 'imenovanje',
+    '9': 'predlog za razpis', 
+    '10': 'priporočilo', 
+    '11': 'poročilo', 
+    '12': 'proceduralni predlog',
+    '13': 'odlok o načrtu ravnanja s stvarnim premoženjem',
+    '14': 'drugo'
 }
 
-slack_token = 'xoxp-2166854968-16070161283-198810942659-c5e5888db47376f6ea7149b7dec701f7'
-
-
-SETTER_KEY = "vednoboljsi112358"
-
-RAVEN_CONFIG = {
-    # removed for dev MUKI SETTINGS
-     'dsn': 'http://4e425a27eba144b8938f588f3a60662b:cf6ef8ba155b4d8da53ca4dea6cf074e@sentry.ilol.si/41' if not DEVELOPMENT else '',
-    # If you are using git, you can also automatically configure the
-    # release based on the git info.
-    #'release': raven.fetch_git_sha(os.path.dirname(__file__)),
-}
+TINYMCE_INCLUDE_JQUERY = False
