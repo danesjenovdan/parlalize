@@ -7,17 +7,19 @@ from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 from parlalize.utils_ import tryHard, getDataFromPagerApi
 
 
-def showCompass():
-    """
-    Plot compass data
-    """
-    fig, ax = plt.subplots()
-    ax.scatter(ideology, zeros)
-    for i, txt in enumerate(people):
-        ax.annotate(str(txt), (ideology[i], zeros[i]))
-    plt.show()
+if __name__ == "__main__":
+    def showCompass():
+        """
+        Plot compass data
+        """
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        ax.scatter(ideology, zeros)
+        for i, txt in enumerate(people):
+            ax.annotate(str(txt), (ideology[i], zeros[i]))
+        plt.show()
 
-    return false
+        return false
 
 
 def assignValueToOption(option):
