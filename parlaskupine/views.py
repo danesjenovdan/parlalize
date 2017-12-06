@@ -3425,7 +3425,7 @@ def getListOfPGs(request, date_=None, force_render=False):
                           'data_path': ('results', 'score'),
                           'out_path': ('results', 'number_of_questions')},
                          {'method': getNumberOfAmendmetsOfPG,
-                          'data_path': (),
+                          'data_path': ('count'),
                           'out_path': ('results', 'number_of_amendments')},
                          {'method': getStyleScoresPG,
                           'data_path': ('results', 'privzdignjeno'),
@@ -4427,7 +4427,6 @@ def getDisunionOrgID(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-  [  
    {  
       "organization":{  
          "acronym":"PS NP",
@@ -4437,7 +4436,6 @@ def getDisunionOrgID(request, pg_id, date_=None):
       },
       "sum":7.095302214241279
    }
-   ]
     """     
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
@@ -4451,7 +4449,11 @@ def getDisunionOrgID(request, pg_id, date_=None):
         suma = sum(map(float, el))/el.count()
     else:
         suma = 0
-    return JsonResponse(suma, safe=False)
+
+    out = {'organization': ids[0].organization.getOrganizationData()
+                           if ids else {},
+           'sum': suma}
+    return JsonResponse(out, safe=False)
 
 
 def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
@@ -4474,8 +4476,12 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
     org = Organization.objects.get(id_parladata=pg_id)
-    count = org.amendments.filter(start_time__lte=date_of).count()
-    return JsonResponse(count, safe=False)
+    card = org.amendments.filter(start_time__lte=date_of)
+    out = {'organization': org.getOrganizationData(),
+           'created_at': datetime.now().strftime(API_DATE_FORMAT),
+           'created_for': card.latest('created_for').created_for.strftime(API_DATE_FORMAT),
+           'count': card.count()}
+    return JsonResponse(out, safe=False)
 
 
 @lockSetter

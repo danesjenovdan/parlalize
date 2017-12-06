@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from django.test.client import RequestFactory
 from requests.auth import HTTPBasicAuth
 import requests
+import re
+import feedparser
 # parlalize initial runner methods #
 
 DZ = 95
@@ -362,22 +364,83 @@ def update():
 
 
 def updateLegislation(request):
-
+    allLaws = []
+    epas = []
     laws = requests.get(API_URL + '/law/',
                        auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
-    count = 1
-    while laws['next'] != 'null':
+    count = 144
+    while laws['next'] != None:
+        
         laws = requests.get(API_URL + '/law/?page=' + str(count),
                             auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
-
         for law in laws['results']:
-            result = Legislation(session=Session.objects.get(id_parladata=int(law['session'])),
-                                 text=law['text'],
-                                 epa=law['epa'],
-                                 result=law['result'],
-                                 mdt=law['mdt'],
-                                 id_parladata=law['id'],
-                                 note=law['note']
-                                 )      
-            result.save()
+            epas.append(str(law['epa']))
         count = count + 1
+    for epa in set(epas):
+        laws = requests.get(API_URL + '/law?epa=' + str(epa),
+                        auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
+        if int(laws['count']) > 1:
+            for law in laws['results']:
+                sorted_date = sorted(laws['results'], key=lambda x: datetime.strptime(x['date'].split('T')[0], '%Y-%m-%d'))
+                print sorted_date[0]
+                result = Legislation(#session=Session.objects.get(id_parladata=int(law['session'])),
+                                       text=sorted_date['text'],
+                                       epa=sorted_date['epa'],
+                                       mdt=sorted_date['mdt'],
+                                       proposer_text=sorted_date['proposer_text'],
+                                       procedure_phase=sorted_date['procedure_phase'],
+                                       procedure=sorted_date['procedure'],
+                                       type_of_law=sorted_date['type_of_law'],
+                                       mdt_fk=sorted_date['mdt_fk']
+                                       )      
+                result.save()
+        else:
+            result = Legislation(#session=Session.objects.get(id_parladata=int(law['session'])),
+                                       text=laws['results']['text'],
+                                       epa=laws['results']['epa'],
+                                       mdt=laws['results']['mdt'],
+                                       proposer_text=laws['results']['proposer_text'],
+                                       procedure_phase=laws['results']['procedure_phase'],
+                                       procedure=laws['results']['procedure'],
+                                       type_of_law=laws['results']['type_of_law'],
+                                       mdt_fk=laws['results']['mdt_fk']
+                                       )      
+            result.save()
+
+
+def importDraftLegislationsFromFeed(): 
+ 
+    def split_epa_and_name(thing): 
+        epa_regex = re.compile(r'\d+-VII') 
+        current_epa = epa_regex.findall(thing)[0] 
+        current_name = thing.split(current_epa)[1].strip() 
+        return (current_epa, current_name)
+
+    def check_and_save_legislation(legislations, classification):
+        stats = {'saved': 0,
+                 'skiped': 0}
+        for legislation in legislations:
+            saved = Legislation.objects.filter(epa=legislation[0])
+            if not saved:
+                Legislation(epa=legislation[0], text=legislation[1], classification=classification).save()
+                stats['saved'] += 1
+            else:
+                stats['skiped'] += 1
+        return stats
+ 
+    url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak' 
+    url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt' 
+    epa_regex = re.compile(r'\d+-VII \w.+') 
+
+    # najprej epe od zakonov 
+    feed_zakoni = feedparser.parse(url_zakoni) 
+    epas_and_names_zakoni = list(set([epa_regex.findall(post.title)[0] for post in feed_zakoni.entries])) 
+    epas_and_names_tuple_zakoni = [split_epa_and_name(thing) for thing in epas_and_names_zakoni] 
+
+    # potem epe od aktov 
+    feed_akti = feedparser.parse(url_akti) 
+    epas_and_names_akti = list(set([epa_regex.findall(post.title)[0] for post in feed_akti.entries])) 
+    epas_and_names_tuple_akti = [split_epa_and_name(thing) for thing in epas_and_names_akti] 
+
+    print(check_and_save_legislation(epas_and_names_tuple_zakoni, 'zakon'), 'zakoni')
+    print(check_and_save_legislation(epas_and_names_tuple_akti, 'akt'), 'akti')
