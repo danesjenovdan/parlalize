@@ -1,5 +1,5 @@
 #! /bin/bash    
-cd /home/***REMOVED***/parlalize
+cd /home/parladaddy/parlalize
 source venv/bin/activate
 
 # virtualenv is now active, which means your PATH has been modified.

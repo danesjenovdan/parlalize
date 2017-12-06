@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_CLASSIFICATIONS
 from parlaskupine.models import Organization
 
 
@@ -477,6 +477,7 @@ def setMotionOfSession(request, session_id):
                         result=result,
                         id_parladata=mot['vote_id'],
                         document_url=mot['doc_url'],
+                        classification=mot['classification'],
                         epa=mot['epa'],
                         law=law
                         )
@@ -495,6 +496,7 @@ def setMotionOfSession(request, session_id):
                                     result=result,
                                     id_parladata=mot['vote_id'],
                                     document_url=mot['doc_url'],
+                                    classification=mot['classification'],
                                     epa=mot['epa'],
                                     law=law
                                     )
@@ -736,7 +738,8 @@ def getMotionOfSession(request, session_id, date=False):
                                         'result': card.result,
                                         'is_outlier': card.is_outlier,
                                         'tags': card.tags,
-                                        'has_outliers': card.has_outlier_voters
+                                        'has_outliers': card.has_outlier_voters,
+                                        'classification': card.classification,
                                         }
                             })
                 dates.append(card.created_at)
@@ -748,6 +751,7 @@ def getMotionOfSession(request, session_id, date=False):
         return JsonResponse({"results": out,
                              "session": session.getSessionData(),
                              "tags": tags,
+                             "classifications": VOTE_CLASSIFICATIONS,
                              "created_for": ses_date,
                              "created_at": created_at}, safe=False)
     else:
@@ -3092,34 +3096,85 @@ def getVotesData(request, votes):
     return JsonResponse(out, safe=False)
 
 
-def legislationList(requests, session_id):
+def legislationList(request, session_id):
+    legislation_type = request.GET.get('type', None)
+    wbs_data = json.loads(getAllStaticData(None).content)['wbs']
+    wbs = {}
+    for wb in wbs_data:
+        wbs[str(wb['id'])] = wb 
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
-    laws = Legislation.objects.filter(session__id_parladata=session_id)
+    laws = Legislation.objects.filter(sessions__id_parladata=session_id)
+    if legislation_type == 'zakon':
+        laws = laws.filter(classification='zakon')
+    elif legislation_type == 'akt':
+        laws = laws.exclude(classification='zakon')
     created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
         out.append({'text': law.text,
+                    'status': law.status,
                     'result': law.result,
+                    'type_of_law': law.type_of_law,
                     'id': law.id_parladata,
-                    'mdt': law.mdt,
+                    'epa': law.epa,
+                    'mdt': wbs[str(law.mdt_fk.id_parladata)] if law.mdt_fk else {'name': '',
+                                                                                 'id': None},
+                    'mdt_text': law.mdt,
+                    'classification': law.classification,
                     })
 
-    return JsonResponse({"results": out,
-                         "session": session.getSessionData(),
-                         "created_for": ses_date,
-                         "created_at": created_at}, safe=False)
+    return JsonResponse({'results': out,
+                         'session': session.getSessionData(),
+                         'created_for': ses_date,
+                         'created_at': created_at}, safe=False)
 
 
-def legislation(requests, law_id):
+def legislation(request, epa):
     out  = []
     created_at = None
-    law = Legislation.objects.get(id_parladata=law_id)
-    session = law.session
+    law = Legislation.objects.get(epa=epa)
+    session = law.sessions.all().latest('start_time')
     votes = Vote.objects.filter(epa=law.epa)
-    if law.votes.all().order_by('start_time'):
-        dates = []
-        for vote in votes:
+    dates = [law.date]
+    for vote in votes:
+        out.append({'votes': {'motion_id': vote.id_parladata,
+                              'text': vote.motion,
+                              'votes_for': vote.votes_for,
+                              'against': vote.against,
+                              'abstain': vote.abstain,
+                              'not_present': vote.not_present,
+                              'result': vote.result,
+                              'is_outlier': vote.is_outlier,
+                              'tags': vote.tags,
+                              'has_outliers': vote.has_outlier_voters,
+                              'documents': vote.document_url
+                               }                           
+                    
+                    })
+        dates.append(vote.created_at)
+    created_at = max(dates).strftime(API_DATE_FORMAT)
+
+    ses_date = session.start_time.strftime(API_DATE_FORMAT)
+    tags = list(Tag.objects.all().values_list('name', flat=True))
+    return JsonResponse({'results': out,
+                         'session': session.getSessionData(),
+                         'tags': tags,
+                         'status': law.status,
+                         'text': law.text,
+                         'note': law.note,
+                         'classification': law.classification,
+                         'created_for': ses_date,
+                         'created_at': created_at}, safe=False)
+
+def otherVotes(request, session_id):
+    out = []
+    dates = []
+    session = Session.objects.get(id_parladata=int(session_id))
+    dates = [session.start_time]
+    allVotes = Vote.objects.filter(session__id_parladata = session_id)
+    for vote in allVotes:
+        if vote.epa == None:
             out.append({'votes': {'motion_id': vote.id_parladata,
                                   'text': vote.motion,
                                   'votes_for': vote.votes_for,
@@ -3139,14 +3194,47 @@ def legislation(requests, law_id):
 
         ses_date = session.start_time.strftime(API_DATE_FORMAT)
         tags = list(Tag.objects.all().values_list('name', flat=True))
-        return JsonResponse({"results": out,
-                             "session": session.getSessionData(),
-                             "tags": tags,
-                             "result": law.result,
-                             "text": law.text,
-                             "note": law.note,
-                             "created_for": ses_date,
-                             "created_at": created_at}, safe=False)
+        return JsonResponse({'results': out,
+                             'session': session.getSessionData(),
+                             'tags': tags,
+                             'created_for': ses_date,
+                             'created_at': created_at}, safe=False)
 
-    else:
-        return JsonResponse({'result': 'No session'})
+
+def getExposedLegislation(request):
+    legislations = Legislation.objects.filter(is_exposed=True)
+    accepted = legislations.filter(result='sprejet').order_by('-updated_at')[:3]
+    under_consideration = legislations.filter(result=None).order_by('-updated_at')[:3]
+    return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
+                         'created_at': datetime.now().strftime(API_DATE_FORMAT),
+                         'accepted': [{'epa': legislation.epa,
+                                       'icon': legislation.icon,
+                                       'text': legislation.text,
+                                       'date': legislation.date.strftime(API_DATE_FORMAT),
+                                      }for legislation in accepted],
+                         'under_consideration': [{'epa': legislation.epa,
+                                                  'icon': legislation.icon,
+                                                  'text': legislation.text,
+                                                  'date': legislation.date.strftime(API_DATE_FORMAT),
+                                                 }for legislation in under_consideration],
+                        })
+
+
+def getAllLegislation(request):
+    legislations = Legislation.objects.all().order_by('date')
+    return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
+                         'created_at': datetime.now().strftime(API_DATE_FORMAT),
+                         'results': [{'epa': legislation.epa,
+                                      'text': legislation.text,
+                                      'date': legislation.date.strftime(API_DATE_FORMAT),
+                                      'mdt': legislation.mdt,
+                                      'classification': legislation.classification,
+                                      'result': legislation.result,
+                                      'type_of_law': legislation.type_of_law
+                                     }for legislation in legislations]})
+
+
+def getAllLegislationEpas(request):
+    legislations = Legislation.objects.filter(procedure_ended=False)
+    epas = legislations.values_list('epa', flat=True)
+    return JsonResponse(list(epas), safe=False)

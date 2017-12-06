@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for parlalize project.
 
@@ -21,14 +22,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEVELOPMENT = False
-
-DEBUG = DEVELOPMENT
-
 ALLOWED_HOSTS = ['*']
 
 
@@ -38,6 +31,8 @@ INSTALLED_APPS = (
     'taggit',
     'djgeojson',
     'leaflet',
+    'dal',
+    'dal_select2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,6 +45,9 @@ INSTALLED_APPS = (
     'django_extensions',
     'raven.contrib.django.raven_compat',
     'corsheaders',
+    'tinymce',
+    'utils',
+
 )
 
 MIDDLEWARE_CLASSES = (
@@ -85,32 +83,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'parlalize.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-
-if not DEVELOPMENT:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'HOST': '',
-            'NAME': '',
-            'USER': '',
-            'PASSWORD': '',
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'HOST': '',
-            'NAME': '',
-            'USER': '',
-            'PASSWORD': '',
-        }
-    }
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -125,13 +97,6 @@ USE_L10N = True
 USE_TZ = False
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
-
-STATIC_URL = '/static/'
-STATIC_ROOT = ''
-
-
 LAST_ACTIVITY_COUNT = 10
 
 
@@ -143,19 +108,6 @@ VOTE_MAP = {
     "ni": 0,
     "ni_poslanec": 0
 }
-
-if DEVELOPMENT:
-    API_URL = "http://localhost:8000/v1"
-    ISCI_URL = "http://localhost:8888"
-
-else:
-    API_URL = ""
-    ISCI_URL = ""
-
-BASE_URL = ''
-GLEJ_URL = ''
-PAGE_URL = ''
-
 
 LOGGING = {
     'version': 1,
@@ -178,24 +130,30 @@ LOGGING = {
 
 
 API_DATE_FORMAT = '%d.%m.%Y'
+API_OUT_DATE_FORMAT = '%-d. %-m. %Y'
 
 # CORS config
 CORS_ORIGIN_ALLOW_ALL = True
 
-API_OUT_DATE_FORMAT = '%-d. %-m. %Y'
+LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '',
-    }
+LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
+
+VOTE_CLASSIFICATIONS = { 
+    '1': 'dnevni red',
+    '2': 'glasovanje o zakonu v celoti', 
+    '3': 'amandma', 
+    '4': 'interpelacija', 
+    '5': 'evidenčni sklep', 
+    '6': 'predlog sklepa', 
+    '7': 'zakon o ratifikaciji', 
+    '8': 'imenovanje',
+    '9': 'predlog za razpis', 
+    '10': 'priporočilo', 
+    '11': 'poročilo', 
+    '12': 'proceduralni predlog',
+    '13': 'odlok o načrtu ravnanja s stvarnim premoženjem',
+    '14': 'drugo'
 }
 
-slack_token = ''
-
-# Key for parlalize setters
-SETTER_KEY = ''
-
-RAVEN_CONFIG = {
-      'dsn': 'key' if not DEVELOPMENT else '',
-}
+TINYMCE_INCLUDE_JQUERY = False
