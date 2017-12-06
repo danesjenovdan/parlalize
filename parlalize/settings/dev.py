@@ -23,8 +23,13 @@ DATABASES = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# static files for development
+# STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# static files for production
+STATIC_URL ='/parlastatic/parlalize/'
+STATIC_ROOT = '/home/parlauser/parlastatic/parlalize/'
 
 API_URL = "http://localhost:8000/v1"
 ISCI_URL = "http://localhost:8888"
@@ -54,3 +59,5 @@ PARSER_UN = "parseruser"
 PARSER_PASS = "parserpassword"
 
 ALL_STATIC_CACHE_AGE = 48
+
+FORCE_SCRIPT_NAME = '/analize'
