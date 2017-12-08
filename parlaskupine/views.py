@@ -20,7 +20,7 @@ import numpy as np
 from utils.speech import WordAnalysis
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
                               getAllStaticData, setCardData, getPersonCardModelNew,
-                              getPGCardModelNew, getPersonData, saveOrAbortNew)
+                              getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY)
 from parlaskupine.models import *
@@ -32,7 +32,7 @@ from kvalifikatorji.scripts import (countWords, getCountListPG, getScores,
 
 
 @lockSetter
-def setBasicInfOfPG(request, pg_id, date_):
+def setBasicInfOfPG(request, pg_id, date_=None):
     """Set method for basic information for PGs.
     """
     if date_:
@@ -41,7 +41,7 @@ def setBasicInfOfPG(request, pg_id, date_):
         data = tryHard(url).json()
     else:
         date_of = datetime.now().date()
-        url = API_URL+'/getBasicInfOfPG/'+str(pg_id)+'/'+date_of
+        url = API_URL+'/getBasicInfOfPG/' + str(pg_id) + '/'
         data = tryHard(url).json()
 
     headOfPG = 0
