@@ -3226,7 +3226,7 @@ def getAllLegislation(request):
                          'created_at': datetime.now().strftime(API_DATE_FORMAT),
                          'results': [{'epa': legislation.epa,
                                       'text': legislation.text,
-                                      'date': legislation.date.strftime(API_DATE_FORMAT),
+                                      'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
                                       'mdt': legislation.mdt,
                                       'classification': legislation.classification,
                                       'result': legislation.result,
