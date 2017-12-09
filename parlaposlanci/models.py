@@ -775,3 +775,16 @@ class MismatchOfPG(Timestampable, models.Model):
     data = models.FloatField(_('Percentage of the same vote as his parlimentary group'),
                              blank=True, null=True,
                              help_text=_('Percentage of the same vote as his parlimentary group'))
+
+    average = models.FloatField(blank=True,
+                                null=True,
+                                help_text=_('Average score'))
+
+    maximum = models.FloatField(blank=True,
+                                null=True,
+                                help_text=_('Maximum score'))
+
+    maxMP = models.ForeignKey('Person',
+                              blank=True, null=True,
+                              related_name='mismatches',
+                              help_text=_('Person who has max mismatch of PG'))
