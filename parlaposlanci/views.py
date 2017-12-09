@@ -4486,5 +4486,13 @@ def getMismatchWithPG(request, person_id, date_=None):
     data = {'person': getPersonData(person_id),
             'created_at': missmatch.created_at.strftime(API_DATE_FORMAT),
             'created_for': missmatch.created_for.strftime(API_DATE_FORMAT),
-            'result': missmatch.data}
+            'result': {
+                'score': missmatch.data,
+                'max': {
+                    'mps': [getPersonData(mismatch.maxMP.id_parladata, date_)],
+                    'score': mismatch.max
+                    },
+                'average': mismatch.average
+                }
+            }
     return JsonResponse(data)

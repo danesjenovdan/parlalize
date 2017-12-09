@@ -98,6 +98,7 @@ def set_mismatch_of_pg():
     final['percent'] = final.apply(lambda x: float(x['equal_vote'])/x['voter_unit']*100.0, axis=1)
     print 'saveing'
     print final.index.values
+    data = []
     for member, row in final.iterrows():
         print member
         value = 100 - row['percent']
@@ -106,7 +107,18 @@ def set_mismatch_of_pg():
         party_classification = party.classification
         if party_classification != 'poslanska skupina':
             value = None
+        data.append({'person': person
+                     'value': value})
+    maxMismatch = max(data, key=lambda x:x['value'] if x['value'] else 0)
+
+    values = [i['value'] for i in data if i['value']]
+    avg = float(sum(values))/len(values)
+
+    for d in data:
         saveOrAbortNew(model=MismatchOfPG,
-                       person=person,
+                       person=d['person'],
                        created_for=datetime.now(),
-                       data=value)
+                       average=avg,
+                       maximum=maxMismatch['values'],
+                       maxMP=maxMismatch['person'],
+                       data=d['value'])

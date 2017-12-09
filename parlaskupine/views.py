@@ -24,6 +24,7 @@ from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY)
 from parlaskupine.models import *
+from parlaskupine.utils_ import getDisunionInOrgHelper, getAmendmentsCount
 from parlaseje.models import Activity, Session, Vote, Speech, Question
 from parlaposlanci.models import Person, MismatchOfPG
 from parlaposlanci.views import getMPsList
@@ -4442,17 +4443,33 @@ def getDisunionOrgID(request, pg_id, date_=None):
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    ids = IntraDisunion.objects.filter(organization__id_parladata=pg_id,
-                                       vote__start_time__lte=date_of)
-    el = ids.values_list('maximum', flat=True)
-    if len(el) != 0:
-        suma = sum(map(float, el))/el.count()
-    else:
-        suma = 0
 
-    out = {'organization': ids[0].organization.getOrganizationData()
-                           if ids else {},
-           'sum': suma}
+    suma, ids = getDisunionInOrgHelper(pg_id, date_of) 
+    org_data = ids[0].organization.getOrganizationData() if ids else {}
+    orgs = tryHard('https://data.parlameter.si/v1/getAllPGs/').json().keys()
+
+    data = []
+    for org in orgs:
+        val, dis = getDisunionInOrgHelper(org, date_of)
+        data.append({'value': val,
+                     'org_obj': dis[0].organization,
+                     'org_id': org})
+
+    maxDisunion = max(data, key=lambda x:x['value'] if x['value'] else 0)
+
+    values = [i['value'] for i in data if i['value']]
+    avg = float(sum(values))/len(values)
+
+    out = {'organization': org_data,
+           'result': {
+               'score': suma,
+               'max': {
+                   'pgs': [maxDisunion['org_obj'].getOrganizationData() if maxDisunion['org_obj'] else {}],
+                   'score': maxDisunion['value']
+                   },
+               'average': avg
+               }
+            }
     return JsonResponse(out, safe=False)
 
 
@@ -4470,17 +4487,43 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
     * @apiExample {curl} Example with date:
         curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfPG/1/12.12.2015    
     """
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
-    else:
-        date_of = datetime.now().date() + timedelta(days=1)
-        date_ = ''
-    org = Organization.objects.get(id_parladata=pg_id)
-    card = org.amendments.filter(start_time__lte=date_of)
-    out = {'organization': org.getOrganizationData(),
-           'created_at': datetime.now().strftime(API_DATE_FORMAT),
-           'created_for': card.latest('created_for').created_for.strftime(API_DATE_FORMAT),
-           'count': card.count()}
+if date_:
+    date_of = datetime.strptime(date_, API_DATE_FORMAT)
+else:
+    date_of = datetime.now().date() + timedelta(days=1)
+    date_ = ''
+orgs = tryHard('https://data.parlameter.si/v1/getAllPGs/').json().keys()
+org = count = last_card_date = None
+data = []
+for org_id in orgs:            
+    temp_org, temp_count, last_card = getAmendmentsCount(org_id, date_of)
+    data.append({'value': temp_count,
+                 'org_obj': temp_org,
+                 'org_id': org_id})
+    print org_id, pg_id, type(org_id), type(pg_id)
+    if org_id == str(pg_id):
+        print("FOUND")
+        org = temp_org
+        count = temp_count
+        last_card_date = last_card
+
+maxAmendmets = max(data, key=lambda x:x['value'] if x['value'] else 0)
+
+values = [i['value'] for i in data if i['value']]
+avg = float(sum(values))/len(values)
+
+out = {'organization': org.getOrganizationData(),
+       'created_at': datetime.now().strftime(API_DATE_FORMAT),
+       'created_for': last_card_date.strftime(API_DATE_FORMAT),
+       'result': {
+           'score': count,
+           'max': {
+               'pgs': [maxAmendmets['org_obj'].getOrganizationData() if maxAmendmets['org_obj'] else {}],
+               'score': maxAmendmets['value']
+               },
+           'average': avg
+           }
+        }
     return JsonResponse(out, safe=False)
 
 
