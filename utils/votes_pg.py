@@ -107,7 +107,7 @@ def set_mismatch_of_pg():
         party_classification = party.classification
         if party_classification != 'poslanska skupina':
             value = None
-        data.append({'person': person
+        data.append({'person': person,
                      'value': value})
     maxMismatch = max(data, key=lambda x:x['value'] if x['value'] else 0)
 
