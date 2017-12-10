@@ -3222,12 +3222,18 @@ def getExposedLegislation(request):
 
 def getAllLegislation(request):
     legislations = Legislation.objects.all().order_by('date')
+    wbs_data = json.loads(getAllStaticData(None).content)['wbs']
+    wbs = {}
+    for wb in wbs_data:
+        wbs[str(wb['id'])] = wb
     return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': datetime.now().strftime(API_DATE_FORMAT),
                          'results': [{'epa': legislation.epa,
                                       'text': legislation.text,
                                       'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
-                                      'mdt': legislation.mdt,
+                                      'mdt_text': legislation.mdt,
+                                      'mdt': wbs[str(law.mdt_fk.id_parladata)] if law.mdt_fk else {'name': '',
+                                                                                                   'id': None},
                                       'classification': legislation.classification,
                                       'result': legislation.result,
                                       'type_of_law': legislation.type_of_law
