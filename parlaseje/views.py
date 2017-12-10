@@ -3232,8 +3232,8 @@ def getAllLegislation(request):
                                       'text': legislation.text,
                                       'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
                                       'mdt_text': legislation.mdt,
-                                      'mdt': wbs[str(law.mdt_fk.id_parladata)] if law.mdt_fk else {'name': '',
-                                                                                                   'id': None},
+                                      'mdt': wbs[str(legislation.mdt_fk.id_parladata)] if legislation.mdt_fk else {'name': '',
+                                                                                                                   'id': None},
                                       'classification': legislation.classification,
                                       'result': legislation.result,
                                       'type_of_law': legislation.type_of_law
