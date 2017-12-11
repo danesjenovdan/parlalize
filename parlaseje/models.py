@@ -565,4 +565,4 @@ class Legislation(Timestampable, models.Model):
     def __str__(self):
         sessions = self.sessions.all().values_list('name', flat=True)
 
-        return ', '.join(sessions if sessions else '') + ' | ' + self.text
+        return ', '.join(sessions if sessions else '') + ' | ' + self.text if self.text else self.epa
