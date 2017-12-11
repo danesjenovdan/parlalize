@@ -3417,7 +3417,7 @@ def getListOfPGs(request, date_=None, force_render=False):
                           'data_path': ('votes', 'organization_value'),
                           'out_path': ('results', 'presence_votes')},
                          {'method': getDisunionOrgID,
-                          'data_path': ('result' 'score'),
+                          'data_path': ('result', 'score'),
                           'out_path': ('results', 'intra_disunion')},
                          {'method': getVocabularySize,
                           'data_path': ('results', 'score'),
