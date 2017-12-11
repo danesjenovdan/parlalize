@@ -3173,6 +3173,7 @@ def legislation(request, epa):
                          'status': law.status,
                          'text': law.text,
                          'note': law.note,
+                         'epa': law.epa,
                          'classification': law.classification,
                          'created_for': ses_date,
                          'created_at': created_at}, safe=False)
