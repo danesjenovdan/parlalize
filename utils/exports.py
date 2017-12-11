@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from parlaseje.models import Legislation
 
 from django.conf import settings
@@ -15,7 +16,8 @@ def exportLegislations():
         i += 1
         sessions = list(map(str, list(legislation.sessions.all().values_list('id_parladata', flat=True))))
         note = legislation.note
-        note = strip_tags(note).replace("&nbsp;", "").replace("\r", "").replace("\n", "")
+        if note:
+            note = strip_tags(note).replace("&nbsp;", "").replace("\r", "").replace("\n", "").replace("&scaron;", "š")
         output.append({
             'id': legislation.epa,
             'sessions_i': sessions,
