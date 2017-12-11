@@ -3144,7 +3144,19 @@ def legislation(request, epa):
     out  = []
     created_at = None
     law = Legislation.objects.get(epa=epa)
-    session = law.sessions.all().latest('start_time')
+    sessions = law.sessions.all()
+    if sessions:
+        session = sessions.latest('start_time')
+        start_time = session.start_time
+        session_data = session.getSessionData()
+    else:
+        start_time = datetime.now()
+        session_data = {'name': '',
+                        'date': '',
+                        'date_ts': '',
+                        'id': '',
+                        'orgs': '',
+                        'in_review': ''}
     votes = Vote.objects.filter(epa=law.epa)
     dates = [law.date]
     for vote in votes:
@@ -3165,10 +3177,10 @@ def legislation(request, epa):
         dates.append(vote.created_at)
     created_at = max(dates).strftime(API_DATE_FORMAT)
 
-    ses_date = session.start_time.strftime(API_DATE_FORMAT)
+    ses_date = start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
     return JsonResponse({'results': out,
-                         'session': session.getSessionData(),
+                         'session': session_data,
                          'tags': tags,
                          'status': law.status,
                          'text': law.text,
