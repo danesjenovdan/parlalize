@@ -1352,6 +1352,7 @@ def getMotionAnalize(request, motion_id):
            'created_for': vote.created_for.strftime(API_DATE_FORMAT),
            'created_at': model.created_at.strftime(API_DATE_FORMAT),
            'name': vote.motion,
+           'epa': vote.epa if vote.epa else None,
            'result': {'accepted': vote.result,
                       'value': max_vote_percent_opt,
                       'max_opt': max_vote_opt,
