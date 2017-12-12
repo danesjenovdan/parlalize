@@ -3182,6 +3182,7 @@ def legislation(request, epa):
                          'tags': tags,
                          'status': law.status,
                          'text': law.text,
+                         'result': law.result,,
                          'abstract': law.note,
                          'abstractVisible': law.abstractVisible,
                          'epa': law.epa,
