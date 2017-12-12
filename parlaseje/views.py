@@ -3177,7 +3177,7 @@ def legislation(request, epa):
 
     ses_date = start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
-    return JsonResponse({'results': out,
+    return JsonResponse({'votes': out,
                          'session': session_data,
                          'tags': tags,
                          'status': law.status,
