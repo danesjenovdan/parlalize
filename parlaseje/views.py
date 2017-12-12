@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
+from parlasseje.utils import hasLegislationLink
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_CLASSIFICATIONS
 from parlaskupine.models import Organization
 
@@ -3259,7 +3260,8 @@ def getAllLegislation(request):
                                                                                                                    'id': None},
                                       'classification': legislation.classification,
                                       'result': legislation.result,
-                                      'type_of_law': legislation.type_of_law
+                                      'type_of_law': legislation.type_of_law,
+                                      'has_link': hasLegislationLink(legislation),
                                      }for legislation in legislations]})
 
 

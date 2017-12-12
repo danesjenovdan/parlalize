@@ -151,3 +151,10 @@ def get_votes_without_legislation():
     v_e = set(list(Vote.objects.all().values_list("epa", flat=True)))
     l_e = list(Legislation.objects.all().values_list("epa", flat=True))
     print len(list((v_e-set(l_e)))) 
+
+
+def hasLegislationLink(legislation):
+    if legislation.sessions.objects.all():
+        return True
+    else:
+        return False
