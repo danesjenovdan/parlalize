@@ -3262,6 +3262,7 @@ def getAllLegislation(request):
                                       'result': legislation.result,
                                       'type_of_law': legislation.type_of_law,
                                       'has_link': hasLegislationLink(legislation),
+                                      'abstractVisible': legislation.abstractVisible,
                                      }for legislation in legislations]})
 
 
