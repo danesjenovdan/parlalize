@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from parlaseje.models import Legislation
 
 from django.conf import settings
+from django.utils.html import strip_tags
 
 from datetime import datetime
 
@@ -13,12 +15,15 @@ def exportLegislations():
     for legislation in Legislation.objects.all():
         i += 1
         sessions = list(map(str, list(legislation.sessions.all().values_list('id_parladata', flat=True))))
+        note = legislation.note
+        if note:
+            note = strip_tags(note).replace("&nbsp;", "").replace("\r", "").replace("\n", "").replace("&scaron;", "š")
         output.append({
             'id': legislation.epa,
             'sessions_i': sessions,
             'mdt': legislation.mdt,
             'text_t': legislation.text,
-            'content_t': legislation.note,
+            'content_t': note,
             'sklic_t': legislation.epa.split('-')[1],
             'tip_t': 'l'
         })

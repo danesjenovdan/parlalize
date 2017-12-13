@@ -49,11 +49,12 @@ class LegislationNotes(admin.ModelAdmin):
                     'abstractVisible',
                     'mdt',
                     'is_exposed',
-                    'icon')
+                    'icon',
+                    'procedure_ended')
 
-    list_editable = ('status', 'result', 'is_exposed')
-    list_filter = ('result', 'status', 'date', 'is_exposed')
-    readonly_fields=('text',)
+    list_editable = ('status', 'result', 'is_exposed', 'procedure_ended')
+    list_filter = ('result', 'status', 'date', 'is_exposed', 'result', 'procedure_ended')
+    #readonly_fields=('text',)
     #fields = ('text', 'status', 'result', 'note', 'abstractVisible', 'is_exposed', 'icon')
 
     def sessions_str(self, obj):

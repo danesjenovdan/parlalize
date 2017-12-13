@@ -68,6 +68,6 @@ static/
 .vscode/.ropeproject/config.py
 
 # settings files
-parladata_project/settings/stage.py
-parladata_project/settings/prod.py
-parladata_project/settings/__init__.py
+parlalize/settings/stage.py
+parlalize/settings/prod.py
+parlalize/settings/__init__.py
