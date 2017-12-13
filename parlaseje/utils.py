@@ -154,7 +154,7 @@ def get_votes_without_legislation():
 
 
 def hasLegislationLink(legislation):
-    if legislation.sessions.objects.all():
+    if legislation.sessions.all():
         return True
     else:
         return False

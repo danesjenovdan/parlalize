@@ -283,14 +283,13 @@ def fastUpdate(fast=True, date_=None):
     sc.api_call("chat.postMessage",
                 channel="#parlalize_notif",
                 text='Start fast update at: ' + str(datetime.now()))
-
     dates = []
 
     lastBallotTime = Ballot.objects.latest('updated_at').updated_at
     lastVoteTime = Vote.objects.latest('updated_at').updated_at
     lastSpeechTime = Speech.objects.latest('updated_at').updated_at
     lastQustionTime = Question.objects.latest('updated_at').updated_at
-    #lastLegislationTime = Legislation.objects.latest('updated_at').updated_at
+    lastLegislationTime = Legislation.objects.latest('updated_at').updated_at
     if date_:
         dates = [date_ + '_00:00' for i in range(5)]
     else:
@@ -301,7 +300,7 @@ def fastUpdate(fast=True, date_=None):
         dates.append(lastBallotTime)
         dates.append(Question.objects.latest('updated_at').updated_at)
         
-        lastLegislationTime=datetime.now()-timedelta(days=10)
+        #lastLegislationTime=datetime.now()-timedelta(days=10)
         dates.append(lastLegislationTime)
 
     # prepare url
