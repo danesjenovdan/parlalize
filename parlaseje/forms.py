@@ -7,7 +7,7 @@ class LegislationForm(forms.ModelForm):
 
     class Meta:
         model = Legislation
-        fields = ('text', 'status', 'result', 'note', 'abstractVisible', 'is_exposed', 'icon', 'mdt_fk')
+        fields = ('text', 'status', 'result', 'note', 'abstractVisible', 'is_exposed', 'icon', 'mdt_fk', 'epa')
         widgets = {
             'mdt_fk': autocomplete.ModelSelect2(url='wb-autocomplete'),
         }

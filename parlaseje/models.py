@@ -563,4 +563,6 @@ class Legislation(Timestampable, models.Model):
                                       help_text='Classification of law')
 
     def __str__(self):
-        return ', '.join(self.sessions.all().values_list('name', flat=True)) + ' | ' + self.text
+        sessions = self.sessions.all().values_list('name', flat=True)
+
+        return ', '.join(sessions if sessions else '') + ' | ' + self.text if self.text else self.epa

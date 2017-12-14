@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
+from parlaseje.utils import hasLegislationLink
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_CLASSIFICATIONS
 from parlaskupine.models import Organization
 
@@ -1347,11 +1348,21 @@ def getMotionAnalize(request, motion_id):
                             'option': option,
                             'is_outlier': outlier})
 
+    # get legislation data
+    legislation = Legislation.objects.filter(epa=vote.epa)
+    if legislation:
+        leg_data = {'epa': vote.epa,
+                    'text': legislation[0].text}
+    else:
+        leg_data = {'epa': None,
+                    'text': ''}
+
     out = {'id': motion_id,
            'session': model.session.getSessionData(),
            'created_for': vote.created_for.strftime(API_DATE_FORMAT),
            'created_at': model.created_at.strftime(API_DATE_FORMAT),
            'name': vote.motion,
+           'legislation': leg_data,
            'result': {'accepted': vote.result,
                       'value': max_vote_percent_opt,
                       'max_opt': max_vote_opt,
@@ -3134,35 +3145,48 @@ def legislation(request, epa):
     out  = []
     created_at = None
     law = Legislation.objects.get(epa=epa)
-    session = law.sessions.all().latest('start_time')
+    sessions = law.sessions.all()
+    if sessions:
+        session = sessions.latest('start_time')
+        start_time = session.start_time
+        session_data = session.getSessionData()
+    else:
+        start_time = datetime.now()
+        session_data = {'name': '',
+                        'date': '',
+                        'date_ts': '',
+                        'id': '',
+                        'orgs': '',
+                        'in_review': ''}
     votes = Vote.objects.filter(epa=law.epa)
     dates = [law.date]
     for vote in votes:
-        out.append({'votes': {'motion_id': vote.id_parladata,
-                              'text': vote.motion,
-                              'votes_for': vote.votes_for,
-                              'against': vote.against,
-                              'abstain': vote.abstain,
-                              'not_present': vote.not_present,
-                              'result': vote.result,
-                              'is_outlier': vote.is_outlier,
-                              'tags': vote.tags,
-                              'has_outliers': vote.has_outlier_voters,
-                              'documents': vote.document_url
-                               }                           
-                    
+        out.append({'motion_id': vote.id_parladata,
+                    'text': vote.motion,
+                    'votes_for': vote.votes_for,
+                    'against': vote.against,
+                    'abstain': vote.abstain,
+                    'not_present': vote.not_present,
+                    'result': vote.result,
+                    'is_outlier': vote.is_outlier,
+                    'tags': vote.tags,
+                    'has_outliers': vote.has_outlier_voters,
+                    'documents': vote.document_url
                     })
         dates.append(vote.created_at)
     created_at = max(dates).strftime(API_DATE_FORMAT)
 
-    ses_date = session.start_time.strftime(API_DATE_FORMAT)
+    ses_date = start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
-    return JsonResponse({'results': out,
-                         'session': session.getSessionData(),
+    return JsonResponse({'votes': out,
+                         'session': session_data,
                          'tags': tags,
                          'status': law.status,
                          'text': law.text,
-                         'note': law.note,
+                         'result': law.result,
+                         'abstract': law.note,
+                         'abstractVisible': law.abstractVisible,
+                         'epa': law.epa,
                          'classification': law.classification,
                          'created_for': ses_date,
                          'created_at': created_at}, safe=False)
@@ -3222,15 +3246,23 @@ def getExposedLegislation(request):
 
 def getAllLegislation(request):
     legislations = Legislation.objects.all().order_by('date')
+    wbs_data = json.loads(getAllStaticData(None).content)['wbs']
+    wbs = {}
+    for wb in wbs_data:
+        wbs[str(wb['id'])] = wb
     return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': datetime.now().strftime(API_DATE_FORMAT),
                          'results': [{'epa': legislation.epa,
                                       'text': legislation.text,
-                                      'date': legislation.date.strftime(API_DATE_FORMAT),
-                                      'mdt': legislation.mdt,
+                                      'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
+                                      'mdt_text': legislation.mdt,
+                                      'mdt': wbs[str(legislation.mdt_fk.id_parladata)] if legislation.mdt_fk else {'name': '',
+                                                                                                                   'id': None},
                                       'classification': legislation.classification,
                                       'result': legislation.result,
-                                      'type_of_law': legislation.type_of_law
+                                      'type_of_law': legislation.type_of_law,
+                                      'has_link': hasLegislationLink(legislation),
+                                      'abstractVisible': legislation.abstractVisible,
                                      }for legislation in legislations]})
 
 

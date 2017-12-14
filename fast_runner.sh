@@ -5,13 +5,13 @@
 #curl http://parlameter.si:8983/solr/knedl/update -H "Content-Type: text/xml" --data-binary '<commit />'
 
 #export speeches to solr
-cd "/home/***REMOVED***/parladata"
+cd "/home/parladaddy/parladata"
 source  "venv/bin/activate"
 python manage.py runscript export_to_solr > sorl_export.log 2>&1 &&
 deactivate
 
 
-cd "/home/***REMOVED***/parlalize"
+cd "/home/parladaddy/parlalize"
 source  "venv/bin/activate"
 echo $PWD
 

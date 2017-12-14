@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from time import sleep
 from raven.contrib.django.raven_compat.models import client
+from itertools import groupby
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -14,10 +15,12 @@ from parlaposlanci.views import (setMPStaticPL, setMembershipsOfMember, setLastA
                                  setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords,
                                  setCompass, setListOfMembersTickers, setPresenceThroughTime,
                                  setMinsterStatic, setPercentOFAttendedSession, setNumberOfQuestionsAll)
-from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
+from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch, setNumberOfQuestionsAll as setNumberOfQuestionsAllPG
 from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL, SETTER_KEY
 
 from utils.votes_pg import set_mismatch_of_pg
+
+from utils.votes import setAllVotesCards
 from utils.recache import recacheCards
 from utils.imports import updateOrganizations
 
@@ -44,21 +47,22 @@ setters = {
     'setPercentOFAttendedSession': {'setter': setPercentOFAttendedSession, 'group': 'parlaposlanci', 'type': 'single'},
     'setNumberOfQuestionsAll': {'setter': setNumberOfQuestionsAll, 'group': 'parlaposlanci', 'type': 'all'},
     'set_mismatch_of_pg': {'setter': set_mismatch_of_pg, 'group': 'parlaposlanci', 'type': 'all'},
+    'setAllVotesCards': {'setter': setAllVotesCards, 'group': 'parlaposlanci', 'type': 'all'},
 
     # parlaskupine
-    'setMPsOfPG': {'setter': setMPsOfPG, 'group': 'parlaskupine'}, 
-    'setBasicInfOfPG': {'setter': setBasicInfOfPG, 'group': 'parlaskupine'},
-    'setWorkingBodies': {'setter': setWorkingBodies, 'group': 'parlaskupine'},
-    'setVocabularySizeALL': {'setter': setVocabularySizeALL, 'group': 'parlaskupine'},
-    'getListOfPGs': {'setter': getListOfPGs, 'group': 'parlaskupine'},
-    'setPresenceThroughTimePG': {'setter': setPresenceThroughTimePG, 'group': 'parlaskupine'},
-    'setPGMismatch': {'setter': setPGMismatch, 'group': 'parlaskupine'},
+    'setMPsOfPG': {'setter': setMPsOfPG, 'group': 'parlaskupine', 'type': 'single'}, 
+    'setBasicInfOfPG': {'setter': setBasicInfOfPG, 'group': 'parlaskupine', 'type': 'single'},
+    'setWorkingBodies': {'setter': setWorkingBodies, 'group': 'parlaskupine', 'type': 'single'},
+    'setVocabularySizeALL': {'setter': setVocabularySizeALL, 'group': 'parlaskupine', 'type': 'all'},
+    'setPresenceThroughTimePG': {'setter': setPresenceThroughTimePG, 'group': 'parlaskupine', 'type': 'single'},
+    'setPGMismatch': {'setter': setPGMismatch, 'group': 'parlaskupine', 'type': 'single'},
+    'setNumberOfQuestionsAllPG': {'setter': setNumberOfQuestionsAllPG, 'group': 'parlaskupine', 'type': 'all'},
 
     # recache
     'setAllStaticData': {'setter': getAllStaticData, 'group': 'recache'},
 
     # utils
-    'updateOrganizations': {'setter': updateOrganizations, 'group': 'utils', 'type': 'single'},
+    'updateOrganizations': {'setter': updateOrganizations, 'group': 'utils', 'type': 'all'},
 }
 #members cards
 recache = {
@@ -107,7 +111,7 @@ def runAsyncSetter(request):
         print 'group setter'
         methods = data['setters']
 
-        runMembersSetters.apply_async((methods, status_id), queue='parlalize')
+        runCardsSetters.apply_async((methods, status_id), queue='parlalize')
             
     else:
         return JsonResponse({'status': 'this isnt post'})
@@ -117,6 +121,7 @@ def runAsyncSetter(request):
 
 @shared_task
 def recache_cards(data, status_id):
+    sendStatus(status_id, "Running", "It looks ok", ['Running recaching'])
     args = {'pgCards':[],
             'mpCards':[],
             'sessions':{},
@@ -126,7 +131,7 @@ def recache_cards(data, status_id):
 
     if data['location'] == 'p':
         args['mpCards'] = data['setters']
-    if data['location'] == 'pg':
+    if data['location'] == 'ps':
         args['pgCards'] = data['setters']
     recacheCards(**args)
 
@@ -142,29 +147,49 @@ def recache(caches, status_id):
 
 
 @shared_task
-def runMembersSetters(methods, status_id):
-    print 'members'
-    methods_single = [(setter, setters[setter]['setter']) for setter in methods if setters[setter]['type'] == 'single']
-    methods_all = [(setter, setters[setter]['setter']) for setter in methods if setters[setter]['type'] == 'all']
-    memberships = tryHard(API_URL + '/getMPs/').json()
-    mIDs = [member['id'] for member in memberships]
+def runCardsSetters(methods, status_id):
+    print 'running'
+    methots_objs = {method: setters[method] for method in methods}
+    data = {'parlaposlanci': {},
+            'parlaskupine': {},
+            'utils': {}}
+
+    # group setters by location and type
+    for key, group in groupby(methots_objs.items(), lambda x: x[1]['group']):
+        for k, g in groupby(group, lambda x: x[1]['type']):
+            data[key][k] = [i for i in g]
+
+    if data['parlaposlanci']:
+        memberships = tryHard(API_URL + '/getMPs/').json()
+        oIDs = [member['id'] for member in memberships]
+        app = 'parlaposlanci'
+
+    elif data['parlaskupine']:
+        membersOfPGsRanges = tryHard(
+            'https://data.parlameter.si/v1/getMembersOfPGsRanges/').json()
+        oIDs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if len(value) > 1]
+        app = 'parlaskupine'
+    elif data['utils']:
+        app = 'utils'
+
 
     # run setters for each member
     done = []
     i=1
-    if methods_single:
+    if 'single' in data[app].keys():
+        data_len = float(len(oIDs))
         try:
-            print mIDs
-            for m in mIDs:
+            print oIDs
+            for m in oIDs:
                 print m
                 current = []
-                print methods_single
-                for setter in methods_single:
-                    func = setter[1]
-                    print func(request_with_key, str(m)).content
+                print data[app]['single']
+                for setter in data[app]['single']:
+                    func = setter[1]['setter']
+                    done.append({str(m): func(request_with_key, str(m)).content})
                     current.append(setter[0])
-                done.append({m: current})
-                sendStatus(status_id, "Running" , str(int(i/90.*100)) + "%", done)
+                #done.append({m: current})
+                sendStatus(status_id, "Running" , str(int(i/data_len*100)) + "%", done)
                 i += 1
         except:
             print "except"
@@ -172,16 +197,18 @@ def runMembersSetters(methods, status_id):
             client.captureException()
 
     # run all in one setters (one call for all members)
-    for i, setter in enumerate(methods_all):
-        print setter
-        sendStatus(status_id, "Start" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
-        func = setter[1]
-        sendStatus(status_id, "Running" , str(int(float(i+1)/len(methods_all)*100)) + "%", done)
-        if len(inspect.getargspec(func).args):
-            print func(request_with_key)
-        else:
-            print func()
-
+    if 'all' in data[app].keys():
+        for i, setter in enumerate(data[app]['all']):
+            print setter
+            sendStatus(status_id, "Start" , str(int(float(i+1)/len(data[app]['all'])*100)) + "%", done)
+            func = setter[1]['setter']
+            sendStatus(status_id, "Running" , str(int(float(i+1)/len(data[app]['all'])*100)) + "%", done)
+            if len(inspect.getargspec(func).args):
+                done.append(func(request_with_key).content)
+            else:
+                done.append(func())
+            #done.append(setter[0])
+    print done
     sendStatus(status_id, "Done", "It looks ok", done)
 
 
@@ -195,5 +222,5 @@ def sendStatus(status_id, type_, note, data):
                  data= {
                             "status_type": type_,
                             "status_note": note,
-                            "status_done": data
+                            "status_done": str(data)
                         })
