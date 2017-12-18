@@ -3174,7 +3174,11 @@ def legislation(request, epa):
                     'documents': vote.document_url
                     })
         dates.append(vote.created_at)
-    created_at = max(dates).strftime(API_DATE_FORMAT)
+    max_date = max(dates)
+    if max_date:
+        created_at = max_date.strftime(API_DATE_FORMAT)
+    else:
+        created_at = datetime.now().strftime(API_DATE_FORMAT)
 
     ses_date = start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
