@@ -3234,12 +3234,12 @@ def getExposedLegislation(request):
                          'accepted': [{'epa': legislation.epa,
                                        'icon': legislation.icon,
                                        'text': legislation.text,
-                                       'date': legislation.date.strftime(API_DATE_FORMAT),
+                                       'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
                                       }for legislation in accepted],
                          'under_consideration': [{'epa': legislation.epa,
                                                   'icon': legislation.icon,
                                                   'text': legislation.text,
-                                                  'date': legislation.date.strftime(API_DATE_FORMAT),
+                                                  'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
                                                  }for legislation in under_consideration],
                         })
 
