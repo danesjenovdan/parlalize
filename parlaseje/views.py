@@ -3123,22 +3123,24 @@ def legislationList(request, session_id):
         laws = laws.exclude(classification='zakon')
     created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
-        out.append({'text': law.text,
-                    'status': law.status,
-                    'result': law.result,
-                    'type_of_law': law.type_of_law,
-                    'id': law.id_parladata,
-                    'epa': law.epa,
+        out.append({'epa': law.epa,
+                    'text': law.text,
+                    'date': law.date.strftime(API_DATE_FORMAT) if law.date else '',
+                    'mdt_text': legislation.mdt,
                     'mdt': wbs[str(law.mdt_fk.id_parladata)] if law.mdt_fk else {'name': '',
                                                                                  'id': None},
-                    'mdt_text': law.mdt,
                     'classification': law.classification,
+                    'result': law.result,
+                    'type_of_law': law.type_of_law,
+                    'has_link': hasLegislationLink(law),
+                    'abstractVisible': law.abstractVisible,
                     })
 
     return JsonResponse({'results': out,
                          'session': session.getSessionData(),
                          'created_for': ses_date,
                          'created_at': created_at}, safe=False)
+
 
 
 def legislation(request, epa):
