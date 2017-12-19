@@ -1509,7 +1509,7 @@ def getDeviationInOrg(request, pg_id, date_=None):
     for result in mostMatching.data:
         out_r.append({
             'ratio': result['ratio'],
-            'person': getMPStaticPersonData(int(result['id']), date_)})
+            'person': getPersonData(int(result['id']), date_)})
     org = Organization.objects.get(id_parladata=int(pg_id))
     out = {
         'organization': org.getOrganizationData(),
