@@ -737,6 +737,7 @@ def getMotionOfSession(request, session_id, date=False):
                                         'abstain': card.abstain,
                                         'not_present': card.not_present,
                                         'result': card.result,
+                                        'epa': card.epa if card.epa else None,
                                         'is_outlier': card.is_outlier,
                                         'tags': card.tags,
                                         'has_outliers': card.has_outlier_voters,
