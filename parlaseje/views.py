@@ -3126,7 +3126,7 @@ def legislationList(request, session_id):
         out.append({'epa': law.epa,
                     'text': law.text,
                     'date': law.date.strftime(API_DATE_FORMAT) if law.date else '',
-                    'mdt_text': legislation.mdt,
+                    'mdt_text': law.mdt,
                     'mdt': wbs[str(law.mdt_fk.id_parladata)] if law.mdt_fk else {'name': '',
                                                                                  'id': None},
                     'classification': law.classification,
