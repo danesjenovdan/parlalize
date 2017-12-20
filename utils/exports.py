@@ -24,6 +24,8 @@ def exportLegislations():
             'mdt': legislation.mdt,
             'text_t': legislation.text,
             'content_t': note,
+            'status': legislation.status,
+            'result': legislation.result,
             'sklic_t': legislation.epa.split('-')[1],
             'tip_t': 'l'
         })
