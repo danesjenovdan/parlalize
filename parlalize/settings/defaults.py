@@ -139,7 +139,30 @@ LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec
 
 LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
 
-VOTE_CLASSIFICATIONS = { 
+VOTE_INDICATORS = { 
+    '1': ['dnevni red', 'širitev dnevnega reda', 'umik točke dnevnega reda'], 
+    '2': ['glasovanje o zakonu v celoti'], 
+    '3': ['amandma'], 
+    '4': ['interpelacija'], 
+    '5': ['evidenčni sklep'], 
+    '6': ['predlog sklepa'], 
+    '7': ['zakon o ratifikaciji'], 
+    '8': ['sklep o imenovanju', 
+          'predlog za imenovanje', 
+          'izvolitev', 
+          'soglasje k imenovanju', 
+          'predlog kandidata', 
+          'predlog kandidatke', 
+          'sklep o izvolitvi', 
+          'predlog za izvolitev'], 
+    '9': ['predlog za razpis'], 
+    '10': ['priporočilo'], 
+    '11': ['poročilo'], 
+    '12': ['proceduralni predlog'], 
+    '13': ['odlok o načrtu ravnanja s stvarnim premoženjem'],
+}
+
+VOTE_NAMES = { 
     '1': 'dnevni red',
     '2': 'glasovanje o zakonu v celoti', 
     '3': 'amandma', 

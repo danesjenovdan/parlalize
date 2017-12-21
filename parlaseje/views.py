@@ -11,8 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
-from parlaseje.utils import hasLegislationLink
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_CLASSIFICATIONS
+from parlaseje.utils import hasLegislationLink, getMotionClassification
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES
 from parlaskupine.models import Organization
 
 
@@ -464,7 +464,9 @@ def setMotionOfSession(request, session_id):
         except:
             law = None
 
+        classification = getMotionClassification(mot['text'])
         vote = Vote.objects.filter(id_parladata=mot['vote_id'])
+
         if vote:
             vote.update(created_for=session.start_time,
                         start_time=mot['start_time'],
@@ -478,9 +480,9 @@ def setMotionOfSession(request, session_id):
                         result=result,
                         id_parladata=mot['vote_id'],
                         document_url=mot['doc_url'],
-                        classification=mot['classification'],
                         epa=mot['epa'],
-                        law=law
+                        law=law,
+                        classification=classification,
                         )
             vote[0].amendment_of.add(*a_orgs)
         else:
@@ -497,9 +499,9 @@ def setMotionOfSession(request, session_id):
                                     result=result,
                                     id_parladata=mot['vote_id'],
                                     document_url=mot['doc_url'],
-                                    classification=mot['classification'],
                                     epa=mot['epa'],
-                                    law=law
+                                    law=law,
+                                    classification=classification,
                                     )
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
@@ -753,7 +755,7 @@ def getMotionOfSession(request, session_id, date=False):
         return JsonResponse({"results": out,
                              "session": session.getSessionData(),
                              "tags": tags,
-                             "classifications": VOTE_CLASSIFICATIONS,
+                             "classifications": VOTE_NAMES,
                              "created_for": ses_date,
                              "created_at": created_at}, safe=False)
     else:

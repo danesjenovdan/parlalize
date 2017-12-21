@@ -27,7 +27,7 @@ import csv
 import itertools
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from parlalize.settings import SETTER_KEY, VOTE_CLASSIFICATIONS
+from parlalize.settings import SETTER_KEY, VOTE_NAMES
 from requests.auth import HTTPBasicAuth
 
 def lockSetter(function):
@@ -648,7 +648,7 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
         'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
         'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
         'all_tags': tags,
-        "classifications": VOTE_CLASSIFICATIONS,
+        "classifications": VOTE_NAMES,
         'results': list(reversed(out))
         }
     result.update(card_owner_data)
