@@ -11,8 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
-from parlaseje.utils import hasLegislationLink
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_CLASSIFICATIONS
+from parlaseje.utils import hasLegislationLink, getMotionClassification
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES
 from parlaskupine.models import Organization
 
 
@@ -464,7 +464,9 @@ def setMotionOfSession(request, session_id):
         except:
             law = None
 
+        classification = getMotionClassification(mot['text'])
         vote = Vote.objects.filter(id_parladata=mot['vote_id'])
+
         if vote:
             vote.update(created_for=session.start_time,
                         start_time=mot['start_time'],
@@ -478,9 +480,9 @@ def setMotionOfSession(request, session_id):
                         result=result,
                         id_parladata=mot['vote_id'],
                         document_url=mot['doc_url'],
-                        classification=mot['classification'],
                         epa=mot['epa'],
-                        law=law
+                        law=law,
+                        classification=classification,
                         )
             vote[0].amendment_of.add(*a_orgs)
         else:
@@ -497,9 +499,9 @@ def setMotionOfSession(request, session_id):
                                     result=result,
                                     id_parladata=mot['vote_id'],
                                     document_url=mot['doc_url'],
-                                    classification=mot['classification'],
                                     epa=mot['epa'],
-                                    law=law
+                                    law=law,
+                                    classification=classification,
                                     )
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
@@ -737,6 +739,7 @@ def getMotionOfSession(request, session_id, date=False):
                                         'abstain': card.abstain,
                                         'not_present': card.not_present,
                                         'result': card.result,
+                                        'epa': card.epa if card.epa else None,
                                         'is_outlier': card.is_outlier,
                                         'tags': card.tags,
                                         'has_outliers': card.has_outlier_voters,
@@ -752,7 +755,7 @@ def getMotionOfSession(request, session_id, date=False):
         return JsonResponse({"results": out,
                              "session": session.getSessionData(),
                              "tags": tags,
-                             "classifications": VOTE_CLASSIFICATIONS,
+                             "classifications": VOTE_NAMES,
                              "created_for": ses_date,
                              "created_at": created_at}, safe=False)
     else:
@@ -3123,22 +3126,24 @@ def legislationList(request, session_id):
         laws = laws.exclude(classification='zakon')
     created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
-        out.append({'text': law.text,
-                    'status': law.status,
-                    'result': law.result,
-                    'type_of_law': law.type_of_law,
-                    'id': law.id_parladata,
-                    'epa': law.epa,
+        out.append({'epa': law.epa,
+                    'text': law.text,
+                    'date': law.date.strftime(API_DATE_FORMAT) if law.date else '',
+                    'mdt_text': law.mdt,
                     'mdt': wbs[str(law.mdt_fk.id_parladata)] if law.mdt_fk else {'name': '',
                                                                                  'id': None},
-                    'mdt_text': law.mdt,
                     'classification': law.classification,
+                    'result': law.result,
+                    'type_of_law': law.type_of_law,
+                    'has_link': hasLegislationLink(law),
+                    'abstractVisible': law.abstractVisible,
                     })
 
     return JsonResponse({'results': out,
                          'session': session.getSessionData(),
                          'created_for': ses_date,
                          'created_at': created_at}, safe=False)
+
 
 
 def legislation(request, epa):
@@ -3174,7 +3179,11 @@ def legislation(request, epa):
                     'documents': vote.document_url
                     })
         dates.append(vote.created_at)
-    created_at = max(dates).strftime(API_DATE_FORMAT)
+    max_date = max(dates)
+    if max_date:
+        created_at = max_date.strftime(API_DATE_FORMAT)
+    else:
+        created_at = datetime.now().strftime(API_DATE_FORMAT)
 
     ses_date = start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
@@ -3227,19 +3236,19 @@ def otherVotes(request, session_id):
 
 def getExposedLegislation(request):
     legislations = Legislation.objects.filter(is_exposed=True)
-    accepted = legislations.filter(result='sprejet').order_by('-updated_at')[:3]
-    under_consideration = legislations.filter(result=None).order_by('-updated_at')[:3]
+    accepted = legislations.filter(result='sprejet').order_by('-updated_at')[:6]
+    under_consideration = legislations.filter(result=None).order_by('-updated_at')[:6]
     return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': datetime.now().strftime(API_DATE_FORMAT),
                          'accepted': [{'epa': legislation.epa,
                                        'icon': legislation.icon,
                                        'text': legislation.text,
-                                       'date': legislation.date.strftime(API_DATE_FORMAT),
+                                       'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
                                       }for legislation in accepted],
                          'under_consideration': [{'epa': legislation.epa,
                                                   'icon': legislation.icon,
                                                   'text': legislation.text,
-                                                  'date': legislation.date.strftime(API_DATE_FORMAT),
+                                                  'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
                                                  }for legislation in under_consideration],
                         })
 

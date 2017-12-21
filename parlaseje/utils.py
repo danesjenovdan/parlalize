@@ -3,7 +3,7 @@ from datetime import datetime
 from django.http import Http404
 from parlaposlanci.models import LastActivity
 from parlaseje.models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, LEGISLATION_STATUS, LEGISLATION_RESULT
+from parlalize.settings import API_URL, API_DATE_FORMAT, LEGISLATION_STATUS, LEGISLATION_RESULT, VOTE_INDICATORS
 from django.http import JsonResponse
 from parlalize.utils_ import tryHard
 
@@ -158,3 +158,14 @@ def hasLegislationLink(legislation):
         return True
     else:
         return False
+
+
+def getMotionClassification(motion): 
+    classes = VOTE_INDICATORS
+    text = motion.lower() 
+    for cl, words in classes.items(): 
+        for word in words: 
+            if word.lower() in text: 
+                return cl 
+
+    return '14' # others

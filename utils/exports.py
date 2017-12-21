@@ -24,6 +24,8 @@ def exportLegislations():
             'mdt': legislation.mdt,
             'text_t': legislation.text,
             'content_t': note,
+            'status': legislation.status,
+            'result': legislation.result,
             'sklic_t': legislation.epa.split('-')[1],
             'tip_t': 'l'
         })
@@ -46,6 +48,22 @@ def exportLegislations():
     print r.text
 
     return 1
+
+
+def deleteLegislations():
+    a = requests.get(settings.SOLR_URL + "/select?wt=json&q=id:*&fl=id&fq=tip_t:l&rows=100000000")
+    indexes = a.json()["response"]["docs"]
+    idsForDelete = [idx['id'] for idx in indexes]
+    data = {'delete': idsForDelete
+            }
+
+    r = requests.post(settings.SOLR_URL + '/update?commit=true',
+                      data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+
+    print r.text
+    return True
+
 
 
 def backupNotes():
