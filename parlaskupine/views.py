@@ -22,7 +22,7 @@ from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
                               getAllStaticData, setCardData, getPersonCardModelNew,
                               getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
-                                API_OUT_DATE_FORMAT, SETTER_KEY)
+                                API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES)
 from parlaskupine.models import *
 from parlaskupine.utils_ import getDisunionInOrgHelper, getAmendmentsCount
 from parlaseje.models import Activity, Session, Vote, Speech, Question
@@ -4042,6 +4042,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                                         'result': vote.result,
                                         'date': vote.start_time,
                                         'tag': vote.tags,
+                                        'classification': vote.classification,
                                         'id_parladata': vote.id_parladata}
 
     c_data = cache.get('pg_disunion' + org_id)
@@ -4054,6 +4055,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                             'result': vote.result,
                             'date': vote.start_time,
                             'tag': vote.tags,
+                            'classification': vote.classification,
                             'maximum': vote.intra_disunion,
                             'id_parladata': vote.id_parladata})
                 out['DZ'] = {'organization': 'dz',
@@ -4079,6 +4081,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                                    key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name',
                                                                  flat=True))
+            out["classifications"] = VOTE_NAMES
             cache.set('pg_disunion' + org_id, out, 60 * 60 * 48)
 
     return JsonResponse(out, safe=False)
