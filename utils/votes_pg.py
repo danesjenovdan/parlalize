@@ -119,6 +119,6 @@ def set_mismatch_of_pg():
                        person=d['person'],
                        created_for=datetime.now(),
                        average=avg,
-                       maximum=maxMismatch['values'],
+                       maximum=maxMismatch['value'],
                        maxMP=maxMismatch['person'],
                        data=d['value'])
