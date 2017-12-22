@@ -635,10 +635,11 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
                 'tags': vote.tags,
             }
             # if party
-            # if card_owner_data.party:
-            #     disunions = vote.vote_intradisunion.filter(organization_id=card_owner_data.party.id)
-            #     if len(disunions) > 0:
-            #         temp_data['disunion'] = disunions[0].maximum
+            if 'party' in  card_owner_data.keys():
+                temp_data['party'] = card_owner_data['party']['id']
+                disunions = vote.vote_intradisunion.filter(organization__id_parladata=card_owner_data['party']['id'])
+                if len(disunions) > 0:
+                    temp_data['disunion'] = disunions[0].maximum
             if ballots[vote.id][0]:
                 temp_data['ballot_id'] = ballots[vote.id][0]
             data[vote.start_time_date].append(temp_data)
