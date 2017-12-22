@@ -4065,6 +4065,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                                    key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name',
                                                                  flat=True))
+            out["classifications"] = VOTE_NAMES
             cache.set('pg_disunion' + org_id, out, 60 * 60 * 48)
         else:
             for vote in votes:
