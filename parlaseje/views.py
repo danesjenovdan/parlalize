@@ -2963,7 +2963,7 @@ def getComparedVotes(request):
                 'abstain': vote.abstain,
                 'not_present': vote.not_present,
                 'result': vote.result,
-                'is_outlier': vote.is_outlier,
+                'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                 'has_outliers': vote.has_outlier_voters,
                 'tags': vote.tags,
                 'date': vote.start_time.strftime(API_DATE_FORMAT)
@@ -3104,7 +3104,7 @@ def getVotesData(request, votes):
                     'abstain': vote.abstain,
                     'not_present': vote.not_present,
                     'result': vote.result,
-                    'is_outlier': vote.is_outlier,
+                    'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'has_outliers': vote.has_outlier_voters}
             })
     return JsonResponse(out, safe=False)
@@ -3173,7 +3173,7 @@ def legislation(request, epa):
                     'abstain': vote.abstain,
                     'not_present': vote.not_present,
                     'result': vote.result,
-                    'is_outlier': vote.is_outlier,
+                    'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'tags': vote.tags,
                     'has_outliers': vote.has_outlier_voters,
                     'documents': vote.document_url
@@ -3215,7 +3215,7 @@ def otherVotes(request, session_id):
                                   'abstain': vote.abstain,
                                   'not_present': vote.not_present,
                                   'result': vote.result,
-                                  'is_outlier': vote.is_outlier,
+                                  'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                                   'tags': vote.tags,
                                   'has_outliers': vote.has_outlier_voters,
                                   'documents': vote.document_url

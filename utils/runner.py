@@ -174,7 +174,8 @@ def runSettersSessions(date_to=None, sessions_ids=None):
         Vote_analysis: setMotionAnalize,
     }
     # set outliers for all votes
-    setOutliers()
+    # TODO remove next comment when algoritem for is_outlier will be fixed
+    #setOutliers()
     for model, setter in setters_models.items():
         # IDs = getSesIDs(dates[1],dates[-1])
         if sessions_ids:
