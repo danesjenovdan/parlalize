@@ -1350,6 +1350,14 @@ def getMotionAnalize(request, motion_id):
             members.append({'person': personData,
                             'option': option,
                             'is_outlier': outlier})
+    if vote.classification == '2':
+        leg = Legislation.objects.filter(epa=vote.epa)
+        if leg:
+            abstract = leg[0].note
+        else:
+            abstract = ''
+    else:
+        abstract = vote.note 
 
     # get legislation data
     legislation = Legislation.objects.filter(epa=vote.epa)
@@ -1378,7 +1386,7 @@ def getMotionAnalize(request, motion_id):
                         'opposition': json.loads(model.oppo_opts)},
            'all': options,
            'abstractVisible': vote.abstractVisible,
-           'abstract': vote.note}
+           'abstract': abstract}
     return JsonResponse(out, safe=False)
 
 
