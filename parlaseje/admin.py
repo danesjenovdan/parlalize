@@ -2,6 +2,7 @@ import sys
 from django.contrib import admin
 from parlaseje.models import *
 from .forms import LegislationForm
+import re
 
 
 reload(sys)
@@ -24,6 +25,10 @@ class LegislationNote(Legislation):
         proxy = True
 
 class VoteNotes(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        clean_abstract(obj)
+        super(VoteNotes, self).save_model(request, obj, form, change)
+
     search_fields = ['session__name', 'motion', 'abstractVisible']
     list_display = ('id',
                     'motion',
@@ -36,6 +41,10 @@ class VoteNotes(admin.ModelAdmin):
     fields = ('motion', 'note', 'abstractVisible')
 
 class LegislationNotes(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        clean_abstract(obj)
+        super(LegislationNotes, self).save_model(request, obj, form, change)
+
     form = LegislationForm
     search_fields = ['text', 'epa', 'sessions__name']
     list_display = ('id',
@@ -59,6 +68,17 @@ class LegislationNotes(admin.ModelAdmin):
 
     def sessions_str(self, obj):
         return ', '.join(obj.sessions.all().values_list('name', flat=True))
+
+def clean_abstract(l):
+    spanre = re.compile('<span.*?>')
+    closespanre = re.compile(r'<\/span>')
+    stylere = re.compile('style=".*?"')
+
+    if l.note:
+        l.note = spanre.sub('', l.note)
+        l.note = closespanre.sub('', l.note)
+        l.note = stylere.sub('', l.note)
+        l.note = l.note.replace('<p>&nbsp;</p>', '')
 
 
 admin.site.register(Session, SessionAdmin)
