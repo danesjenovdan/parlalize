@@ -1354,10 +1354,13 @@ def getMotionAnalize(request, motion_id):
         leg = Legislation.objects.filter(epa=vote.epa)
         if leg:
             abstract = leg[0].note
+            visible = leg[0].abstractVisible
         else:
             abstract = ''
+            visible = False
     else:
-        abstract = vote.note 
+        abstract = vote.note
+        visible = vote.abstractVisible
 
     # get legislation data
     legislation = Legislation.objects.filter(epa=vote.epa)
@@ -1385,7 +1388,7 @@ def getMotionAnalize(request, motion_id):
            'gov_side': {'coalition': json.loads(model.coal_opts),
                         'opposition': json.loads(model.oppo_opts)},
            'all': options,
-           'abstractVisible': vote.abstractVisible,
+           'abstractVisible': visible,
            'abstract': abstract}
     return JsonResponse(out, safe=False)
 
