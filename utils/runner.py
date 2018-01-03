@@ -20,7 +20,7 @@ from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Questio
 from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
 from parlaseje.utils import idsOfSession, getSesDates
 from utils.recache import updatePagesS, updateLastActivity, recacheActivities, recacheWBs
-from utils.imports import update, updateDistricts, updateTags, updatePersonStatus
+from utils.imports import update, updateDistricts, updateTags, updatePersonStatus, importDraftLegislationsFromFeed
 from utils.votes_outliers import setMotionAnalize, setOutliers
 from utils.votes_pg import set_mismatch_of_pg
 from utils.exports import exportLegislations
@@ -636,8 +636,11 @@ def fastUpdate(fast=True, date_=None):
     q_update = list(questions.values_list("person__id_parladata", flat=True))
     p_update += q_update
 
-    # if "fast" fastUpdate then skip update last activites
+    # nightly update
     if not fast:
+        # read draft legislations
+        importDraftLegislationsFromFeed()
+        # update last activites
         updateLastActivity(list(set(p_update)))
         recacheActivities(('poslanska-vprasanja-in-pobude',
                            'poslanska-vprasanja-in-pobude'),
