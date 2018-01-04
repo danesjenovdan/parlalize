@@ -3211,6 +3211,7 @@ def legislation(request, epa):
                          'result': law.result,
                          'abstract': law.note,
                          'abstractVisible': law.abstractVisible,
+                         'extra_abstract': law.extra_note,
                          'epa': law.epa,
                          'classification': law.classification,
                          'created_for': ses_date,
