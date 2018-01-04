@@ -3176,7 +3176,8 @@ def legislation(request, epa):
                         'orgs': '',
                         'in_review': ''}
     votes = Vote.objects.filter(epa=law.epa)
-    dates = [law.date]
+    if law.date:
+        dates = [law.date]
     for vote in votes:
         out.append({'motion_id': vote.id_parladata,
                     'text': vote.motion,
