@@ -2636,8 +2636,8 @@ def setCompass(request, date_=None):
 
     isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
     print isNewVote
-    if not isNewVote:
-        return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
+    #if not isNewVote:
+    #    return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
 
     data = getCompassData(date_of)
     if data == []:
@@ -4478,16 +4478,16 @@ def getMismatchWithPG(request, person_id, date_=None):
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    missmatch = getPersonCardModelNew(MismatchOfPG, int(person_id), date_)
+    mismatch = getPersonCardModelNew(MismatchOfPG, int(person_id), date_)
 
     data = {'person': getPersonData(person_id),
-            'created_at': missmatch.created_at.strftime(API_DATE_FORMAT),
-            'created_for': missmatch.created_for.strftime(API_DATE_FORMAT),
+            'created_at': mismatch.created_at.strftime(API_DATE_FORMAT),
+            'created_for': mismatch.created_for.strftime(API_DATE_FORMAT),
             'result': {
-                'score': missmatch.data,
+                'score': mismatch.data,
                 'max': {
                     'mps': [getPersonData(mismatch.maxMP.id_parladata, date_)],
-                    'score': mismatch.max
+                    'score': mismatch.maximum
                     },
                 'average': mismatch.average
                 }
