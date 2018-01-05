@@ -5,7 +5,6 @@ from django.contrib import admin
 from parlaseje.utils import getSessionDataAPI
 from parlaskupine.utils_ import getPgDataAPI
 from parlalize.utils_ import modelsData, getPersonsCardDates, getOrgsCardDates, getAllStaticData, monitorMe, recacheLastSession, getPersonDataAPI
-from utils.legislations import test_legislation_statuses
 
 # admin.autodiscover()
 
@@ -24,7 +23,6 @@ urlpatterns = patterns('',
     (r'^v1/utils/getOrgsCardDates/(?P<org_id>\d+)', getOrgsCardDates),
     (r'^v1/utils/getAllStaticData/', getAllStaticData),
     (r'^v1/utils/recacheLastSession/', recacheLastSession),
-    (r'^v1/utils/testLegislationResults/', test_legislation_statuses),
     (r'^v1/monitoring/', monitorMe),
     (r'^tinymce/', include('tinymce.urls')),
 )
