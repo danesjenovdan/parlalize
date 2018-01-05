@@ -42,7 +42,7 @@ def check_for_legislation_final_vote(request):
                 finished += 1
                 legislation.save()
 
-            if mdt_vote:
+            elif mdt_vote:
                 if is_accepeted(mdt_vote[0]):
                     ## REJECTED
                     legislation.result = REJECTED
@@ -54,7 +54,7 @@ def check_for_legislation_final_vote(request):
                     pass
 
 
-            if beginning_vote:
+            elif beginning_vote:
                 if not is_accepeted(beginning_vote[0]):
                     ## REJECTED
                     legislation.result = REJECTED
