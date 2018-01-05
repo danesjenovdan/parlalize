@@ -1,5 +1,8 @@
 from parlaseje.models import Legislation, Vote
 from parlalize.settings import LEGISLATION_STATUS, LEGISLATION_RESULT
+from parlalize.utils_ import lockSetter
+
+from django.http import JsonResponse
 
 # imported from settings
 # LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
@@ -56,8 +59,10 @@ def check_for_legislation_final_vote():
                     pass
 
 
+@lockSetter
 def test_legislation_statuses():
     legislations = Legislation.objects.filter(status=FINISHED)
+    fails = []
     for legislation in legislations:
         if legislation.epa:
             final_vote = Vote.objects.filter(epa=legislation.epa,
@@ -71,39 +76,46 @@ def test_legislation_statuses():
 
             if final_vote:
                 if repeated_vote:
-                    if repeated_vote[0].result:
+                    if is_accepeted(repeated_vote[0]):
                         if legislation.result == ACCEPTED:
                         ## it's ok
                             pass
                         else:
-                            print 'fail, had repeated vote, should be ACCEPTED', legislation.epa
+                            fails.append('fail, had repeated vote, should be ACCEPTED ' + legislation.epa)
                     else:
                         if legislation.result == REJECTED:
                             pass
                         else:
-                            print 'fail, had repeated vote, should be REJECTED', legislation.epa
+                            fails.append('fail, had repeated vote, should be REJECTED ' + legislation.epa)
                 else:
-                    if final_vote[0].result:
+                    if is_accepeted(final_vote[0]):
                         if legislation.result == ACCEPTED:
                             ## it's ok
                             pass
                         else:
-                            print 'fail', legislation.epa
+                            fails.append('fail ' + legislation.epa)
             elif mdt_vote:
-                if mdt_vote[0].result:
+                if is_accepeted(mdt_vote[0]):
                     if legislation.result == REJECTED:
                         if legislation.status ==  FINISHED:
                             pass
                         else:
-                            print 'je rejected ni pa finished', legislation.epa
+                            fails.append('je rejected ni pa finished ' + legislation.epa)
                     else:
-                        print 'mogu bi bit rejected', legislation.epa
+                        fails.append('mogu bi bit rejected ' + legislation.epa)
             elif beginning_vote:
-                if not beginning_vote[0].result:
+                if not is_accepeted(beginning_vote[0]):
                     if legislation.result == REJECTED:
                         if legislation.status ==  FINISHED:
                             pass
                         else:
-                            print 'je rejected ni pa finished', legislation.epa
+                            fails.append('je rejected ni pa finished ' + legislation.epa)
                     else:
-                        print 'mogu bi bit rejected', legislation.epa
+                        fails.append('mogu bi bit rejected ' + legislation.epa)
+    return JsonResponse(fails, safe=False)
+
+
+# is legislation accepted
+def is_accepeted(vote):
+    accepted_option = False if 'ni primeren' in vote.motion else True
+    return vote.result == accepted_option
