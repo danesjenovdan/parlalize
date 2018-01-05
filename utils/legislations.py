@@ -60,7 +60,7 @@ def check_for_legislation_final_vote():
 
 
 @lockSetter
-def test_legislation_statuses():
+def test_legislation_statuses(request):
     legislations = Legislation.objects.filter(status=FINISHED)
     fails = []
     for legislation in legislations:
