@@ -3206,6 +3206,7 @@ def legislation(request, epa):
     return JsonResponse({'votes': out,
                          'session': session_data,
                          'tags': tags,
+                         'icon': law.icon,
                          'status': law.status,
                          'text': law.text,
                          'result': law.result,
