@@ -91,43 +91,43 @@ def test_legislation_statuses(request):
                         ## it's ok
                             pass
                         else:
-                            fails.append('fail, had repeated vote, should be ACCEPTED ' + legislation.epa + ' id: ' + legislation.id)
+                            fails.append('fail, had repeated vote, should be ACCEPTED ' + legislation.epa + ' id: ' + str(legislation.id))
                     else:
                         if legislation.result == REJECTED:
                             pass
                         else:
-                            fails.append('fail, had repeated vote, should be REJECTED ' + legislation.epa + ' id: ' + legislation.id)
+                            fails.append('fail, had repeated vote, should be REJECTED ' + legislation.epa + ' id: ' + str(legislation.id))
                 else:
                     if is_accepeted(final_vote[0]):
                         if legislation.result == ACCEPTED:
                             ## it's ok
                             pass
                         else:
-                            fails.append('fail final vote, should be ACCEPTED' + legislation.epa + ' id: ' + legislation.id)
+                            fails.append('fail final vote, should be ACCEPTED' + legislation.epa + ' id: ' + str(legislation.id))
                     else:
                         if legislation.result == REJECTED:
                             ## it's ok
                             pass
                         else:
-                            fails.append('fail final vote, should be REJECTED ' + legislation.epa + ' id: ' + legislation.id)
+                            fails.append('fail final vote, should be REJECTED ' + legislation.epa + ' id: ' + str(legislation.id))
             elif mdt_vote:
                 if is_accepeted(mdt_vote[0]):
                     if legislation.result == REJECTED:
                         if legislation.status ==  FINISHED:
                             pass
                         else:
-                            fails.append('je rejected ni pa finished ' + legislation.epa + ' id: ' + legislation.id)
+                            fails.append('je rejected ni pa finished ' + legislation.epa + ' id: ' + str(legislation.id))
                     else:
-                        fails.append('mogu bi bit rejected ' + legislation.epa + ' id: ' + legislation.id)
+                        fails.append('mogu bi bit rejected ' + legislation.epa + ' id: ' + str(legislation.id))
             elif beginning_vote:
                 if not is_accepeted(beginning_vote[0]):
                     if legislation.result == REJECTED:
                         if legislation.status ==  FINISHED:
                             pass
                         else:
-                            fails.append('je rejected ni pa finished ' + legislation.epa + ' id: ' + legislation.id)
+                            fails.append('je rejected ni pa finished ' + legislation.epa + ' id: ' + str(legislation.id))
                     else:
-                        fails.append('mogu bi bit rejected ' + legislation.epa + ' id: ' + legislation.id)
+                        fails.append('mogu bi bit rejected ' + legislation.epa + ' id: ' + str(legislation.id))
     return JsonResponse(fails, safe=False)
 
 
