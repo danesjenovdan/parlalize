@@ -3798,20 +3798,17 @@ def setAllMPsTFIDFsFromSearch(request):
     with a POST request.
     """
     if request.method == 'POST':
-        print request.body
-        print type(request.body)
         post_data = json.loads(request.body)
-        print type(post_data)
         if post_data:
-            print post_data
             save_statuses = []
             date_of = datetime.today()
-            person = Person.objects.get(id_parladata=post_data['person']['id'])
-            save_statuses.append(saveOrAbortNew(Tfidf,
-                                                person=person,
-                                                created_for=date_of,
-                                                is_visible=False,
-                                                data=post_data['results']))
+            for person_data in post_data:
+                person = Person.objects.get(id_parladata=person_data['person']['id'])
+                save_statuses.append(saveOrAbortNew(Tfidf,
+                                                    person=person,
+                                                    created_for=date_of,
+                                                    is_visible=False,
+                                                    data=person_data['results']))
 
             return JsonResponse({'status': 'alliswell',
                                  'saved': save_statuses})
