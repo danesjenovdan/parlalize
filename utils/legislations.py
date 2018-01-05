@@ -91,43 +91,59 @@ def test_legislation_statuses(request):
                         ## it's ok
                             pass
                         else:
-                            fails.append('fail, had repeated vote, should be ACCEPTED ' + legislation.epa + ' id: ' + str(legislation.id))
+                            fails.append({'desc': 'fail, had repeated vote, should be ACCEPTED',
+                                          'epa': legislation.epa,
+                                          'id': legislation.id})
                     else:
                         if legislation.result == REJECTED:
                             pass
                         else:
-                            fails.append('fail, had repeated vote, should be REJECTED ' + legislation.epa + ' id: ' + str(legislation.id))
+                            fails.append({'desc': 'fail, had repeated vote, should be REJECTED',
+                                          'epa': legislation.epa,
+                                          'id': legislation.id})
                 else:
                     if is_accepeted(final_vote[0]):
                         if legislation.result == ACCEPTED:
                             ## it's ok
                             pass
                         else:
-                            fails.append('fail final vote, should be ACCEPTED' + legislation.epa + ' id: ' + str(legislation.id))
+                            fails.append({'desc': 'fail final vote, should be ACCEPTED',
+                                          'epa': legislation.epa,
+                                          'id': legislation.id})
                     else:
                         if legislation.result == REJECTED:
                             ## it's ok
                             pass
                         else:
-                            fails.append('fail final vote, should be REJECTED ' + legislation.epa + ' id: ' + str(legislation.id))
+                            fails.append({'desc': 'fail final vote, should be REJECTED',
+                                          'epa': legislation.epa,
+                                          'id': legislation.id})
             elif mdt_vote:
                 if is_accepeted(mdt_vote[0]):
                     if legislation.result == REJECTED:
                         if legislation.status ==  FINISHED:
                             pass
                         else:
-                            fails.append('je rejected ni pa finished ' + legislation.epa + ' id: ' + str(legislation.id))
+                            fails.append({'desc': 'je rejected ni pa finished',
+                                          'epa': legislation.epa,
+                                          'id': legislation.id})
                     else:
-                        fails.append('mogu bi bit rejected ' + legislation.epa + ' id: ' + str(legislation.id))
+                        fails.append({'desc': 'mogu bi bit rejected',
+                                      'epa': legislation.epa,
+                                      'id': legislation.id})
             elif beginning_vote:
                 if not is_accepeted(beginning_vote[0]):
                     if legislation.result == REJECTED:
                         if legislation.status ==  FINISHED:
                             pass
                         else:
-                            fails.append('je rejected ni pa finished ' + legislation.epa + ' id: ' + str(legislation.id))
+                            fails.append({'desc': 'je rejected ni pa finished',
+                                          'epa': legislation.epa,
+                                          'id': legislation.id})
                     else:
-                        fails.append('mogu bi bit rejected ' + legislation.epa + ' id: ' + str(legislation.id))
+                        fails.append({'desc': 'mogu bi bit rejected',
+                                      'epa': legislation.epa,
+                                      'id': legislation.id})
     return JsonResponse(fails, safe=False)
 
 
