@@ -410,11 +410,12 @@ def updateLegislation(request):
 
 def importDraftLegislationsFromFeed(): 
  
-    def split_epa_and_name(thing): 
+    def split_epa_and_name(thing, date): 
         epa_regex = re.compile(r'\d+-VII') 
         current_epa = epa_regex.findall(thing)[0] 
-        current_name = thing.split(current_epa)[1].strip() 
-        return (current_epa, current_name)
+        current_name = thing.split(current_epa)[1].strip()
+        date = getDate(date)
+        return (current_epa, current_name, date)
 
     def check_and_save_legislation(legislations, classification):
         stats = {'saved': 0,
@@ -422,25 +423,41 @@ def importDraftLegislationsFromFeed():
         for legislation in legislations:
             saved = Legislation.objects.filter(epa=legislation[0])
             if not saved:
-                Legislation(epa=legislation[0], text=legislation[1], classification=classification).save()
+                Legislation(epa=legislation[0], text=legislation[1], date=legislation[2] classification=classification).save()
                 stats['saved'] += 1
             else:
                 stats['skiped'] += 1
         return stats
- 
+
+    def getDate(dat):
+    dat_fields = dat.split(" ")[1:4]
+    month_map = {'Jan':1,
+                 'Feb':2,
+                 'Mar':3,
+                 'Apr':4,
+                 'May':5,
+                 'Jun':6,
+                 'Jul':7,
+                 'Aug':8,
+                 'Sep':9,
+                 'Oct':10,
+                 'Nov':11,
+                 'Dec':12}
+    return datetime(day=int(dat_fields[0]), month=month_map[dat_fields[1]], year=int(dat_fields[2]))
+
     url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak' 
     url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt' 
     epa_regex = re.compile(r'\d+-VII \w.+') 
 
     # najprej epe od zakonov 
     feed_zakoni = feedparser.parse(url_zakoni) 
-    epas_and_names_zakoni = list(set([epa_regex.findall(post.title)[0] for post in feed_zakoni.entries])) 
-    epas_and_names_tuple_zakoni = [split_epa_and_name(thing) for thing in epas_and_names_zakoni] 
+    epas_and_names_zakoni = list([(epa_regex.findall(post.title)[0], post['published']) for post in feed_zakoni.entries])
+    epas_and_names_tuple_zakoni = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_zakoni] 
 
     # potem epe od aktov 
     feed_akti = feedparser.parse(url_akti) 
-    epas_and_names_akti = list(set([epa_regex.findall(post.title)[0] for post in feed_akti.entries])) 
-    epas_and_names_tuple_akti = [split_epa_and_name(thing) for thing in epas_and_names_akti] 
+    epas_and_names_akti = list([(epa_regex.findall(post.title)[0], post['published']) for post in feed_akti.entries])
+    epas_and_names_tuple_akti = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_akti] 
 
     print(check_and_save_legislation(epas_and_names_tuple_zakoni, 'zakon'), 'zakoni')
     print(check_and_save_legislation(epas_and_names_tuple_akti, 'akt'), 'akti')
