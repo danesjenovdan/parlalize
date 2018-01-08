@@ -423,7 +423,7 @@ def importDraftLegislationsFromFeed():
         for legislation in legislations:
             saved = Legislation.objects.filter(epa=legislation[0])
             if not saved:
-                Legislation(epa=legislation[0], text=legislation[1], date=legislation[2] classification=classification).save()
+                Legislation(epa=legislation[0], text=legislation[1], date=legislation[2], classification=classification).save()
                 stats['saved'] += 1
             else:
                 stats['skiped'] += 1
