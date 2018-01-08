@@ -430,20 +430,20 @@ def importDraftLegislationsFromFeed():
         return stats
 
     def getDate(dat):
-    dat_fields = dat.split(" ")[1:4]
-    month_map = {'Jan':1,
-                 'Feb':2,
-                 'Mar':3,
-                 'Apr':4,
-                 'May':5,
-                 'Jun':6,
-                 'Jul':7,
-                 'Aug':8,
-                 'Sep':9,
-                 'Oct':10,
-                 'Nov':11,
-                 'Dec':12}
-    return datetime(day=int(dat_fields[0]), month=month_map[dat_fields[1]], year=int(dat_fields[2]))
+        dat_fields = dat.split(" ")[1:4]
+        month_map = {'Jan':1,
+                     'Feb':2,
+                     'Mar':3,
+                     'Apr':4,
+                     'May':5,
+                     'Jun':6,
+                     'Jul':7,
+                     'Aug':8,
+                     'Sep':9,
+                     'Oct':10,
+                     'Nov':11,
+                     'Dec':12}
+        return datetime(day=int(dat_fields[0]), month=month_map[dat_fields[1]], year=int(dat_fields[2]))
 
     url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak' 
     url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt' 
