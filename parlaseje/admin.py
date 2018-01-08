@@ -79,6 +79,7 @@ def clean_abstract(l):
         l.note = closespanre.sub('', l.note)
         l.note = stylere.sub('', l.note)
         l.note = l.note.replace('<p>&nbsp;</p>', '')
+        l.note = l.note.replace('<p></p>', '')
 
 
 admin.site.register(Session, SessionAdmin)
