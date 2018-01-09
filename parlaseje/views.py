@@ -3136,6 +3136,9 @@ def legislationList(request, session_id):
         laws = laws.filter(classification='zakon')
     elif legislation_type == 'akt':
         laws = laws.exclude(classification='zakon')
+
+    if not laws:
+        raise Http404('Session has no legislation')
     created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
         out.append({'epa': law.epa,
