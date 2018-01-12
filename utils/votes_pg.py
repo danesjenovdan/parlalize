@@ -16,7 +16,7 @@ def set_mismatch_of_pg(date_=''):
     else:
         f_date = datetime.now()
     API_URL = 'https://data.parlameter.si/v1'
-    url = API_URL + '/getVotesTableExtended'
+    url = API_URL + '/getVotesTableExtended/' + date_
     data = getDataFromPagerApi(url)
     data = pd.DataFrame(data)
     url = API_URL + '/getMPs/' + date_
