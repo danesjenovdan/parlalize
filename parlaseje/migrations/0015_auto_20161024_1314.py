@@ -16,14 +16,4 @@ class Migration(migrations.Migration):
             name='id_parladata',
             field=models.IntegerField(help_text='id parladata', null=True, verbose_name='parladata id', blank=True),
         ),
-        migrations.AlterField(
-            model_name='vote',
-            name='result',
-            field=models.NullBooleanField(default=False, help_text=b'The result of the vote'),
-        ),
-        migrations.AlterField(
-            model_name='vote_graph',
-            name='result',
-            field=models.NullBooleanField(default=False, help_text=b'The result of the vote'),
-        ),
     ]

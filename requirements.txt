@@ -46,3 +46,4 @@ websocket-client==0.40.0
 https://github.com/aljosa/django-tinymce/archive/master.zip
 django-autocomplete-light==3.2.10
 feedparser==5.2.1
+celery==4.1.0
