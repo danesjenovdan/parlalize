@@ -4,6 +4,7 @@ from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
 from parlaposlanci.views import setMinsterStatic
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag, Legislation
+from parlaseje.views import setMotionOfSession
 from datetime import datetime, timedelta
 from django.test.client import RequestFactory
 from requests.auth import HTTPBasicAuth
@@ -188,7 +189,9 @@ def updateMotionOfSession():
     ses = Session.objects.all()
     for s in ses:
         print s.id_parladata
-        tryHard(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata) + '?key=' + SETTER_KEY )
+        resp =  setMotionOfSession(request_with_key, str(s.id_parladata))
+        print resp.content
+        #tryHard(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata) + '?key=' + SETTER_KEY )
 
 # treba pofixsat
 
@@ -330,35 +333,43 @@ def updatePersonFunctions():
 
 def update():
     updateOrganizations()
-    print 'org'
+    print 'orgs done'
 
+    print 'start people'
     updatePeople()
-    print 'pep'
+    print 'people done'
 
+    print 'start ministers'
     updateMinistrers()
-    print 'ministers'
+    print 'ministers done'
 
+    print 'start sessions'
     setAllSessions()
-    print 'Sessions'
+    print 'Sessions done'
 
+    print 'start speeches'
     updateSpeeches()
-    print 'speeches'
+    print 'speeches done'
 
+    print 'start votes'
     updateMotionOfSession()
-    print 'votes'
+    print 'votes done'
 
+    print 'start ballots'
     updateBallots()
-    print 'ballots'
+    print 'ballots done'
 
+    print 'update districts and tags'
     updateDistricts()
-
     updateTags()
 
-    print 'update person status'
+    print 'start update person status'
     updatePersonStatus()
+    print 'update person status done'
 
-    print 'update person has_function'
+    print 'start update person has_function'
     updatePersonFunctions()
+    print 'update person has_function done'
 
     return 1
 
