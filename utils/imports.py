@@ -1,4 +1,4 @@
-from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, PARSER_PASS
+from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, PARSER_PASS, BASE_URL
 from parlalize.utils_ import tryHard, getDataFromPagerApi
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
