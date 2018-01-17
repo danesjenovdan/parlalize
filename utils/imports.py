@@ -188,7 +188,7 @@ def updateMotionOfSession():
     ses = Session.objects.all()
     for s in ses:
         print s.id_parladata
-        tryHard(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata))
+        tryHard(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata) + '?key=' + SETTER_KEY )
 
 # treba pofixsat
 
