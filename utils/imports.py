@@ -318,7 +318,7 @@ def updatePersonStatus():
 
 
 def updatePersonFunctions():
-    mps = tryHard(API_URL + '/getMembersWithFuction').json()
+    mps = tryHard(API_URL + '/getMembersWithFunction/').json()
 
     for person in Person.objects.all():
         if person.has_function:
