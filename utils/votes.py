@@ -187,7 +187,11 @@ class VotesAnalysis(object):
         for mp in self.members:
             print '.:' + str(mp) + ':.'
             person = Person.objects.get(id_parladata=int(mp))
-            r = self.equalVotersData[mp]
+            try:
+                r = self.equalVotersData[mp]
+            except:
+                print mp, 'fail set equal voters'
+                continue
             mps_data = r.reset_index().sort_values(mp, ascending=False)
 
             # most equal
