@@ -344,23 +344,26 @@ class VotesAnalysis(object):
         max_ses_voters = actualSession[actualSession.attendance == max_session_value]['voter'].tolist()
 
         for mp in self.members:
-            person = Person.objects.get(id_parladata=int(mp))
-            thisVotes = votes[votes.voter == mp].reset_index().at[0, 'attendance']
-            tempS = sessions[sessions.voter == mp].reset_index()
-            thisSession = tempS.at[0, 'attendance']
-            print mp
+            try:
+                person = Person.objects.get(id_parladata=int(mp))
+                thisVotes = votes[votes.voter == mp].reset_index().at[0, 'attendance']
+                tempS = sessions[sessions.voter == mp].reset_index()
+                thisSession = tempS.at[0, 'attendance']
+                print mp
 
-            result = saveOrAbortNew(model=Presence,
-                                    created_for=self.date_of,
-                                    person=person,
-                                    person_value_sessions=thisSession,
-                                    maxMP_sessions=max_ses_voters,
-                                    average_sessions=avgSession,
-                                    maximum_sessions=max_session_value,
-                                    person_value_votes=thisVotes,
-                                    maxMP_votes=max_vote_voters,
-                                    average_votes=avgVote,
-                                    maximum_votes=max_vote_value)
+                result = saveOrAbortNew(model=Presence,
+                                        created_for=self.date_of,
+                                        person=person,
+                                        person_value_sessions=thisSession,
+                                        maxMP_sessions=max_ses_voters,
+                                        average_sessions=avgSession,
+                                        maximum_sessions=max_session_value,
+                                        person_value_votes=thisVotes,
+                                        maxMP_votes=max_vote_voters,
+                                        average_votes=avgVote,
+                                        maximum_votes=max_vote_value)
+            except:
+                print mp, 'fail set presence'
 
     def setPresenceOfPGs(self):
         """
