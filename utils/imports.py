@@ -5,9 +5,11 @@ from parlaskupine.models import Organization
 from parlaposlanci.views import setMinsterStatic
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag, Legislation
 from parlaseje.views import setMotionOfSession
-from datetime import datetime, timedelta
+from .exports import exportLegislations
 from django.test.client import RequestFactory
+from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
+
 import requests
 import re
 import feedparser
@@ -456,19 +458,28 @@ def importDraftLegislationsFromFeed():
                      'Dec':12}
         return datetime(day=int(dat_fields[0]), month=month_map[dat_fields[1]], year=int(dat_fields[2]))
 
-    url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak' 
-    url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt' 
+    url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak'
+    url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt'
     epa_regex = re.compile(r'\d+-VII \w.+') 
 
     # najprej epe od zakonov 
-    feed_zakoni = feedparser.parse(url_zakoni) 
+    feed_zakoni = feedparser.parse(url_zakoni)
     epas_and_names_zakoni = list([(epa_regex.findall(post.title)[0], post['published']) for post in feed_zakoni.entries])
-    epas_and_names_tuple_zakoni = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_zakoni] 
+    epas_and_names_tuple_zakoni = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_zakoni]
 
     # potem epe od aktov 
-    feed_akti = feedparser.parse(url_akti) 
+    feed_akti = feedparser.parse(url_akti)
     epas_and_names_akti = list([(epa_regex.findall(post.title)[0], post['published']) for post in feed_akti.entries])
-    epas_and_names_tuple_akti = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_akti] 
+    epas_and_names_tuple_akti = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_akti]
 
-    print(check_and_save_legislation(epas_and_names_tuple_zakoni, 'zakon'), 'zakoni')
-    print(check_and_save_legislation(epas_and_names_tuple_akti, 'akt'), 'akti')
+    update = False
+    report = check_and_save_legislation(epas_and_names_tuple_zakoni, 'zakon')
+    print report, 'zakon'
+    if report['saved']:
+        update = True
+    report = check_and_save_legislation(epas_and_names_tuple_akti, 'akt')
+    print report, 'akti'
+    if report['saved']:
+        update = True
+    if update:
+        exportLegislations()
