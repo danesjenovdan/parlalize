@@ -3130,8 +3130,9 @@ def legislationList(request, session_id):
         wbs[str(wb['id'])] = wb 
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
+    epas=session.in_session.exclude(epa='').distinct('epa').values_list('epa', flat=True)
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
-    laws = Legislation.objects.filter(sessions__id_parladata=session_id)
+    laws = Legislation.objects.filter(epa__in=epas)
     if legislation_type == 'zakon':
         laws = laws.filter(classification='zakon')
     elif legislation_type == 'akt':
