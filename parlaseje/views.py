@@ -3189,6 +3189,7 @@ def legislation(request, epa):
         dates = []
     for vote in votes:
         out.append({'motion_id': vote.id_parladata,
+                    'session_id': vote.session_id,
                     'text': vote.motion,
                     'votes_for': vote.votes_for,
                     'against': vote.against,
