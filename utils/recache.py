@@ -194,6 +194,12 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[], sender=None
             for v in votes.values_list("id_parladata", flat=True):
                 card_url = base_url + 's/' + 'glasovanje-layered-2' + '/' + str(v)
                 cardRecache(card_url)
+            epas = votes.exclude(epa=None).distinct('epa')
+            for epa in epas:
+                if epa in [None, '']:
+                    continue
+                card_url = base_url + 's/' + 'zakon/?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislation%2F' + str(epa)
+                cardRecache(card_url)
         # return progres to dashboard or print progresbar
         if sender:
             sender(status_id, "Running" , str(int(pg_ids.index(pg)/90.*100)) + "%", '[]')
@@ -203,6 +209,16 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[], sender=None
                              prefix='Session: ')
     if sender:
         sender(status_id, "Done" , str(datetime.now()), '[]')
+
+
+def recacheLegislationsOnSession(session_id):
+    votes = Vote.objects.filter(session__id_parladata=session_id)
+    epas = votes.exclude(epa=None).distinct('epa')
+    for epa in epas:
+        if epa in [None, '']:
+            continue
+        card_url = base_url + 's/' + 'zakon/?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislation%2F' + str(epa)
+        cardRecache(card_url)
 
 
 def updateLastActivity(mps_ids):

@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
-from parlaseje.utils import hasLegislationLink, getMotionClassification
+from parlaseje.utils_ import hasLegislationLink, getMotionClassification
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES
 from parlaskupine.models import Organization
 
