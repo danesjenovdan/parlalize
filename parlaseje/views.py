@@ -3226,40 +3226,43 @@ def legislation(request, epa):
                          'created_for': ses_date,
                          'created_at': created_at}, safe=False)
 
+
 def otherVotes(request, session_id):
     out = []
     dates = []
     session = Session.objects.get(id_parladata=int(session_id))
     dates = [session.start_time]
-    allVotes = Vote.objects.filter(session__id_parladata = session_id)
-    for vote in allVotes.order_by("start_time"):
-        if (vote.epa == None) or (vote.epa == ''):
-            out.append({'votes': {'motion_id': vote.id_parladata,
-                                  'text': vote.motion,
-                                  'votes_for': vote.votes_for,
-                                  'against': vote.against,
-                                  'abstain': vote.abstain,
-                                  'not_present': vote.not_present,
-                                  'result': vote.result,
-                                  'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
-                                  'tags': vote.tags,
-                                  'has_outliers': vote.has_outlier_voters,
-                                  'documents': vote.document_url,
-                                  'classification': vote.classification,
-                                   }                           
-                        
-                        })
-            dates.append(vote.created_at)
+    allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
+    for vote in allVotes.order_by('start_time'):
+        print vote
+        out.append({'results': {'motion_id': vote.id_parladata,
+                                'text': vote.motion,
+                                'votes_for': vote.votes_for,
+                                'against': vote.against,
+                                'abstain': vote.abstain,
+                                'not_present': vote.not_present,
+                                'result': vote.result,
+                                'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
+                                'tags': vote.tags,
+                                'has_outliers': vote.has_outlier_voters,
+                                'documents': vote.document_url,
+                                'classification': vote.classification,
+                                }
+                    })
+        dates.append(vote.created_at)
+    if dates:
         created_at = max(dates).strftime(API_DATE_FORMAT)
+    else:
+        created_at = datetime.now().strftime(API_DATE_FORMAT)
 
-        ses_date = session.start_time.strftime(API_DATE_FORMAT)
-        tags = list(Tag.objects.all().values_list('name', flat=True))
-        return JsonResponse({'results': out,
-                             'session': session.getSessionData(),
-                             'tags': tags,
-                             "classifications": VOTE_NAMES,
-                             'created_for': ses_date,
-                             'created_at': created_at}, safe=False)
+    ses_date = session.start_time.strftime(API_DATE_FORMAT)
+    tags = list(Tag.objects.all().values_list('name', flat=True))
+    return JsonResponse({'results': out,
+                         'session': session.getSessionData(),
+                         'tags': tags,
+                         'classifications': VOTE_NAMES,
+                         'created_for': ses_date,
+                         'created_at': created_at}, safe=False)
 
 
 def getExposedLegislation(request):
