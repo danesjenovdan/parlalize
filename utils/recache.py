@@ -212,7 +212,7 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[], sender=None
 
 
 def recacheLegislationsOnSession(session_id):
-    base_url = PAGE_URL + '/'
+    base_url = GLEJ_URL + '/'
     votes = Vote.objects.filter(session__id_parladata=session_id)
     epas = votes.exclude(epa=None).distinct('epa')
     for epa in epas:
