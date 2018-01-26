@@ -3232,8 +3232,8 @@ def otherVotes(request, session_id):
     session = Session.objects.get(id_parladata=int(session_id))
     dates = [session.start_time]
     allVotes = Vote.objects.filter(session__id_parladata = session_id)
-    for vote in allVotes:
-        if vote.epa == None or vote.epa == '':
+    for vote in allVotes.order_by("start_time"):
+        if (vote.epa == None) or (vote.epa == ''):
             out.append({'votes': {'motion_id': vote.id_parladata,
                                   'text': vote.motion,
                                   'votes_for': vote.votes_for,
