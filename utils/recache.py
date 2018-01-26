@@ -218,7 +218,7 @@ def recacheLegislationsOnSession(session_id):
     for epa in epas:
         if epa in [None, '']:
             continue
-        card_url = base_url + 's/' + 'zakon/?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislation%2F' + str(epa)
+        card_url = base_url + 's/' + 'zakon/?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislation%2F' + str(epa) + '&forceRender=true'
         tryHard(card_url)
 
 
