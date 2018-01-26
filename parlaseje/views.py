@@ -3233,7 +3233,7 @@ def otherVotes(request, session_id):
     dates = [session.start_time]
     allVotes = Vote.objects.filter(session__id_parladata = session_id)
     for vote in allVotes:
-        if vote.epa == None:
+        if vote.epa == None || vote.epa == '':
             out.append({'votes': {'motion_id': vote.id_parladata,
                                   'text': vote.motion,
                                   'votes_for': vote.votes_for,
@@ -3244,7 +3244,8 @@ def otherVotes(request, session_id):
                                   'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                                   'tags': vote.tags,
                                   'has_outliers': vote.has_outlier_voters,
-                                  'documents': vote.document_url
+                                  'documents': vote.document_url,
+                                  'classification': card.classification,
                                    }                           
                         
                         })
@@ -3256,6 +3257,7 @@ def otherVotes(request, session_id):
         return JsonResponse({'results': out,
                              'session': session.getSessionData(),
                              'tags': tags,
+                             "classifications": VOTE_NAMES,
                              'created_for': ses_date,
                              'created_at': created_at}, safe=False)
 
