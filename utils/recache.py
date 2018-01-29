@@ -211,17 +211,6 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[], sender=None
         sender(status_id, "Done" , str(datetime.now()), '[]')
 
 
-def recacheLegislationsOnSession(session_id):
-    base_url = GLEJ_URL + '/'
-    votes = Vote.objects.filter(session__id_parladata=session_id)
-    epas = votes.exclude(epa=None).distinct('epa')
-    for epa in epas:
-        if epa in [None, '']:
-            continue
-        card_url = base_url + 's/' + 'zakon/?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislation%2F' + str(epa) + '&forceRender=true'
-        tryHard(card_url)
-
-
 def updateLastActivity(mps_ids):
     print 'set last activity for: ', mps_ids
     for mp in mps_ids:
