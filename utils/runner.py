@@ -18,7 +18,7 @@ from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, P
 from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
 
 from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
-from parlaseje.utils import idsOfSession, getSesDates
+from parlaseje.utils_ import idsOfSession, getSesDates
 from utils.recache import updatePagesS, updateLastActivity, recacheActivities, recacheWBs
 from utils.imports import update, updateDistricts, updateTags, updatePersonStatus, importDraftLegislationsFromFeed
 from utils.votes_outliers import setMotionAnalize, setOutliers

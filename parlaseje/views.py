@@ -511,7 +511,7 @@ def setMotionOfSession(request, session_id):
         no = 0
         kvorum = 0
         not_present = 0
-        recacheLegislationsOnSession(session_id)
+    recacheLegislationsOnSession(session_id)
     return JsonResponse({'alliswell': True})
 
 
