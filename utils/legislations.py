@@ -18,11 +18,30 @@ REJECTED = LEGISLATION_RESULT[2][0]
 @lockSetter
 def check_for_legislation_final_vote(request):
     legislations = Legislation.objects.filter(status=IN_PROCESS)
-    finished = 0
-    mdt = 0
-    beginning = 0
+    stats = {'finished': 0,
+             'mdt': 0,
+             'beginning': 0}
     for legislation in legislations:
-        if legislation.epa:
+        resp = set_legislation_result(legislation)
+        if resp:
+            stats[resp] += 1
+    return JsonResponse({'status': 'done',
+                         'report': 'finished: ' + str(stats['finished']) + ', mdt: ' + str(stats['mdt']) + ', beginning: ' + str(stats['beginning'])},
+                        safe=False) 
+
+def finish_legislation_by_final_vote(vote):
+    if any(word in vote.motion for word in ['v celoti',
+                                            'ponovno odlo',
+                                            'sklep mdt',
+                                            'sklep o primernosti predloga zakona']):
+        if vote.epa:
+            legislation = Legislation.objects.filter(epa=vote.epa)
+            if legislation:
+                set_legislation_result(legislation)
+
+
+def set_legislation_result(legislation):
+    if legislation.epa:
             final_vote = Vote.objects.filter(epa=legislation.epa,
                                              motion__icontains='v celoti')
             repeated_vote = Vote.objects.filter(epa=legislation.epa,
@@ -39,7 +58,7 @@ def check_for_legislation_final_vote(request):
                 else:
                     ## REJECTED
                     legislation.result = REJECTED
-                finished += 1
+                return 'finished'
                 legislation.save()
 
             elif mdt_vote:
@@ -48,7 +67,7 @@ def check_for_legislation_final_vote(request):
                     legislation.result = REJECTED
                     legislation.status = FINISHED
                     legislation.save()
-                    mdt += 1
+                    return 'mdt'
                 else:
                     ## FURTHER VOTING WILL HAPPEN
                     pass
@@ -60,13 +79,11 @@ def check_for_legislation_final_vote(request):
                     legislation.result = REJECTED
                     legislation.status = FINISHED
                     legislation.save()
-                    beginning += 1
+                    return 'beginning'
                 else:
                     ## FURTHER VOTING WILL HAPPEN
                     pass
-    return JsonResponse({'status': 'done',
-                         'report': 'finished: ' + str(finished) + ', mdt: ' + str(mdt) + ', beginning: ' + str(beginning)},
-                        safe=False) 
+    return None
 
 
 @lockSetter

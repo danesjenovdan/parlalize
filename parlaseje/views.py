@@ -15,6 +15,8 @@ from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recach
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES
 from parlaskupine.models import Organization
 
+from utils.legislations import finish_legislation_by_final_vote
+
 
 import json
 import re
@@ -453,6 +455,8 @@ def setMotionOfSession(request, session_id):
             if vote['option'] == str('ni'):
                 not_present = not_present + 1
         result = mot['result']
+        if not result:
+            continue
         if mot['amendment_of']:
             a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
         else:
@@ -468,6 +472,7 @@ def setMotionOfSession(request, session_id):
         vote = Vote.objects.filter(id_parladata=mot['vote_id'])
 
         if vote:
+            prev_result = vote[0].result
             vote.update(created_for=session.start_time,
                         start_time=mot['start_time'],
                         session=session,
@@ -485,6 +490,8 @@ def setMotionOfSession(request, session_id):
                         classification=classification,
                         )
             vote[0].amendment_of.add(*a_orgs)
+            if prev_result != vote[0].result:
+                finish_legislation_by_final_vote(vote[0])
         else:
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
@@ -506,6 +513,8 @@ def setMotionOfSession(request, session_id):
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
                 vote[0].amendment_of.add(*a_orgs)
+
+            finish_legislation_by_final_vote(vote[0])
 
         yes = 0
         no = 0
