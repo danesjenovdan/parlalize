@@ -100,7 +100,8 @@ USE_TZ = False
 LAST_ACTIVITY_COUNT = 10
 
 
-#PARLALIZE vote options represent for vote analyses
+# PARLALIZE vote options represent for vote analyses
+# in ballots we save the option as string. this is used to transform it to a numerical value
 VOTE_MAP = {
     "za": 1, # for
     "proti": -1, # against
@@ -136,12 +137,16 @@ API_OUT_DATE_FORMAT = '%-d. %-m. %Y'
 CORS_ORIGIN_ALLOW_ALL = True
 
 # Legislation status options: in procedure / procedure ended
+# we use these in the django admin interface to define select dropdown options
+# it is tied to the model, so if you change this please check parlaseje.models.Legislation
 LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
 
 # Legislation result: empty / accepted / rejected
+# we use these in the django admin interface to define select dropdown options
+# it is tied to the model, so if you change this please check parlaseje.models.Legislation
 LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
 
-# Vote classificators. Vote text contains.
+# Vote classificators. Vote text contains. This is tied to VOTE_NAMES.
 VOTE_INDICATORS = { 
     '1': ['dnevni red', 'širitev dnevnega reda', 'umik točke dnevnega reda'], 
     '2': ['glasovanje o zakonu v celoti'], 
