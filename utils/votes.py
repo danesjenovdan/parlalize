@@ -4,7 +4,7 @@ import json
 
 from datetime import datetime
 
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, VOTE_MAP
 from parlalize.utils_ import tryHard, saveOrAbortNew, getDataFromPagerApi
 
 from parlaseje.models import Session
@@ -12,13 +12,6 @@ from parlaposlanci.models import Person, EqualVoters, LessEqualVoters, Presence
 from parlaskupine.models import (Organization, MostMatchingThem,
                                  LessMatchingThem, DeviationInOrganization,
                                  PercentOFAttendedSession)
-
-VOTE_MAP = {'za': 1,
-            'proti': -1,
-            'kvorum': 0,
-            'ni': 0,
-            'ni_poslanec': 0
-            }
 
 
 class VotesAnalysis(object):
