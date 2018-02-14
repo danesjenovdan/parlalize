@@ -513,8 +513,7 @@ def setMotionOfSession(request, session_id):
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
                 vote[0].amendment_of.add(*a_orgs)
-
-            finish_legislation_by_final_vote(vote[0])
+                finish_legislation_by_final_vote(vote[0])
 
         yes = 0
         no = 0
