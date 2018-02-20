@@ -422,7 +422,6 @@ def updateLegislation(request):
 
 
 def importDraftLegislationsFromFeed(): 
- 
     def split_epa_and_name(thing, date): 
         epa_regex = re.compile(r'\d+-VII') 
         current_epa = epa_regex.findall(thing)[0] 
@@ -443,33 +442,27 @@ def importDraftLegislationsFromFeed():
         return stats
 
     def getDate(dat):
-        dat_fields = dat.split(" ")[1:4]
-        month_map = {'Jan':1,
-                     'Feb':2,
-                     'Mar':3,
-                     'Apr':4,
-                     'May':5,
-                     'Jun':6,
-                     'Jul':7,
-                     'Aug':8,
-                     'Sep':9,
-                     'Oct':10,
-                     'Nov':11,
-                     'Dec':12}
-        return datetime(day=int(dat_fields[0]), month=month_map[dat_fields[1]], year=int(dat_fields[2]))
+        return datetime.strptime(dat.split(',')[1].strip(), "%d %b %Y %X %Z")
 
-    url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak'
-    url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt'
-    epa_regex = re.compile(r'\d+-VII \w.+') 
+    def getEpaFromText(text):
+        epa_regex = re.compile(r'\d+-VII \w.+')
+        result = epa_regex.findall(text)
+        if result:
+            return result[0]
+        else:
+            return None
+        url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak'
+        url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt'
+    
 
     # najprej epe od zakonov 
     feed_zakoni = feedparser.parse(url_zakoni)
-    epas_and_names_zakoni = list([(epa_regex.findall(post.title)[0], post['published']) for post in feed_zakoni.entries])
+    epas_and_names_zakoni = list([(getEpaFromText(post.title), post['published']) for post in feed_zakoni.entries if getEpaFromText(post.title)])
     epas_and_names_tuple_zakoni = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_zakoni]
 
     # potem epe od aktov 
     feed_akti = feedparser.parse(url_akti)
-    epas_and_names_akti = list([(epa_regex.findall(post.title)[0], post['published']) for post in feed_akti.entries])
+    epas_and_names_akti = list([(getEpaFromText(post.title), post['published']) for post in feed_akti.entries  if getEpaFromText(post.title)])
     epas_and_names_tuple_akti = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_akti]
 
     update = False
