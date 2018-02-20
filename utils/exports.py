@@ -132,4 +132,3 @@ def data_to_csv():
                 tmp[column] = model_data.person_value
         data.append(tmp)
     listToCSV(data, 'toski_export.csv')
-data_to_csv()

@@ -451,10 +451,10 @@ def importDraftLegislationsFromFeed():
             return result[0]
         else:
             return None
-        url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak'
-        url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt'
-    
 
+    url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak'
+    url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt'
+    
     # najprej epe od zakonov 
     feed_zakoni = feedparser.parse(url_zakoni)
     epas_and_names_zakoni = list([(getEpaFromText(post.title), post['published']) for post in feed_zakoni.entries if getEpaFromText(post.title)])
