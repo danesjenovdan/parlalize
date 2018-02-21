@@ -517,6 +517,9 @@ def fastUpdate(fast=True, date_=None):
             ballots.save()
 
     # update questions
+    sc.api_call("chat.postMessage",
+                channel="#parlalize_notif",
+                text='Start update Questions at: ' + str(datetime.now()))
     existingISs = list(Question.objects.all().values_list('id_parladata',
                                                           flat=True))
     for dic in data['questions']:
@@ -560,11 +563,17 @@ def fastUpdate(fast=True, date_=None):
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.add(*rec_posts)
 
+    sc.api_call("chat.postMessage",
+                channel="#parlalize_notif",
+                text='Start update distircts and tags at: ' + str(datetime.now()))
     updateDistricts()
 
     updateTags()
 
     if data['persons']:
+        sc.api_call("chat.postMessage",
+                    channel="#parlalize_notif",
+                    text='Update MPStatic at: ' + str(datetime.now()))
         print 'mp static'
         updateMPStatic()
         print 'update person status'

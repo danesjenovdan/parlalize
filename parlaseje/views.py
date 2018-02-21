@@ -442,6 +442,7 @@ def setMotionOfSession(request, session_id):
     no = 0
     kvorum = 0
     not_present = 0
+    laws = []
     for mot in motion:
         url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
@@ -465,6 +466,7 @@ def setMotionOfSession(request, session_id):
         # TODO: replace try with: "if mot['epa']"
         try:
             law = Legislation.objects.get(epa=mot['epa'])
+            laws.append(law)
         except:
             law = None
 
@@ -519,7 +521,8 @@ def setMotionOfSession(request, session_id):
         no = 0
         kvorum = 0
         not_present = 0
-    recacheLegislationsOnSession(session_id)
+    if laws:
+        recacheLegislationsOnSession(session_id)
     return JsonResponse({'alliswell': True})
 
 
