@@ -447,14 +447,14 @@ def setMotionOfSession(request, session_id):
         url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
         for vote in votes:
-            if vote['option'] == str('za'):
+            if vote['option'] == str('aye'):
                 yes = yes + 1
-            if vote['option'] == str('proti'):
+            if vote['option'] == str('no'):
                 no = no + 1
-            if vote['option'] == str('kvorum'):
+            if vote['option'] == str('tellno'):
                 kvorum = kvorum + 1
-            if vote['option'] == str('ni'):
-                not_present = not_present + 1
+            if vote['option'] == str('tellaye'):
+                kvorum = kvorum + 1
         result = mot['result']
         if result == None:
             continue
