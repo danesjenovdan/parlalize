@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recacheLegislationsOnSession
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES, DZ, COUNCIL_ID
 from parlaskupine.models import Organization
 
 from utils.legislations import finish_legislation_by_final_vote
@@ -2011,8 +2011,6 @@ def getSessionsByClassification(request):
     }
     """
     sessions = json.loads(getAllStaticData(None).content)['sessions']
-    COUNCIL_ID = 9
-    DZ = 95
     working_bodies = ["odbor", "komisija", "preiskovalna komisija"]
     out = {"kolegij": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=COUNCIL_ID).order_by("-start_time")],
            "dz": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=DZ).order_by("-start_time")],
@@ -2124,8 +2122,6 @@ def getSessionsList(request, date_=None, force_render=False):
     }
     }
     """
-    COUNCIL_ID = 9
-    DZ = 95
     working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
