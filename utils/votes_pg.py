@@ -12,7 +12,7 @@ from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi
 def set_mismatch_of_pg(date_=''):
     print 'prepare date'
     if date_:
-        f_date = datetime.strptime(date, '%d.%m.%Y')
+        f_date = datetime.strptime(date_, '%d.%m.%Y')
     else:
         f_date = datetime.now()
     API_URL = 'https://data.parlameter.si/v1'
