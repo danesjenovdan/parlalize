@@ -159,7 +159,7 @@ def onDatePGCardRunner(date_=None):
         except:
             print FAIL + 'FAIL on: ' + str(setter) + ENDC
 
-    set_mismatch_of_pg()
+    set_mismatch_of_pg(None)
 
     # updateWB()
 
