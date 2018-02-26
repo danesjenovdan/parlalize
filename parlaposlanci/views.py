@@ -2453,7 +2453,8 @@ def setAverageNumberOfSpeechesPerSessionAll(request, date_=None): # TODO refacto
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         # dirty work around, TODO: fix findDatesFromLastCard for input without person_id
-        date_of = findDatesFromLastCard(Presence, '11', datetime.now().strftime(API_DATE_FORMAT))[0]
+        #date_of = findDatesFromLastCard(Presence, '11', datetime.now().strftime(API_DATE_FORMAT))[0]
+        date_of = datetime.now().date()
         date_ = ""
 
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
