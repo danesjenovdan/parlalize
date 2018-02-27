@@ -58,8 +58,8 @@ def set_legislation_result(legislation):
                 else:
                     ## REJECTED
                     legislation.result = REJECTED
+                    legislation.save()
                 return 'finished'
-                legislation.save()
 
             elif mdt_vote:
                 if is_accepeted(mdt_vote[0]):
