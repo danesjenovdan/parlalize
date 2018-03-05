@@ -1000,26 +1000,35 @@ def getLastActivity(request, person_id, date_=None):
     a = a.extra(select={'start_time_date': 'DATE(start_time)'})
     dates = list(set(list(a.values_list("start_time_date", flat=True))))
     dates.sort()
-    a = a.filter(person__id_parladata=person_id,
-                 start_time__gte=dates[-15]).order_by('-start_time')
- 
-    staticData = requests.get(BASE_URL + '/utils/getAllStaticData/').json()
-    result = []
-    dates = list(set(list(a.values_list("start_time_date", flat=True))))
-    dates.sort()
-    data = {date: [] for date in dates}
-    for activity in a:
-        act_obj = activity.get_child()
-        if type(act_obj) == Ballot:
-            data[activity.start_time_date].append(getBallotData(act_obj))
-        elif type(act_obj) == Speech:
-            data[activity.start_time_date].append(getSpeechData(act_obj, staticData['sessions']))
-        elif type(act_obj) == Question:
-            data[activity.start_time_date].append(getQuestionData(act_obj, staticData['sessions']))
+    if len(dates) > 14:
+        st_date = dates[-15]
+        
+    elif len(dates) > 0:
+        st_date = dates[0]
+    else:
+        st_date = None
+        out = []
+    if st_date:
+        a = a.filter(person__id_parladata=person_id,
+                     start_time__gte=st_date).order_by('-start_time')
+     
+        staticData = requests.get(BASE_URL + '/utils/getAllStaticData/').json()
+        result = []
+        dates = list(set(list(a.values_list("start_time_date", flat=True))))
+        dates.sort()
+        data = {date: [] for date in dates}
+        for activity in a:
+            act_obj = activity.get_child()
+            if type(act_obj) == Ballot:
+                data[activity.start_time_date].append(getBallotData(act_obj))
+            elif type(act_obj) == Speech:
+                data[activity.start_time_date].append(getSpeechData(act_obj, staticData['sessions']))
+            elif type(act_obj) == Question:
+                data[activity.start_time_date].append(getQuestionData(act_obj, staticData['sessions']))
 
-    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
-            'events': data[date]}
-           for date in dates]
+        out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+                'events': data[date]}
+               for date in dates]
 
     result = {
         'created_at': dates[-1].strftime(API_OUT_DATE_FORMAT),
