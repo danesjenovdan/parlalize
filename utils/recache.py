@@ -8,7 +8,7 @@ from raven.contrib.django.raven_compat.models import client
 from parlaposlanci.views import getSlugs, getListOfMembers
 from parlaskupine.views import getListOfPGs, getIntraDisunionOrg
 from parlaseje.views import getSessionsList
-from parlaseje.models import Session
+from parlaseje.models import Session, Vote
 from parlaskupine.models import Organization
 from parlalize.settings import API_DATE_FORMAT, BASE_URL, API_URL, GLEJ_URL, PAGE_URL, slack_token
 from parlalize.utils_ import getAllStaticData, tryHard, printProgressBar, getPersonData
@@ -193,6 +193,12 @@ def recacheCards(pgCards=[], mpCards=[], sessions={}, votes_of_s=[], sender=None
             votes = Vote.objects.filter(session__id_parladata=s)
             for v in votes.values_list("id_parladata", flat=True):
                 card_url = base_url + 's/' + 'glasovanje-layered-2' + '/' + str(v)
+                cardRecache(card_url)
+            epas = votes.exclude(epa=None).distinct('epa')
+            for epa in epas:
+                if epa in [None, '']:
+                    continue
+                card_url = base_url + 's/' + 'zakon/?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislation%2F' + str(epa)
                 cardRecache(card_url)
         # return progres to dashboard or print progresbar
         if sender:

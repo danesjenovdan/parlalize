@@ -3,7 +3,7 @@ from datetime import datetime
 from django.http import Http404
 from parlaposlanci.models import LastActivity
 from parlaseje.models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, LEGISLATION_STATUS, LEGISLATION_RESULT, VOTE_INDICATORS
+from parlalize.settings import API_URL, API_DATE_FORMAT, LEGISLATION_STATUS, LEGISLATION_RESULT, VOTE_INDICATORS, GLEJ_URL
 from django.http import JsonResponse
 from parlalize.utils_ import tryHard
 
@@ -169,3 +169,20 @@ def getMotionClassification(motion):
                 return cl 
 
     return '14' # others
+
+
+def recacheLegislationsOnSession(session_id):
+    base_url = GLEJ_URL + '/'
+    card_url = base_url + 'c/' + 'zakonodaja/:id?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislationList%2F' + str(session_id) + '&forceRender=true'
+    print card_url
+    tryHard(card_url)
+    card_url = base_url + 's/' + 'seznam-glasovanj/' + str(session_id) + '?forceRender=true'
+    tryHard(card_url)
+    votes = Vote.objects.filter(session__id_parladata=session_id)
+    epas = votes.exclude(epa=None).distinct('epa').values_list('epa', flat=True)
+    for epa in epas:
+        if epa in [None, '']:
+            continue
+        card_url = base_url + 's/' + 'zakon/?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislation%2F' + str(epa) + '&forceRender=true'
+        print card_url
+        tryHard(card_url)

@@ -9,11 +9,14 @@ from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi
 
-def set_mismatch_of_pg():
+def set_mismatch_of_pg(request, date_=''):
     print 'prepare date'
-    date_ = ''
+    if date_:
+        f_date = datetime.strptime(date_, '%d.%m.%Y')
+    else:
+        f_date = datetime.now()
     API_URL = 'https://data.parlameter.si/v1'
-    url = API_URL + '/getVotesTableExtended'
+    url = API_URL + '/getVotesTableExtended/' + date_
     data = getDataFromPagerApi(url)
     data = pd.DataFrame(data)
     url = API_URL + '/getMPs/' + date_
@@ -117,8 +120,8 @@ def set_mismatch_of_pg():
     for d in data:
         saveOrAbortNew(model=MismatchOfPG,
                        person=d['person'],
-                       created_for=datetime.now(),
+                       created_for=f_date,
                        average=avg,
-                       maximum=maxMismatch['values'],
+                       maximum=maxMismatch['value'],
                        maxMP=maxMismatch['person'],
                        data=d['value'])

@@ -11,9 +11,11 @@ from django.views.decorators.csrf import csrf_exempt
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
-from parlaseje.utils import hasLegislationLink, getMotionClassification
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES
+from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recacheLegislationsOnSession
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES, DZ, COUNCIL_ID
 from parlaskupine.models import Organization
+
+from utils.legislations import finish_legislation_by_final_vote
 
 
 import json
@@ -440,6 +442,7 @@ def setMotionOfSession(request, session_id):
     no = 0
     kvorum = 0
     not_present = 0
+    laws = []
     for mot in motion:
         url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
@@ -453,6 +456,8 @@ def setMotionOfSession(request, session_id):
             if vote['option'] == str('ni'):
                 not_present = not_present + 1
         result = mot['result']
+        if result == None:
+            continue
         if mot['amendment_of']:
             a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
         else:
@@ -461,6 +466,7 @@ def setMotionOfSession(request, session_id):
         # TODO: replace try with: "if mot['epa']"
         try:
             law = Legislation.objects.get(epa=mot['epa'])
+            laws.append(law)
         except:
             law = None
 
@@ -468,6 +474,7 @@ def setMotionOfSession(request, session_id):
         vote = Vote.objects.filter(id_parladata=mot['vote_id'])
 
         if vote:
+            prev_result = vote[0].result
             vote.update(created_for=session.start_time,
                         start_time=mot['start_time'],
                         session=session,
@@ -485,6 +492,8 @@ def setMotionOfSession(request, session_id):
                         classification=classification,
                         )
             vote[0].amendment_of.add(*a_orgs)
+            if prev_result != vote[0].result:
+                finish_legislation_by_final_vote(vote[0])
         else:
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
@@ -506,11 +515,14 @@ def setMotionOfSession(request, session_id):
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
                 vote[0].amendment_of.add(*a_orgs)
+                finish_legislation_by_final_vote(vote[0])
 
         yes = 0
         no = 0
         kvorum = 0
         not_present = 0
+    if laws:
+        recacheLegislationsOnSession(session_id)
     return JsonResponse({'alliswell': True})
 
 
@@ -740,7 +752,7 @@ def getMotionOfSession(request, session_id, date=False):
                                         'not_present': card.not_present,
                                         'result': card.result,
                                         'epa': card.epa if card.epa else None,
-                                        'is_outlier': card.is_outlier,
+                                        'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. card.is_outlier,
                                         'tags': card.tags,
                                         'has_outliers': card.has_outlier_voters,
                                         'classification': card.classification,
@@ -1350,6 +1362,17 @@ def getMotionAnalize(request, motion_id):
             members.append({'person': personData,
                             'option': option,
                             'is_outlier': outlier})
+    if vote.classification == '2':
+        leg = Legislation.objects.filter(epa=vote.epa)
+        if leg:
+            abstract = leg[0].note
+            visible = leg[0].abstractVisible
+        else:
+            abstract = ''
+            visible = False
+    else:
+        abstract = vote.note
+        visible = vote.abstractVisible
 
     # get legislation data
     legislation = Legislation.objects.filter(epa=vote.epa)
@@ -1369,15 +1392,16 @@ def getMotionAnalize(request, motion_id):
            'result': {'accepted': vote.result,
                       'value': max_vote_percent_opt,
                       'max_opt': max_vote_opt,
-                      'is_outlier': vote.is_outlier},
+                      'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
+                      },
            'documents': docs if docs else [],
            'members': members,
            'parties': orgs_data,
            'gov_side': {'coalition': json.loads(model.coal_opts),
                         'opposition': json.loads(model.oppo_opts)},
            'all': options,
-           'abstractVisible': vote.abstractVisible,
-           'abstract': vote.note}
+           'abstractVisible': visible,
+           'abstract': abstract}
     return JsonResponse(out, safe=False)
 
 
@@ -1987,8 +2011,6 @@ def getSessionsByClassification(request):
     }
     """
     sessions = json.loads(getAllStaticData(None).content)['sessions']
-    COUNCIL_ID = 9
-    DZ = 95
     working_bodies = ["odbor", "komisija", "preiskovalna komisija"]
     out = {"kolegij": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=COUNCIL_ID).order_by("-start_time")],
            "dz": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=DZ).order_by("-start_time")],
@@ -2100,8 +2122,6 @@ def getSessionsList(request, date_=None, force_render=False):
     }
     }
     """
-    COUNCIL_ID = 9
-    DZ = 95
     working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -2963,7 +2983,7 @@ def getComparedVotes(request):
                 'abstain': vote.abstain,
                 'not_present': vote.not_present,
                 'result': vote.result,
-                'is_outlier': vote.is_outlier,
+                'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                 'has_outliers': vote.has_outlier_voters,
                 'tags': vote.tags,
                 'date': vote.start_time.strftime(API_DATE_FORMAT)
@@ -3104,7 +3124,7 @@ def getVotesData(request, votes):
                     'abstain': vote.abstain,
                     'not_present': vote.not_present,
                     'result': vote.result,
-                    'is_outlier': vote.is_outlier,
+                    'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'has_outliers': vote.has_outlier_voters}
             })
     return JsonResponse(out, safe=False)
@@ -3118,12 +3138,19 @@ def legislationList(request, session_id):
         wbs[str(wb['id'])] = wb 
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
+    epas=session.in_session.exclude(epa='').distinct('epa').values_list('epa', flat=True)
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
-    laws = Legislation.objects.filter(sessions__id_parladata=session_id)
+    laws = Legislation.objects.filter(epa__in=epas)
     if legislation_type == 'zakon':
         laws = laws.filter(classification='zakon')
     elif legislation_type == 'akt':
         laws = laws.exclude(classification='zakon')
+
+    if not laws:
+        return JsonResponse({'results': [],
+                             'session': session.getSessionData(),
+                             'created_for': ses_date,
+                             'created_at': datetime.now().strftime(API_DATE_FORMAT)}, safe=False)
     created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
     for law in laws:
         out.append({'epa': law.epa,
@@ -3164,74 +3191,86 @@ def legislation(request, epa):
                         'orgs': '',
                         'in_review': ''}
     votes = Vote.objects.filter(epa=law.epa)
-    dates = [law.date]
+    if law.date:
+        dates = [law.date]
+    else:
+        dates = []
     for vote in votes:
         out.append({'motion_id': vote.id_parladata,
+                    'session_id': vote.session.id_parladata,
                     'text': vote.motion,
                     'votes_for': vote.votes_for,
                     'against': vote.against,
                     'abstain': vote.abstain,
                     'not_present': vote.not_present,
                     'result': vote.result,
-                    'is_outlier': vote.is_outlier,
+                    'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'tags': vote.tags,
                     'has_outliers': vote.has_outlier_voters,
                     'documents': vote.document_url
                     })
         dates.append(vote.created_at)
-    max_date = max(dates)
-    if max_date:
+    if dates:
+        max_date = max(dates)
         created_at = max_date.strftime(API_DATE_FORMAT)
     else:
-        created_at = datetime.now().strftime(API_DATE_FORMAT)
+        created_at = law.created_at.strftime(API_DATE_FORMAT)
+        
 
     ses_date = start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
     return JsonResponse({'votes': out,
                          'session': session_data,
                          'tags': tags,
+                         'icon': law.icon,
                          'status': law.status,
                          'text': law.text,
                          'result': law.result,
                          'abstract': law.note,
                          'abstractVisible': law.abstractVisible,
+                         'extra_abstract': law.extra_note,
                          'epa': law.epa,
                          'classification': law.classification,
                          'created_for': ses_date,
                          'created_at': created_at}, safe=False)
+
 
 def otherVotes(request, session_id):
     out = []
     dates = []
     session = Session.objects.get(id_parladata=int(session_id))
     dates = [session.start_time]
-    allVotes = Vote.objects.filter(session__id_parladata = session_id)
-    for vote in allVotes:
-        if vote.epa == None:
-            out.append({'votes': {'motion_id': vote.id_parladata,
-                                  'text': vote.motion,
-                                  'votes_for': vote.votes_for,
-                                  'against': vote.against,
-                                  'abstain': vote.abstain,
-                                  'not_present': vote.not_present,
-                                  'result': vote.result,
-                                  'is_outlier': vote.is_outlier,
-                                  'tags': vote.tags,
-                                  'has_outliers': vote.has_outlier_voters,
-                                  'documents': vote.document_url
-                                   }                           
-                        
-                        })
-            dates.append(vote.created_at)
+    allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
+    for vote in allVotes.order_by('start_time'):
+        print vote
+        out.append({'results': {'motion_id': vote.id_parladata,
+                                'text': vote.motion,
+                                'votes_for': vote.votes_for,
+                                'against': vote.against,
+                                'abstain': vote.abstain,
+                                'not_present': vote.not_present,
+                                'result': vote.result,
+                                'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
+                                'tags': vote.tags,
+                                'has_outliers': vote.has_outlier_voters,
+                                'documents': vote.document_url,
+                                'classification': vote.classification,
+                                }
+                    })
+        dates.append(vote.created_at)
+    if dates:
         created_at = max(dates).strftime(API_DATE_FORMAT)
+    else:
+        created_at = datetime.now().strftime(API_DATE_FORMAT)
 
-        ses_date = session.start_time.strftime(API_DATE_FORMAT)
-        tags = list(Tag.objects.all().values_list('name', flat=True))
-        return JsonResponse({'results': out,
-                             'session': session.getSessionData(),
-                             'tags': tags,
-                             'created_for': ses_date,
-                             'created_at': created_at}, safe=False)
+    ses_date = session.start_time.strftime(API_DATE_FORMAT)
+    tags = list(Tag.objects.all().values_list('name', flat=True))
+    return JsonResponse({'results': out,
+                         'session': session.getSessionData(),
+                         'tags': tags,
+                         'classifications': VOTE_NAMES,
+                         'created_for': ses_date,
+                         'created_at': created_at}, safe=False)
 
 
 def getExposedLegislation(request):

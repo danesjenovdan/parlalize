@@ -31,25 +31,19 @@ class WordAnalysis(object):
             self.date_of = datetime.now().date()
             self.date_ = ''
 
-        url = ('' + API_URL + ''
-               '/isSpeechOnDay/'
-               '' + self.date_ + '')
-        self.isNewSpeech = tryHard(url).json()['isSpeech']
-        print self.isNewSpeech
-        if self.isNewSpeech:
-            self.count_of = count_of
+        self.count_of = count_of
 
-            # get members for this day
-            url = ('' + API_URL + ''
-                   '/getMPs/'
-                   '' + self.date_ + '')
-            self.members = tryHard(url).json()
-            url = ('' + API_URL + ''
-                   '/getAllTimeMemberships')
-            self.allTimeMembers = tryHard(url).json()
-            # self.prepereSpeechesFromSearch()
-            self.prepereSpeeches()
-            self.wordCounter()
+        # get members for this day
+        url = ('' + API_URL + ''
+               '/getMPs/'
+               '' + self.date_ + '')
+        self.members = tryHard(url).json()
+        url = ('' + API_URL + ''
+               '/getAllTimeMemberships')
+        self.allTimeMembers = tryHard(url).json()
+        # self.prepereSpeechesFromSearch()
+        self.prepereSpeeches()
+        self.wordCounter()
 
     def prepereSpeechesFromSearch(self):
         if self.count_of == 'members':

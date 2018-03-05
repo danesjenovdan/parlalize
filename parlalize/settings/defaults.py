@@ -100,13 +100,14 @@ USE_TZ = False
 LAST_ACTIVITY_COUNT = 10
 
 
-#PARLALIZE votes represent
+# PARLALIZE vote options represent for vote analyses
+# in ballots we save the option as string. this is used to transform it to a numerical value
 VOTE_MAP = {
-    "za": 1,
-    "proti": -1,
-    "kvorum": 0,
-    "ni": 0,
-    "ni_poslanec": 0
+    "za": 1, # for
+    "proti": -1, # against
+    "kvorum": 0, # abstain
+    "ni": 0, # not present
+    "ni_poslanec": 0 # is not a Member
 }
 
 LOGGING = {
@@ -135,10 +136,17 @@ API_OUT_DATE_FORMAT = '%-d. %-m. %Y'
 # CORS config
 CORS_ORIGIN_ALLOW_ALL = True
 
+# Legislation status options: in procedure / procedure ended
+# we use these in the django admin interface to define select dropdown options
+# it is tied to the model, so if you change this please check parlaseje.models.Legislation
 LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
 
+# Legislation result: empty / accepted / rejected
+# we use these in the django admin interface to define select dropdown options
+# it is tied to the model, so if you change this please check parlaseje.models.Legislation
 LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
 
+# Vote classificators. Vote text contains. This is tied to VOTE_NAMES.
 VOTE_INDICATORS = { 
     '1': ['dnevni red', 'širitev dnevnega reda', 'umik točke dnevnega reda'], 
     '2': ['glasovanje o zakonu v celoti'], 
@@ -162,21 +170,25 @@ VOTE_INDICATORS = {
     '13': ['odlok o načrtu ravnanja s stvarnim premoženjem'],
 }
 
+# Vote classification
 VOTE_NAMES = { 
-    '1': 'dnevni red',
-    '2': 'glasovanje o zakonu v celoti', 
-    '3': 'amandma', 
-    '4': 'interpelacija', 
-    '5': 'evidenčni sklep', 
-    '6': 'predlog sklepa', 
-    '7': 'zakon o ratifikaciji', 
-    '8': 'imenovanje',
-    '9': 'predlog za razpis', 
-    '10': 'priporočilo', 
-    '11': 'poročilo', 
-    '12': 'proceduralni predlog',
+    '1': 'dnevni red', # agenda
+    '2': 'glasovanje o zakonu v celoti', # final votiong 
+    '3': 'amandma', # amendment
+    '4': 'interpelacija', # interpelation
+    '5': 'evidenčni sklep', # record conclusion
+    '6': 'predlog sklepa', # proposal for a decision
+    '7': 'zakon o ratifikaciji', # ratification law
+    '8': 'imenovanje', # naming
+    '9': 'predlog za razpis', # proposal for a call
+    '10': 'priporočilo', # recommendation 
+    '11': 'poročilo', # report 
+    '12': 'proceduralni predlog', # procedural proposal 
     '13': 'odlok o načrtu ravnanja s stvarnim premoženjem',
-    '14': 'drugo'
+    '14': 'drugo' # others
 }
 
 TINYMCE_INCLUDE_JQUERY = False
+
+COUNCIL_ID = 9
+DZ = 95

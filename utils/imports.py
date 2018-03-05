@@ -1,12 +1,15 @@
-from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, PARSER_PASS
+from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, PARSER_PASS, BASE_URL
 from parlalize.utils_ import tryHard, getDataFromPagerApi
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
 from parlaposlanci.views import setMinsterStatic
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag, Legislation
-from datetime import datetime, timedelta
+from parlaseje.views import setMotionOfSession
+from .exports import exportLegislations
 from django.test.client import RequestFactory
+from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
+
 import requests
 import re
 import feedparser
@@ -188,7 +191,9 @@ def updateMotionOfSession():
     ses = Session.objects.all()
     for s in ses:
         print s.id_parladata
-        tryHard(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata))
+        resp =  setMotionOfSession(request_with_key, str(s.id_parladata))
+        print resp.content
+        #tryHard(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata) + '?key=' + SETTER_KEY )
 
 # treba pofixsat
 
@@ -315,7 +320,7 @@ def updatePersonStatus():
 
 
 def updatePersonFunctions():
-    mps = tryHard(API_URL + '/getMembersWithFuction').json()
+    mps = tryHard(API_URL + '/getMembersWithFunction/').json()
 
     for person in Person.objects.all():
         if person.has_function:
@@ -330,35 +335,43 @@ def updatePersonFunctions():
 
 def update():
     updateOrganizations()
-    print 'org'
+    print 'orgs done'
 
+    print 'start people'
     updatePeople()
-    print 'pep'
+    print 'people done'
 
+    print 'start ministers'
     updateMinistrers()
-    print 'ministers'
+    print 'ministers done'
 
+    print 'start sessions'
     setAllSessions()
-    print 'Sessions'
+    print 'Sessions done'
 
+    print 'start speeches'
     updateSpeeches()
-    print 'speeches'
+    print 'speeches done'
 
+    print 'start votes'
     updateMotionOfSession()
-    print 'votes'
+    print 'votes done'
 
+    print 'start ballots'
     updateBallots()
-    print 'ballots'
+    print 'ballots done'
 
+    print 'update districts and tags'
     updateDistricts()
-
     updateTags()
 
-    print 'update person status'
+    print 'start update person status'
     updatePersonStatus()
+    print 'update person status done'
 
-    print 'update person has_function'
+    print 'start update person has_function'
     updatePersonFunctions()
+    print 'update person has_function done'
 
     return 1
 
@@ -409,12 +422,12 @@ def updateLegislation(request):
 
 
 def importDraftLegislationsFromFeed(): 
- 
-    def split_epa_and_name(thing): 
+    def split_epa_and_name(thing, date): 
         epa_regex = re.compile(r'\d+-VII') 
         current_epa = epa_regex.findall(thing)[0] 
-        current_name = thing.split(current_epa)[1].strip() 
-        return (current_epa, current_name)
+        current_name = thing.split(current_epa)[1].strip()
+        date = getDate(date)
+        return (current_epa, current_name, date)
 
     def check_and_save_legislation(legislations, classification):
         stats = {'saved': 0,
@@ -422,25 +435,44 @@ def importDraftLegislationsFromFeed():
         for legislation in legislations:
             saved = Legislation.objects.filter(epa=legislation[0])
             if not saved:
-                Legislation(epa=legislation[0], text=legislation[1], classification=classification).save()
+                Legislation(epa=legislation[0], text=legislation[1], date=legislation[2], classification=classification).save()
                 stats['saved'] += 1
             else:
                 stats['skiped'] += 1
         return stats
- 
-    url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak' 
-    url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt' 
-    epa_regex = re.compile(r'\d+-VII \w.+') 
 
+    def getDate(dat):
+        return datetime.strptime(dat.split(',')[1].strip(), "%d %b %Y %X %Z")
+
+    def getEpaFromText(text):
+        epa_regex = re.compile(r'\d+-VII \w.+')
+        result = epa_regex.findall(text)
+        if result:
+            return result[0]
+        else:
+            return None
+
+    url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak'
+    url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt'
+    
     # najprej epe od zakonov 
-    feed_zakoni = feedparser.parse(url_zakoni) 
-    epas_and_names_zakoni = list(set([epa_regex.findall(post.title)[0] for post in feed_zakoni.entries])) 
-    epas_and_names_tuple_zakoni = [split_epa_and_name(thing) for thing in epas_and_names_zakoni] 
+    feed_zakoni = feedparser.parse(url_zakoni)
+    epas_and_names_zakoni = list([(getEpaFromText(post.title), post['published']) for post in feed_zakoni.entries if getEpaFromText(post.title)])
+    epas_and_names_tuple_zakoni = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_zakoni]
 
     # potem epe od aktov 
-    feed_akti = feedparser.parse(url_akti) 
-    epas_and_names_akti = list(set([epa_regex.findall(post.title)[0] for post in feed_akti.entries])) 
-    epas_and_names_tuple_akti = [split_epa_and_name(thing) for thing in epas_and_names_akti] 
+    feed_akti = feedparser.parse(url_akti)
+    epas_and_names_akti = list([(getEpaFromText(post.title), post['published']) for post in feed_akti.entries  if getEpaFromText(post.title)])
+    epas_and_names_tuple_akti = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_akti]
 
-    print(check_and_save_legislation(epas_and_names_tuple_zakoni, 'zakon'), 'zakoni')
-    print(check_and_save_legislation(epas_and_names_tuple_akti, 'akt'), 'akti')
+    update = False
+    report = check_and_save_legislation(epas_and_names_tuple_zakoni, 'zakon')
+    print report, 'zakon'
+    if report['saved']:
+        update = True
+    report = check_and_save_legislation(epas_and_names_tuple_akti, 'akt')
+    print report, 'akti'
+    if report['saved']:
+        update = True
+    if update:
+        exportLegislations()

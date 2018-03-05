@@ -4,7 +4,7 @@ import json
 
 from datetime import datetime
 
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, VOTE_MAP
 from parlalize.utils_ import tryHard, saveOrAbortNew, getDataFromPagerApi
 
 from parlaseje.models import Session
@@ -12,13 +12,6 @@ from parlaposlanci.models import Person, EqualVoters, LessEqualVoters, Presence
 from parlaskupine.models import (Organization, MostMatchingThem,
                                  LessMatchingThem, DeviationInOrganization,
                                  PercentOFAttendedSession)
-
-VOTE_MAP = {'za': 1,
-            'proti': -1,
-            'kvorum': 0,
-            'ni': 0,
-            'ni_poslanec': 0
-            }
 
 
 class VotesAnalysis(object):
@@ -187,7 +180,11 @@ class VotesAnalysis(object):
         for mp in self.members:
             print '.:' + str(mp) + ':.'
             person = Person.objects.get(id_parladata=int(mp))
-            r = self.equalVotersData[mp]
+            try:
+                r = self.equalVotersData[mp]
+            except:
+                print mp, 'fail set equal voters'
+                continue
             mps_data = r.reset_index().sort_values(mp, ascending=False)
 
             # most equal
@@ -344,23 +341,26 @@ class VotesAnalysis(object):
         max_ses_voters = actualSession[actualSession.attendance == max_session_value]['voter'].tolist()
 
         for mp in self.members:
-            person = Person.objects.get(id_parladata=int(mp))
-            thisVotes = votes[votes.voter == mp].reset_index().at[0, 'attendance']
-            tempS = sessions[sessions.voter == mp].reset_index()
-            thisSession = tempS.at[0, 'attendance']
-            print mp
+            try:
+                person = Person.objects.get(id_parladata=int(mp))
+                thisVotes = votes[votes.voter == mp].reset_index().at[0, 'attendance']
+                tempS = sessions[sessions.voter == mp].reset_index()
+                thisSession = tempS.at[0, 'attendance']
+                print mp
 
-            result = saveOrAbortNew(model=Presence,
-                                    created_for=self.date_of,
-                                    person=person,
-                                    person_value_sessions=thisSession,
-                                    maxMP_sessions=max_ses_voters,
-                                    average_sessions=avgSession,
-                                    maximum_sessions=max_session_value,
-                                    person_value_votes=thisVotes,
-                                    maxMP_votes=max_vote_voters,
-                                    average_votes=avgVote,
-                                    maximum_votes=max_vote_value)
+                result = saveOrAbortNew(model=Presence,
+                                        created_for=self.date_of,
+                                        person=person,
+                                        person_value_sessions=thisSession,
+                                        maxMP_sessions=max_ses_voters,
+                                        average_sessions=avgSession,
+                                        maximum_sessions=max_session_value,
+                                        person_value_votes=thisVotes,
+                                        maxMP_votes=max_vote_voters,
+                                        average_votes=avgVote,
+                                        maximum_votes=max_vote_value)
+            except:
+                print mp, 'fail set presence'
 
     def setPresenceOfPGs(self):
         """

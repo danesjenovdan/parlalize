@@ -2453,7 +2453,8 @@ def setAverageNumberOfSpeechesPerSessionAll(request, date_=None): # TODO refacto
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         # dirty work around, TODO: fix findDatesFromLastCard for input without person_id
-        date_of = findDatesFromLastCard(Presence, '11', datetime.now().strftime(API_DATE_FORMAT))[0]
+        #date_of = findDatesFromLastCard(Presence, '11', datetime.now().strftime(API_DATE_FORMAT))[0]
+        date_of = datetime.now().date()
         date_ = ""
 
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
@@ -2636,8 +2637,8 @@ def setCompass(request, date_=None):
 
     isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
     print isNewVote
-    if not isNewVote:
-        return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
+    #if not isNewVote:
+    #    return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
 
     data = getCompassData(date_of)
     if data == []:
@@ -3798,20 +3799,17 @@ def setAllMPsTFIDFsFromSearch(request):
     with a POST request.
     """
     if request.method == 'POST':
-        print request.body
-        print type(request.body)
         post_data = json.loads(request.body)
-        print type(post_data)
         if post_data:
-            print post_data
             save_statuses = []
             date_of = datetime.today()
-            person = Person.objects.get(id_parladata=post_data['person']['id'])
-            save_statuses.append(saveOrAbortNew(Tfidf,
-                                                person=person,
-                                                created_for=date_of,
-                                                is_visible=False,
-                                                data=post_data['results']))
+            for person_data in post_data:
+                person = Person.objects.get(id_parladata=person_data['person']['id'])
+                save_statuses.append(saveOrAbortNew(Tfidf,
+                                                    person=person,
+                                                    created_for=date_of,
+                                                    is_visible=False,
+                                                    data=person_data['results']))
 
             return JsonResponse({'status': 'alliswell',
                                  'saved': save_statuses})
@@ -4481,16 +4479,16 @@ def getMismatchWithPG(request, person_id, date_=None):
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    missmatch = getPersonCardModelNew(MismatchOfPG, int(person_id), date_)
+    mismatch = getPersonCardModelNew(MismatchOfPG, int(person_id), date_)
 
     data = {'person': getPersonData(person_id),
-            'created_at': missmatch.created_at.strftime(API_DATE_FORMAT),
-            'created_for': missmatch.created_for.strftime(API_DATE_FORMAT),
+            'created_at': mismatch.created_at.strftime(API_DATE_FORMAT),
+            'created_for': mismatch.created_for.strftime(API_DATE_FORMAT),
             'result': {
-                'score': missmatch.data,
+                'score': mismatch.data,
                 'max': {
                     'mps': [getPersonData(mismatch.maxMP.id_parladata, date_)],
-                    'score': mismatch.max
+                    'score': mismatch.maximum
                     },
                 'average': mismatch.average
                 }

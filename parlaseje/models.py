@@ -487,7 +487,7 @@ class Tag(models.Model):
 
 class Legislation(Timestampable, models.Model):
     sessions = models.ManyToManyField('Session',
-                                      blank=True, null=True,
+                                      blank=True,
                                       help_text='The legislative session in which the motion was proposed',
                                       related_name='laws')
 
@@ -541,6 +541,9 @@ class Legislation(Timestampable, models.Model):
 
     note = HTMLField(blank=True,
                      null=True)
+
+    extra_note = HTMLField(blank=True,
+                           null=True)
 
     abstractVisible = models.BooleanField(default=False,
                                           help_text='Is abstract visible')

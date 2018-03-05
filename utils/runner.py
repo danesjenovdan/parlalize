@@ -18,9 +18,9 @@ from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, P
 from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
 
 from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
-from parlaseje.utils import idsOfSession, getSesDates
+from parlaseje.utils_ import idsOfSession, getSesDates
 from utils.recache import updatePagesS, updateLastActivity, recacheActivities, recacheWBs
-from utils.imports import update, updateDistricts, updateTags, updatePersonStatus
+from utils.imports import update, updateDistricts, updateTags, updatePersonStatus, importDraftLegislationsFromFeed
 from utils.votes_outliers import setMotionAnalize, setOutliers
 from utils.votes_pg import set_mismatch_of_pg
 from utils.exports import exportLegislations
@@ -159,7 +159,7 @@ def onDatePGCardRunner(date_=None):
         except:
             print FAIL + 'FAIL on: ' + str(setter) + ENDC
 
-    set_mismatch_of_pg()
+    set_mismatch_of_pg(None)
 
     # updateWB()
 
@@ -174,7 +174,8 @@ def runSettersSessions(date_to=None, sessions_ids=None):
         Vote_analysis: setMotionAnalize,
     }
     # set outliers for all votes
-    setOutliers()
+    # TODO remove next comment when algoritem for is_outlier will be fixed
+    #setOutliers()
     for model, setter in setters_models.items():
         # IDs = getSesIDs(dates[1],dates[-1])
         if sessions_ids:
@@ -516,6 +517,9 @@ def fastUpdate(fast=True, date_=None):
             ballots.save()
 
     # update questions
+    sc.api_call("chat.postMessage",
+                channel="#parlalize_notif",
+                text='Start update Questions at: ' + str(datetime.now()))
     existingISs = list(Question.objects.all().values_list('id_parladata',
                                                           flat=True))
     for dic in data['questions']:
@@ -559,11 +563,17 @@ def fastUpdate(fast=True, date_=None):
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.add(*rec_posts)
 
+    sc.api_call("chat.postMessage",
+                channel="#parlalize_notif",
+                text='Start update distircts and tags at: ' + str(datetime.now()))
     updateDistricts()
 
     updateTags()
 
     if data['persons']:
+        sc.api_call("chat.postMessage",
+                    channel="#parlalize_notif",
+                    text='Update MPStatic at: ' + str(datetime.now()))
         print 'mp static'
         updateMPStatic()
         print 'update person status'
@@ -635,8 +645,11 @@ def fastUpdate(fast=True, date_=None):
     q_update = list(questions.values_list("person__id_parladata", flat=True))
     p_update += q_update
 
-    # if "fast" fastUpdate then skip update last activites
+    # nightly update
     if not fast:
+        # read draft legislations
+        importDraftLegislationsFromFeed()
+        # update last activites
         updateLastActivity(list(set(p_update)))
         recacheActivities(('poslanska-vprasanja-in-pobude',
                            'poslanska-vprasanja-in-pobude'),

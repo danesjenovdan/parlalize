@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('against', models.IntegerField(help_text=b'Number votes againt', null=True, blank=True)),
                 ('abstain', models.IntegerField(help_text=b'Number votes abstain', null=True, blank=True)),
                 ('not_present', models.IntegerField(help_text=b'Number of MPs that warent on the session', null=True, blank=True)),
-                ('result', models.CharField(help_text=b'The result of the vote', max_length=255, null=True, blank=True)),
+                ('result', models.NullBooleanField(default=False, help_text=b'The result of the vote')),
                 ('id_parladata', models.IntegerField(help_text='id parladata', null=True, verbose_name='parladata id', blank=True)),
                 ('pgs_yes', jsonfield.fields.JSONField(null=True, blank=True)),
                 ('pgs_no', jsonfield.fields.JSONField(null=True, blank=True)),

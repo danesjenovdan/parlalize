@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 
 from django.contrib import admin
 
-from parlaseje.utils import getSessionDataAPI
+from parlaseje.utils_ import getSessionDataAPI
 from parlaskupine.utils_ import getPgDataAPI
 from parlalize.utils_ import modelsData, getPersonsCardDates, getOrgsCardDates, getAllStaticData, monitorMe, recacheLastSession, getPersonDataAPI
 
