@@ -352,8 +352,14 @@ def getPersonData(id_parladata, date_=None):
                     'is_active': None,
                     'has_function': False,
                     }
-
-    partyData = data.party.getOrganizationData()
+    try:
+        partyData = data.party.getOrganizationData()
+    except:
+        print 'Nima org', data.person.name
+        partyData = {'acronym': None,
+                     'id': None,
+                     'name': None,
+                     'is_coalition': None}
     return {
             'type': 'mp',
             'name': data.person.name,

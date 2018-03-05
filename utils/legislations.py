@@ -37,7 +37,7 @@ def finish_legislation_by_final_vote(vote):
         if vote.epa:
             legislation = Legislation.objects.filter(epa=vote.epa)
             if legislation:
-                set_legislation_result(legislation)
+                set_legislation_result(legislation[0])
 
 
 def set_legislation_result(legislation):
@@ -58,8 +58,8 @@ def set_legislation_result(legislation):
                 else:
                     ## REJECTED
                     legislation.result = REJECTED
-                return 'finished'
                 legislation.save()
+                return 'finished'
 
             elif mdt_vote:
                 if is_accepeted(mdt_vote[0]):

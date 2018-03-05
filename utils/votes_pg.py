@@ -9,7 +9,7 @@ from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi
 
-def set_mismatch_of_pg(date_=''):
+def set_mismatch_of_pg(request, date_=''):
     print 'prepare date'
     if date_:
         f_date = datetime.strptime(date_, '%d.%m.%Y')
