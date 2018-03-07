@@ -4496,7 +4496,7 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    orgs = tryHard('https://data.parlameter.si/v1/getAllPGs/').json().keys()
+    orgs = tryHard(API_URL + '/getAllPGs/').json().keys()
     org = count = last_card_date = None
     data = []
     for org_id in orgs:            
