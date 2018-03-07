@@ -4514,7 +4514,10 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
     maxAmendmets = max(data, key=lambda x:x['value'] if x['value'] else 0)
 
     values = [i['value'] for i in data if i['value']]
-    avg = float(sum(values))/len(values)
+    if values:
+        avg = float(sum(values))/len(values)
+    else:
+        avg = 0
 
     out = {'organization': org.getOrganizationData(),
            'created_at': datetime.now().strftime(API_DATE_FORMAT),
