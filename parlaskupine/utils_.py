@@ -34,4 +34,8 @@ def getAmendmentsCount(pg_id, date_of):
     org = Organization.objects.get(id_parladata=pg_id)
     card = org.amendments.filter(start_time__lte=date_of)
     count = card.count()
-    return org, count, card.latest('created_for').created_for
+    if not card:
+        date = datetime.now()
+    else:
+        date = card.latest('created_for').created_for
+    return org, count, date
