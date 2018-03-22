@@ -456,8 +456,6 @@ def setMotionOfSession(request, session_id):
             if vote['option'] == str('ni'):
                 not_present = not_present + 1
         result = mot['result']
-        if result == None:
-            continue
         if mot['amendment_of']:
             a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
         else:
@@ -3196,6 +3194,8 @@ def legislation(request, epa):
     else:
         dates = []
     for vote in votes:
+        if vote.result == None:
+            continue
         out.append({'motion_id': vote.id_parladata,
                     'session_id': vote.session.id_parladata,
                     'text': vote.motion,
@@ -3242,6 +3242,8 @@ def otherVotes(request, session_id):
     dates = [session.start_time]
     allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
     for vote in allVotes.order_by('start_time'):
+        if vote.result == None:
+            continue
         print vote
         out.append({'results': {'motion_id': vote.id_parladata,
                                 'text': vote.motion,
