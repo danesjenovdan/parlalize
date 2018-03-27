@@ -21,7 +21,7 @@ from parlalize.settings import API_URL, SETTER_KEY, DASHBOARD_URL, SETTER_KEY
 from utils.votes_pg import set_mismatch_of_pg
 
 from utils.votes import setAllVotesCards
-from utils.recache import recacheCards
+from utils.recache import recacheCards, recacheListOfSession
 from utils.imports import updateOrganizations
 
 
@@ -60,6 +60,7 @@ setters = {
 
     # recache
     'setAllStaticData': {'setter': getAllStaticData, 'group': 'recache'},
+    'recacheListOfSession': {'setter': recacheListOfSession, 'group': 'recache'},
 
     # utils
     'updateOrganizations': {'setter': updateOrganizations, 'group': 'utils', 'type': 'all'},

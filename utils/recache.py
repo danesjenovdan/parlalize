@@ -248,3 +248,9 @@ def recacheWBs():
         print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?frame=true&altHeader=true&forceRender=true')
         print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?embed=true&altHeader=true&forceRender=true')
         print requests.get(GLEJ_URL + '/wb/getWorkingBodies/'+str(wb['id'])+'?forceRender=true')
+
+
+# Added 2 dummy attribute that mathed look like a other recache methods
+def recacheListOfSession(tmp=None, force_render=None):
+    getSessionsList(None, force_render=True)
+    requests.get(GLEJ_URL + '/s/seznam-sej/?forceRender=true&state=%7B%22generator%22%3Atrue%7D')
