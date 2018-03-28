@@ -110,19 +110,19 @@ def data_to_csv():
               (MismatchOfPG, 'neujemanje s poslansko skupino'),
               (SpokenWords, 'st. izgovorjenih besed'),
               (AverageNumberOfSpeechesPerSession, 'stevilo govorov na sejo'),
-              (VocabularySize, 'raznolikost besedisca')]
+              (VocabularySize, 'raznolikost besedisca'),
+              (MPStaticPL, 'st_mandatov')]
 
     mps = tryHard(settings.API_URL+'/getMPs/').json()
 
     data = []
 
     for mp in mps:
-        tmp = {'member_id': mp['id']}
+        tmp = {'member_id': mp['id'], 'ime': mp['name'], 'PS': mp['acronym']}
         for model, column in models:
             print mp['id'], model
             model_data = getPersonCardModelNew(model, mp['id'])
             if model == Presence:
-                tmp[column] = model_data.person_value_sessions
                 tmp[column] = model_data.person_value_votes
             if model == NumberOfQuestions or model == SpokenWords or model == VocabularySize:
                 tmp[column] = model_data.score
@@ -130,5 +130,8 @@ def data_to_csv():
                 tmp[column] = model_data.data
             if model == NumberOfSpeechesPerSession:
                 tmp[column] = model_data.person_value
+            if model == MPStaticPL:
+                tmp[column] = model_data.mandates
+                tmp['izobrazba'] = model_data.education_level
         data.append(tmp)
     listToCSV(data, 'toski_export.csv')
