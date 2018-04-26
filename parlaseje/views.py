@@ -3188,7 +3188,7 @@ def legislation(request, epa):
                         'id': '',
                         'orgs': '',
                         'in_review': ''}
-    votes = Vote.objects.filter(epa=law.epa)
+    votes = Vote.objects.filter(epa=law.epa).order_by('start_time')
     if law.date:
         dates = [law.date]
     else:
@@ -3207,7 +3207,8 @@ def legislation(request, epa):
                     'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'tags': vote.tags,
                     'has_outliers': vote.has_outlier_voters,
-                    'documents': vote.document_url
+                    'documents': vote.document_url,
+                    'start_time': vote.start_time
                     })
         dates.append(vote.created_at)
     if dates:
