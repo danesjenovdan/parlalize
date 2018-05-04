@@ -1000,8 +1000,9 @@ def getLastActivity(request, person_id, date_=None):
     a = a.extra(select={'start_time_date': 'DATE(start_time)'})
     dates = list(set(list(a.values_list("start_time_date", flat=True))))
     dates.sort()
+    limit = min([15, len(dates)])
     a = a.filter(person__id_parladata=person_id,
-                 start_time__gte=dates[-15]).order_by('-start_time')
+                 start_time__gte=dates[-limit]).order_by('-start_time')
  
     staticData = requests.get(BASE_URL + '/utils/getAllStaticData/').json()
     result = []
