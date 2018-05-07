@@ -9,6 +9,8 @@ from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi
 
+from django.http import JsonResponse
+
 def set_mismatch_of_pg(request, date_=''):
     print 'prepare date'
     if date_:
@@ -125,3 +127,5 @@ def set_mismatch_of_pg(request, date_=''):
                        maximum=maxMismatch['value'],
                        maxMP=maxMismatch['person'],
                        data=d['value'])
+
+    return JsonResponse({'alliswell': True})
