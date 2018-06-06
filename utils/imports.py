@@ -1,5 +1,5 @@
 from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, PARSER_PASS, BASE_URL
-from parlalize.utils_ import tryHard, getDataFromPagerApi
+from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiGen
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
 from parlaposlanci.views import setMinsterStatic
@@ -79,34 +79,34 @@ def deleteUnconnectedSpeeches():
 
 def updateSpeeches():
     url = API_URL + '/getAllAllSpeeches'
-    data = getDataFromPagerApi(url)
     existingISs = list(Speech.objects.all().values_list('id_parladata',
                                                         flat=True))
-    for dic in data:
-        if int(dic['id']) not in existingISs:
-            print 'adding speech'
-            print dic['valid_to']
-            person = Person.objects.get(id_parladata=int(dic['speaker']))
-            speech = Speech(person=person,
-                            organization=Organization.objects.get(
-                                id_parladata=int(dic['party'])),
-                            content=dic['content'], order=dic['order'],
-                            session=Session.objects.get(
-                                id_parladata=int(dic['session'])),
-                            start_time=dic['start_time'],
-                            end_time=dic['end_time'],
-                            valid_from=dic['valid_from'],
-                            valid_to=dic['valid_to'],
-                            id_parladata=dic['id'])
-            speech.save()
-        else:
-            print 'update speech'
-            speech = Speech.objects.filter(id_parladata=dic['id'])
-            speech.update(valid_from=dic['valid_from'],
-                          valid_to=dic['valid_to'])
+    for page in getDataFromPagerApiGen(url):
+        for dic in page:
+            if int(dic['id']) not in existingISs:
+                print 'adding speech'
+                print dic['valid_to']
+                person = Person.objects.get(id_parladata=int(dic['speaker']))
+                speech = Speech(person=person,
+                                organization=Organization.objects.get(
+                                    id_parladata=int(dic['party'])),
+                                content=dic['content'], order=dic['order'],
+                                session=Session.objects.get(
+                                    id_parladata=int(dic['session'])),
+                                start_time=dic['start_time'],
+                                end_time=dic['end_time'],
+                                valid_from=dic['valid_from'],
+                                valid_to=dic['valid_to'],
+                                id_parladata=dic['id'])
+                speech.save()
+            else:
+                print 'update speech'
+                speech = Speech.objects.filter(id_parladata=dic['id'])
+                speech.update(valid_from=dic['valid_from'],
+                              valid_to=dic['valid_to'])
 
     # delete speeches which was deleted in parladata @dirty fix
-    deleteUnconnectedSpeeches()
+    #deleteUnconnectedSpeeches()
     return 1
 
 

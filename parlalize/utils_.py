@@ -734,3 +734,15 @@ def getDataFromPagerApi(url, per_page = None):
     end = time.time()
     print("TIME: ", end - start)
     return data
+
+
+def getDataFromPagerApiGen(url, per_page = None):
+    end = False
+    page = 1
+    while not end:
+        response = requests.get(url + '?page=' + str(page) + ('&per_page='+str(per_page) if per_page else '')).json()
+        if page >= response['pages']:
+            break
+        page += 1
+        yield response['data']
+
