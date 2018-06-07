@@ -98,3 +98,43 @@ def tajmer(base_url, endpoints, id_):
                      'time': (end - start),
                      'status': resp.status_code})
     return data
+
+
+def export_members_data():
+    out_data = [['id', 'spol', 'izobrazba', 'je_poslanec', 'name', 'ime_stranke',
+        'id_stranke', 'kratica_stranke', 'spoken_words', 'st_govotov_na_sejo', 'prisotnost_glasovanja',
+        'prisotnost_seje', 'odstopanje_od_stranke', 'st_vprasanj', 'problematicno', 'privzdignejno', 'preprosto', 'raznolikost_besedisca']]
+    pp = Person.objects.all().exclude(pg=None).exclude(pg='')
+    for p in pp:
+        print(p.name, p.id_parladata)
+        person_data = []
+        static_data = p.static_data.latest('created_for')
+        person_data.append(p.id_parladata)
+        person_data.append(static_data.gender)
+        person_data.append(static_data.education_level)
+        person_data.append(p.actived)
+        person_data.append(p.name)
+        person_data.append(static_data.party.name)
+        person_data.append(static_data.party.id_parladata)
+        person_data.append(static_data.party.acronym)
+        #person_data.append(Speech.getValidSpeeches(datetime.now()).filter(person_id=p.id).count())
+        person_data.append(p.childrenSW.latest('created_for').score)
+        person_data.append(p.averagenumberofspeechespersession_set.latest('created_for').score)
+        person_data.append(p.children.latest('created_for').person_value_votes)
+        person_data.append(p.children.latest('created_for').person_value_sessions)
+        try:
+            person_data.append(p.mismatchofpg_set.all().latest("created_for").data)
+        except:
+            person_data.append('')
+        try:
+            person_data.append(p.numberofquestions_set.latest('created_for').score)
+        except:
+            person_data.append('')
+        ss = p.childrenStSc.latest('created_for')
+        person_data.append(ss.problematicno)
+        person_data.append(ss.privzdignjeno)
+        person_data.append(ss.preprosto)
+        person_data.append(p.VocabularySizes.latest('created_for').score)
+        out_data.append(person_data)
+
+    return out_data
