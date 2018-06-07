@@ -16,6 +16,7 @@ from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, I
 from parlaskupine.models import Organization
 
 from utils.legislations import finish_legislation_by_final_vote
+from utils.votes_outliers import setMotionAnalize
 
 
 import json
@@ -456,8 +457,6 @@ def setMotionOfSession(request, session_id):
             if vote['option'] == str('tellaye'):
                 kvorum = kvorum + 1
         result = mot['result']
-        if result == None:
-            continue
         if mot['amendment_of']:
             a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
         else:
@@ -521,6 +520,10 @@ def setMotionOfSession(request, session_id):
         no = 0
         kvorum = 0
         not_present = 0
+
+    # set motion analize
+    setMotionAnalize(None, session_id)
+
     if laws:
         recacheLegislationsOnSession(session_id)
     return JsonResponse({'alliswell': True})
@@ -3190,12 +3193,14 @@ def legislation(request, epa):
                         'id': '',
                         'orgs': '',
                         'in_review': ''}
-    votes = Vote.objects.filter(epa=law.epa)
+    votes = Vote.objects.filter(epa=law.epa).order_by('start_time')
     if law.date:
         dates = [law.date]
     else:
         dates = []
     for vote in votes:
+        if vote.result == None:
+            continue
         out.append({'motion_id': vote.id_parladata,
                     'session_id': vote.session.id_parladata,
                     'text': vote.motion,
@@ -3207,7 +3212,8 @@ def legislation(request, epa):
                     'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'tags': vote.tags,
                     'has_outliers': vote.has_outlier_voters,
-                    'documents': vote.document_url
+                    'documents': vote.document_url,
+                    'start_time': vote.start_time
                     })
         dates.append(vote.created_at)
     if dates:
@@ -3242,6 +3248,8 @@ def otherVotes(request, session_id):
     dates = [session.start_time]
     allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
     for vote in allVotes.order_by('start_time'):
+        if vote.result == None:
+            continue
         print vote
         out.append({'results': {'motion_id': vote.id_parladata,
                                 'text': vote.motion,

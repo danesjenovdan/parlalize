@@ -18,7 +18,7 @@ from parlaskupine.models import (Organization, WorkingBodies,
 from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
                               PresenceOfPG, AbsentMPs, VoteDetailed, Quote, Question)
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
-                                DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL, ALL_STATIC_CACHE_AGE)
+                                DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL, ALL_STATIC_CACHE_AGE, slack_token)
 from django.contrib.contenttypes.models import ContentType
 import requests
 import json
@@ -29,6 +29,8 @@ from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from parlalize.settings import SETTER_KEY, VOTE_NAMES
 from requests.auth import HTTPBasicAuth
+
+from slackclient import SlackClient
 
 def lockSetter(function):
     def wrap(request, *args, **kwargs):
@@ -411,7 +413,7 @@ def modelsData(request):
 
 
 def getAllStaticData(request, force_render=False):
-
+    sc = SlackClient(slack_token)
     date_of = datetime.now().date()
     date_ = date_of.strftime(API_DATE_FORMAT)
 
@@ -419,6 +421,9 @@ def getAllStaticData(request, force_render=False):
     if c_data and not force_render:
         out = c_data
     else:
+        sc.api_call("chat.postMessage",
+                    channel="#parlalize_notif",
+                    text='StaticDataDebug start: ' + str(c_data)[:100] + ' ' + str(force_render))
 
         PS_NP = ['poslanska skupina', 'nepovezani poslanec']
         date_ = datetime.now().strftime(API_DATE_FORMAT)
@@ -447,6 +452,9 @@ def getAllStaticData(request, force_render=False):
                        'name': org.name} for org in orgs]
 
         cache.set('all_statics', out, 60 * 60 * ALL_STATIC_CACHE_AGE)
+        sc.api_call("chat.postMessage",
+                    channel="#parlalize_notif",
+                    text='StaticDataDebug end: ' + str(out)[:100] + ' ' + str(force_render))
 
     return JsonResponse(out)
 
@@ -732,3 +740,15 @@ def getDataFromPagerApi(url, per_page = None):
     end = time.time()
     print("TIME: ", end - start)
     return data
+
+
+def getDataFromPagerApiGen(url, per_page = None):
+    end = False
+    page = 1
+    while not end:
+        response = requests.get(url + '?page=' + str(page) + ('&per_page='+str(per_page) if per_page else '')).json()
+        if page >= response['pages']:
+            break
+        page += 1
+        yield response['data']
+

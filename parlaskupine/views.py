@@ -233,13 +233,6 @@ def getBasicInfOfPG(request, pg_id, date=None):
 @lockSetter
 def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
     if date_:
-        url = API_URL + '/isVoteOnDay/' + date_
-        isNewVote = tryHard(url).json()['isVote']
-        print isNewVote
-        if not isNewVote:
-            return JsonResponse({'alliswell': True,
-                                 'status': 'Ni glasovanja na ta dan',
-                                 'saved': False})
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
         date_of = findDatesFromLastCard(PercentOFAttendedSession,
