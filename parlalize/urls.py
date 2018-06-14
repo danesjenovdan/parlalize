@@ -9,6 +9,7 @@ from parlalize.utils_ import modelsData, getPersonsCardDates, getOrgsCardDates, 
 # admin.autodiscover()
 
 urlpatterns = patterns('',
+    (r'^', include(admin.site.urls)),
     (r'^admin/', include(admin.site.urls)),
     (r'^v1/p/', include('parlaposlanci.urls')),
     (r'^v1/pg/', include('parlaskupine.urls')),
