@@ -1018,9 +1018,9 @@ def getLastActivity(request, person_id, date_=None):
         elif type(act_obj) == Question:
             data[activity.start_time_date].append(getQuestionData(act_obj, staticData['sessions']))
 
-    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
-            'events': data[date]}
-           for date in dates]
+        out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+                'events': data[date]}
+               for date in dates]
 
     result = {
         'created_at': dates[-1].strftime(API_OUT_DATE_FORMAT),
@@ -3787,7 +3787,7 @@ def getSlugs(request):
                     "prisotnost": "/seja/prisotnost/",
                     "transkript": "/seja/transkript/"
                 },
-            "base": "https://parlameter.si"
+            "base": settings.FRONT_URL
             }
     return JsonResponse(obj)
 

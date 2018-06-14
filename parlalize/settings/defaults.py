@@ -103,11 +103,10 @@ LAST_ACTIVITY_COUNT = 10
 # PARLALIZE vote options represent for vote analyses
 # in ballots we save the option as string. this is used to transform it to a numerical value
 VOTE_MAP = {
-    "za": 1, # for
-    "proti": -1, # against
-    "kvorum": 0, # abstain
-    "ni": 0, # not present
-    "ni_poslanec": 0 # is not a Member
+    "aye": 1, # for
+    "no": -1, # against
+    "tellaye": 0, # abstain
+    "tellno": 0, # not present
 }
 
 LOGGING = {
