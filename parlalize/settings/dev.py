@@ -36,6 +36,7 @@ ISCI_URL = "http://localhost:8888"
 BASE_URL = 'http://localhost:8080/v1'
 DASHBOARD_URL = 'http://localhost:8881'
 SOLR_URL = 'http://127.0.0.1:8983/solr/parlameter'
+FRONT_URL = 'http://parlameter.si/'
 
 GLEJ_URL = ''
 PAGE_URL = ''

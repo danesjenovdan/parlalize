@@ -3787,7 +3787,7 @@ def getSlugs(request):
                     "prisotnost": "/seja/prisotnost/",
                     "transkript": "/seja/transkript/"
                 },
-            "base": "https://parlameter.si"
+            "base": settings.FRONT_URL
             }
     return JsonResponse(obj)
 
