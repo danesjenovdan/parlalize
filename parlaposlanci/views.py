@@ -11,8 +11,8 @@ from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
 
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
-                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL)
-from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard, 
+                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL)
+from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
@@ -3787,7 +3787,7 @@ def getSlugs(request):
                     "prisotnost": "/seja/prisotnost/",
                     "transkript": "/seja/transkript/"
                 },
-            "base": settings.FRONT_URL
+            "base": FRONT_URL
             }
     return JsonResponse(obj)
 
