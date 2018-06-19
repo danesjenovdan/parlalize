@@ -4014,7 +4014,7 @@ def setListOfMembersTickers(request, date_=None):
 
     return JsonResponse(data, safe=False)
 
-def setListOfMembersTickersCore(date_, prevData)
+def setListOfMembersTickersCore(date_, prevData):
 
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
 
