@@ -4006,7 +4006,7 @@ def setListOfMembersTickers(request, date_=None):
         prevCard = getListOfMembersTickers(request, session_time.strftime(API_DATE_FORMAT)).content
         print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
         prevData = json.loads(prevCard)['data']
-    else:
+    except:
         prevData = []
 
     data = setListOfMembersTickersCore(date_, prevData)
