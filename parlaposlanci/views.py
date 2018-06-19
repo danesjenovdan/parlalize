@@ -3995,17 +3995,28 @@ def setListOfMembersTickers(request, date_=None):
         date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
 
-    mps = tryHard(API_URL+'/getMPs/'+date_).json()
-
     # get start_time of previous session and find older card of this date
-    prev_session = Session.objects.filter(start_time__lte=date_of,
-                                          organization__id_parladata=95,
-                                          name__icontains=' redna')
-    session_time = prev_session.order_by("-start_time")[0].start_time
 
-    prevCard = getListOfMembersTickers(request, session_time.strftime(API_DATE_FORMAT)).content
-    print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
-    prevData = json.loads(prevCard)['data']
+    try:
+        prev_session = Session.objects.filter(start_time__lte=date_of,
+                                              organization__id_parladata=95,
+                                              name__icontains=' redna')
+        session_time = prev_session.order_by("-start_time")[0].start_time
+
+        prevCard = getListOfMembersTickers(request, session_time.strftime(API_DATE_FORMAT)).content
+        print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
+        prevData = json.loads(prevCard)['data']
+    else:
+        prevData = []
+
+    data = setListOfMembersTickersCore(date_, prevData)
+
+
+    return JsonResponse(data, safe=False)
+
+def setListOfMembersTickersCore(date_, prevData)
+
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
 
     rank_data = {'presence_sessions': [],
                  'presence_votes': [],
@@ -4221,7 +4232,7 @@ def setListOfMembersTickers(request, date_=None):
 
     MembersList(created_for=date_of,
                 data=data).save()
-    return JsonResponse(data, safe=False)
+    return data
 
 
 def getListOfMembersTickers(request, date_=None):
