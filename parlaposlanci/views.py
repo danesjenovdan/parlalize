@@ -11,7 +11,7 @@ from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
 
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
-                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL)
+                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL, ISCI_URL, GLEJ_URL)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
@@ -3787,7 +3787,14 @@ def getSlugs(request):
                     "prisotnost": "/seja/prisotnost/",
                     "transkript": "/seja/transkript/"
                 },
-            "base": FRONT_URL
+            "base": FRONT_URL,
+            "urls": {
+                "base": FRONT_URL,
+                "analize": BASE_URL,
+                "isci": ISCI_URL,
+                "data": API_URL,
+                "glej": GLEJ_URL,
+                }
             }
     return JsonResponse(obj)
 
@@ -4226,6 +4233,9 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
             key_without_data.append(key)
     print prevData
     if key_without_data and prevData:
+        return {'status': 'failed', 'cards_without_new_data': key_without_data}
+
+    if key_without_data:
         return {'status': 'failed', 'cards_without_new_data': key_without_data}
 
     data = sorted(data, key=lambda k: k['person']['name'])
