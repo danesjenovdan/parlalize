@@ -4016,13 +4016,13 @@ def setListOfMembersTickers(request, date_=None):
     except:
         prevData = []
 
-    data = setListOfMembersTickersCore(date_, prevData)
-
+    data = setListOfMembersTickersCore(date_, date_of, prevData)
+    print(data)
 
     return JsonResponse(data, safe=False)
 
-def setListOfMembersTickersCore(date_, prevData):
-
+def setListOfMembersTickersCore(date_, date_of, prevData):
+    print("CORE")
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
 
     rank_data = {'presence_sessions': [],
@@ -4031,9 +4031,9 @@ def setListOfMembersTickersCore(date_, prevData):
                  'spoken_words': [],
                  'speeches_per_session': [],
                  'number_of_questions': [],
-                 'privzdignjeno': [],
-                 'preprosto': [],
-                 'problematicno': [],
+                 #'privzdignjeno': [],
+                 #'preprosto': [],
+                 #'problematicno': [],
                  'mismatch_of_pg': [],
                  }
     
@@ -4128,7 +4128,8 @@ def setListOfMembersTickersCore(date_, prevData):
         person_obj['results']['gender'] = {}
         person_obj['results']['gender']['score'] = gender
 
-        try:
+
+        """try:
             styleScores = getPersonCardModelNew(StyleScores,
                                                 int(person_id),
                                                 date_)
@@ -4153,7 +4154,7 @@ def setListOfMembersTickersCore(date_, prevData):
         except:
             preprosto = 0
             privzdignjeno = 0
-            problematicno = 0
+            problematicno = 0"""
 
         try:
             mismatch = getPersonCardModelNew(MismatchOfPG,
@@ -4165,7 +4166,7 @@ def setListOfMembersTickersCore(date_, prevData):
         person_obj['results']['mismatch_of_pg']['score'] = mismatch
         rank_data['mismatch_of_pg'].append(value)
 
-        person_obj['results']['privzdignjeno'] = {}
+        """person_obj['results']['privzdignjeno'] = {}
         person_obj['results']['privzdignjeno']['score'] = privzdignjeno
         rank_data['privzdignjeno'].append(value)
 
@@ -4175,7 +4176,7 @@ def setListOfMembersTickersCore(date_, prevData):
 
         person_obj['results']['problematicno'] = {}
         person_obj['results']['problematicno']['score'] = problematicno
-        rank_data['problematicno'].append(value)
+        rank_data['problematicno'].append(value)"""
 
         data.append(person_obj)
 
@@ -4230,10 +4231,9 @@ def setListOfMembersTickersCore(date_, prevData):
         if not sum(diff):
             print key, sum(diff)
             key_without_data.append(key)
-
-    if key_without_data:
-        return JsonResponse({'status': 'failed',
-                             'cards_without_new_data': key_without_data}, safe=False)
+    print prevData
+    if key_without_data and prevData:
+        return {'status': 'failed', 'cards_without_new_data': key_without_data}
 
     data = sorted(data, key=lambda k: k['person']['name'])
 

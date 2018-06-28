@@ -2186,9 +2186,9 @@ def setVocabularySizeALL(request, date_=None):
     """
     sw = WordAnalysis(count_of='groups', date_=date_)
 
-    if not sw.isNewSpeech:
-        return JsonResponse({'alliswell': True,
-                             'msg': 'Na ta dan ni bilo govorov'})
+    #if not sw.isNewSpeech:
+    #    return JsonResponse({'alliswell': True,
+    #                         'msg': 'Na ta dan ni bilo govorov'})
 
     # Vocabolary size
     all_score = sw.getVocabularySize()
@@ -2199,7 +2199,7 @@ def setVocabularySizeALL(request, date_=None):
 
     print '[INFO] saving vocabulary size'
     for p in all_score:
-        Organization.objects.get(id_parladata=int(p['counter_id']))
+        org = Organization.objects.get(id_parladata=int(p['counter_id']))
         saveOrAbortNew(model=VocabularySize,
                        organization=org,
                        created_for=date_of,
