@@ -4235,6 +4235,9 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
     if key_without_data and prevData:
         return {'status': 'failed', 'cards_without_new_data': key_without_data}
 
+    if key_without_data:
+        return {'status': 'failed', 'cards_without_new_data': key_without_data}
+
     data = sorted(data, key=lambda k: k['person']['name'])
 
     MembersList(created_for=date_of,
