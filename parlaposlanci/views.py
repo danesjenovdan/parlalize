@@ -3706,6 +3706,7 @@ def getSlugs(request):
 
     * @apiSuccessExample {json} Example response:
     {
+        "legislationLink": "/zakonodaja/",
         "partyLink": {
             "govori": "/govori/",
             "base": "/poslanska-skupina/",
@@ -3781,6 +3782,7 @@ def getSlugs(request):
                     "pregled": "/pregled/"
                 },
 
+            "legislationLink": "/zakonodaja/",
             "sessionLink": {
                     "glasovanje": "/seja/glasovanje/",
                     "glasovanja": "/seja/glasovanja/",
