@@ -746,9 +746,10 @@ def getDataFromPagerApiGen(url, per_page = None):
     end = False
     page = 1
     while not end:
+        print(page)
         response = requests.get(url + '?page=' + str(page) + ('&per_page='+str(per_page) if per_page else '')).json()
+        yield response['data']
         if page >= response['pages']:
+            print("brejk")
             break
         page += 1
-        yield response['data']
-
