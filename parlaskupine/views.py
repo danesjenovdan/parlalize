@@ -4455,7 +4455,10 @@ def getDisunionOrgID(request, pg_id, date_=None):
     maxDisunion = max(data, key=lambda x:x['value'] if x['value'] else 0)
 
     values = [i['value'] for i in data if i['value']]
-    avg = float(sum(values))/len(values)
+    try:
+        avg = float(sum(values))/len(values)
+    except:
+        avg = 0
 
     out = {'organization': org_data,
            'result': {
