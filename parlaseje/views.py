@@ -3312,7 +3312,7 @@ def getAllLegislation(request):
                                       'text': legislation.text,
                                       'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
                                       'mdt_text': legislation.mdt,
-                                      'mdt': wbs[str(legislation.mdt_fk.id_parladata)] if legislation.mdt_fk else {'name': '',
+                                      'mdt': wbs[str(legislation.mdt_fk.id_parladata)] if legislation.mdt_fk and legislation.mdt_fk in wbs.keys() else {'name': '',
                                                                                                                    'id': None},
                                       'classification': legislation.classification,
                                       'result': legislation.result,
