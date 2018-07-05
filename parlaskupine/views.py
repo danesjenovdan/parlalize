@@ -4443,7 +4443,7 @@ def getDisunionOrgID(request, pg_id, date_=None):
 
     suma, ids = getDisunionInOrgHelper(pg_id, date_of) 
     org_data = ids[0].organization.getOrganizationData() if ids else {}
-    orgs = tryHard('https://data.parlameter.si/v1/getAllPGs/').json().keys()
+    orgs = tryHard(API_URL + '/getAllPGs/').json().keys()
 
     data = []
     for org in orgs:
