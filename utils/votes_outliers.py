@@ -92,8 +92,10 @@ def setMotionAnalize(request, session_id):
     all_votes['pg_za'] = all_votes.apply(lambda row: getPGsList(row, pg_za), axis=1)
     all_votes['pg_ni'] = all_votes.apply(lambda row: getPGsList(row, pg_ni), axis=1)
     all_votes['pg_kvorum'] = all_votes.apply(lambda row: getPGsList(row, pg_kvorum), axis=1)
-
-    all_votes['coal'] = data[data.is_coalition == 1].groupby(['vote_id']).sum().apply(lambda row: getOptions(row, 'coal'), axis=1)
+    try:
+        all_votes['coal'] = data[data.is_coalition == 1].groupby(['vote_id']).sum().apply(lambda row: getOptions(row, 'coal'), axis=1)
+    except:
+        all_votes['coal'] = ""
     all_votes['oppo'] = data[data.is_coalition == 0].groupby(['vote_id']).sum().apply(lambda row: getOptions(row, 'oppo'), axis=1)
 
     parties = data.groupby(['vote_id',
@@ -161,18 +163,23 @@ def setMotionAnalize(request, session_id):
                           vote=vote,
                           maximum=oppoInterCalc[vote_id]
                           ).save()
-
-        if coalIntra:
-            coalIntra.update(maximum=coalInterCalc[vote_id])
-        else:
+        if coalInterCalc.empty:
             IntraDisunion(organization=coalition,
                           vote=vote,
-                          maximum=coalInterCalc[vote_id]
+                          maximum=0
                           ).save()
+        else:
+            if coalIntra:
+                coalIntra.update(maximum=coalInterCalc[vote_id])
+            else:
+                IntraDisunion(organization=coalition,
+                              vote=vote,
+                              maximum=coalInterCalc[vote_id]
+                              ).save()
 
-        vote.has_outlier_voters = has_outliers
-        vote.intra_disunion = allInter[vote_id]
-        vote.save()
+            vote.has_outlier_voters = has_outliers
+            vote.intra_disunion = allInter[vote_id]
+            vote.save()
         print all_votes.loc[vote_id, 'pg_za']
         if vote_a:
             vote_a.update(votes_for=all_votes.loc[vote_id, 'option_za'],
