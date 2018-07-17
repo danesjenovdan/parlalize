@@ -81,6 +81,7 @@ def setMPStaticPL(request, person_id, date_=None):
                             person=person,
                             voters=data['voters'],
                             age=data['age'],
+                            birth_date=datetime if data['birth_date'] else None,
                             mandates=data['mandates'],
                             party=Organization.objects.get(id_parladata=int(data['party_id'])),
                             education=data['education'],
@@ -239,6 +240,7 @@ def getMPStaticPL(request, person_id, date_=None):
         'results': {
             'voters': card.voters,
             'age': card.age,
+            'birth_date': card.birth_date.strftime(API_DATE_FORMAT) if card.birth_date else None,
             'mandates': card.mandates,
             'party_id': card.party.id_parladata,
             'acronym': card.acronym,

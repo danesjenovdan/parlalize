@@ -370,6 +370,11 @@ class MPStaticPL(Timestampable, models.Model):
     age = models.IntegerField(blank=True, null=True,
                               help_text=_('Person\'s age.'))
 
+    birth_date = models.DateField(_('date of activity'),
+                                  blank=True,
+                                  null=True,
+                                  help_text=_('date of analize'))
+
     mandates = models.IntegerField(
         blank=True, null=True, help_text=_('Number of mandates'))
 
