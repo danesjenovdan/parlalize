@@ -12,7 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recacheLegislationsOnSession
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES, DZ, COUNCIL_ID
+from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
+                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT)
 from parlaskupine.models import Organization
 
 from utils.legislations import finish_legislation_by_final_vote
@@ -448,14 +449,14 @@ def setMotionOfSession(request, session_id):
         url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
         for vote in votes:
-            if vote['option'] == str('aye'):
-                yes = yes + 1
-            if vote['option'] == str('no'):
-                no = no + 1
-            if vote['option'] == str('tellno'):
-                kvorum = kvorum + 1
-            if vote['option'] == str('tellaye'):
-                kvorum = kvorum + 1
+            if vote['option'] in YES:
+                yes += 1
+            if vote['option'] in AGAINST:
+                no += 1
+            if vote['option'] in ABSTAIN:
+                kvorum += 1
+            if vote['option']  in NOT_PRESENT:
+                not_present += 1
         result = mot['result']
         if mot['amendment_of']:
             a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
