@@ -365,7 +365,7 @@ def getSpeechesOfSession(request, session_id):
 
     return JsonResponse({"pages": paginator.num_pages,
                          "count": paginator.count,
-                         "per_page": paginator.per_pages,
+                         "per_page": paginator.per_page,
                          "page": page,
                          "session": sessionData,
                          "created_for": session_time,
