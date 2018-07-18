@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q, F
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
@@ -336,6 +337,12 @@ def getSpeechesOfSession(request, session_id):
 
     personsStatic = tryHard(BASE_URL + "/utils/getAllStaticData/").json()
 
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 150)
+
+    paginator = Paginator(speeches, per_page)
+    speeches = paginator.get_page(page)
+
     data = []
     for speech in speeches:
         out = {"speech_id": speech.id_parladata,
@@ -356,7 +363,11 @@ def getSpeechesOfSession(request, session_id):
         }
         data.append(result)
 
-    return JsonResponse({"session": sessionData,
+    return JsonResponse({"pages": paginator.num_pages,
+                         "count": paginator.count,
+                         "per_page": paginator.per_pages,
+                         "page": page,
+                         "session": sessionData,
                          "created_for": session_time,
                          "created_at": datetime.today().strftime(API_DATE_FORMAT),
                          "results": data})
