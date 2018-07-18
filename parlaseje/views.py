@@ -341,7 +341,7 @@ def getSpeechesOfSession(request, session_id):
     per_page = request.GET.get('per_page', 150)
 
     paginator = Paginator(speeches, per_page)
-    speeches = paginator.get_page(page)
+    speeches = paginator.page(page)
 
     data = []
     for speech in speeches:
