@@ -239,7 +239,6 @@ def getMPStaticPL(request, person_id, date_=None):
         'person': getPersonData(person_id, date_),
         'results': {
             'voters': card.voters,
-            'age': card.age,
             'birth_date': card.birth_date,
             'mandates': card.mandates,
             'party_id': card.party.id_parladata,
@@ -4113,20 +4112,16 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
         try:
             mpStatic = getPersonCardModelNew(MPStaticPL,
                                              int(person_id))
-            age = mpStatic.age
             mandates = mpStatic.mandates
             education = mpStatic.education_level
             gender = mpStatic.gender
             birth_date = mpStatic.birth_date
         except:
-            age = None
             mandates = None
             education = None
             gender = None
             birth_date = None
 
-        person_obj['results']['age'] = {}
-        person_obj['results']['age']['score'] = age
         person_obj['results']['birth_date'] = {}
         person_obj['results']['birth_date']['score'] = birth_date
         person_obj['results']['mandates'] = {}
