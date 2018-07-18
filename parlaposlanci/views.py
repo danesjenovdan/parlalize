@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 from django.core.cache import cache
+from django.utils import dateparse
 
 from scipy.stats import rankdata
 from datetime import date, datetime, timedelta
@@ -81,7 +82,7 @@ def setMPStaticPL(request, person_id, date_=None):
                             person=person,
                             voters=data['voters'],
                             age=data['age'],
-                            birth_date=datetime if data['birth_date'] else None,
+                            birth_date=dateparse.parse_datetime(data['birth_date']) if data['birth_date'] else None,
                             mandates=data['mandates'],
                             party=Organization.objects.get(id_parladata=int(data['party_id'])),
                             education=data['education'],
