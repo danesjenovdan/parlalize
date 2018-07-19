@@ -151,6 +151,9 @@ class Speech(Versionable, Activity):
     order = models.IntegerField(blank=True, null=True,
                                 help_text='Order of speech')
 
+    agenda_item_order = models.IntegerField(blank=True, null=True,
+                                            help_text='Order of speech')
+
     organization = models.ForeignKey('parlaskupine.Organization',
                                      blank=True, null=True,
                                      help_text='Organization')
