@@ -82,31 +82,31 @@ def updateSpeeches():
     existingISs = list(Speech.objects.all().values_list('id_parladata',
                                                         flat=True))
     for page in getDataFromPagerApiGen(url):
-        #for dic in page:
-        if int(dic['id']) not in existingISs:
-            print 'adding speech'
-            print dic['valid_to']
-            person = Person.objects.get(id_parladata=int(dic['speaker']))
-            speech = Speech(person=person,
-                            organization=Organization.objects.get(
-                                id_parladata=int(dic['party'])),
-                            content=dic['content'],
-                            order=dic['order'],
-                            agenda_item_order=dic['agenda_item_order'],
-                            session=Session.objects.get(
-                                id_parladata=int(dic['session'])),
-                            start_time=dic['start_time'],
-                            end_time=dic['end_time'],
-                            valid_from=dic['valid_from'],
-                            valid_to=dic['valid_to'],
-                            id_parladata=dic['id'])
-            speech.save()
-        else:
-            print 'update speech'
-            speech = Speech.objects.filter(id_parladata=dic['id'])
-            speech.update(valid_from=dic['valid_from'],
-                          valid_to=dic['valid_to'],
-                          agenda_item_order=dic['agenda_item_order'])
+        for dic in page:
+            if int(dic['id']) not in existingISs:
+                print 'adding speech'
+                print dic['valid_to']
+                person = Person.objects.get(id_parladata=int(dic['speaker']))
+                speech = Speech(person=person,
+                                organization=Organization.objects.get(
+                                    id_parladata=int(dic['party'])),
+                                content=dic['content'],
+                                order=dic['order'],
+                                agenda_item_order=dic['agenda_item_order'],
+                                session=Session.objects.get(
+                                    id_parladata=int(dic['session'])),
+                                start_time=dic['start_time'],
+                                end_time=dic['end_time'],
+                                valid_from=dic['valid_from'],
+                                valid_to=dic['valid_to'],
+                                id_parladata=dic['id'])
+                speech.save()
+            else:
+                print 'update speech'
+                speech = Speech.objects.filter(id_parladata=dic['id'])
+                speech.update(valid_from=dic['valid_from'],
+                              valid_to=dic['valid_to'],
+                              agenda_item_order=dic['agenda_item_order'])
 
     # delete speeches which was deleted in parladata @dirty fix
     #deleteUnconnectedSpeeches()
