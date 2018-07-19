@@ -330,6 +330,7 @@ def getSpeechesOfSession(request, session_id):
     session = get_object_or_404(Session, id_parladata=session_id)
     speeches_queryset = Speech.getValidSpeeches(datetime.now())
     speeches = speeches_queryset.filter(session=session).order_by("start_time",
+                                                                  "agenda_item_order",
                                                                   "order")
 
     sessionData = session.getSessionData()
