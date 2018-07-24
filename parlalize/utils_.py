@@ -753,3 +753,14 @@ def getDataFromPagerApiGen(url, per_page = None):
             print("brejk")
             break
         page += 1
+
+
+def getPersonAmendmentsCount(person_id, date_of):
+    person = Person.objects.get(id_parladata=person_id)
+    card = person.amendment_of_person.filter(start_time__lte=date_of)
+    count = card.count()
+    if not card:
+        date = datetime.now()
+    else:
+        date = card.latest('created_for').created_for
+    return person, count, date

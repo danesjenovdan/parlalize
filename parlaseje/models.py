@@ -296,6 +296,9 @@ class Vote(Timestampable, models.Model):
     amendment_of = models.ManyToManyField('parlaskupine.Organization',
                                           related_name='amendments')
 
+    amendment_of_person = models.ManyToManyField('parlaposlanci.Person',
+                                          related_name='amendments')
+
     abstractVisible = models.BooleanField(default=False,
                                           help_text='Is abstract visible')
 

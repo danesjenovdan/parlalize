@@ -101,6 +101,9 @@ urlpatterns = patterns(
     url(r'^getNumberOfQuestions/(?P<person_id>\d+)/(?P<date_>[\w].+)', getNumberOfQuestions),
     url(r'^getNumberOfQuestions/(?P<person_id>\d+)/', getNumberOfQuestions),
 
+    url(r'^getNumberOfAmendmetsOfMember/(?P<person_id>\d+)/(?P<date_>[\w].+)', getNumberOfAmendmetsOfMember),
+    url(r'^getNumberOfAmendmetsOfMember/(?P<person_id>\d+)/', getNumberOfAmendmetsOfMember),
+
     url(r'^getListOfMembers/(?P<date_>[\w].+)', getListOfMembers),
     url(r'^getListOfMembers/', getListOfMembers),
 

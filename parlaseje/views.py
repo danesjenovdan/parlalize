@@ -15,6 +15,7 @@ from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recacheLegislationsOnSession
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
                                 DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT)
+from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 
 from utils.legislations import finish_legislation_by_final_vote
@@ -475,6 +476,11 @@ def setMotionOfSession(request, session_id):
         else:
             a_orgs = []
 
+        if mot['amendment_of_people']:
+            a_people = Person.objects.filter(id_parladata__in=mot['amendment_of_people'])
+        else:
+            a_people = []
+
         # TODO: replace try with: "if mot['epa']"
         try:
             law = Legislation.objects.get(epa=mot['epa'])
@@ -504,6 +510,7 @@ def setMotionOfSession(request, session_id):
                         classification=classification,
                         )
             vote[0].amendment_of.add(*a_orgs)
+            vote[0].amendment_of_person.add(*a_people)
             if prev_result != vote[0].result:
                 finish_legislation_by_final_vote(vote[0])
         else:
@@ -527,6 +534,7 @@ def setMotionOfSession(request, session_id):
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
                 vote[0].amendment_of.add(*a_orgs)
+                vote[0].amendment_of_person.add(*a_people)
                 finish_legislation_by_final_vote(vote[0])
 
         yes = 0
