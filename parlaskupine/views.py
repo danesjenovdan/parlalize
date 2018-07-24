@@ -4071,7 +4071,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                     ob['organization'] = org.getOrganizationData()
                 out['results'] = ob
 
-            out['results'] = sorted(out[str(acr)]['votes'],
+            out['results'] = sorted(out['results']['votes'],
                                    key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name',
                                                                  flat=True))
