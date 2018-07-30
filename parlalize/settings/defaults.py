@@ -102,12 +102,6 @@ LAST_ACTIVITY_COUNT = 10
 
 # PARLALIZE vote options represent for vote analyses
 # in ballots we save the option as string. this is used to transform it to a numerical value
-VOTE_MAP = {
-    "aye": 1, # for
-    "no": -1, # against
-    "tellaye": 0, # abstain
-    "tellno": 0, # not present
-}
 
 LOGGING = {
     'version': 1,
@@ -188,6 +182,3 @@ VOTE_NAMES = {
 }
 
 TINYMCE_INCLUDE_JQUERY = False
-
-COUNCIL_ID = 9
-DZ = 95
