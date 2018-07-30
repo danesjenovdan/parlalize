@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 from django.core.cache import cache
+from django.utils import dateparse
 
 from scipy.stats import rankdata
 from datetime import date, datetime, timedelta
@@ -13,7 +14,8 @@ from slugify import slugify
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL, ISCI_URL, GLEJ_URL)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
-                              getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi)
+                              getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi,
+                              getPersonAmendmentsCount)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)
@@ -81,6 +83,7 @@ def setMPStaticPL(request, person_id, date_=None):
                             person=person,
                             voters=data['voters'],
                             age=data['age'],
+                            birth_date=dateparse.parse_datetime(data['birth_date']) if data['birth_date'] else None,
                             mandates=data['mandates'],
                             party=Organization.objects.get(id_parladata=int(data['party_id'])),
                             education=data['education'],
@@ -238,7 +241,7 @@ def getMPStaticPL(request, person_id, date_=None):
         'person': getPersonData(person_id, date_),
         'results': {
             'voters': card.voters,
-            'age': card.age,
+            'birth_date': card.birth_date,
             'mandates': card.mandates,
             'party_id': card.party.id_parladata,
             'acronym': card.acronym,
@@ -3706,6 +3709,7 @@ def getSlugs(request):
 
     * @apiSuccessExample {json} Example response:
     {
+        "legislationLink": "/zakonodaja/",
         "partyLink": {
             "govori": "/govori/",
             "base": "/poslanska-skupina/",
@@ -3781,6 +3785,7 @@ def getSlugs(request):
                     "pregled": "/pregled/"
                 },
 
+            "legislationLink": "/zakonodaja/",
             "sessionLink": {
                     "glasovanje": "/seja/glasovanje/",
                     "glasovanja": "/seja/glasovanja/",
@@ -4109,18 +4114,18 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
         try:
             mpStatic = getPersonCardModelNew(MPStaticPL,
                                              int(person_id))
-            age = mpStatic.age
             mandates = mpStatic.mandates
             education = mpStatic.education_level
             gender = mpStatic.gender
+            birth_date = mpStatic.birth_date
         except:
-            age = None
             mandates = None
             education = None
             gender = None
+            birth_date = None
 
-        person_obj['results']['age'] = {}
-        person_obj['results']['age']['score'] = age
+        person_obj['results']['birth_date'] = {}
+        person_obj['results']['birth_date']['score'] = birth_date
         person_obj['results']['mandates'] = {}
         person_obj['results']['mandates']['score'] = mandates
         person_obj['results']['education'] = {}
@@ -4516,3 +4521,59 @@ def getMismatchWithPG(request, person_id, date_=None):
                 }
             }
     return JsonResponse(data)
+
+
+def getNumberOfAmendmetsOfMember(request, person_id, date_=None):
+    """
+    * @api {get} getNumberOfAmendmetsOfMember/{pg_id}/{?date} Gets number of amendments of specific organization 
+    * @apiName getNumberOfAmendmetsOfMember
+    * @apiGroup MPs
+    * @apiDescription This function returns number of amendments of specific member
+    * @apiParam {Integer} person_id Parladata id for the member in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfMember/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfMember/1/12.12.2015    
+    """
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = ''
+    members = [i['id' ]for i in  tryHard(API_URL + '/getAllMPs/').json().keys()]
+    person = count = last_card_date = None
+    data = []
+    for p_id in members:            
+        temp_person, temp_count, last_card = getPersonAmendmentsCount(p_id, date_of)
+        data.append({'value': temp_count,
+                     'person_obj': temp_person,
+                     'party_id': person_id})
+        if p_id == str(person_id):
+            print("FOUND")
+            person = temp_person
+            count = temp_count
+            last_card_date = last_card
+
+    maxAmendmets = max(data, key=lambda x:x['value'] if x['value'] else 0)
+
+    values = [i['value'] for i in data if i['value']]
+    if values:
+        avg = float(sum(values))/len(values)
+    else:
+        avg = 0
+
+    out = {'person': person.getPersonData(),
+           'created_at': datetime.now().strftime(API_DATE_FORMAT),
+           'created_for': last_card_date.strftime(API_DATE_FORMAT),
+           'result': {
+               'score': count,
+               'max': {
+                   'pgs': [maxAmendmets['person_obj'].getPersonData() if maxAmendmets['person_obj'] else {}],
+                   'score': maxAmendmets['value']
+                   },
+               'average': avg
+               }
+            }
+    return JsonResponse(out, safe=False)

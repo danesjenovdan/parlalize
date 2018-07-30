@@ -20,6 +20,18 @@ DATABASES = {
     }
 }
 
+YES = ['yes']
+NOT_PRESENT =  ['no']
+AGAINST = ['against']
+ABSTAIN = ['kvorum']
+
+VOTE_MAP = {
+    "aye": 1, # for
+    "no": -1, # against
+    "tellaye": 0, # abstain
+    "tellno": 0, # not present
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
@@ -63,3 +75,6 @@ ALL_STATIC_CACHE_AGE = 48
 
 if not DEVELOPMENT:
     FORCE_SCRIPT_NAME = '/analize'
+
+DZ = 95
+COUNCIL_ID = 9

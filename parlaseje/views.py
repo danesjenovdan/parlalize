@@ -8,11 +8,14 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q, F
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recacheLegislationsOnSession
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES, DZ, COUNCIL_ID
+from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
+                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT)
+from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 
 from utils.legislations import finish_legislation_by_final_vote
@@ -328,12 +331,19 @@ def getSpeechesOfSession(request, session_id):
     session = get_object_or_404(Session, id_parladata=session_id)
     speeches_queryset = Speech.getValidSpeeches(datetime.now())
     speeches = speeches_queryset.filter(session=session).order_by("start_time",
+                                                                  "agenda_item_order",
                                                                   "order")
 
     sessionData = session.getSessionData()
     session_time = session.start_time.strftime(API_DATE_FORMAT)
 
     personsStatic = tryHard(BASE_URL + "/utils/getAllStaticData/").json()
+
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 150)
+
+    paginator = Paginator(speeches, per_page)
+    speeches = paginator.page(page)
 
     data = []
     for speech in speeches:
@@ -355,7 +365,11 @@ def getSpeechesOfSession(request, session_id):
         }
         data.append(result)
 
-    return JsonResponse({"session": sessionData,
+    return JsonResponse({"pages": paginator.num_pages,
+                         "count": paginator.count,
+                         "per_page": paginator.per_page,
+                         "page": page,
+                         "session": sessionData,
                          "created_for": session_time,
                          "created_at": datetime.today().strftime(API_DATE_FORMAT),
                          "results": data})
@@ -448,19 +462,24 @@ def setMotionOfSession(request, session_id):
         url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
         for vote in votes:
-            if vote['option'] == str('aye'):
-                yes = yes + 1
-            if vote['option'] == str('no'):
-                no = no + 1
-            if vote['option'] == str('tellno'):
-                kvorum = kvorum + 1
-            if vote['option'] == str('tellaye'):
-                kvorum = kvorum + 1
+            if vote['option'] in YES:
+                yes += 1
+            if vote['option'] in AGAINST:
+                no += 1
+            if vote['option'] in ABSTAIN:
+                kvorum += 1
+            if vote['option']  in NOT_PRESENT:
+                not_present += 1
         result = mot['result']
         if mot['amendment_of']:
             a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
         else:
             a_orgs = []
+
+        if mot['amendment_of_people']:
+            a_people = Person.objects.filter(id_parladata__in=mot['amendment_of_people'])
+        else:
+            a_people = []
 
         # TODO: replace try with: "if mot['epa']"
         try:
@@ -491,6 +510,7 @@ def setMotionOfSession(request, session_id):
                         classification=classification,
                         )
             vote[0].amendment_of.add(*a_orgs)
+            vote[0].amendment_of_person.add(*a_people)
             if prev_result != vote[0].result:
                 finish_legislation_by_final_vote(vote[0])
         else:
@@ -514,6 +534,7 @@ def setMotionOfSession(request, session_id):
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
                 vote[0].amendment_of.add(*a_orgs)
+                vote[0].amendment_of_person.add(*a_people)
                 finish_legislation_by_final_vote(vote[0])
 
         yes = 0
@@ -3312,7 +3333,7 @@ def getAllLegislation(request):
                                       'text': legislation.text,
                                       'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
                                       'mdt_text': legislation.mdt,
-                                      'mdt': wbs[str(legislation.mdt_fk.id_parladata)] if legislation.mdt_fk else {'name': '',
+                                      'mdt': wbs[str(legislation.mdt_fk.id_parladata)] if legislation.mdt_fk and legislation.mdt_fk in wbs.keys() else {'name': '',
                                                                                                                    'id': None},
                                       'classification': legislation.classification,
                                       'result': legislation.result,

@@ -3966,7 +3966,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
 
     * @apiSuccessExample {json} Example response:
     {  
-   "SMC":[  
+   "results":[  
       {  
          "text":"Dnevni red v celoti",
          "id_parladata":6513,
@@ -4051,10 +4051,10 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                             'classification': vote.classification,
                             'maximum': vote.intra_disunion,
                             'id_parladata': vote.id_parladata})
-                out['DZ'] = {'organization': 'dz',
+                out['results'] = {'organization': 'dz',
                              'votes': tab}
 
-            out[str(acr)] = sorted(out[str(acr)]['votes'],
+            out['results'] = sorted(out['results']['votes'],
                                    key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name',
                                                                  flat=True))
@@ -4069,9 +4069,9 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                     obj['maximum'] = float(intra.maximum)
                     ob['votes'].append(obj)
                     ob['organization'] = org.getOrganizationData()
-                out[Organization.objects.get(id_parladata=org_id).acronym] = ob
+                out['results'] = ob
 
-            out[str(acr)] = sorted(out[str(acr)]['votes'],
+            out['results'] = sorted(out['results']['votes'],
                                    key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name',
                                                                  flat=True))
@@ -4443,7 +4443,7 @@ def getDisunionOrgID(request, pg_id, date_=None):
 
     suma, ids = getDisunionInOrgHelper(pg_id, date_of) 
     org_data = ids[0].organization.getOrganizationData() if ids else {}
-    orgs = tryHard('https://data.parlameter.si/v1/getAllPGs/').json().keys()
+    orgs = tryHard(API_URL + '/getAllPGs/').json().keys()
 
     data = []
     for org in orgs:
@@ -4455,7 +4455,10 @@ def getDisunionOrgID(request, pg_id, date_=None):
     maxDisunion = max(data, key=lambda x:x['value'] if x['value'] else 0)
 
     values = [i['value'] for i in data if i['value']]
-    avg = float(sum(values))/len(values)
+    try:
+        avg = float(sum(values))/len(values)
+    except:
+        avg = 0
 
     out = {'organization': org_data,
            'result': {

@@ -151,6 +151,9 @@ class Speech(Versionable, Activity):
     order = models.IntegerField(blank=True, null=True,
                                 help_text='Order of speech')
 
+    agenda_item_order = models.IntegerField(blank=True, null=True,
+                                            help_text='Order of speech')
+
     organization = models.ForeignKey('parlaskupine.Organization',
                                      blank=True, null=True,
                                      help_text='Organization')
@@ -291,6 +294,9 @@ class Vote(Timestampable, models.Model):
                                        help_text='intra disunion for all members')
 
     amendment_of = models.ManyToManyField('parlaskupine.Organization',
+                                          related_name='amendments')
+
+    amendment_of_person = models.ManyToManyField('parlaposlanci.Person',
                                           related_name='amendments')
 
     abstractVisible = models.BooleanField(default=False,
