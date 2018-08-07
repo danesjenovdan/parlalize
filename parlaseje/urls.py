@@ -1,11 +1,13 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url, include
 from parlaseje.views import *
+from rest_framework import routers
+from .api import TFIDFView
+
+router = routers.DefaultRouter()
+router.register(r'tfidfs', TFIDFView)
 
 
-urlpatterns = patterns(
-    # fix (first url was ignored)
-    (),
-
+urlpatterns = [
     # All setters
     url(r'^setMotionOfSession/(?P<session_id>\d+)', setMotionOfSession),
     url(r'^setMotionOfSession/(?P<session_id>\d+)/(?P<date_>[\w].+)', setMotionOfSession),
@@ -62,4 +64,6 @@ urlpatterns = patterns(
     url(r'^getAllLegislation/', getAllLegislation),
 
     url(r'^allActiveEpas/', getAllLegislationEpas),
-)
+
+    url(r'^', include(router.urls)),
+]

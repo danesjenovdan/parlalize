@@ -1,10 +1,9 @@
-from django.conf.urls import patterns, include, url
-from parlaskupine.views import *
-from parlaskupine.admin import WBAutocomplete
+from django.conf.urls import include, url
+from .views import *
+from .admin import WBAutocomplete
 
 
-urlpatterns = patterns('',
-
+urlpatterns = [
 #	url(r'^getMPsList/', getMPsList),
     # setters
     url(r'^setBasicInfOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setBasicInfOfPG),
@@ -112,4 +111,4 @@ urlpatterns = patterns('',
     # autocomplete urls
     url(r'^wb-autocomplete/$', WBAutocomplete.as_view(), name='wb-autocomplete'),
 
-)
+]

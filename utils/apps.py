@@ -6,4 +6,4 @@ class UtilsConfig(AppConfig):
         from .recache import getAllStaticData, getSessionsList
         print "recache on ready"
         getAllStaticData(None)
-        getSessionsList(None)
+        #getSessionsList(None)

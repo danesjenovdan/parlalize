@@ -22,7 +22,7 @@ class Session(Timestampable, models.Model):
 
     name = models.CharField(_('name'),
                             blank=True, null=True,
-                            max_length=128,
+                            max_length=512,
                             help_text=_('Session name'))
 
     date = PopoloDateTimeField(_('date of session'),

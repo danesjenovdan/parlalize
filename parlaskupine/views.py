@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from django.db.models.expressions import Date
+from django.db.models.functions import Trunc
 
 from collections import Counter
 from scipy.stats.stats import pearsonr
@@ -22,9 +22,10 @@ from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
                               getAllStaticData, setCardData, getPersonCardModelNew,
                               getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
-                                API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES)
-from parlaskupine.models import *
-from parlaskupine.utils_ import getDisunionInOrgHelper, getAmendmentsCount
+                                API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
+                                AGAINST, ABSTAIN)
+from .models import *
+from .utils_ import getDisunionInOrgHelper, getAmendmentsCount
 from parlaseje.models import Activity, Session, Vote, Speech, Question
 from parlaposlanci.models import Person, MismatchOfPG
 from parlaposlanci.views import getMPsList
@@ -996,7 +997,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     out = []
     speeches = speeches_q.filter(organization__id_parladata=pg_id)
 
-    speeches = speeches.annotate(day=Date("start_time",
+    speeches = speeches.annotate(day=Trunc("start_time",
                                           "day")).values('day',
                                                          'id_parladata',
                                                          'session__id_parladata',
@@ -3476,9 +3477,10 @@ def setPresenceThroughTime(request, party_id, date_=None):
     data_for_save = []
 
     for month in data:
-        stats = month['ni'] + month['za'] + month['proti'] + month['kvorum']
+        options = YES + NOT_PRESENT + AGAINST + ABSTAIN
+        stats = sum([month[option] for option in options if option in month.keys()])
         not_member = month['total'] - stats
-        presence = float(stats-month['ni']) / stats if stats else 0
+        presence = float(stats-sum([month[option] for option in NOT_PRESENT  if option in month.keys()])) / stats if stats else 0
         data_for_save.append({'date_ts': month['date_ts'],
                               'presence': presence * 100,
                               })

@@ -12,7 +12,8 @@ from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
 
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
-                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL, ISCI_URL, GLEJ_URL)
+                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL,
+                                ISCI_URL, GLEJ_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi,
                               getPersonAmendmentsCount)
@@ -31,6 +32,9 @@ import json
 import string
 import copy
 
+
+def index(request):
+    return JsonResponse({})
 
 # get List of MPs
 def getMPsList(request, date_=None):
@@ -3878,10 +3882,11 @@ def setPresenceThroughTime(request, person_id, date_=None):
     data_for_save = []
 
     for month in data:
-        stats = month['ni'] + month['za'] + month['proti'] + month['kvorum']
+        options = YES + NOT_PRESENT + AGAINST + ABSTAIN
+        stats = sum([month[option] for option in options if option in month.keys()])
         not_member = month['total'] - stats
         not_member = float(not_member) / month['total'] if not_member else 0
-        presence = float(stats-month['ni']) / month['total'] if stats else 0
+        presence = float(stats-sum([month[option] for option in NOT_PRESENT  if option in month.keys()])) / month['total'] if stats else 0
         data_for_save.append({'date_ts': month['date_ts'],
                               'presence': presence * 100,
                               'not_member': not_member * 100,

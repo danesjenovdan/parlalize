@@ -2,7 +2,7 @@ from django.contrib import admin
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
-from parlaskupine.models import *
+from .models import *
 from dal import autocomplete
 # Register your models here.
 
