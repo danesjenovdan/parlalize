@@ -50,4 +50,4 @@ celery==4.1.0
 matplotlib==2.1.1
 django-celery-monitor==1.1.2
 djangorestframework==3.7.1
-django-filter==2.0.0
+django-filter==1.1.0

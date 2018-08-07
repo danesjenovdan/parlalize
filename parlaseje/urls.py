@@ -1,5 +1,10 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from parlaseje.views import *
+from rest_framework import routers
+from .api import TFIDFView
+
+router = routers.DefaultRouter()
+router.register(r'tfidfs', TFIDFView)
 
 
 urlpatterns = [
@@ -59,4 +64,6 @@ urlpatterns = [
     url(r'^getAllLegislation/', getAllLegislation),
 
     url(r'^allActiveEpas/', getAllLegislationEpas),
+
+    url(r'^', include(router.urls)),
 ]
