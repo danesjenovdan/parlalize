@@ -33,6 +33,9 @@ import string
 import copy
 
 
+def index(request):
+    return JsonResponse({})
+
 # get List of MPs
 def getMPsList(request, date_=None):
     output = []

@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from django.db.models.expressions import Date
+from django.db.models.functions import Trunc
 
 from collections import Counter
 from scipy.stats.stats import pearsonr
@@ -24,8 +24,8 @@ from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
                                 AGAINST, ABSTAIN)
-from parlaskupine.models import *
-from parlaskupine.utils_ import getDisunionInOrgHelper, getAmendmentsCount
+from .models import *
+from .utils_ import getDisunionInOrgHelper, getAmendmentsCount
 from parlaseje.models import Activity, Session, Vote, Speech, Question
 from parlaposlanci.models import Person, MismatchOfPG
 from parlaposlanci.views import getMPsList
@@ -997,7 +997,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     out = []
     speeches = speeches_q.filter(organization__id_parladata=pg_id)
 
-    speeches = speeches.annotate(day=Date("start_time",
+    speeches = speeches.annotate(day=Trunc("start_time",
                                           "day")).values('day',
                                                          'id_parladata',
                                                          'session__id_parladata',

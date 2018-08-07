@@ -9,6 +9,7 @@ from .exports import exportLegislations
 from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
+from raven.contrib.django.raven_compat.models import client
 
 import requests
 import re

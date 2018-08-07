@@ -1,6 +1,7 @@
 # Create your tasks here
 from __future__ import absolute_import, unicode_literals
-from celery import shared_task
+from django_celery_monitor.models import TaskState
+from celery import states, shared_task
 from time import sleep
 from raven.contrib.django.raven_compat.models import client
 from itertools import groupby
@@ -9,6 +10,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.test.client import RequestFactory
 from django.core.exceptions import PermissionDenied
+from django.forms.models import model_to_dict
 
 from parlalize.utils_ import getAllStaticData, tryHard
 from parlaposlanci.views import (setMPStaticPL, setMembershipsOfMember, setLastActivity,
@@ -225,3 +227,9 @@ def sendStatus(status_id, type_, note, data):
                             "status_note": note,
                             "status_done": str(data)
                         })
+
+
+def get_celery_status(request):
+    tasks = TaskState.objects.all().order_by('-tstamp')
+    objs = [model_to_dict(task) for task in tasks]
+    return JsonResponse(objs, safe=False)

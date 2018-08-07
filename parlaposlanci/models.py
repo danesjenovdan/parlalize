@@ -120,7 +120,7 @@ class SpokenWords(Timestampable, models.Model):  # Card for spoken words of MP o
 
     maxMP = models.ForeignKey('Person',
                               blank=True, null=True,
-                              related_name='childrenSW_',
+                              related_name='childrenSW_1',
                               help_text=_('Person who has max spoken words'))
 
     average = models.IntegerField(_('average'),

@@ -1,11 +1,8 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from parlaseje.views import *
 
 
-urlpatterns = patterns(
-    # fix (first url was ignored)
-    (),
-
+urlpatterns = [
     # All setters
     url(r'^setMotionOfSession/(?P<session_id>\d+)', setMotionOfSession),
     url(r'^setMotionOfSession/(?P<session_id>\d+)/(?P<date_>[\w].+)', setMotionOfSession),
@@ -62,4 +59,4 @@ urlpatterns = patterns(
     url(r'^getAllLegislation/', getAllLegislation),
 
     url(r'^allActiveEpas/', getAllLegislationEpas),
-)
+]
