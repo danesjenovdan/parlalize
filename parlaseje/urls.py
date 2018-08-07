@@ -1,10 +1,11 @@
 from django.conf.urls import url, include
 from parlaseje.views import *
 from rest_framework import routers
-from .api import TFIDFView
+from .api import TFIDFView, VoteNoteView
 
 router = routers.DefaultRouter()
 router.register(r'tfidfs', TFIDFView)
+router.register(r'vote-notes', VoteNoteView)
 
 
 urlpatterns = [
