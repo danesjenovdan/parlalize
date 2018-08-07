@@ -23,7 +23,7 @@ class TFIDFView(viewsets.ModelViewSet):
 class VoteNoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
-        fields = ('id', 'note', 'abstractVisible', 'id_parladata')
+        fields = ('id', 'note', 'abstractVisible', 'id_parladata', 'session',)
 
 
 class VoteNoteView(viewsets.ModelViewSet):
@@ -31,5 +31,5 @@ class VoteNoteView(viewsets.ModelViewSet):
     queryset = Vote.objects.all()
     serializer_class = VoteNoteSerializer
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
-    filter_fields = ('id_parladata',)
+    filter_fields = ('id_parladata', 'session__id_parladata')
     ordering_fields = ('-created_for',)
