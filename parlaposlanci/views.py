@@ -4542,15 +4542,15 @@ def getNumberOfAmendmetsOfMember(request, person_id, date_=None):
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    members = [i['id' ]for i in  tryHard(API_URL + '/getAllMPs/').json().keys()]
+    members = [i['id' ]for i in  tryHard(API_URL + '/getMPs/').json()]
     person = count = last_card_date = None
     data = []
-    for p_id in members:            
+    for p_id in members:
         temp_person, temp_count, last_card = getPersonAmendmentsCount(p_id, date_of)
         data.append({'value': temp_count,
                      'person_obj': temp_person,
                      'party_id': person_id})
-        if p_id == str(person_id):
+        if str(p_id) == str(person_id):
             print("FOUND")
             person = temp_person
             count = temp_count
@@ -4564,13 +4564,13 @@ def getNumberOfAmendmetsOfMember(request, person_id, date_=None):
     else:
         avg = 0
 
-    out = {'person': person.getPersonData(),
+    out = {'person': getPersonData(person.id_parladata),
            'created_at': datetime.now().strftime(API_DATE_FORMAT),
            'created_for': last_card_date.strftime(API_DATE_FORMAT),
            'result': {
                'score': count,
                'max': {
-                   'pgs': [maxAmendmets['person_obj'].getPersonData() if maxAmendmets['person_obj'] else {}],
+                   'pgs': [getPersonData(maxAmendmets['person_obj'].id_parladata, date_) if maxAmendmets['person_obj'] else {}],
                    'score': maxAmendmets['value']
                    },
                'average': avg
