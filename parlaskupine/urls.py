@@ -2,6 +2,12 @@ from django.conf.urls import include, url
 from .views import *
 from .admin import WBAutocomplete
 
+from rest_framework import routers
+from .api import TFIDFView
+
+router = routers.DefaultRouter()
+router.register(r'tfidfs', TFIDFView)
+
 
 urlpatterns = [
 #	url(r'^getMPsList/', getMPsList),
@@ -110,5 +116,8 @@ urlpatterns = [
 
     # autocomplete urls
     url(r'^wb-autocomplete/$', WBAutocomplete.as_view(), name='wb-autocomplete'),
+
+    # drf
+    url(r'^', include(router.urls)),
 
 ]
