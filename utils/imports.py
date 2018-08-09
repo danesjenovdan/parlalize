@@ -49,7 +49,7 @@ def updatePeople():
     return 1
 
 
-def updateOrganizations():
+def updateOrganizations(dummy_arg=None):
     data = tryHard(API_URL + '/getAllOrganizations').json()
     for pg in data:
         if Organization.objects.filter(id_parladata=pg):
