@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from parlaposlanci.views import *
 
 from rest_framework import routers
@@ -7,9 +7,7 @@ from .api import TFIDFView
 router = routers.DefaultRouter()
 router.register(r'tfidfs', TFIDFView)
 
-urlpatterns = patterns(
-    '', # TODO this is fucking crazy
-
+urlpatterns = [
     # setters
     url(r'^setMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMPStaticPL),
     url(r'^setMPStatic/(?P<person_id>\d+)/', setMPStaticPL),
@@ -107,6 +105,9 @@ urlpatterns = patterns(
     url(r'^getNumberOfQuestions/(?P<person_id>\d+)/(?P<date_>[\w].+)', getNumberOfQuestions),
     url(r'^getNumberOfQuestions/(?P<person_id>\d+)/', getNumberOfQuestions),
 
+    url(r'^getNumberOfAmendmetsOfMember/(?P<person_id>\d+)/(?P<date_>[\w].+)', getNumberOfAmendmetsOfMember),
+    url(r'^getNumberOfAmendmetsOfMember/(?P<person_id>\d+)/', getNumberOfAmendmetsOfMember),
+
     url(r'^getListOfMembers/(?P<date_>[\w].+)', getListOfMembers),
     url(r'^getListOfMembers/', getListOfMembers),
 
@@ -127,4 +128,6 @@ urlpatterns = patterns(
     #runer
     #url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
 
-)
+    # drf
+    url(r'^', include(router.urls)),
+]

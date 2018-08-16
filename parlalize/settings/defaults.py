@@ -15,6 +15,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 
 import raven
+from django.utils.translation import gettext as _
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -47,20 +48,21 @@ INSTALLED_APPS = (
     'corsheaders',
     'tinymce',
     'utils',
-
+    'django_celery_monitor',
+    'rest_framework',
+    'django_filters',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-)
+]
 
 ROOT_URLCONF = 'parlalize.urls'
 
@@ -77,6 +79,21 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
         },
+    },
+]
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -102,12 +119,6 @@ LAST_ACTIVITY_COUNT = 10
 
 # PARLALIZE vote options represent for vote analyses
 # in ballots we save the option as string. this is used to transform it to a numerical value
-VOTE_MAP = {
-    "aye": 1, # for
-    "no": -1, # against
-    "tellaye": 0, # abstain
-    "tellno": 0, # not present
-}
 
 LOGGING = {
     'version': 1,
@@ -138,13 +149,15 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Legislation status options: in procedure / procedure ended
 # we use these in the django admin interface to define select dropdown options
 # it is tied to the model, so if you change this please check parlaseje.models.Legislation
-LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
-
+# LEGISLATION_STATUS = [('under_consideration', _('v obravnavi')), ('end_of_hearing', _('konec obravnave'))]
+LEGISLATION_STATUS = [('under_consideration', ('v obravnavi')), ('end_of_hearing', ('konec obravnave'))]
 # Legislation result: empty / accepted / rejected
 # we use these in the django admin interface to define select dropdown options
 # it is tied to the model, so if you change this please check parlaseje.models.Legislation
-LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
 
+
+# LEGISLATION_RESULT = [(None, _('Prazno')), ('accepted', _('sprejet')), ('rejected', _('zavrnjen'))]
+LEGISLATION_RESULT = [(None, ('Prazno')), ('accepted', ('sprejet')), ('rejected',('zavrnjen'))]
 # Vote classificators. Vote text contains. This is tied to VOTE_NAMES.
 VOTE_INDICATORS = { 
     '1': ['dnevni red', 'širitev dnevnega reda', 'umik točke dnevnega reda'], 
@@ -189,5 +202,12 @@ VOTE_NAMES = {
 
 TINYMCE_INCLUDE_JQUERY = False
 
-COUNCIL_ID = 9
-DZ = 95
+REST_FRAMEWORK = { 
+    'DEFAULT_PERMISSION_CLASSES': [ 
+        'rest_framework.permissions.IsAdminUser', 
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10, 
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
+}

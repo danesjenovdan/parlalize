@@ -473,7 +473,9 @@ def fastUpdate(fast=True, date_=None):
             speech = Speech(person=person,
                             organization=Organization.objects.get(
                                 id_parladata=int(dic['party'])),
-                            content=dic['content'], order=dic['order'],
+                            content=dic['content'],
+                            agenda_item_order=dic['agenda_item_order'],
+                            order=dic['order'],
                             session=Session.objects.get(
                                 id_parladata=int(dic['session'])),
                             start_time=dic['start_time'],

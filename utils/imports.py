@@ -9,6 +9,7 @@ from .exports import exportLegislations
 from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
+from raven.contrib.django.raven_compat.models import client
 
 import requests
 import re
@@ -48,7 +49,7 @@ def updatePeople():
     return 1
 
 
-def updateOrganizations():
+def updateOrganizations(dummy_arg=None):
     data = tryHard(API_URL + '/getAllOrganizations').json()
     for pg in data:
         if Organization.objects.filter(id_parladata=pg):
@@ -90,7 +91,9 @@ def updateSpeeches():
                 speech = Speech(person=person,
                                 organization=Organization.objects.get(
                                     id_parladata=int(dic['party'])),
-                                content=dic['content'], order=dic['order'],
+                                content=dic['content'],
+                                order=dic['order'],
+                                agenda_item_order=dic['agenda_item_order'],
                                 session=Session.objects.get(
                                     id_parladata=int(dic['session'])),
                                 start_time=dic['start_time'],
@@ -103,7 +106,8 @@ def updateSpeeches():
                 print 'update speech'
                 speech = Speech.objects.filter(id_parladata=dic['id'])
                 speech.update(valid_from=dic['valid_from'],
-                              valid_to=dic['valid_to'])
+                              valid_to=dic['valid_to'],
+                              agenda_item_order=dic['agenda_item_order'])
 
     # delete speeches which was deleted in parladata @dirty fix
     #deleteUnconnectedSpeeches()

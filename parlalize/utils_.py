@@ -746,9 +746,21 @@ def getDataFromPagerApiGen(url, per_page = None):
     end = False
     page = 1
     while not end:
+        print(page)
         response = requests.get(url + '?page=' + str(page) + ('&per_page='+str(per_page) if per_page else '')).json()
+        yield response['data']
         if page >= response['pages']:
+            print("brejk")
             break
         page += 1
-        yield response['data']
 
+
+def getPersonAmendmentsCount(person_id, date_of):
+    person = Person.objects.get(id_parladata=person_id)
+    card = person.amendment_of_person.filter(start_time__lte=date_of)
+    count = card.count()
+    if not card:
+        date = datetime.now()
+    else:
+        date = card.latest('created_for').created_for
+    return person, count, date

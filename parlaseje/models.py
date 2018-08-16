@@ -22,7 +22,7 @@ class Session(Timestampable, models.Model):
 
     name = models.CharField(_('name'),
                             blank=True, null=True,
-                            max_length=128,
+                            max_length=512,
                             help_text=_('Session name'))
 
     date = PopoloDateTimeField(_('date of session'),
@@ -150,6 +150,9 @@ class Speech(Versionable, Activity):
 
     order = models.IntegerField(blank=True, null=True,
                                 help_text='Order of speech')
+
+    agenda_item_order = models.IntegerField(blank=True, null=True,
+                                            help_text='Order of speech')
 
     organization = models.ForeignKey('parlaskupine.Organization',
                                      blank=True, null=True,
@@ -291,6 +294,9 @@ class Vote(Timestampable, models.Model):
                                        help_text='intra disunion for all members')
 
     amendment_of = models.ManyToManyField('parlaskupine.Organization',
+                                          related_name='amendments')
+
+    amendment_of_person = models.ManyToManyField('parlaposlanci.Person',
                                           related_name='amendments')
 
     abstractVisible = models.BooleanField(default=False,
@@ -566,6 +572,6 @@ class Legislation(Timestampable, models.Model):
                                       help_text='Classification of law')
 
     def __str__(self):
-        sessions = self.sessions.all().values_list('name', flat=True)
-
+        #sessions = self.sessions.all().values_list('name', flat=True)
+        sessions = []
         return ', '.join(sessions if sessions else '') + ' | ' + self.text if self.text else self.epa

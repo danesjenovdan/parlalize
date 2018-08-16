@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from parlaseje.views import *
 from rest_framework import routers
 from .api import TFIDFView, VoteNoteView, LegislationView
@@ -8,10 +8,8 @@ router.register(r'tfidfs', TFIDFView)
 router.register(r'vote-notes', VoteNoteView)
 router.register(r'legislations', LegislationView)
 
-urlpatterns = patterns(
-    # fix (first url was ignored)
-    (),
 
+urlpatterns = [
     # All setters
     url(r'^setMotionOfSession/(?P<session_id>\d+)', setMotionOfSession),
     url(r'^setMotionOfSession/(?P<session_id>\d+)/(?P<date_>[\w].+)', setMotionOfSession),
@@ -60,7 +58,7 @@ urlpatterns = patterns(
 
     url(r'^getLegislationList/(?P<session_id>\d+)$', legislationList),
     
-    url(r'^getLegislation/(?P<epa>[A-Z0-9 \-\+]+)', legislation),
+    url(r'^getLegislation/(?P<epa>[A-Z0-9 \-\+\/]+)', legislation),
     url(r'^otherVotes/(?P<session_id>\d+)$', otherVotes),
 
     url(r'^getExposedLegislation/', getExposedLegislation),
@@ -68,5 +66,6 @@ urlpatterns = patterns(
     url(r'^getAllLegislation/', getAllLegislation),
 
     url(r'^allActiveEpas/', getAllLegislationEpas),
+
     url(r'^', include(router.urls)),
-)
+]

@@ -144,7 +144,7 @@ class MPOfPg(Timestampable, models.Model):
 
     organization = models.ForeignKey('Organization',
                            blank=True, null=True,
-                           related_name='MPOfPg_',
+                           related_name='MPOfPg_1',
                            help_text=_('PG'))
 
     id_parladata = models.IntegerField(_('parladata id'),

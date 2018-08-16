@@ -9,6 +9,7 @@ from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi
 
+from django.conf import settings
 from django.http import JsonResponse
 
 def set_mismatch_of_pg(request, date_=''):
@@ -17,20 +18,19 @@ def set_mismatch_of_pg(request, date_=''):
         f_date = datetime.strptime(date_, '%d.%m.%Y')
     else:
         f_date = datetime.now()
-    API_URL = 'https://data.parlameter.si/v1'
-    url = API_URL + '/getVotesTableExtended/' + date_
+    url = settings.API_URL + '/getVotesTableExtended/' + date_
     data = getDataFromPagerApi(url)
     data = pd.DataFrame(data)
-    url = API_URL + '/getMPs/' + date_
+    url = settings.API_URL + '/getMPs/' + date_
     mps = requests.get(url).json()
     members = [mp['id'] for mp in mps]
-    url = API_URL + '/getMembersOfPGsOnDate/' + date_
+    url = settings.API_URL + '/getMembersOfPGsOnDate/' + date_
     memsOfPGs = requests.get(url).json()
-    url = API_URL + '/getAllPGs/' + date_
+    url = settings.API_URL + '/getAllPGs/' + date_
     pgs = requests.get(url).json()
 
-    coalition = requests.get(API_URL + '/getCoalitionPGs').json()['coalition']
-    orgs = requests.get(API_URL + '/getAllPGsExt/')
+    coalition = requests.get(settings.API_URL + '/getCoalitionPGs').json()['coalition']
+    orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
     data['option_ni'] = 0
     data['option_za'] = 0
     data['option_proti'] = 0
