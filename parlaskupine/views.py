@@ -18,7 +18,7 @@ import math
 import numpy as np
 
 from utils.speech import WordAnalysis
-from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
+from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getAllStaticData, setCardData, getPersonCardModelNew,
                               getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
