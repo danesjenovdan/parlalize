@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 from parlaseje.views import *
 from rest_framework import routers
 from .api import TFIDFView, VoteNoteView, LegislationView
@@ -68,4 +68,5 @@ urlpatterns = patterns(
     url(r'^getAllLegislation/', getAllLegislation),
 
     url(r'^allActiveEpas/', getAllLegislationEpas),
+    url(r'^', include(router.urls)),
 )
