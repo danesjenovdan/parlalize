@@ -4450,9 +4450,10 @@ def getDisunionOrgID(request, pg_id, date_=None):
     data = []
     for org in orgs:
         val, dis = getDisunionInOrgHelper(org, date_of)
-        data.append({'value': val,
-                     'org_obj': dis[0].organization,
-                     'org_id': org})
+        if dis:
+            data.append({'value': val,
+                         'org_obj': dis[0].organization,
+                         'org_id': org})
 
     maxDisunion = max(data, key=lambda x:x['value'] if x['value'] else 0)
 
