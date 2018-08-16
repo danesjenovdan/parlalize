@@ -1,6 +1,12 @@
 from django.conf.urls import patterns, url
 from parlaseje.views import *
+from rest_framework import routers
+from .api import TFIDFView, VoteNoteView, LegislationView
 
+router = routers.DefaultRouter()
+router.register(r'tfidfs', TFIDFView)
+router.register(r'vote-notes', VoteNoteView)
+router.register(r'legislations', LegislationView)
 
 urlpatterns = patterns(
     # fix (first url was ignored)

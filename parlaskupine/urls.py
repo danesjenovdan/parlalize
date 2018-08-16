@@ -2,6 +2,11 @@ from django.conf.urls import patterns, include, url
 from parlaskupine.views import *
 from parlaskupine.admin import WBAutocomplete
 
+from rest_framework import routers
+from .api import TFIDFView
+
+router = routers.DefaultRouter()
+router.register(r'tfidfs', TFIDFView)
 
 urlpatterns = patterns('',
 
@@ -112,4 +117,6 @@ urlpatterns = patterns('',
     # autocomplete urls
     url(r'^wb-autocomplete/$', WBAutocomplete.as_view(), name='wb-autocomplete'),
 
+    # drf
+    url(r'^', include(router.urls)),
 )

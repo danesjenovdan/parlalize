@@ -1,6 +1,12 @@
 from django.conf.urls import patterns, include, url
 from parlaposlanci.views import *
 
+from rest_framework import routers
+from .api import TFIDFView
+
+router = routers.DefaultRouter()
+router.register(r'tfidfs', TFIDFView)
+
 urlpatterns = patterns(
     '', # TODO this is fucking crazy
 
@@ -120,4 +126,5 @@ urlpatterns = patterns(
 
     #runer
     #url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
+
 )
