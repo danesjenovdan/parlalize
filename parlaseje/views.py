@@ -130,6 +130,7 @@ def getSpeech(request, speech_id):
     out = {"speech_id": speech.id_parladata,
            "content": speech.content,
            "session": speech.session.getSessionData(),
+           "the_order": speech.the_order,
            "quoted_text": None,
            "end_idx": None,
            "start_idx": None,

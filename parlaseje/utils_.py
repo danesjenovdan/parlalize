@@ -196,6 +196,6 @@ def speech_the_order():
                                                                       "agenda_item_order",
                                                                       "order")
 
-        for i, s in enumetare(speeches):
+        for i, s in enumerate(speeches):
             s.the_order = i
             s.save()
