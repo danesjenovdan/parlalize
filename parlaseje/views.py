@@ -1686,6 +1686,7 @@ def getQuote(request, quote_id):
                                      "start_idx": quote.first_char,
                                      "end_idx": quote.last_char,
                                      "speech_id": quote.speech.id_parladata,
+                                     "the_order": quote.speech.the_order,
                                      "content": quote.speech.content,
                                      'session': quote.speech.session.getSessionData(),
                                      'quote_id': quote.id}})
