@@ -191,11 +191,11 @@ def recacheLegislationsOnSession(session_id):
 def speech_the_order():
     sessions = Session.objects.all()
     for session in sessions:
-    speeches_queryset = Speech.getValidSpeeches(datetime.now())
-    speeches = speeches_queryset.filter(session=session).order_by("start_time",
-                                                                  "agenda_item_order",
-                                                                  "order")
+        speeches_queryset = Speech.getValidSpeeches(datetime.now())
+        speeches = speeches_queryset.filter(session=session).order_by("start_time",
+                                                                      "agenda_item_order",
+                                                                      "order")
 
-    for i, s in enumetare(speeches):
-        s.the_order = i
-        s.save()
+        for i, s in enumetare(speeches):
+            s.the_order = i
+            s.save()
