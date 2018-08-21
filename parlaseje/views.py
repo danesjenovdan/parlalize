@@ -130,6 +130,7 @@ def getSpeech(request, speech_id):
     out = {"speech_id": speech.id_parladata,
            "content": speech.content,
            "session": speech.session.getSessionData(),
+           "the_order": speech.the_order,
            "quoted_text": None,
            "end_idx": None,
            "start_idx": None,
@@ -330,9 +331,7 @@ def getSpeechesOfSession(request, session_id):
     """
     session = get_object_or_404(Session, id_parladata=session_id)
     speeches_queryset = Speech.getValidSpeeches(datetime.now())
-    speeches = speeches_queryset.filter(session=session).order_by("start_time",
-                                                                  "agenda_item_order",
-                                                                  "order")
+    speeches = speeches_queryset.filter(session=session).order_by("the_order")
 
     sessionData = session.getSessionData()
     session_time = session.start_time.strftime(API_DATE_FORMAT)
@@ -350,6 +349,7 @@ def getSpeechesOfSession(request, session_id):
         out = {"speech_id": speech.id_parladata,
                "content": speech.content,
                "session": sessionData,
+               "the_order": speech.the_order,
                "quoted_text": None,
                "end_idx": None,
                "start_idx": None,
@@ -1686,6 +1686,7 @@ def getQuote(request, quote_id):
                                      "start_idx": quote.first_char,
                                      "end_idx": quote.last_char,
                                      "speech_id": quote.speech.id_parladata,
+                                     "the_order": quote.speech.the_order,
                                      "content": quote.speech.content,
                                      'session': quote.speech.session.getSessionData(),
                                      'quote_id': quote.id}})

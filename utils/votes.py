@@ -378,8 +378,11 @@ class VotesAnalysis(object):
         maxSessionOrgIdx = table['sessions'].idxmax()
 
         for pg in self.pgs:
-            thisSessions = table[table.pg == pg].sessions[pg]
-            thisVotes = table[table.pg == pg].votes[pg]
+            try:
+                thisSessions = table[table.pg == pg].sessions[pg]
+                thisVotes = table[table.pg == pg].votes[pg]
+            except:
+                continue
             thisOrg = Organization.objects.get(id_parladata=pg)
             result = saveOrAbortNew(model=PercentOFAttendedSession,
                                     created_for=self.date_of,

@@ -7,6 +7,7 @@ from rest_framework import (serializers, viewsets, pagination, permissions,
 from django.conf import settings
 
 class TFIDFSerializer(serializers.ModelSerializer):
+    data = serializers.JSONField(help_text='Input is array of TFIDFs words objects.')
     class Meta:
         model = Tfidf
         fields = '__all__'

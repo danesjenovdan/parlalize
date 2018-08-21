@@ -27,4 +27,5 @@ urlpatterns = [
     url(r'^v1/utils/recacheLastSession/', recacheLastSession),
     url(r'^v1/monitoring/', monitorMe),
     url(r'^tinymce/', include('tinymce.urls')),
+    url(r'^oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]

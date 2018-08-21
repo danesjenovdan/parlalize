@@ -186,3 +186,16 @@ def recacheLegislationsOnSession(session_id):
         card_url = base_url + 's/' + 'zakon/?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislation%2F' + str(epa) + '&forceRender=true'
         print card_url
         tryHard(card_url)
+
+
+def speech_the_order():
+    sessions = Session.objects.all()
+    for session in sessions:
+        speeches_queryset = Speech.getValidSpeeches(datetime.now())
+        speeches = speeches_queryset.filter(session=session).order_by("start_time",
+                                                                      "agenda_item_order",
+                                                                      "order")
+
+        for i, s in enumerate(speeches):
+            s.the_order = i
+            s.save()
