@@ -5,6 +5,7 @@ from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
 from parlalize.utils_ import tryHard, getDataFromPagerApi
+from django.conf import settings
 
 
 if __name__ == "__main__":
@@ -26,15 +27,15 @@ def assignValueToOption(option):
     """
     get numeric class for vote option
     """
-    if option == 'ni':
+    if option in settings.NOT_PRESENT:
         return 0
-    if option == 'za':
+    if option in settings.YES:
         return 1
-    if option == 'proti':
+    if option in settings.AGAINST:
         return 2
-    if option == 'kvorum':
+    if option in settings.ABSTAIN:
         return 3
-    if option == 'ni obstajal':
+    if option == settings.NOT_A_MEMBER:
         return 4
 
 
