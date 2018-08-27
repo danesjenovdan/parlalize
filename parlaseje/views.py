@@ -473,13 +473,13 @@ def setMotionOfSession(request, session_id):
 
         if mot['counter']:
             # this is for votes without ballots
-            opts_set = set(mot['option'])
+            opts_set = set(mot['counter'])
             if opts_set.intersection(YES):
-                yes = mot['option']['for']
+                yes = mot['counter']['for']
             if opts_set.intersection(AGAINST):
-                no = mot['option']['against']
+                no = mot['counter']['against']
             if opts_set.intersection(ABSTAIN):
-                kvorum = mot['option']['abstain']
+                kvorum = mot['counter']['abstain']
 
             # hardcoded croations number of member
             not_present = 151 - sum(t.values())
