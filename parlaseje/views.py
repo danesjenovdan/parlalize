@@ -473,7 +473,8 @@ def setMotionOfSession(request, session_id):
 
         if mot['counter']:
             # this is for votes without ballots
-            opts_set = set(mot['counter'])
+
+            opts_set = set(mot['counter'].keys())
             if opts_set.intersection(YES):
                 yes = mot['counter']['for']
             if opts_set.intersection(AGAINST):
@@ -482,7 +483,7 @@ def setMotionOfSession(request, session_id):
                 kvorum = mot['counter']['abstain']
 
             # hardcoded croations number of member
-            not_present = 151 - sum(t.values())
+            not_present = 151 - sum(mot['counter'].values())
 
         result = mot['result']
         if mot['amendment_of']:
@@ -781,6 +782,8 @@ def getMotionOfSession(request, session_id, date=False):
             for card in cards:
                 if card.result == None:
                     continue
+
+                has_votes = bool(card.vote.all())
                 out.append({'session': sessionData,
                             'results': {'motion_id': card.id_parladata,
                                         'text': card.motion,
@@ -794,6 +797,7 @@ def getMotionOfSession(request, session_id, date=False):
                                         'tags': card.tags,
                                         'has_outliers': card.has_outlier_voters,
                                         'classification': card.classification,
+                                        'has_votes': has_votes,
                                         }
                             })
                 dates.append(card.created_at)
