@@ -470,6 +470,20 @@ def setMotionOfSession(request, session_id):
                 kvorum += 1
             if vote['option']  in NOT_PRESENT:
                 not_present += 1
+
+        if mot['counter']:
+            # this is for votes without ballots
+            opts_set = set(mot['option'])
+            if opts_set.intersection(YES):
+                yes = mot['option']['for']
+            if opts_set.intersection(AGAINST):
+                no = mot['option']['against']
+            if opts_set.intersection(ABSTAIN):
+                kvorum = mot['option']['abstain']
+
+            # hardcoded croations number of member
+            not_present = 151 - sum(t.values())
+
         result = mot['result']
         if mot['amendment_of']:
             a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
