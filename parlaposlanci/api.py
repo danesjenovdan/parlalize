@@ -8,6 +8,7 @@ from django.conf import settings
 
 class TFIDFSerializer(serializers.ModelSerializer):
     #id_parladata = serializers.SerializerMethodField()
+    data = serializers.JSONField(help_text='Input is array of TFIDFs words objects.')
     class Meta:
         model = Tfidf
         fields = '__all__'
