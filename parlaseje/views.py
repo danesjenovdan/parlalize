@@ -1895,7 +1895,7 @@ def getLastSessionLanding(request, date_=None):
     else:
         fdate = datetime.now().today()
     ready = False
-    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for")
+    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for", "-created_at")
     if not presences:
         raise Http404("Nismo našli kartice")
     presence_index = 0
