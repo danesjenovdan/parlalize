@@ -757,7 +757,7 @@ def getDataFromPagerApiGen(url, per_page = None):
 
 def getPersonAmendmentsCount(person_id, date_of):
     person = Person.objects.get(id_parladata=person_id)
-    card = person.amendment_of_person.filter(start_time__lte=date_of)
+    card = person.amendments.filter(start_time__lte=date_of)
     count = card.count()
     if not card:
         date = datetime.now()
