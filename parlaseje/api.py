@@ -35,7 +35,7 @@ class TFIDFView(viewsets.ModelViewSet):
     fields = '__all__'
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('session', 'session__id_parladata')
-    ordering_fields = ('-created_for',)
+    ordering_fields = ('created_for',)
 
 
 
@@ -45,7 +45,7 @@ class VoteNoteView(viewsets.ModelViewSet):
     serializer_class = VoteNoteSerializer
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('id_parladata', 'session__id_parladata')
-    ordering_fields = ('-created_for',)
+    ordering_fields = ('created_for',)
 
 
 class LegislationView(viewsets.ModelViewSet):
@@ -53,7 +53,7 @@ class LegislationView(viewsets.ModelViewSet):
     queryset = Legislation.objects.all()
     serializer_class = LegislationSerializer
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
-    ordering_fields = ('-date',)
+    ordering_fields = ('date',)
     filter_fields = ('is_exposed', 'status', 'result')
     search_fields = ('text',)
 
