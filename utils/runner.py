@@ -470,8 +470,7 @@ def fastUpdate(fast=True, date_=None):
         if int(dic['id']) not in existingIDs:
             print 'adding speech'
             person = Person.objects.get(id_parladata=int(dic['speaker']))
-            speech = Speech(person=person,
-                            organization=Organization.objects.get(
+            speech = Speech(organization=Organization.objects.get(
                                 id_parladata=int(dic['party'])),
                             content=dic['content'],
                             agenda_item_order=dic['agenda_item_order'],
@@ -484,6 +483,7 @@ def fastUpdate(fast=True, date_=None):
                             valid_to=dic['valid_to'],
                             id_parladata=dic['id'])
             speech.save()
+            speech.person.add(person)
         else:
             print "update speech"
             person = Person.objects.get(id_parladata=int(dic['speaker']))
@@ -510,13 +510,13 @@ def fastUpdate(fast=True, date_=None):
             print 'adding ballot ' + str(dic['vote'])
             vote = Vote.objects.get(id_parladata=dic['vote'])
             person = Person.objects.get(id_parladata=int(dic['voter']))
-            ballots = Ballot(person=person,
-                             option=dic['option'],
+            ballots = Ballot(option=dic['option'],
                              vote=vote,
                              start_time=vote.start_time,
                              end_time=None,
                              id_parladata=dic['id'])
             ballots.save()
+            ballots.person.add(person)
 
     # update questions
     sc.api_call("chat.postMessage",
@@ -551,8 +551,7 @@ def fastUpdate(fast=True, date_=None):
                                                        ministry__id_parladata=post['organization_id']).order_by('-created_for')
                 if static:
                     rec_posts.append(static[0])
-            question = Question(person=person,
-                                session=session,
+            question = Question(session=session,
                                 start_time=dic['date'],
                                 id_parladata=dic['id'],
                                 recipient_text=dic['recipient_text'],
@@ -561,6 +560,7 @@ def fastUpdate(fast=True, date_=None):
                                 author_org=author_org,
                                 )
             question.save()
+            question.person.add(person)
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.add(*rec_posts)

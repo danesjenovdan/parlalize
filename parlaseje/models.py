@@ -123,12 +123,7 @@ class Activity(Timestampable, models.Model):
                                 related_name="%(app_label)s_%(class)s_related",
                                 help_text=_('Session '))
 
-    person = models.ForeignKey('parlaposlanci.Person',
-                               related_name='activitys',
-                               blank=True, null=True,
-                               help_text=_('MP'))
-
-    persons = models.ManyToManyField('parlaposlanci.Person',
+    person = models.ManyToManyField('parlaposlanci.Person',
                                      blank=True,
                                      help_text=_('MP'))
 

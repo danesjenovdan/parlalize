@@ -88,8 +88,7 @@ def updateSpeeches():
                 print 'adding speech'
                 print dic['valid_to']
                 person = Person.objects.get(id_parladata=int(dic['speaker']))
-                speech = Speech(person=person,
-                                organization=Organization.objects.get(
+                speech = Speech(organization=Organization.objects.get(
                                     id_parladata=int(dic['party'])),
                                 content=dic['content'],
                                 order=dic['order'],
@@ -102,6 +101,7 @@ def updateSpeeches():
                                 valid_to=dic['valid_to'],
                                 id_parladata=dic['id'])
                 speech.save()
+                speech.person.add(person)
             else:
                 print 'update speech'
                 speech = Speech.objects.filter(id_parladata=dic['id'])
@@ -146,8 +146,7 @@ def updateQuestions():
                                                        ministry=post['organization_id'])
                 if static:
                     rec_posts.append(static[0])
-            question = Question(person=person,
-                                session=session,
+            question = Question(session=session,
                                 start_time=dic['date'],
                                 id_parladata=dic['id'],
                                 author_org=author_org,
@@ -156,6 +155,7 @@ def updateQuestions():
                                 content_link=link,
                                 )
             question.save()
+            question.person.add(person)
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.all(*rec_posts)
@@ -212,13 +212,13 @@ def updateBallots():
             print 'adding ballot ' + str(dic['vote'])
             vote = Vote.objects.get(id_parladata=dic['vote'])
             person = Person.objects.get(id_parladata=int(dic['voter']))
-            ballots = Ballot(person=person,
-                             option=dic['option'],
+            ballots = Ballot(option=dic['option'],
                              vote=vote,
                              start_time=vote.start_time,
                              end_time=None,
                              id_parladata=dic['id'])
             ballots.save()
+            ballots.person.add(person)
     return 1
 
 

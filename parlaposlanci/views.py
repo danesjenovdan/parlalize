@@ -979,6 +979,7 @@ def getLastActivity(request, person_id, date_=None):
         return {'speech_id': speech.id_parladata,
                 'type': 'speech',
                 'session': this_session,
+                'the_order': speech.the_order,
                 }
  
     def getQuestionData(question, sessions_data):
