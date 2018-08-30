@@ -24,4 +24,4 @@ class TFIDFView(viewsets.ModelViewSet):
     fields = '__all__'
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('person', 'person__id_parladata')
-    ordering_fields = ('-created_for',)
+    ordering_fields = ('created_for',)

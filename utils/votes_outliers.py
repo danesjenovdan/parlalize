@@ -60,10 +60,9 @@ def setMotionAnalize(request, session_id):
     data['option_proti'] = 0
     data['option_kvorum'] = 0
     data.loc[data['option'] == 'ni', 'option_ni'] = 1
-    data.loc[data['option'] == 'aye', 'option_za'] = 1
-    data.loc[data['option'] == 'no', 'option_proti'] = 1
-    data.loc[data['option'] == 'tellno', 'option_kvorum'] = 1
-    data.loc[data['option'] == 'tellyes', 'option_kvorum'] = 1
+    data.loc[data['option'] == 'za', 'option_za'] = 1
+    data.loc[data['option'] == 'proti', 'option_proti'] = 1
+    data.loc[data['option'] == 'kvorum', 'option_kvorum'] = 1
     data['voter_unit'] = 1
     data['is_coalition'] = 0
     data.loc[data['voterparty'].isin(coalition), 'is_coalition'] = 1
