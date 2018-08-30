@@ -8,6 +8,7 @@ from django.conf import settings
 
 class TFIDFSerializer(serializers.ModelSerializer):
     #id_parladata = serializers.SerializerMethodField()
+    data = serializers.JSONField(help_text='Input is array of TFIDFs words objects.')
     class Meta:
         model = Tfidf
         fields = '__all__'
@@ -24,4 +25,4 @@ class TFIDFView(viewsets.ModelViewSet):
     fields = '__all__'
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('organization', 'organization__id_parladata')
-    ordering_fields = ('-created_for',)
+    ordering_fields = ('created_for',)

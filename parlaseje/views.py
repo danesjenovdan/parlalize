@@ -130,6 +130,7 @@ def getSpeech(request, speech_id):
     out = {"speech_id": speech.id_parladata,
            "content": speech.content,
            "session": speech.session.getSessionData(),
+           "the_order": speech.the_order,
            "quoted_text": None,
            "end_idx": None,
            "start_idx": None,
@@ -330,9 +331,7 @@ def getSpeechesOfSession(request, session_id):
     """
     session = get_object_or_404(Session, id_parladata=session_id)
     speeches_queryset = Speech.getValidSpeeches(datetime.now())
-    speeches = speeches_queryset.filter(session=session).order_by("start_time",
-                                                                  "agenda_item_order",
-                                                                  "order")
+    speeches = speeches_queryset.filter(session=session).order_by("the_order")
 
     sessionData = session.getSessionData()
     session_time = session.start_time.strftime(API_DATE_FORMAT)
@@ -350,6 +349,7 @@ def getSpeechesOfSession(request, session_id):
         out = {"speech_id": speech.id_parladata,
                "content": speech.content,
                "session": sessionData,
+               "the_order": speech.the_order,
                "quoted_text": None,
                "end_idx": None,
                "start_idx": None,
@@ -470,6 +470,21 @@ def setMotionOfSession(request, session_id):
                 kvorum += 1
             if vote['option']  in NOT_PRESENT:
                 not_present += 1
+
+        if mot['counter']:
+            # this is for votes without ballots
+
+            opts_set = set(mot['counter'].keys())
+            if opts_set.intersection(YES):
+                yes = mot['counter']['for']
+            if opts_set.intersection(AGAINST):
+                no = mot['counter']['against']
+            if opts_set.intersection(ABSTAIN):
+                kvorum = mot['counter']['abstain']
+
+            # hardcoded croations number of member
+            not_present = 151 - sum(mot['counter'].values())
+
         result = mot['result']
         if mot['amendment_of']:
             a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
@@ -572,20 +587,20 @@ def setMotionOfSessionGraph(request, session_id):
         url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
         for vote in votes:
-            if vote['option'] == str('za'):
+            if vote['option'] in YES:
                 yes = yes + 1
                 yesdic[vote['pg_id']] += 1
                 tabyes.append(vote['mp_id'])
-            if vote['option'] == str('proti'):
+            if vote['option'] in AGAINST:
                 no = no + 1
                 nodic[vote['pg_id']] += 1
                 tabno.append(vote['mp_id'])
 
-            if vote['option'] == str('kvorum'):
+            if vote['option'] in ABSTAIN:
                 kvorum = kvorum + 1
                 kvordic[vote['pg_id']] += 1
                 tabkvo.append(vote['mp_id'])
-            if vote['option'] == str('ni'):
+            if vote['option'] in NOT_PRESENT:
                 not_present = not_present + 1
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])
@@ -767,6 +782,8 @@ def getMotionOfSession(request, session_id, date=False):
             for card in cards:
                 if card.result == None:
                     continue
+
+                has_votes = bool(card.vote.all())
                 out.append({'session': sessionData,
                             'results': {'motion_id': card.id_parladata,
                                         'text': card.motion,
@@ -780,6 +797,7 @@ def getMotionOfSession(request, session_id, date=False):
                                         'tags': card.tags,
                                         'has_outliers': card.has_outlier_voters,
                                         'classification': card.classification,
+                                        'has_votes': has_votes,
                                         }
                             })
                 dates.append(card.created_at)
@@ -1686,6 +1704,7 @@ def getQuote(request, quote_id):
                                      "start_idx": quote.first_char,
                                      "end_idx": quote.last_char,
                                      "speech_id": quote.speech.id_parladata,
+                                     "the_order": quote.speech.the_order,
                                      "content": quote.speech.content,
                                      'session': quote.speech.session.getSessionData(),
                                      'quote_id': quote.id}})
@@ -1876,7 +1895,7 @@ def getLastSessionLanding(request, date_=None):
     else:
         fdate = datetime.now().today()
     ready = False
-    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for")
+    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for", "-created_at")
     if not presences:
         raise Http404("Nismo našli kartice")
     presence_index = 0

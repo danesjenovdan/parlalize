@@ -124,8 +124,13 @@ class Activity(Timestampable, models.Model):
                                 help_text=_('Session '))
 
     person = models.ForeignKey('parlaposlanci.Person',
+                               related_name='activitys',
                                blank=True, null=True,
                                help_text=_('MP'))
+
+    persons = models.ManyToManyField('parlaposlanci.Person',
+                                     blank=True,
+                                     help_text=_('MP'))
 
     start_time = PopoloDateTimeField(blank=True, null=True,
                                      help_text='Start time')
@@ -154,6 +159,10 @@ class Speech(Versionable, Activity):
     agenda_item_order = models.IntegerField(blank=True, null=True,
                                             help_text='Order of speech')
 
+    the_order = models.IntegerField(blank=True, null=True,
+                                    help_text='Absolute order on session',
+                                    db_index=True,)
+
     organization = models.ForeignKey('parlaskupine.Organization',
                                      blank=True, null=True,
                                      help_text='Organization')
@@ -180,6 +189,10 @@ class Question(Activity):
                                    blank=True, null=True,
                                    related_name='AuthorOrg',
                                    help_text=_('Author organization'))
+
+    author_orgs = models.ManyToManyField('parlaskupine.Organization',
+                                         blank=True,
+                                         help_text=_('Author organizations'))
 
     recipient_persons = models.ManyToManyField('parlaposlanci.Person',
                                                blank=True,

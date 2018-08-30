@@ -96,3 +96,4 @@ admin.site.register(Quote)
 admin.site.register(PresenceOfPG)
 admin.site.register(Tfidf, TFIDFAdmin)
 
+admin.site.register(Question)
