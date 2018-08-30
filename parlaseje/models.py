@@ -124,8 +124,13 @@ class Activity(Timestampable, models.Model):
                                 help_text=_('Session '))
 
     person = models.ForeignKey('parlaposlanci.Person',
+                               related_name='activitys',
                                blank=True, null=True,
                                help_text=_('MP'))
+
+    persons = models.ManyToManyField('parlaposlanci.Person',
+                                     blank=True,
+                                     help_text=_('MP'))
 
     start_time = PopoloDateTimeField(blank=True, null=True,
                                      help_text='Start time')
@@ -184,6 +189,10 @@ class Question(Activity):
                                    blank=True, null=True,
                                    related_name='AuthorOrg',
                                    help_text=_('Author organization'))
+
+    author_orgs = models.ManyToManyField('parlaskupine.Organization',
+                                         blank=True,
+                                         help_text=_('Author organizations'))
 
     recipient_persons = models.ManyToManyField('parlaposlanci.Person',
                                                blank=True,
