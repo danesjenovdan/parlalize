@@ -3169,11 +3169,15 @@ def getQuestionsOfPG(request, pg_id, date_=False):
     all_recipients = list(questions.values_list('recipient_text',
                                                 flat=True))
     for question in questions:
-        p_id = str(question.person.id_parladata)
         temp_data = question.getQuestionData(ministrStatic)
-        author = personsStatic[p_id]
-        all_authors[p_id] = author
-        temp_data.update({'person': author})
+        authors = []
+        for person in question.person.all():
+            p_id = str(person.id_parladata)
+            author = personsStatic[p_id]
+            authors.append(author)
+            all_authors[p_id] = author
+            temp_data.update({'person': author[0]})
+        temp_data.update({'authors': authors})
         data[question.start_time_date].append(temp_data)
 
     out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
