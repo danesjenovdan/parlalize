@@ -24,7 +24,7 @@ class VoteNoteSerializer(serializers.ModelSerializer):
 class LegislationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Legislation
-        fields = ('id', 'note', 'extra_note', 'abstractVisible', 'sessions', 'text', 'epa', 'status', 'result', 'is_exposed', 'icon')
+        fields = ('id', 'note', 'extra_note', 'abstractVisible', 'sessions', 'text', 'epa', 'status', 'result', 'is_exposed', 'icon', 'date')
         read_only_fields = ('id', 'sessions', 'epa')
 
 
