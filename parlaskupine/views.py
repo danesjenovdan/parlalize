@@ -3176,7 +3176,7 @@ def getQuestionsOfPG(request, pg_id, date_=False):
             author = personsStatic[p_id]
             authors.append(author)
             all_authors[p_id] = author
-            temp_data.update({'person': author[0]})
+            temp_data.update({'person': author})
         temp_data.update({'authors': authors})
         data[question.start_time_date].append(temp_data)
 
