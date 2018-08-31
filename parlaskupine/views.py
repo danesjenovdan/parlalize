@@ -23,7 +23,7 @@ from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDat
                               getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
-                                AGAINST, ABSTAIN)
+                                AGAINST, ABSTAIN, DZ)
 from .models import *
 from .utils_ import getDisunionInOrgHelper, getAmendmentsCount
 from parlaseje.models import Activity, Session, Vote, Speech, Question
@@ -4048,7 +4048,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     if c_data and not force_render:
         out = c_data
     else:
-        if int(org_id) == 95:
+        if int(org_id) == DZ:
             for vote in votes:
                 tab.append({'text': vote.motion,
                             'result': vote.result,
