@@ -355,7 +355,7 @@ def getSpeechesOfSession(request, session_id):
                "start_idx": None,
                "quote_id": None}
         try:
-            personData = personsStatic['persons'][str(speech.person.id_parladata)]
+            personData = personsStatic['persons'][str(speech.person.first().id_parladata)]
         except:
             personData = getPersonData(speech.person.id_parladata,
                                        session_time)
