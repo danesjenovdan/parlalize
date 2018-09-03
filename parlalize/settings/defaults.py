@@ -200,20 +200,20 @@ VOTE_INDICATORS = {
 
 # Vote classification
 VOTE_NAMES = { 
-    '1': 'dnevni red', # agenda
-    '2': 'glasovanje o zakonu v celoti', # final votiong 
-    '3': 'amandma', # amendment
-    '4': 'interpelacija', # interpelation
-    '5': 'evidenčni sklep', # record conclusion
-    '6': 'predlog sklepa', # proposal for a decision
-    '7': 'zakon o ratifikaciji', # ratification law
-    '8': 'imenovanje', # naming
-    '9': 'predlog za razpis', # proposal for a call
-    '10': 'priporočilo', # recommendation 
-    '11': 'poročilo', # report 
-    '12': 'proceduralni predlog', # procedural proposal 
-    '13': 'odlok o načrtu ravnanja s stvarnim premoženjem',
-    '14': 'drugo' # others
+    '1': 'agenda', # agenda
+    '2': 'whole_law', # final votiong 
+    '3': 'amendment', # amendment
+    '4': 'no_confidence', # interpelation
+    '5': 'record_conclusion', # record conclusion
+    '6': 'conclusion_proposal', # proposal for a decision
+    '7': 'ratification', # ratification law
+    '8': 'naming', # naming
+    '9': 'call_proposal', # proposal for a call
+    '10': 'recommendation', # recommendation 
+    '11': 'report', # report 
+    '12': 'procedural_proposal', # procedural proposal 
+    '13': 'personal_property_decree',
+    '14': 'other' # others
 }
 
 TINYMCE_INCLUDE_JQUERY = False
