@@ -3279,6 +3279,7 @@ def otherVotes(request, session_id):
         if vote.result == None:
             continue
         print vote
+        has_votes = bool(vote.vote.all())
         out.append({'results': {'motion_id': vote.id_parladata,
                                 'text': vote.motion,
                                 'votes_for': vote.votes_for,
@@ -3291,6 +3292,7 @@ def otherVotes(request, session_id):
                                 'has_outliers': vote.has_outlier_voters,
                                 'documents': vote.document_url,
                                 'classification': vote.classification,
+                                'has_votes': has_votes
                                 }
                     })
         dates.append(vote.created_at)
@@ -3320,6 +3322,7 @@ def getAllVotes(request):
             continue
         print vote
         tags += vote.tags
+        has_votes = bool(vote.vote.all())
         out.append({'results': {'motion_id': vote.id_parladata,
                                 'text': vote.motion,
                                 'session': sessions[str(vote.session.id_parladata)],
@@ -3333,6 +3336,7 @@ def getAllVotes(request):
                                 'has_outliers': vote.has_outlier_voters,
                                 'documents': vote.document_url,
                                 'classification': vote.classification,
+                                'has_votes': has_votes
                                 }
                     })
         dates.append(vote.created_at)
