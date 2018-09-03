@@ -3331,7 +3331,7 @@ def getAllVotes(request):
         if vote.result == None:
             continue
         print vote
-        tags = tags += vote.tags
+        tags += vote.tags
         out.append({'results': {'motion_id': vote.id_parladata,
                                 'text': vote.motion,
                                 'session': sessions[str(vote.session.id_parladata)],
