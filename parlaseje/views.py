@@ -3351,12 +3351,11 @@ def getAllVotes(request):
     else:
         created_at = datetime.now().strftime(API_DATE_FORMAT)
 
-    ses_date = session.start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
     return JsonResponse({'results': out,
                          'tags': tags,
                          'classifications': VOTE_NAMES,
-                         'created_for': ses_date,
+                         'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': created_at}, safe=False)
 
 
