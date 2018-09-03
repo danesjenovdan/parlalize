@@ -3155,7 +3155,7 @@ def getQuestionsOfPG(request, pg_id, date_=False):
 
     end_of_day = date_of + timedelta(days=1)
     questions = Question.objects.filter(start_time__lt=end_of_day,
-                                        author_org__id_parladata=pg_id)
+                                        author_orgs__id_parladata=pg_id)
 
     staticData = tryHard(BASE_URL + '/utils/getAllStaticData/').json()
     personsStatic = staticData['persons']
