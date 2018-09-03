@@ -1453,41 +1453,29 @@ def setPresenceOfPG(request, session_id):
     """
     url = API_URL + '/getBallotsOfSession/' + str(session_id) + '/'
     votes = getDataFromPagerApi(url)
-    motions = tryHard(API_URL + '/motionOfSession/' + str(session_id) + '/').json()
+
+    counters_in = Counter([vote['pg_id'] for vote in votes if vote['option'] not in NOT_PRESENT])
+    counters_out = Counter([vote['pg_id'] for vote in votes if vote['option'] in NOT_PRESENT])
+
+
+    pgs = list(set(counters_in.keys() + counters_out.keys()))
+
+    results = {}
+
+    for pg in pgs:
+        try:
+            results[pg] = counters_in[pg] * 100 / (counters_in[pg] + counters_out[pg])
+        except:
+            if pg in counters_in.keys():
+                results[pg] = 100
+            elif pg in counters_out.keys(): 
+                results[pg] = 0
+            else:
+                print('this dont work')
     session = Session.objects.get(id_parladata=session_id)
-    membersOfPG = tryHard(API_URL + '/getMembersOfPGsOnDate/' + session.start_time.strftime(API_DATE_FORMAT)).json()
-
-    allTimePGs = tryHard(API_URL + '/getAllPGsExt/').json().keys()
-
-    onSession = {}
-    final = {}
-    allPgs = {}
-
-    if len(votes) != 0:
-        for vote in votes:
-            if vote['option'] != 'ni':
-                if vote['mo_id'] in onSession.keys():
-                    onSession[vote['mo_id']].append(vote['pg_id'])
-                else:
-                    onSession.update({vote['mo_id']: [vote['pg_id']]})
-    else:
-        return JsonResponse({'alliswell': True, "status": "nothin to add"})
-
-    counters = dict(Counter([item for sublist in onSession.values() for item in sublist]))
-
-    for i in membersOfPG:
-        allPgs[i] = len(membersOfPG[i]) * len(motions)
-        print type(i), type(allTimePGs[1])
-        if allPgs[i] == 0 or i not in allTimePGs:
-            continue
-        if int(i) in counters.keys():
-            final[i] = int((float(counters[int(i)]) / float(allPgs[str(i)])) * 100)
-        else:
-            final[i] = 0
-
     result = saveOrAbortNew(model=PresenceOfPG,
                             created_for=session.start_time,
-                            presence=[final],
+                            presence=[results],
                             session=session)
 
     return JsonResponse({'alliswell': True})
