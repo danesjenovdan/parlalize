@@ -3324,12 +3324,14 @@ def otherVotes(request, session_id):
 def getAllVotes(request):
     out = []
     dates = []
+    tags = []
     sessions = json.loads(getAllStaticData(None).content)['sessions']
     allVotes = Vote.objects.all().prefetch_related('session')
     for vote in allVotes.order_by('start_time'):
         if vote.result == None:
             continue
         print vote
+        tags = tags += vote.tags
         out.append({'results': {'motion_id': vote.id_parladata,
                                 'text': vote.motion,
                                 'session': sessions[str(vote.session.id_parladata)],
@@ -3351,9 +3353,8 @@ def getAllVotes(request):
     else:
         created_at = datetime.now().strftime(API_DATE_FORMAT)
 
-    tags = list(Tag.objects.all().values_list('name', flat=True))
     return JsonResponse({'results': out,
-                         'tags': tags,
+                         'tags': list(set(tags)),
                          'classifications': VOTE_NAMES,
                          'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': created_at}, safe=False)
