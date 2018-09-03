@@ -3324,7 +3324,6 @@ def otherVotes(request, session_id):
 def getAllVotes(request):
     out = []
     dates = []
-    dates = [session.start_time]
     sessions = json.loads(getAllStaticData(None).content)['sessions']
     allVotes = Vote.objects.all().prefetch_related('session')
     for vote in allVotes.order_by('start_time'):
