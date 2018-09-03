@@ -3332,7 +3332,7 @@ def getAllVotes(request):
         print vote
         out.append({'results': {'motion_id': vote.id_parladata,
                                 'text': vote.motion,
-                                'session': sessions[vote.session.id_parladata],
+                                'session': sessions[str(vote.session.id_parladata)],
                                 'votes_for': vote.votes_for,
                                 'against': vote.against,
                                 'abstain': vote.abstain,
