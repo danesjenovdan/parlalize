@@ -3321,6 +3321,46 @@ def otherVotes(request, session_id):
                          'created_at': created_at}, safe=False)
 
 
+def getAllVotes(request):
+    out = []
+    dates = []
+    dates = [session.start_time]
+    sessions = json.loads(getAllStaticData(None).content)['sessions']
+    allVotes = Vote.objects.all().prefetch_related('session')
+    for vote in allVotes.order_by('start_time'):
+        if vote.result == None:
+            continue
+        print vote
+        out.append({'results': {'motion_id': vote.id_parladata,
+                                'text': vote.motion,
+                                'session': sessions[vote.session.id_parladata],
+                                'votes_for': vote.votes_for,
+                                'against': vote.against,
+                                'abstain': vote.abstain,
+                                'not_present': vote.not_present,
+                                'result': vote.result,
+                                'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
+                                'tags': vote.tags,
+                                'has_outliers': vote.has_outlier_voters,
+                                'documents': vote.document_url,
+                                'classification': vote.classification,
+                                }
+                    })
+        dates.append(vote.created_at)
+    if dates:
+        created_at = max(dates).strftime(API_DATE_FORMAT)
+    else:
+        created_at = datetime.now().strftime(API_DATE_FORMAT)
+
+    ses_date = session.start_time.strftime(API_DATE_FORMAT)
+    tags = list(Tag.objects.all().values_list('name', flat=True))
+    return JsonResponse({'results': out,
+                         'tags': tags,
+                         'classifications': VOTE_NAMES,
+                         'created_for': ses_date,
+                         'created_at': created_at}, safe=False)
+
+
 def getExposedLegislation(request):
     legislations = Legislation.objects.filter(is_exposed=True)
     accepted = legislations.filter(result='sprejet').order_by('-updated_at')[:6]
@@ -3366,3 +3406,5 @@ def getAllLegislationEpas(request):
     legislations = Legislation.objects.filter(procedure_ended=False)
     epas = legislations.values_list('epa', flat=True)
     return JsonResponse(list(epas), safe=False)
+
+
