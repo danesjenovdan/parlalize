@@ -110,7 +110,7 @@ def set_mismatch_of_pg(request, date_=''):
         person = Person.objects.get(id_parladata=member)
         party = person.static_data.latest('created_at').party
         party_classification = party.classification
-        if party_classification != 'poslanska skupina':
+        if party_classification != settings.PS:
             value = None
         data.append({'person': person,
                      'value': value})

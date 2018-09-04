@@ -68,6 +68,7 @@ def getMPsList(request, date_=None):
 # returns MP static data like PoliticalParty, age, ....
 @lockSetter
 def setMPStaticPL(request, person_id, date_=None):
+    print("MADAFAKA")
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
         data = tryHard(API_URL + '/getMPStatic/' + person_id + "/" + date_).json()
@@ -761,6 +762,7 @@ def getNumberOfSpokenWords(request, person_id, date=None):
     return JsonResponse(results)
 
 
+# deprecated
 @lockSetter
 def setLastActivity(request, person_id):
     out = []
