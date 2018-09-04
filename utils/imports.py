@@ -157,7 +157,6 @@ def updateQuestions():
                                 content_link=link,
                                 )
             question.save()
-            print(author_orgs)
             question.author_org.add(*author_org)
             question.person.add(*person)
             question.recipient_persons.add(*rec_p)
