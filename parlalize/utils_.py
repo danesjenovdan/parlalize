@@ -425,7 +425,6 @@ def getAllStaticData(request, force_render=False):
                     channel="#parlalize_notif",
                     text='StaticDataDebug start: ' + str(c_data)[:100] + ' ' + str(force_render))
 
-        PS_NP = ['poslanska skupina', 'nepovezani poslanec']
         date_ = datetime.now().strftime(API_DATE_FORMAT)
 
         out = {'persons': {}, 'partys': {}, 'wbs': {}, 'sessions': {}, 'ministrs': {}}
@@ -433,8 +432,7 @@ def getAllStaticData(request, force_render=False):
             personData = getPersonData(person.id_parladata,
                                        date_)
             out['persons'][person.id_parladata] = personData
-
-        parliamentary_group = Organization.objects.filter(classification__in=PS_NP)
+        parliamentary_group = Organization.objects.filter(classification__in=settings.PS_NP)
         for party in parliamentary_group:
             out['partys'][party.id_parladata] = party.getOrganizationData()
 

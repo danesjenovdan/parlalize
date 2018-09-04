@@ -78,3 +78,5 @@ if not DEVELOPMENT:
 
 DZ = 95
 COUNCIL_ID = 9
+
+PS_NP = ['party', 'unaligned MP']
