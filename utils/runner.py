@@ -532,7 +532,9 @@ def fastUpdate(fast=True, date_=None):
             else:
                 session = None
             link = dic['link'] if dic['link'] else None
-            person = Person.objects.get(id_parladata=int(dic['author_id']))
+            person = []
+            for i in dic['author_id']:
+                person.append(Person.objects.get(id_parladata=int(i)))
             if dic['recipient_id']:
                 rec_p = list(Person.objects.filter(id_parladata__in=dic['recipient_id']))
             else:
@@ -541,10 +543,9 @@ def fastUpdate(fast=True, date_=None):
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
-            if dic['author_org_id']:
-                author_org = Organization.objects.get(id_parladata=dic['author_org_id'])
-            else:
-                author_org = None
+            author_org = []
+            for i in dic['author_org_id']:
+                author_org.append(Organization.objects.get(id_parladata=i))
             rec_posts = []
             for post in dic['recipient_posts']:
                 static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
@@ -557,10 +558,10 @@ def fastUpdate(fast=True, date_=None):
                                 recipient_text=dic['recipient_text'],
                                 title=dic['title'],
                                 content_link=link,
-                                author_org=author_org,
                                 )
             question.save()
-            question.person.add(person)
+            question.person.add(*person)
+            question.author_org.add(*author_org)
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.add(*rec_posts)
