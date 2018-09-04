@@ -1691,7 +1691,7 @@ def getQuote(request, quote_id):
     }
     """
     quote = get_object_or_404(Quote, id=quote_id)
-    return JsonResponse({"person": getPersonData(quote.speech.person.id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
+    return JsonResponse({"person": getPersonData(quote.speech.person.first().id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
                          "created_for": quote.created_at.strftime(API_DATE_FORMAT),
                          "created_at": quote.created_at.strftime(API_DATE_FORMAT),
                          "results": {"quoted_text": quote.quoted_text,
