@@ -220,8 +220,8 @@ class Question(Activity):
                 'recipient_orgs': orgs,
                 'url': self.content_link,
                 'id': self.id_parladata,
-                'session_name': self.session.name if self.session else 'Unknown',
-                'session_id': self.session.id_parladata if self.session else 'Unknown'}
+                'session_name': self.session.name if self.session else None,
+                'session_id': self.session.id_parladata if self.session else None}
 
 
 class Ballot(Activity):
