@@ -53,7 +53,7 @@ class LegislationView(viewsets.ModelViewSet):
     queryset = Legislation.objects.all()
     serializer_class = LegislationSerializer
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
-    ordering_fields = ('date',)
+    ordering_fields = ('date', 'id')
     filter_fields = ('is_exposed', 'status', 'result')
     search_fields = ('text',)
 

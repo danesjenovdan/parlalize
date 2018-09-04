@@ -426,12 +426,13 @@ def getAllStaticData(request, force_render=False):
                     text='StaticDataDebug start: ' + str(c_data)[:100] + ' ' + str(force_render))
 
         date_ = datetime.now().strftime(API_DATE_FORMAT)
-
+        print("asdasdasd")
         out = {'persons': {}, 'partys': {}, 'wbs': {}, 'sessions': {}, 'ministrs': {}}
         for person in Person.objects.all():
             personData = getPersonData(person.id_parladata,
                                        date_)
             out['persons'][person.id_parladata] = personData
+        print("asdasdasd")
         parliamentary_group = Organization.objects.filter(classification__in=settings.PS_NP)
         for party in parliamentary_group:
             out['partys'][party.id_parladata] = party.getOrganizationData()

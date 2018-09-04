@@ -1451,6 +1451,10 @@ def getMotionAnalize(request, motion_id):
 def setPresenceOfPG(request, session_id):
     """ Stores presence of PGs on specific session
     """
+
+    url = API_URL + '/getAllPGsExt/'
+    PGs = tryHard(url).json().keys()
+
     url = API_URL + '/getBallotsOfSession/' + str(session_id) + '/'
     votes = getDataFromPagerApi(url)
 
@@ -1463,6 +1467,8 @@ def setPresenceOfPG(request, session_id):
     results = {}
 
     for pg in pgs:
+        if not str(pg) in PGs:
+            continue
         try:
             results[pg] = counters_in[pg] * 100 / (counters_in[pg] + counters_out[pg])
         except:
