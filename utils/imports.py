@@ -82,6 +82,7 @@ def updateSpeeches():
     url = API_URL + '/getAllAllSpeeches'
     existingISs = list(Speech.objects.all().values_list('id_parladata',
                                                         flat=True))
+    orgs = {str(org.id_parladata): org.id for org in Organization.objects.all()}
     for page in getDataFromPagerApiGen(url):
         for dic in page:
             if int(dic['id']) not in existingISs:
@@ -107,7 +108,8 @@ def updateSpeeches():
                 speech = Speech.objects.filter(id_parladata=dic['id'])
                 speech.update(valid_from=dic['valid_from'],
                               valid_to=dic['valid_to'],
-                              agenda_item_order=dic['agenda_item_order'])
+                              agenda_item_order=dic['agenda_item_order'],
+                              organization_id=orgs[str(dic['party'])])
 
     # delete speeches which was deleted in parladata @dirty fix
     #deleteUnconnectedSpeeches()
