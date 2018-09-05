@@ -2706,9 +2706,9 @@ def getComparedVotes(request):
     # select for same people DONE
     for i, e in enumerate(people_same_list):
         if i < len(people_same_list) - 1:
-            select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s, ' % (select_same_people, str(i), str(i), str(i))
+            select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s, parlaseje_activity_person ap%s, ' % (select_same_people, str(i), str(i), str(i), str(i))
         else:
-            select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s' % (select_same_people, str(i), str(i), str(i))
+            select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s, parlaseje_activity_person ap%s ' % (select_same_people, str(i), str(i), str(i), str(i))
     
     # select for same parties DONE
     for i, e in enumerate(parties_same_list):
@@ -2720,9 +2720,9 @@ def getComparedVotes(request):
     # select for different people DONE
     for i, e in enumerate(people_different_list):
         if i < len(people_different_list) - 1:
-            select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s, ' % (select_different_people, str(i), str(i), str(i))
+            select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s, parlaseje_activity_person dap%s, ' % (select_different_people, str(i), str(i), str(i), str(i))
         else:
-            select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s' % (select_different_people, str(i), str(i), str(i))
+            select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s, parlaseje_activity_person dap%s ' % (select_different_people, str(i), str(i), str(i), str(i))
     
     # select for different parties DONE
     for i, e in enumerate(parties_different_list):
@@ -2778,9 +2778,9 @@ def getComparedVotes(request):
     # match same people with persons DONE
     for i, e in enumerate(people_same_list):
         if i < len(people_same_list) - 1:
-            match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.person_id = p%s.id AND p%s.id_parladata = %s AND ' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), e)
+            match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.id = ap%s.activity_id AND ap%s.person_id = p%s.id AND p%s.id_parladata = %s AND ' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
         else:
-            match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.person_id = p%s.id AND p%s.id_parladata = %s' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), e)
+            match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.id = ap%s.activity_id AND ap%s.person_id = p%s.id AND p%s.id_parladata = %s' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
     
     # match same parties with organizations DONE
     for i, e in enumerate(parties_same_list):
@@ -2877,9 +2877,9 @@ def getComparedVotes(request):
     # match different people with person
     for i, e in enumerate(people_different_list):
         if i < len(people_different_list) - 1:
-            match_different_people_persons = '%s db%s.activity_ptr_id = da%s.id AND da%s.person_id = dp%s.id AND dp%s.id_parladata = %s AND ' % (match_different_people_persons, str(i), str(i), str(i), str(i), str(i), e)
+            match_different_people_persons = '%s db%s.activity_ptr_id = da%s.id AND da%s.id = dap%s.activity_id AND dap%s.person_id = dp%s.id AND dp%s.id_parladata = %s AND ' % (match_different_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
         else:
-            match_different_people_persons = '%s db%s.activity_ptr_id = da%s.id AND da%s.person_id = dp%s.id AND dp%s.id_parladata = %s' % (match_different_people_persons, str(i), str(i), str(i), str(i), str(i), e)
+            match_different_people_persons = '%s db%s.activity_ptr_id = da%s.id AND da%s.id = dap%s.activity_id AND dap%s.person_id = dp%s.id AND dp%s.id_parladata = %s ' % (match_different_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
 
     # match different parties with organizations
     for i, e in enumerate(parties_different_list):
@@ -2944,27 +2944,27 @@ def getComparedVotes(request):
 
         for i, e in enumerate(people_same_list):
             if i < len(people_same_list) - 1:
-                exclude_ni_people_same = '%s b%s.option != \'ni\' AND ' % (exclude_ni_people_same, i)
+                exclude_ni_people_same = '%s b%s.option != \'%s\' AND ' % (exclude_ni_people_same, i, NOT_PRESENT[0])
             else:
-                exclude_ni_people_same = '%s b%s.option != \'ni\'' % (exclude_ni_people_same, i)
+                exclude_ni_people_same = '%s b%s.option != \'%s\'' % (exclude_ni_people_same, i, NOT_PRESENT[0])
         
         for i, e in enumerate(parties_same_list):
             if i < len(parties_same_list) - 1:
-                exclude_ni_parties_same = '%s pb%s.option != \'ni\' AND ' % (exclude_ni_parties_same, i)
+                exclude_ni_parties_same = '%s pb%s.option != \'%s\' AND ' % (exclude_ni_parties_same, i, NOT_PRESENT[0])
             else:
-                exclude_ni_parties_same = '%s pb%s.option != \'ni\'' % (exclude_ni_parties_same, i)
+                exclude_ni_parties_same = '%s pb%s.option != \'%s\'' % (exclude_ni_parties_same, i, NOT_PRESENT[0])
         
         for i, e in enumerate(people_different_list):
             if i < len(people_different_list) - 1:
-                exclude_ni_people_different = '%s db%s.option != \'ni\' AND ' % (exclude_ni_people_different, i)
+                exclude_ni_people_different = '%s db%s.option != \'%s\' AND ' % (exclude_ni_people_different, i, NOT_PRESENT[0])
             else:
-                exclude_ni_people_different = '%s db%s.option != \'ni\'' % (exclude_ni_people_different, i)
+                exclude_ni_people_different = '%s db%s.option != \'%s\'' % (exclude_ni_people_different, i, NOT_PRESENT[0])
         
         for i, e in enumerate(parties_different_list):
             if i < len(parties_different_list) - 1:
-                exclude_ni_parties_different = '%s dpb%s.option != \'ni\' AND ' % (exclude_ni_parties_different, i)
+                exclude_ni_parties_different = '%s dpb%s.option != \'%s\' AND ' % (exclude_ni_parties_different, i, NOT_PRESENT[0])
             else:
-                exclude_ni_parties_different = '%s dpb%s.option != \'ni\'' % (exclude_ni_parties_different, i)
+                exclude_ni_parties_different = '%s dpb%s.option != \'%s\'' % (exclude_ni_parties_different, i, NOT_PRESENT[0])
 
         exclude_ni_list = [exclude_ni_people_same, exclude_ni_parties_same, exclude_ni_people_different, exclude_ni_parties_different]
         exclude_ni_list_clean = [s for s in exclude_ni_list if s != '']
