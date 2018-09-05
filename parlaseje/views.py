@@ -137,7 +137,7 @@ def getSpeech(request, speech_id):
            'quote_id': None}
 
     result = {
-        'person': getPersonData(speech.person.id_parladata,
+        'person': getPersonData(speech.person.first().id_parladata,
                                 speech.session.start_time.strftime(API_DATE_FORMAT)),
         'created_for': speech.start_time.strftime(API_DATE_FORMAT),
         'created_at': speech.created_at.strftime(API_DATE_FORMAT),
@@ -357,7 +357,7 @@ def getSpeechesOfSession(request, session_id):
         try:
             personData = personsStatic['persons'][str(speech.person.first().id_parladata)]
         except:
-            personData = getPersonData(speech.person.id_parladata,
+            personData = getPersonData(speech.person.first().id_parladata,
                                        session_time)
         result = {
             'person': personData,
