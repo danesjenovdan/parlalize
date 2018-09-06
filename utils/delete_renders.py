@@ -74,4 +74,5 @@ def deleteRendersOfSessionVotes(session_id):
 
 def deleteMPandPGsRenders():
     delete_renders(group='p')
-    delete_renders(group='s')
+    delete_renders(group='ps')
+

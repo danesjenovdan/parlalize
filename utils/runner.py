@@ -117,25 +117,46 @@ def onDateMPCardRunner(date_=None):
 """
     When are membersips changed, run this method for update data and page
 """
-def onMembershipChangePGRunner(pg_ids, date_=None):
-    print("runnam za pg-je", pg_ids)
-    return
+def onMembershipChangePGRunner(data, date_=None):
     if date_:
         dateObj = datetime.strptime(date_, API_DATE_FORMAT)
         date_of = dateObj.date()
     else:
         date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
+
+    pg_ids = data['pgs']
+    mp_ids = data['mps']
+    print("runnam za pg-je", pg_ids)
+    return
     votez = VotesAnalysis(date_of)
     votez.setAll()
     set_mismatch_of_pg(None)
 
-    setters = [
+    setters_mp = [
+        setMembershipsOfMember,
+        setMPStaticPL
+    ]
+
+    for mp in mp_ids:
+        for setter in setters_mp:
+            try:
+                setter(request_with_key, str(mp), date_)
+            except:
+                msg = ('' + FAIL + ''
+                       'FAIL on: '
+                       '' + str(setter) + ''
+                       ' and with id: '
+                       '' + str(membership['id']) + ''
+                       '' + ENDC + '')
+                print msg
+
+    pg_setters = [
         setMPsOfPG,
         setBasicInfOfPG,
         setPGMismatch,
     ]
-    for setter in setters:
+    for setter in pg_setters:
         for pg_id in pg_ids:
             try:
                 setter(request_with_key, str(pg_id), date_)
@@ -143,7 +164,9 @@ def onMembershipChangePGRunner(pg_ids, date_=None):
                 text = ('' + FAIL + 'FAIL on: ' + str(setter) + ''
                         ' and with id: ' + str(pg_id) + ENDC + '')
                 print text
+
     getAllStaticData(None, force_render=True)
+    getListOfPGs(None, date_, force_render=True)
     deleteMPandPGsRenders()
 
 
