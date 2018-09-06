@@ -26,8 +26,9 @@ from utils.votes_pg import set_mismatch_of_pg
 from utils.exports import exportLegislations
 
 from .votes import VotesAnalysis
+from .delete_renders import deleteMPandPGsRenders
 
-from parlalize.utils_ import tryHard, datesGenerator, printProgressBar, getPersonData
+from parlalize.utils_ import tryHard, datesGenerator, printProgressBar, getPersonData, getAllStaticData
 
 import json
 from slackclient import SlackClient
@@ -113,6 +114,39 @@ def onDateMPCardRunner(date_=None):
         except:
             print 'FAIL on: ' + str(setter)
 
+"""
+    When are membersips changed, run this method for update data and page
+"""
+def onMembershipChangePGRunner(pg_ids, date_=None):
+    print("runnam za pg-je", pg_ids)
+    return
+    if date_:
+        dateObj = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = dateObj.date()
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+    votez = VotesAnalysis(date_of)
+    votez.setAll()
+    set_mismatch_of_pg(None)
+
+    setters = [
+        setMPsOfPG,
+        setBasicInfOfPG,
+        setPGMismatch,
+    ]
+    for setter in setters:
+        for pg_id in pg_ids:
+            try:
+                setter(request_with_key, str(pg_id), date_)
+            except:
+                text = ('' + FAIL + 'FAIL on: ' + str(setter) + ''
+                        ' and with id: ' + str(pg_id) + ENDC + '')
+                print text
+    getAllStaticData(None, force_render=True)
+    deleteMPandPGsRenders()
+
+
 
 def onDatePGCardRunner(date_=None):
     FAIL = '\033[91m'
@@ -125,6 +159,9 @@ def onDatePGCardRunner(date_=None):
         date_of = (datetime.now() - timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
     print date_
+    set_mismatch_of_pg(None)
+    votez = VotesAnalysis(date_of)
+    votez.setAll()
     setters = [
         setMPsOfPG,
         setBasicInfOfPG,
@@ -158,8 +195,6 @@ def onDatePGCardRunner(date_=None):
             setter(request_with_key, date_)
         except:
             print FAIL + 'FAIL on: ' + str(setter) + ENDC
-
-    set_mismatch_of_pg(None)
 
     # updateWB()
 

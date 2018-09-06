@@ -21,6 +21,7 @@ from parlaposlanci import views as members_views
 from parlaskupine import views as parties_views
 from parlaseje import views as sessions_views
 from utils import recache as recache_views
+from utils import runner as runner_views 
 
 import requests
 import json
@@ -41,14 +42,22 @@ import_setters = ['updateOrganizations']
 all_in_one = ['setAverageNumberOfSpeechesPerSessionAll', 'setVocabularySizeAndSpokenWords',
     'setListOfMembersTickers', 'setNumberOfQuestionsAll', 'setAllVotesCards', 'updateOrganizations']
 
+update = ['onMembershipChangePGRunner']
+
 
 @csrf_exempt
 def runAsyncSetter(request):
     args = ['method', 'attr']
     if request.method == 'POST':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except:
+            return JsonResponse({'status': 'add json data to request'}, status=400)
         print data
-        auth_key = request.META['HTTP_AUTHORIZATION']
+        try:
+            auth_key = request.META['HTTP_AUTHORIZATION']
+        except:
+            return JsonResponse({'status': 'unauthorized'}, status=401)
         if auth_key != SETTER_KEY:
             print("auth fail")
             raise PermissionDenied
@@ -66,9 +75,12 @@ def runAsyncSetter(request):
             elif setter['type'] == 'setter':
                 print(setter)
                 runCardsSetters.apply_async(list_args, queue='parlalize')
+            elif setter['type'] == 'update':
+                print(setter)
+                runUpdate.apply_async(list_args, queue='parlalize')
             
     else:
-        return JsonResponse({'status': 'this isnt post'})
+        return JsonResponse({'status': 'this isnt post'}, status=405)
 
     return JsonResponse({'status':'runned'})
 
@@ -88,6 +100,14 @@ def recache_cards(card, attr):
 
 
 # need some love if is necessary
+@shared_task
+def runUpdate(updater, attr):
+    print(updater, attr)
+    method = getattr(runner_views, updater)
+    print attr
+    method(attr)
+
+
 @shared_task
 def recache(caches, attr):
     print 'reache'

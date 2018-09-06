@@ -20,6 +20,7 @@ from parlaskupine.models import Organization
 
 from utils.legislations import finish_legislation_by_final_vote
 from utils.votes_outliers import setMotionAnalize
+from utils.delete_renders import deleteRendersOfSessionVotes
 
 
 import json
@@ -562,6 +563,9 @@ def setMotionOfSession(request, session_id):
 
     if laws:
         recacheLegislationsOnSession(session_id)
+
+    deleteRendersOfSessionVotes(session_id)
+
     return JsonResponse({'alliswell': True})
 
 

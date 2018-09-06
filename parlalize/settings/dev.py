@@ -80,3 +80,6 @@ DZ = 95
 COUNCIL_ID = 9
 
 PS_NP = ['party', 'unaligned MP']
+
+HAS_LEGISLATIONS = True
+
