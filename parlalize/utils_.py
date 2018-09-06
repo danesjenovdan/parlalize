@@ -25,6 +25,7 @@ import json
 import time
 import csv
 import itertools
+from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from parlalize.settings import SETTER_KEY, VOTE_NAMES
