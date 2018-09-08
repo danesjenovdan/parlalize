@@ -3091,7 +3091,7 @@ def setNumberOfQuestionsAll(request, date_=None):
     authors = []
     for question in data:
         if question['author_id'] in mps_ids:
-            authors.append(question['author_id'])
+            authors.extend(question['author_id'])
 
     avg = len(authors)/float(len(mps_ids))
     question_count = Counter(authors)
