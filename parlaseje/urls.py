@@ -61,7 +61,7 @@ urlpatterns = [
     url(r'^getLegislation/(?P<epa>[A-Z0-9 \-\+\/]+)', legislation),
     url(r'^otherVotes/(?P<session_id>\d+)$', otherVotes),
 
-    url(r'^getAllVotes/$', getAllVotes),
+    url(r'^getAllVotes/', getAllVotes),
 
     url(r'^getExposedLegislation/', getExposedLegislation),
 
