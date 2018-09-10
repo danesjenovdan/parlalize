@@ -14,7 +14,7 @@ from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonDat
 from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recacheLegislationsOnSession
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
-                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT)
+                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT, PS)
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 
@@ -1385,7 +1385,7 @@ def getMotionAnalize(request, motion_id):
     pg_outliers = {}
     for org in tmp_data:
         org_obj = Organization.objects.get(id_parladata=int(org))
-        if org_obj.classification == 'poslanska skupina':
+        if org_obj.classification == PS:
             orgs_data[org] = json.loads(tmp_data[org])
             orgs_data[org]['party'] = org_obj.getOrganizationData()
             if orgs_data[org]['outliers']:

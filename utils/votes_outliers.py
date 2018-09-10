@@ -11,10 +11,10 @@ import json
 from collections import Counter
 
 from parlaseje.models import Vote_analysis
-from parlalize.settings import API_URL
 from parlaskupine.models import Organization, IntraDisunion
-
 from parlalize.utils_ import printProgressBar
+
+from django.conf import settings
 
 
 def setOutliers():
@@ -46,14 +46,14 @@ def setMotionAnalize(request, session_id):
     setIntraDisunion
     """
     session = get_object_or_404(Session, id_parladata=session_id)
-    url = API_URL + '/getVotesOfSessionTable/' + str(session_id) + '/'
+    url = settings.API_URL + '/getVotesOfSessionTable/' + str(session_id) + '/'
     data = pd.read_json(url)
     if data.empty:
         return
-    coalition = requests.get(API_URL + '/getCoalitionPGs').json()['coalition']
-    partys = Organization.objects.filter(classification='poslanska skupina')
+    coalition = requests.get(settings.API_URL + '/getCoalitionPGs').json()['coalition']
+    partys = Organization.objects.filter(classification=settings.PS)
     paries_ids = partys.values_list('id_parladata', flat=True)
-    orgs = requests.get(API_URL + '/getAllPGsExt/')
+    orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
     data['option_absent'] = 0
     data['option_for'] = 0
     data['option_against'] = 0
