@@ -17,7 +17,7 @@ methods = {
 }
 
 
-def delete_renders(method=None, group='p', owner_id=None):
+def delete_renders(method=None, group='p', owner_id=None, renders=None):
     if settings.GLEJ_URL:
         def match(item):
             if owner_id:
@@ -30,8 +30,9 @@ def delete_renders(method=None, group='p', owner_id=None):
                     return False
             return True
 
-        url = settings.GLEJ_URL + '/api/cards/renders'
-        renders = requests.get(url).json()
+        if not renders:
+            url = settings.GLEJ_URL + '/api/cards/renders'
+            renders = requests.get(url).json()
 
         cards = [render['_id'] for render in filter(lambda x: match(x), renders['docs'])]
         for card_id in cards:
@@ -62,8 +63,11 @@ def deleteRendersOfSessionVotes(session_id):
     delete_renders(method='seznam-glasovanj', group='s', owner_id=session_id)
 
     # delete renders vote details
+    url = settings.GLEJ_URL + '/api/cards/renders'
+    renders = requests.get(url).json()
+
     for vote in votes:
-        delete_renders(method='glasovanje', group='s', owner_id=vote.id_parladata)
+        delete_renders(method='glasovanje', group='s', owner_id=vote.id_parladata, renders=renders)
 
     # delete last session
     delete_renders(method='zadnja-seja', group='c', owner_id=None)
