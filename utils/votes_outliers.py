@@ -245,7 +245,7 @@ def getPartyBallot(row):
     """
     using for set ballot of party:
 
-    methodology: ignore not_present
+    methodology: ignore absent
     """
     stats = {'for': row['option_for'],
              'against': row['option_against'],
@@ -274,13 +274,13 @@ def getOptions(row, side):
     stats = {'for': row['option_for'],
              'against': row['option_against'],
              'abstain': row['option_abstain'],
-             'not_present': row['option_absent']}
+             'absent': row['option_absent']}
     max_opt = max(stats, key=stats.get)
     max_ids = [key for key, val in stats.iteritems() if val == max(stats.values())]
 
     if len(max_ids) > 1:
-        if 'not_present' in max_ids:
-            max_ids.remove('not_present')
+        if 'absent' in max_ids:
+            max_ids.remove('absent')
             if len(max_ids) > 1:
                 max_vote = 'cant_compute'
             else:
@@ -294,10 +294,10 @@ def getOptions(row, side):
     if side == 'oppo':
         # if side is oppozition don't show outliers
         pass
-        #if max_vote != 'not_present':
+        #if max_vote != 'absent':
         #    outliers = [opt for opt in ['for', 'against'] if stats[opt]]
     else:
-        if max_vote != 'not_present':
+        if max_vote != 'absent':
             outliers = [opt for opt in ['abstain', 'for', 'against'] if stats[opt]]
     for opt in max_ids:
         if opt in outliers:
@@ -307,7 +307,7 @@ def getOptions(row, side):
                                  'for': row['option_for'],
                                  'against': row['option_against'],
                                  'abstain': row['option_abstain'],
-                                 'not_present': row['option_absent'],
+                                 'absent': row['option_absent'],
                                  },
                        'max': {
                                'max_opt': max_vote,
