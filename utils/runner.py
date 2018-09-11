@@ -76,6 +76,8 @@ def onDateMPCardRunner(date_=None):
     else:
         date_of = (datetime.now() - timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
+
+    set_mismatch_of_pg(None, date_)
     setters = [
         setMembershipsOfMember,
         setPresenceThroughTime,
@@ -104,6 +106,7 @@ def onDateMPCardRunner(date_=None):
         setAverageNumberOfSpeechesPerSessionAll,
         setNumberOfQuestionsAll,
         setCompass,
+        setVocabularySizeAndSpokenWords,
     ]
 
     zero = datetime(day=2, month=8, year=2014).date()
