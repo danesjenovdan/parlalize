@@ -52,6 +52,7 @@ class Organization(Timestampable, models.Model):
                   'name': self.name,
                   'acronym': self.acronym,
                   'is_coalition': self.is_coalition,
+                  'classification': self.classification,
                }
 
 

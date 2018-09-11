@@ -332,7 +332,8 @@ def getPersonData(id_parladata, date_=None):
                 'party': {'acronym': None,
                           'id': None,
                           'name': None,
-                          'is_coalition': None},
+                          'is_coalition': None,
+                          'classification': None},
                 'name': guest['name'] if guest else None,
                 'gov_id': guest['gov_id'],
                 'id': id_parladata,
@@ -346,7 +347,8 @@ def getPersonData(id_parladata, date_=None):
                     'party': {'acronym': None,
                               'id': None,
                               'name': None,
-                              'is_coalition': None},
+                              'is_coalition': None,
+                              'classification': None},
                     'name': guest['name'] if guest else None,
                     'gov_id': None,
                     'id': id_parladata,
@@ -362,7 +364,8 @@ def getPersonData(id_parladata, date_=None):
         partyData = {'acronym': None,
                      'id': None,
                      'name': None,
-                     'is_coalition': None}
+                     'is_coalition': None,
+                     'classification': None}
     return {
             'type': 'mp',
             'name': data.person.name,
