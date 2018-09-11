@@ -69,8 +69,8 @@ def setBasicInfOfPG(request, pg_id, date_=None):
                             viceOfPG=viceOfPG,
                             numberOfSeats=data['NumberOfSeats'],
                             allVoters=data['AllVoters'],
-                            facebook=data['Facebook'],
-                            twitter=data['Twitter'],
+                            facebook=json.dumps(data['Facebook']),
+                            twitter=json.dumps(data['Twitter']),
                             email=data['Mail']
                             )
 
@@ -222,8 +222,8 @@ def getBasicInfOfPG(request, pg_id, date=None):
             'numberOfSeats': card.numberOfSeats,
             'allVoters': card.allVoters,
             'social': {
-                'facebook': card.facebook,
-                'twitter': card.twitter,
+                'facebook': json.loads(card.facebook),
+                'twitter': json.laods(card.twitter),
                 'email': card.email
                 }
             }
