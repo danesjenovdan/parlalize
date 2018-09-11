@@ -777,6 +777,7 @@ def getMotionOfSession(request, session_id, date=False):
     """
     out = []
     created_at = None
+    cats = []
     session = Session.objects.get(id_parladata=int(session_id))
     if session:
         sessionData = session.getSessionData()
@@ -804,16 +805,20 @@ def getMotionOfSession(request, session_id, date=False):
                                         'has_votes': has_votes,
                                         }
                             })
+                cats.append(card.classification)
                 dates.append(card.created_at)
             created_at = max(dates).strftime(API_DATE_FORMAT)
         else:
             out = []
         ses_date = session.start_time.strftime(API_DATE_FORMAT)
         tags = list(Tag.objects.all().values_list('name', flat=True))
+
+        filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
+
         return JsonResponse({"results": out,
                              "session": session.getSessionData(),
                              "tags": tags,
-                             "classifications": VOTE_NAMES,
+                             "classifications": filter_cats,
                              "created_for": ses_date,
                              "created_at": created_at}, safe=False)
     else:
@@ -3282,6 +3287,7 @@ def legislation(request, epa):
 def otherVotes(request, session_id):
     out = []
     dates = []
+    cats = []
     session = Session.objects.get(id_parladata=int(session_id))
     dates = [session.start_time]
     allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
@@ -3305,6 +3311,7 @@ def otherVotes(request, session_id):
                                 'has_votes': has_votes
                                 }
                     })
+        cats.append(vote.classification)
         dates.append(vote.created_at)
     if dates:
         created_at = max(dates).strftime(API_DATE_FORMAT)
@@ -3313,10 +3320,11 @@ def otherVotes(request, session_id):
 
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
+    filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
     return JsonResponse({'results': out,
                          'session': session.getSessionData(),
                          'tags': tags,
-                         'classifications': VOTE_NAMES,
+                         'classifications': filter_cats,
                          'created_for': ses_date,
                          'created_at': created_at}, safe=False)
 
@@ -3325,6 +3333,7 @@ def getAllVotes(request):
     out = []
     dates = []
     tags = []
+    cats = []
     sessions = json.loads(getAllStaticData(None).content)['sessions']
     allVotes = Vote.objects.all().prefetch_related('session')
     for vote in allVotes.order_by('start_time'):
@@ -3349,15 +3358,18 @@ def getAllVotes(request):
                                 'has_votes': has_votes
                                 }
                     })
+        cats.append(vote.classification)
         dates.append(vote.created_at)
     if dates:
         created_at = max(dates).strftime(API_DATE_FORMAT)
     else:
         created_at = datetime.now().strftime(API_DATE_FORMAT)
 
+    filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
+
     return JsonResponse({'results': out,
                          'tags': list(set(tags)),
-                         'classifications': VOTE_NAMES,
+                         'classifications': filter_cats,
                          'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': created_at}, safe=False)
 
