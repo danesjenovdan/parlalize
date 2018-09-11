@@ -1378,7 +1378,7 @@ def getMotionAnalize(request, motion_id):
         max_vote_percent_opt = 0
         max_vote_opt = '/'
     else:
-        max_vote_percent_opt = float(stats[max_vote_opt])/(stats['abstain']+stats['against']+stats['for']+stats['not_present'])*100
+        max_vote_percent_opt = float(stats[max_vote_opt])/(stats['abstain']+stats['against']+stats['for']+stats['absent'])*100
 
     tmp_data = model.pgs_data
     orgs_data = {}
