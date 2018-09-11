@@ -130,8 +130,7 @@ def onMembershipChangePGRunner(data, date_=None):
 
     pg_ids = data['pgs']
     mp_ids = data['mps']
-    print("runnam za pg-je", pg_ids)
-    return
+
     votez = VotesAnalysis(date_of)
     votez.setAll()
     set_mismatch_of_pg(None)
