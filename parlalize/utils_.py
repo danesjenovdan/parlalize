@@ -628,7 +628,7 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
     """
     generic method which return tagged ballots for partys and members
     """
-    votes = Vote.objects.filter(start_time__lte=datetime_obj).order_by('start_time')
+    votes = Vote.objects.filter(start_time__lte=datetime_obj).order_by('start_time').prefetch_related('session')
     votes = votes.filter(id__in=ballots.keys())
     # add start_time_date to querySetObjets
     votes = votes.extra(select={'start_time_date': 'DATE(start_time)'})
@@ -636,6 +636,7 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
     dates = list(set(list(votes.values_list("start_time_date", flat=True))))
     dates.sort()
     data = {date: [] for date in dates}
+    cats = []
     #current_data = {'date': votes[0].start_time_date, 'ballots': []}
     for vote in votes:
         try:
@@ -648,6 +649,7 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
                 'option': ballots[vote.id][1],
                 'tags': vote.tags,
             }
+            cats.append(vote.classification)
             # if party
             if 'party' in  card_owner_data.keys():
                 temp_data['party'] = card_owner_data['party']['id']
@@ -665,11 +667,12 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
            for date in dates]
 
     tags = list(Tag.objects.all().values_list('name', flat=True))
+    filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
     result = {
         'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
         'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
         'all_tags': tags,
-        "classifications": VOTE_NAMES,
+        "classifications": filter_cats,
         'results': list(reversed(out))
         }
     result.update(card_owner_data)
