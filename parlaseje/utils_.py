@@ -165,7 +165,7 @@ def getMotionClassification(motion):
     text = motion.lower() 
     for cl, words in classes.items(): 
         for word in words: 
-            if word.lower() in text: 
+            if word.lower() in text.lower(): 
                 return cl 
 
     return '14' # others
