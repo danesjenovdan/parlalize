@@ -791,10 +791,10 @@ def getMotionOfSession(request, session_id, date=False):
                 out.append({'session': sessionData,
                             'results': {'motion_id': card.id_parladata,
                                         'text': card.motion,
-                                        'votes_for': card.votes_for,
+                                        'for': card.votes_for,
                                         'against': card.against,
                                         'abstain': card.abstain,
-                                        'not_present': card.not_present,
+                                        'absent': card.not_present,
                                         'result': card.result,
                                         'epa': card.epa if card.epa else None,
                                         'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. card.is_outlier,
@@ -1368,11 +1368,11 @@ def getMotionAnalize(request, motion_id):
     options = {'for': model.votes_for,
                'against': model.against,
                'abstain': model.abstain,
-               'not_present': model.not_present}
+               'absent': model.not_present}
     stats = {'for': model.votes_for,
              'against': model.against,
              'abstain': model.abstain,
-             'not_present': model.not_present}
+             'absent': model.not_present}
     max_vote_opt = max(stats, key=stats.get)
     if stats[max_vote_opt] == 0:
         max_vote_percent_opt = 0
@@ -1396,7 +1396,7 @@ def getMotionAnalize(request, motion_id):
     members = []
     for option, members_ids in [('for', json.loads(model.mp_yes)),
                             ('against', json.loads(model.mp_no)),
-                            ('not_present', json.loads(model.mp_np)),
+                            ('absent', json.loads(model.mp_np)),
                             ('abstain', json.loads(model.mp_kvor))]:
         for mp in members_ids:
             personData = getPersonData(mp, vote.start_time.strftime(API_DATE_FORMAT))
