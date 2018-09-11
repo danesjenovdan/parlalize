@@ -4035,6 +4035,30 @@ def setListOfMembersTickers(request, date_=None):
 
     return JsonResponse(data, safe=False)
 
+@lockSetter
+def setListOfMembersTickersMonthly(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    # get start_time of previous session and find older card of this date
+
+    try:
+        previous_time = date_of - timedelta(days=28)
+
+        prevCard = getListOfMembersTickers(request, previous_time.strftime(API_DATE_FORMAT)).content
+        print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
+        prevData = json.loads(prevCard)['data']
+    except:
+        prevData = []
+
+    data = setListOfMembersTickersCore(date_, date_of, prevData)
+    print(data)
+
+    return JsonResponse(data, safe=False)
+
 def setListOfMembersTickersCore(date_, date_of, prevData):
     print("CORE")
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
