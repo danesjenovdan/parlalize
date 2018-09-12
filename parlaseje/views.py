@@ -3336,7 +3336,7 @@ def getAllVotes(request):
     cats = []
     sessions = json.loads(getAllStaticData(None).content)['sessions']
     allVotes = Vote.objects.all().prefetch_related('session')
-    for vote in allVotes.order_by('start_time'):
+    for vote in allVotes.order_by('-start_time'):
         if vote.result == None:
             continue
         print vote
