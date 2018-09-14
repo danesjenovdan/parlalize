@@ -3165,10 +3165,10 @@ def getVotesData(request, votes):
 
                     'motion_id': vote.id_parladata,
                     'text': vote.motion,
-                    'votes_for': vote.votes_for,
+                    'for': vote.votes_for,
                     'against': vote.against,
                     'abstain': vote.abstain,
-                    'not_present': vote.not_present,
+                    'absent': vote.not_present,
                     'result': vote.result,
                     'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'has_outliers': vote.has_outlier_voters}
