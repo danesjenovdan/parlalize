@@ -13,7 +13,8 @@ from slugify import slugify
 
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL,
-                                ISCI_URL, GLEJ_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN)
+                                ISCI_URL, GLEJ_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN,
+                                NOTIFICATIONS_API)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi,
                               getPersonAmendmentsCount)
@@ -3807,6 +3808,7 @@ def getSlugs(request):
                 "isci": ISCI_URL,
                 "data": API_URL,
                 "glej": GLEJ_URL,
+                "notifications_api": NOTIFICATIONS_API
                 }
             }
     return JsonResponse(obj)
