@@ -77,11 +77,14 @@ def onDateMPCardRunner(date_=None):
         date_of = (datetime.now() - timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
 
+    votez = VotesAnalysis(date_of)
+    votez.setAll()
     set_mismatch_of_pg(None, date_)
     setters = [
         setMembershipsOfMember,
         setPresenceThroughTime,
         setPercentOFAttendedSession,
+        setMPStaticPL
     ]
 
     memberships = tryHard(API_URL + '/getMPs/' + date_).json()
