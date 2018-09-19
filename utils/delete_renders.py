@@ -18,6 +18,8 @@ methods = {
 
 
 def delete_renders(method=None, group='p', owner_id=None, renders=None):
+    return
+    # TODO use new api for delete renders
     if settings.GLEJ_URL:
         def match(item):
             if owner_id:
@@ -79,4 +81,3 @@ def deleteRendersOfSessionVotes(session_id):
 def deleteMPandPGsRenders():
     delete_renders(group='p')
     delete_renders(group='ps')
-
