@@ -245,6 +245,11 @@ class Ballot(Activity):
         super(Activity, self).__init__(*args, **kwargs)
 
 
+class AmendmentOfOrg(Timestampable, models.Model):
+    vote = models.ForeignKey('Vote')
+    organization = models.ForeignKey('parlaskupine.Organization')
+
+
 class Vote(Timestampable, models.Model):
     """Model of all votes that happend on specific sessions,
        with number of votes for, against, abstain and not present.
@@ -302,7 +307,9 @@ class Vote(Timestampable, models.Model):
                                        help_text='intra disunion for all members')
 
     amendment_of = models.ManyToManyField('parlaskupine.Organization',
-                                          related_name='amendments')
+                                          related_name='amendments',
+                                          through=AmendmentOfOrg)
+
 
     amendment_of_person = models.ManyToManyField('parlaposlanci.Person',
                                           related_name='amendments')

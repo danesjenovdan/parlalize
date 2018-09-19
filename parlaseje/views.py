@@ -488,7 +488,7 @@ def setMotionOfSession(request, session_id):
 
         result = mot['result']
         if mot['amendment_of']:
-            a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
+            a_orgs = [Organization.objects.filter(id_parladata__in=org_id) for org_id in mot['amendment_of']]
         else:
             a_orgs = []
 
@@ -525,7 +525,9 @@ def setMotionOfSession(request, session_id):
                         law=law,
                         classification=classification,
                         )
-            vote[0].amendment_of.add(*a_orgs)
+            vote[0].amendment_of.clear()
+            for org in  a_orgs:
+                AmendmentOfOrg(vote=vote[0], organization=org).save()
             vote[0].amendment_of_person.add(*a_people)
             if prev_result != vote[0].result:
                 finish_legislation_by_final_vote(vote[0])
@@ -549,7 +551,9 @@ def setMotionOfSession(request, session_id):
                                     )
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
-                vote[0].amendment_of.add(*a_orgs)
+                vote[0].amendment_of.clear()
+                for org in  a_orgs:
+                    AmendmentOfOrg(vote=vote[0], organization=org).save()
                 vote[0].amendment_of_person.add(*a_people)
                 finish_legislation_by_final_vote(vote[0])
 
