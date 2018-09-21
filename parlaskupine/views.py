@@ -2559,15 +2559,17 @@ def setNumberOfQuestionsAll(request, date_=None):
     for question in data:
         qDate = datetime.strptime(question['date'], '%Y-%m-%dT%X')
         qDate = qDate.strftime(API_DATE_FORMAT)
-        try:
-            person_data = mpStatic[str(question['author_id'])]
-        except KeyError as e:
-            person_data = getPersonData(str(question['author_id']), date_s)
-            mpStatic[str(question['author_id'])] = person_data
-        if person_data and person_data['party'] and person_data['party']['id']:
-            authors.append(person_data['party']['id'])
-        else:
-            print 'person nima mpstatic: ', question['author_id']
+        for author in question['author_id']:
+            try:
+                person_data = mpStatic[str(author)]
+            except KeyError as e:
+                print(str(question['author_id']))
+                person_data = getPersonData(str(author), date_s)
+                mpStatic[str(author)] = person_data
+            if person_data and person_data['party'] and person_data['party']['id']:
+                authors.append(person_data['party']['id'])
+            else:
+                print 'person nima mpstatic: ', author
 
     avg = len(authors)/float(len(pg_ids))
     question_count = Counter(authors)
