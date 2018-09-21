@@ -78,7 +78,7 @@ class VotesAnalysis(object):
         # prepere helper columns (logic, option_ni, voter_unit)
         self.data['logic'] = self.data.apply(lambda row: toLogic(row), axis=1)
         self.data['option_x'] = 0
-        self.data.loc[self.data['option'] == 'ni', 'option_x'] = 1
+        self.data.loc[self.data['option'] == 'absent', 'option_x'] = 1
         self.data['voter_unit'] = 1
 
     # analyses
