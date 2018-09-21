@@ -624,7 +624,7 @@ def fastUpdate(fast=True, date_=None):
                                 )
             question.save()
             question.person.add(*person)
-            question.author_org.add(*author_org)
+            question.author_orgs.add(*author_org)
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.add(*rec_posts)
