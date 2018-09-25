@@ -83,6 +83,10 @@ COUNCIL_ID = 9
 PS_NP = ['pg', 'unaligned MP']
 PS = 'pg'
 
+WBS = ['committee',
+       'comission',
+       'investigative comission']
+
 HAS_LEGISLATIONS = True
 
 # Vote classificators. Vote text contains. This is tied to VOTE_NAMES.

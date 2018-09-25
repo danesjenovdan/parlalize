@@ -14,7 +14,7 @@ from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonDat
 from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recacheLegislationsOnSession
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
-                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT, PS)
+                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT, PS, WBS)
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 
@@ -2386,8 +2386,8 @@ def getWorkingBodies(request):
     }
     ]
     """
-    working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
-    orgs = Organization.objects.filter(classification__in=working_bodies)
+
+    orgs = Organization.objects.filter(classification__in=WBS)
     data = []
     for org in orgs:
         data.append({'id': org.id_parladata, 'name': org.name})
