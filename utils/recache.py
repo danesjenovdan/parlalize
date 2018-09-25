@@ -98,11 +98,16 @@ def updateCacheforList(date_=None):
         if not date_:
             tomorrow = datetime.now() + timedelta(days=1)
             date_ = tomorrow.strftime(API_DATE_FORMAT)
-        getAllStaticData(None, force_render=True)
-        getListOfMembers(None, date_, force_render=True)
-        getListOfPGs(None, date_, force_render=True)
-        getSessionsList(None, date_, force_render=True)
         updateCacheIntraDisunion()
+        print("ned intradisunion")
+        getAllStaticData(None, force_render=True)
+        print("end static")
+        getListOfMembers(None, date_, force_render=True)
+        print("end memebrs")
+        getListOfPGs(None, date_, force_render=True)
+        print("end pgs")
+        getSessionsList(None, date_, force_render=True)
+        print("end session")
         # store static data for search
         
         sc.api_call("chat.postMessage",
