@@ -85,3 +85,46 @@ PS = 'pg'
 
 HAS_LEGISLATIONS = True
 
+# Vote classificators. Vote text contains. This is tied to VOTE_NAMES.
+
+# Vote classificators. Vote text contains. This is tied to VOTE_NAMES.
+VOTE_INDICATORS = { 
+    '1': ['dnevni red', 'širitev dnevnega reda', 'umik točke dnevnega reda'], 
+    '2': ['glasovanje o zakonu v celoti'], 
+    '3': ['amandma'], 
+    '4': ['interpelacija'], 
+    '5': ['evidenčni sklep'], 
+    '6': ['predlog sklepa'], 
+    '7': ['zakon o ratifikaciji'], 
+    '8': ['sklep o imenovanju', 
+          'predlog za imenovanje', 
+          'izvolitev', 
+          'soglasje k imenovanju', 
+          'predlog kandidata', 
+          'predlog kandidatke', 
+          'sklep o izvolitvi', 
+          'predlog za izvolitev'], 
+    '9': ['predlog za razpis'], 
+    '10': ['priporočilo'], 
+    '11': ['poročilo'], 
+    '12': ['proceduralni predlog'], 
+    '13': ['odlok o načrtu ravnanja s stvarnim premoženjem'],
+}
+
+# Vote classification
+VOTE_NAMES = { 
+    '1': 'agenda', # agenda
+    '2': 'whole_law', # final votiong 
+    '3': 'amendment', # amendment
+    '4': 'no_confidence', # interpelation
+    '5': 'record_conclusion', # record conclusion
+    '6': 'conclusion_proposal', # proposal for a decision
+    '7': 'ratification', # ratification law
+    '8': 'naming', # naming
+    '9': 'call_proposal', # proposal for a call
+    '10': 'recommendation', # recommendation 
+    '11': 'report', # report 
+    '12': 'procedural_proposal', # procedural proposal 
+    '13': 'personal_property_decree',
+    '14': 'other' # others
+}
