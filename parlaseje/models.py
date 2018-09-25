@@ -22,7 +22,7 @@ class Session(Timestampable, models.Model):
 
     name = models.CharField(_('name'),
                             blank=True, null=True,
-                            max_length=128,
+                            max_length=512,
                             help_text=_('Session name'))
 
     date = PopoloDateTimeField(_('date of session'),
@@ -123,9 +123,9 @@ class Activity(Timestampable, models.Model):
                                 related_name="%(app_label)s_%(class)s_related",
                                 help_text=_('Session '))
 
-    person = models.ForeignKey('parlaposlanci.Person',
-                               blank=True, null=True,
-                               help_text=_('MP'))
+    person = models.ManyToManyField('parlaposlanci.Person',
+                                     blank=True,
+                                     help_text=_('MP'))
 
     start_time = PopoloDateTimeField(blank=True, null=True,
                                      help_text='Start time')
@@ -150,6 +150,13 @@ class Speech(Versionable, Activity):
 
     order = models.IntegerField(blank=True, null=True,
                                 help_text='Order of speech')
+
+    agenda_item_order = models.IntegerField(blank=True, null=True,
+                                            help_text='Order of speech')
+
+    the_order = models.IntegerField(blank=True, null=True,
+                                    help_text='Absolute order on session',
+                                    db_index=True,)
 
     organization = models.ForeignKey('parlaskupine.Organization',
                                      blank=True, null=True,
@@ -177,6 +184,10 @@ class Question(Activity):
                                    blank=True, null=True,
                                    related_name='AuthorOrg',
                                    help_text=_('Author organization'))
+
+    author_orgs = models.ManyToManyField('parlaskupine.Organization',
+                                         blank=True,
+                                         help_text=_('Author organizations'))
 
     recipient_persons = models.ManyToManyField('parlaposlanci.Person',
                                                blank=True,
@@ -209,8 +220,8 @@ class Question(Activity):
                 'recipient_orgs': orgs,
                 'url': self.content_link,
                 'id': self.id_parladata,
-                'session_name': self.session.name if self.session else 'Unknown',
-                'session_id': self.session.id_parladata if self.session else 'Unknown'}
+                'session_name': self.session.name if self.session else None,
+                'session_id': self.session.id_parladata if self.session else None}
 
 
 class Ballot(Activity):
@@ -232,6 +243,11 @@ class Ballot(Activity):
 
     def __init__(self, *args, **kwargs):
         super(Activity, self).__init__(*args, **kwargs)
+
+
+class AmendmentOfOrg(Timestampable, models.Model):
+    vote = models.ForeignKey('Vote')
+    organization = models.ForeignKey('parlaskupine.Organization')
 
 
 class Vote(Timestampable, models.Model):
@@ -291,6 +307,11 @@ class Vote(Timestampable, models.Model):
                                        help_text='intra disunion for all members')
 
     amendment_of = models.ManyToManyField('parlaskupine.Organization',
+                                          related_name='amendments',
+                                          through=AmendmentOfOrg)
+
+
+    amendment_of_person = models.ManyToManyField('parlaposlanci.Person',
                                           related_name='amendments')
 
     abstractVisible = models.BooleanField(default=False,
@@ -566,6 +587,6 @@ class Legislation(Timestampable, models.Model):
                                       help_text='Classification of law')
 
     def __str__(self):
-        sessions = self.sessions.all().values_list('name', flat=True)
-
+        #sessions = self.sessions.all().values_list('name', flat=True)
+        sessions = []
         return ', '.join(sessions if sessions else '') + ' | ' + self.text if self.text else self.epa

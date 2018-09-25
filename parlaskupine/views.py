@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from django.db.models.expressions import Date
+from django.db.models.functions import Trunc
 
 from collections import Counter
 from scipy.stats.stats import pearsonr
@@ -18,13 +18,14 @@ import math
 import numpy as np
 
 from utils.speech import WordAnalysis
-from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots,
+from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getAllStaticData, setCardData, getPersonCardModelNew,
                               getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
-                                API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES)
-from parlaskupine.models import *
-from parlaskupine.utils_ import getDisunionInOrgHelper, getAmendmentsCount
+                                API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
+                                AGAINST, ABSTAIN, DZ)
+from .models import *
+from .utils_ import getDisunionInOrgHelper, getAmendmentsCount
 from parlaseje.models import Activity, Session, Vote, Speech, Question
 from parlaposlanci.models import Person, MismatchOfPG
 from parlaposlanci.views import getMPsList
@@ -68,8 +69,8 @@ def setBasicInfOfPG(request, pg_id, date_=None):
                             viceOfPG=viceOfPG,
                             numberOfSeats=data['NumberOfSeats'],
                             allVoters=data['AllVoters'],
-                            facebook=data['Facebook'],
-                            twitter=data['Twitter'],
+                            facebook=json.dumps(data['Facebook']),
+                            twitter=json.dumps(data['Twitter']),
                             email=data['Mail']
                             )
 
@@ -221,8 +222,8 @@ def getBasicInfOfPG(request, pg_id, date=None):
             'numberOfSeats': card.numberOfSeats,
             'allVoters': card.allVoters,
             'social': {
-                'facebook': card.facebook,
-                'twitter': card.twitter,
+                'facebook': json.loads(card.facebook),
+                'twitter': json.loads(card.twitter),
                 'email': card.email
                 }
             }
@@ -996,7 +997,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     out = []
     speeches = speeches_q.filter(organization__id_parladata=pg_id)
 
-    speeches = speeches.annotate(day=Date("start_time",
+    speeches = speeches.annotate(day=Trunc("start_time",
                                           "day")).values('day',
                                                          'id_parladata',
                                                          'session__id_parladata',
@@ -2186,9 +2187,9 @@ def setVocabularySizeALL(request, date_=None):
     """
     sw = WordAnalysis(count_of='groups', date_=date_)
 
-    if not sw.isNewSpeech:
-        return JsonResponse({'alliswell': True,
-                             'msg': 'Na ta dan ni bilo govorov'})
+    #if not sw.isNewSpeech:
+    #    return JsonResponse({'alliswell': True,
+    #                         'msg': 'Na ta dan ni bilo govorov'})
 
     # Vocabolary size
     all_score = sw.getVocabularySize()
@@ -2199,7 +2200,7 @@ def setVocabularySizeALL(request, date_=None):
 
     print '[INFO] saving vocabulary size'
     for p in all_score:
-        Organization.objects.get(id_parladata=int(p['counter_id']))
+        org = Organization.objects.get(id_parladata=int(p['counter_id']))
         saveOrAbortNew(model=VocabularySize,
                        organization=org,
                        created_for=date_of,
@@ -2558,15 +2559,17 @@ def setNumberOfQuestionsAll(request, date_=None):
     for question in data:
         qDate = datetime.strptime(question['date'], '%Y-%m-%dT%X')
         qDate = qDate.strftime(API_DATE_FORMAT)
-        try:
-            person_data = mpStatic[str(question['author_id'])]
-        except KeyError as e:
-            person_data = getPersonData(str(question['author_id']), date_s)
-            mpStatic[str(question['author_id'])] = person_data
-        if person_data and person_data['party'] and person_data['party']['id']:
-            authors.append(person_data['party']['id'])
-        else:
-            print 'person nima mpstatic: ', question['author_id']
+        for author in question['author_id']:
+            try:
+                person_data = mpStatic[str(author)]
+            except KeyError as e:
+                print(str(question['author_id']))
+                person_data = getPersonData(str(author), date_s)
+                mpStatic[str(author)] = person_data
+            if person_data and person_data['party'] and person_data['party']['id']:
+                authors.append(person_data['party']['id'])
+            else:
+                print 'person nima mpstatic: ', author
 
     avg = len(authors)/float(len(pg_ids))
     question_count = Counter(authors)
@@ -3154,7 +3157,7 @@ def getQuestionsOfPG(request, pg_id, date_=False):
 
     end_of_day = date_of + timedelta(days=1)
     questions = Question.objects.filter(start_time__lt=end_of_day,
-                                        author_org__id_parladata=pg_id)
+                                        author_orgs__id_parladata=pg_id)
 
     staticData = tryHard(BASE_URL + '/utils/getAllStaticData/').json()
     personsStatic = staticData['persons']
@@ -3168,11 +3171,15 @@ def getQuestionsOfPG(request, pg_id, date_=False):
     all_recipients = list(questions.values_list('recipient_text',
                                                 flat=True))
     for question in questions:
-        p_id = str(question.person.id_parladata)
         temp_data = question.getQuestionData(ministrStatic)
-        author = personsStatic[p_id]
-        all_authors[p_id] = author
-        temp_data.update({'person': author})
+        authors = []
+        for person in question.person.all():
+            p_id = str(person.id_parladata)
+            author = personsStatic[p_id]
+            authors.append(author)
+            all_authors[p_id] = author
+            temp_data.update({'person': author})
+        temp_data.update({'authors': authors})
         data[question.start_time_date].append(temp_data)
 
     out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
@@ -3476,9 +3483,10 @@ def setPresenceThroughTime(request, party_id, date_=None):
     data_for_save = []
 
     for month in data:
-        stats = month['ni'] + month['za'] + month['proti'] + month['kvorum']
+        options = YES + NOT_PRESENT + AGAINST + ABSTAIN
+        stats = sum([month[option] for option in options if option in month.keys()])
         not_member = month['total'] - stats
-        presence = float(stats-month['ni']) / stats if stats else 0
+        presence = float(stats-sum([month[option] for option in NOT_PRESENT  if option in month.keys()])) / stats if stats else 0
         data_for_save.append({'date_ts': month['date_ts'],
                               'presence': presence * 100,
                               })
@@ -3966,7 +3974,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
 
     * @apiSuccessExample {json} Example response:
     {  
-   "SMC":[  
+   "results":[  
       {  
          "text":"Dnevni red v celoti",
          "id_parladata":6513,
@@ -4042,7 +4050,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     if c_data and not force_render:
         out = c_data
     else:
-        if int(org_id) == 95:
+        if int(org_id) == DZ:
             for vote in votes:
                 tab.append({'text': vote.motion,
                             'result': vote.result,
@@ -4051,10 +4059,10 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                             'classification': vote.classification,
                             'maximum': vote.intra_disunion,
                             'id_parladata': vote.id_parladata})
-                out['DZ'] = {'organization': 'dz',
+                out['results'] = {'organization': 'dz',
                              'votes': tab}
 
-            out[str(acr)] = sorted(out[str(acr)]['votes'],
+            out['results'] = sorted(out['results']['votes'],
                                    key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name',
                                                                  flat=True))
@@ -4069,9 +4077,9 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                     obj['maximum'] = float(intra.maximum)
                     ob['votes'].append(obj)
                     ob['organization'] = org.getOrganizationData()
-                out[Organization.objects.get(id_parladata=org_id).acronym] = ob
+                out['results'] = ob
 
-            out[str(acr)] = sorted(out[str(acr)]['votes'],
+            out['results'] = sorted(out['results']['votes'],
                                    key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name',
                                                                  flat=True))
@@ -4443,19 +4451,23 @@ def getDisunionOrgID(request, pg_id, date_=None):
 
     suma, ids = getDisunionInOrgHelper(pg_id, date_of) 
     org_data = ids[0].organization.getOrganizationData() if ids else {}
-    orgs = tryHard('https://data.parlameter.si/v1/getAllPGs/').json().keys()
+    orgs = tryHard(API_URL + '/getAllPGs/').json().keys()
 
     data = []
     for org in orgs:
         val, dis = getDisunionInOrgHelper(org, date_of)
-        data.append({'value': val,
-                     'org_obj': dis[0].organization,
-                     'org_id': org})
+        if dis:
+            data.append({'value': val,
+                         'org_obj': dis[0].organization,
+                         'org_id': org})
 
     maxDisunion = max(data, key=lambda x:x['value'] if x['value'] else 0)
 
     values = [i['value'] for i in data if i['value']]
-    avg = float(sum(values))/len(values)
+    try:
+        avg = float(sum(values))/len(values)
+    except:
+        avg = 0
 
     out = {'organization': org_data,
            'result': {

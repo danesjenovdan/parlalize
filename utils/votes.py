@@ -78,7 +78,7 @@ class VotesAnalysis(object):
         # prepere helper columns (logic, option_ni, voter_unit)
         self.data['logic'] = self.data.apply(lambda row: toLogic(row), axis=1)
         self.data['option_x'] = 0
-        self.data.loc[self.data['option'] == 'ni', 'option_x'] = 1
+        self.data.loc[self.data['option'] == 'absent', 'option_x'] = 1
         self.data['voter_unit'] = 1
 
     # analyses
@@ -378,8 +378,11 @@ class VotesAnalysis(object):
         maxSessionOrgIdx = table['sessions'].idxmax()
 
         for pg in self.pgs:
-            thisSessions = table[table.pg == pg].sessions[pg]
-            thisVotes = table[table.pg == pg].votes[pg]
+            try:
+                thisSessions = table[table.pg == pg].sessions[pg]
+                thisVotes = table[table.pg == pg].votes[pg]
+            except:
+                continue
             thisOrg = Organization.objects.get(id_parladata=pg)
             result = saveOrAbortNew(model=PercentOFAttendedSession,
                                     created_for=self.date_of,

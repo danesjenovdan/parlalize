@@ -1,6 +1,6 @@
-from django.conf.urls import patterns, include, url
-from parlaskupine.views import *
-from parlaskupine.admin import WBAutocomplete
+from django.conf.urls import include, url
+from .views import *
+from .admin import WBAutocomplete
 
 from rest_framework import routers
 from .api import TFIDFView
@@ -8,8 +8,8 @@ from .api import TFIDFView
 router = routers.DefaultRouter()
 router.register(r'tfidfs', TFIDFView)
 
-urlpatterns = patterns('',
 
+urlpatterns = [
 #	url(r'^getMPsList/', getMPsList),
     # setters
     url(r'^setBasicInfOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setBasicInfOfPG),
@@ -119,4 +119,5 @@ urlpatterns = patterns('',
 
     # drf
     url(r'^', include(router.urls)),
-)
+
+]

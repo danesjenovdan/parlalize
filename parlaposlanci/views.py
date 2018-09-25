@@ -12,9 +12,12 @@ from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
 
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
-                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL)
+                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL,
+                                ISCI_URL, GLEJ_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN,
+                                NOTIFICATIONS_API)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
-                              getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi)
+                              getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi,
+                              getPersonAmendmentsCount)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)
@@ -30,6 +33,9 @@ import json
 import string
 import copy
 
+
+def index(request):
+    return JsonResponse({})
 
 # get List of MPs
 def getMPsList(request, date_=None):
@@ -63,6 +69,7 @@ def getMPsList(request, date_=None):
 # returns MP static data like PoliticalParty, age, ....
 @lockSetter
 def setMPStaticPL(request, person_id, date_=None):
+    print("MADAFAKA")
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
         data = tryHard(API_URL + '/getMPStatic/' + person_id + "/" + date_).json()
@@ -240,7 +247,6 @@ def getMPStaticPL(request, person_id, date_=None):
         'person': getPersonData(person_id, date_),
         'results': {
             'voters': card.voters,
-            'age': card.age,
             'birth_date': card.birth_date,
             'mandates': card.mandates,
             'party_id': card.party.id_parladata,
@@ -248,7 +254,7 @@ def getMPStaticPL(request, person_id, date_=None):
             'education': card.education,
             'previous_occupation': card.previous_occupation,
             'name': card.name,
-            'district': [District.objects.get(id_parladata=dist).name for dist in card.district] if card.district else None,
+            'district': [District.objects.get(id_parladata=dist).name for dist in card.district] if card.district else [],
             'party': card.party_name,
             'social': [{'facebook': card.facebook if card.facebook != 'False' else None, 'twitter': card.twitter if card.twitter != 'False' else None, 'linkedin': card.linkedin if card.linkedin != 'False' else None}],
             'groups': [{'group_id': group.groupid, 'group_name': group.groupname} for group in card.mpstaticgroup_set.all()],
@@ -571,7 +577,7 @@ def getPercentOFAttendedSession(request, person_id, date=None):
                 "score": equalVoters.person_value_sessions,
                 "average": equalVoters.average_sessions,
                 "max": {
-                    "mps": [getPersonData(person, date) for person in equalVoters.maxMP_sessions],
+                    "mps": [getPersonData(person, date) for person in equalVoters.maxMP_sessions[:5]],
                     "score": equalVoters.maximum_sessions,
                 }
             },
@@ -579,7 +585,7 @@ def getPercentOFAttendedSession(request, person_id, date=None):
                 "score": equalVoters.person_value_votes,
                 "average": equalVoters.average_votes,
                 "max": {
-                    "mps": [getPersonData(person, date) for person in equalVoters.maxMP_votes],
+                    "mps": [getPersonData(person, date) for person in equalVoters.maxMP_votes[:5]],
                     "score": equalVoters.maximum_votes,
                 }
             }
@@ -757,6 +763,7 @@ def getNumberOfSpokenWords(request, person_id, date=None):
     return JsonResponse(results)
 
 
+# deprecated
 @lockSetter
 def setLastActivity(request, person_id):
     out = []
@@ -975,6 +982,7 @@ def getLastActivity(request, person_id, date_=None):
         return {'speech_id': speech.id_parladata,
                 'type': 'speech',
                 'session': this_session,
+                'the_order': speech.the_order,
                 }
  
     def getQuestionData(question, sessions_data):
@@ -3083,8 +3091,9 @@ def setNumberOfQuestionsAll(request, date_=None):
     mps_ids = [mp['id'] for mp in mps]
     authors = []
     for question in data:
-        if question['author_id'] in mps_ids:
-            authors.append(question['author_id'])
+        for author in question['author_id']:
+            if author in mps_ids:
+                authors.append(author)
 
     avg = len(authors)/float(len(mps_ids))
     question_count = Counter(authors)
@@ -3792,7 +3801,15 @@ def getSlugs(request):
                     "prisotnost": "/seja/prisotnost/",
                     "transkript": "/seja/transkript/"
                 },
-            "base": FRONT_URL
+            "base": FRONT_URL,
+            "urls": {
+                "base": FRONT_URL,
+                "analize": BASE_URL,
+                "isci": ISCI_URL,
+                "data": API_URL,
+                "glej": GLEJ_URL,
+                "notifications_api": NOTIFICATIONS_API
+                }
             }
     return JsonResponse(obj)
 
@@ -3871,10 +3888,11 @@ def setPresenceThroughTime(request, person_id, date_=None):
     data_for_save = []
 
     for month in data:
-        stats = month['ni'] + month['za'] + month['proti'] + month['kvorum']
+        options = YES + NOT_PRESENT + AGAINST + ABSTAIN
+        stats = sum([month[option] for option in options if option in month.keys()])
         not_member = month['total'] - stats
         not_member = float(not_member) / month['total'] if not_member else 0
-        presence = float(stats-month['ni']) / month['total'] if stats else 0
+        presence = float(stats-sum([month[option] for option in NOT_PRESENT  if option in month.keys()])) / month['total'] if stats else 0
         data_for_save.append({'date_ts': month['date_ts'],
                               'presence': presence * 100,
                               'not_member': not_member * 100,
@@ -4000,17 +4018,52 @@ def setListOfMembersTickers(request, date_=None):
         date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
 
-    mps = tryHard(API_URL+'/getMPs/'+date_).json()
+    # get start_time of previous session and find older card of this date
+
+    try:
+        prev_session = Session.objects.filter(start_time__lte=date_of,
+                                              organization__id_parladata=95,
+                                              name__icontains=' redna')
+        session_time = prev_session.order_by("-start_time")[0].start_time
+
+        prevCard = getListOfMembersTickers(request, session_time.strftime(API_DATE_FORMAT)).content
+        print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
+        prevData = json.loads(prevCard)['data']
+    except:
+        prevData = []
+
+    data = setListOfMembersTickersCore(date_, date_of, prevData)
+    print(data)
+
+    return JsonResponse(data, safe=False)
+
+@lockSetter
+def setListOfMembersTickersMonthly(request, date_=None):
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
 
     # get start_time of previous session and find older card of this date
-    prev_session = Session.objects.filter(start_time__lte=date_of,
-                                          organization__id_parladata=95,
-                                          name__icontains=' redna')
-    session_time = prev_session.order_by("-start_time")[0].start_time
 
-    prevCard = getListOfMembersTickers(request, session_time.strftime(API_DATE_FORMAT)).content
-    print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
-    prevData = json.loads(prevCard)['data']
+    try:
+        previous_time = date_of - timedelta(days=28)
+
+        prevCard = getListOfMembersTickers(request, previous_time.strftime(API_DATE_FORMAT)).content
+        print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
+        prevData = json.loads(prevCard)['data']
+    except:
+        prevData = []
+
+    data = setListOfMembersTickersCore(date_, date_of, prevData)
+    print(data)
+
+    return JsonResponse(data, safe=False)
+
+def setListOfMembersTickersCore(date_, date_of, prevData):
+    print("CORE")
+    mps = tryHard(API_URL+'/getMPs/'+date_).json()
 
     rank_data = {'presence_sessions': [],
                  'presence_votes': [],
@@ -4018,9 +4071,9 @@ def setListOfMembersTickers(request, date_=None):
                  'spoken_words': [],
                  'speeches_per_session': [],
                  'number_of_questions': [],
-                 'privzdignjeno': [],
-                 'preprosto': [],
-                 'problematicno': [],
+                 #'privzdignjeno': [],
+                 #'preprosto': [],
+                 #'problematicno': [],
                  'mismatch_of_pg': [],
                  }
     
@@ -4096,20 +4149,16 @@ def setListOfMembersTickers(request, date_=None):
         try:
             mpStatic = getPersonCardModelNew(MPStaticPL,
                                              int(person_id))
-            age = mpStatic.age
             mandates = mpStatic.mandates
             education = mpStatic.education_level
             gender = mpStatic.gender
             birth_date = mpStatic.birth_date
         except:
-            age = None
             mandates = None
             education = None
             gender = None
             birth_date = None
 
-        person_obj['results']['age'] = {}
-        person_obj['results']['age']['score'] = age
         person_obj['results']['birth_date'] = {}
         person_obj['results']['birth_date']['score'] = birth_date
         person_obj['results']['mandates'] = {}
@@ -4119,7 +4168,8 @@ def setListOfMembersTickers(request, date_=None):
         person_obj['results']['gender'] = {}
         person_obj['results']['gender']['score'] = gender
 
-        try:
+
+        """try:
             styleScores = getPersonCardModelNew(StyleScores,
                                                 int(person_id),
                                                 date_)
@@ -4144,7 +4194,7 @@ def setListOfMembersTickers(request, date_=None):
         except:
             preprosto = 0
             privzdignjeno = 0
-            problematicno = 0
+            problematicno = 0"""
 
         try:
             mismatch = getPersonCardModelNew(MismatchOfPG,
@@ -4156,7 +4206,7 @@ def setListOfMembersTickers(request, date_=None):
         person_obj['results']['mismatch_of_pg']['score'] = mismatch
         rank_data['mismatch_of_pg'].append(value)
 
-        person_obj['results']['privzdignjeno'] = {}
+        """person_obj['results']['privzdignjeno'] = {}
         person_obj['results']['privzdignjeno']['score'] = privzdignjeno
         rank_data['privzdignjeno'].append(value)
 
@@ -4166,7 +4216,7 @@ def setListOfMembersTickers(request, date_=None):
 
         person_obj['results']['problematicno'] = {}
         person_obj['results']['problematicno']['score'] = problematicno
-        rank_data['problematicno'].append(value)
+        rank_data['problematicno'].append(value)"""
 
         data.append(person_obj)
 
@@ -4221,16 +4271,18 @@ def setListOfMembersTickers(request, date_=None):
         if not sum(diff):
             print key, sum(diff)
             key_without_data.append(key)
+    print prevData
+    if key_without_data and prevData:
+        return {'status': 'failed', 'cards_without_new_data': key_without_data}
 
     if key_without_data:
-        return JsonResponse({'status': 'failed',
-                             'cards_without_new_data': key_without_data}, safe=False)
+        return {'status': 'failed', 'cards_without_new_data': key_without_data}
 
     data = sorted(data, key=lambda k: k['person']['name'])
 
     MembersList(created_for=date_of,
                 data=data).save()
-    return JsonResponse(data, safe=False)
+    return data
 
 
 def getListOfMembersTickers(request, date_=None):
@@ -4504,3 +4556,59 @@ def getMismatchWithPG(request, person_id, date_=None):
                 }
             }
     return JsonResponse(data)
+
+
+def getNumberOfAmendmetsOfMember(request, person_id, date_=None):
+    """
+    * @api {get} getNumberOfAmendmetsOfMember/{pg_id}/{?date} Gets number of amendments of specific organization 
+    * @apiName getNumberOfAmendmetsOfMember
+    * @apiGroup MPs
+    * @apiDescription This function returns number of amendments of specific member
+    * @apiParam {Integer} person_id Parladata id for the member in question.
+    * @apiParam {date} date Optional date.
+
+    * @apiExample {curl} Example:
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfMember/1
+    * @apiExample {curl} Example with date:
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfMember/1/12.12.2015    
+    """
+    if date_:
+        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+    else:
+        date_of = datetime.now().date() + timedelta(days=1)
+        date_ = ''
+    members = [i['id' ]for i in  tryHard(API_URL + '/getMPs/').json()]
+    person = count = last_card_date = None
+    data = []
+    for p_id in members:
+        temp_person, temp_count, last_card = getPersonAmendmentsCount(p_id, date_of)
+        data.append({'value': temp_count,
+                     'person_obj': temp_person,
+                     'party_id': person_id})
+        if str(p_id) == str(person_id):
+            print("FOUND")
+            person = temp_person
+            count = temp_count
+            last_card_date = last_card
+
+    maxAmendmets = max(data, key=lambda x:x['value'] if x['value'] else 0)
+
+    values = [i['value'] for i in data if i['value']]
+    if values:
+        avg = float(sum(values))/len(values)
+    else:
+        avg = 0
+
+    out = {'person': getPersonData(person.id_parladata),
+           'created_at': datetime.now().strftime(API_DATE_FORMAT),
+           'created_for': last_card_date.strftime(API_DATE_FORMAT),
+           'result': {
+               'score': count,
+               'max': {
+                   'pgs': [getPersonData(maxAmendmets['person_obj'].id_parladata, date_) if maxAmendmets['person_obj'] else {}],
+                   'score': maxAmendmets['value']
+                   },
+               'average': avg
+               }
+            }
+    return JsonResponse(out, safe=False)

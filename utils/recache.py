@@ -10,7 +10,7 @@ from parlaskupine.views import getListOfPGs, getIntraDisunionOrg
 from parlaseje.views import getSessionsList
 from parlaseje.models import Session, Vote
 from parlaskupine.models import Organization
-from parlalize.settings import API_DATE_FORMAT, BASE_URL, API_URL, GLEJ_URL, PAGE_URL, slack_token
+from parlalize.settings import API_DATE_FORMAT, BASE_URL, API_URL, GLEJ_URL, PAGE_URL, slack_token, PS
 from parlalize.utils_ import getAllStaticData, tryHard, printProgressBar, getPersonData
 from django.db.models import Q
 from slackclient import SlackClient
@@ -118,7 +118,7 @@ def updateCacheforList(date_=None):
 
 
 def updateCacheIntraDisunion():
-    organizatons = Organization.objects.filter(Q(classification='poslanska skupina') |
+    organizatons = Organization.objects.filter(Q(classification=PS) |
                                                Q(classification='stran_vlade') |
                                                Q(name='Državni zbor')).values_list('id_parladata', flat=True)
     for org in organizatons:
@@ -254,3 +254,4 @@ def recacheWBs():
 def recacheListOfSession(tmp=None, force_render=None):
     getSessionsList(None, force_render=True)
     requests.get(GLEJ_URL + '/s/seznam-sej/?forceRender=true&state=%7B%22generator%22%3Atrue%7D')
+

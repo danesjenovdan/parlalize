@@ -8,15 +8,19 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q, F
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recacheLegislationsOnSession
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES, DZ, COUNCIL_ID
+from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
+                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT, PS)
+from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 
 from utils.legislations import finish_legislation_by_final_vote
 from utils.votes_outliers import setMotionAnalize
+from utils.delete_renders import deleteRendersOfSessionVotes
 
 
 import json
@@ -127,13 +131,14 @@ def getSpeech(request, speech_id):
     out = {"speech_id": speech.id_parladata,
            "content": speech.content,
            "session": speech.session.getSessionData(),
+           "the_order": speech.the_order,
            "quoted_text": None,
            "end_idx": None,
            "start_idx": None,
            'quote_id': None}
 
     result = {
-        'person': getPersonData(speech.person.id_parladata,
+        'person': getPersonData(speech.person.first().id_parladata,
                                 speech.session.start_time.strftime(API_DATE_FORMAT)),
         'created_for': speech.start_time.strftime(API_DATE_FORMAT),
         'created_at': speech.created_at.strftime(API_DATE_FORMAT),
@@ -327,27 +332,33 @@ def getSpeechesOfSession(request, session_id):
     """
     session = get_object_or_404(Session, id_parladata=session_id)
     speeches_queryset = Speech.getValidSpeeches(datetime.now())
-    speeches = speeches_queryset.filter(session=session).order_by("start_time",
-                                                                  "order")
+    speeches = speeches_queryset.filter(session=session).order_by("the_order")
 
     sessionData = session.getSessionData()
     session_time = session.start_time.strftime(API_DATE_FORMAT)
 
     personsStatic = tryHard(BASE_URL + "/utils/getAllStaticData/").json()
 
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 150)
+
+    paginator = Paginator(speeches, per_page)
+    speeches = paginator.page(page)
+
     data = []
     for speech in speeches:
         out = {"speech_id": speech.id_parladata,
                "content": speech.content,
                "session": sessionData,
+               "the_order": speech.the_order,
                "quoted_text": None,
                "end_idx": None,
                "start_idx": None,
                "quote_id": None}
         try:
-            personData = personsStatic['persons'][str(speech.person.id_parladata)]
+            personData = personsStatic['persons'][str(speech.person.first().id_parladata)]
         except:
-            personData = getPersonData(speech.person.id_parladata,
+            personData = getPersonData(speech.person.first().id_parladata,
                                        session_time)
         result = {
             'person': personData,
@@ -355,7 +366,11 @@ def getSpeechesOfSession(request, session_id):
         }
         data.append(result)
 
-    return JsonResponse({"session": sessionData,
+    return JsonResponse({"pages": paginator.num_pages,
+                         "count": paginator.count,
+                         "per_page": paginator.per_page,
+                         "page": page,
+                         "session": sessionData,
                          "created_for": session_time,
                          "created_at": datetime.today().strftime(API_DATE_FORMAT),
                          "results": data})
@@ -448,19 +463,39 @@ def setMotionOfSession(request, session_id):
         url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
         for vote in votes:
-            if vote['option'] == str('aye'):
-                yes = yes + 1
-            if vote['option'] == str('no'):
-                no = no + 1
-            if vote['option'] == str('tellno'):
-                kvorum = kvorum + 1
-            if vote['option'] == str('tellaye'):
-                kvorum = kvorum + 1
+            if vote['option'] in YES:
+                yes += 1
+            if vote['option'] in AGAINST:
+                no += 1
+            if vote['option'] in ABSTAIN:
+                kvorum += 1
+            if vote['option']  in NOT_PRESENT:
+                not_present += 1
+
+        if mot['counter']:
+            # this is for votes without ballots
+
+            opts_set = set(mot['counter'].keys())
+            if opts_set.intersection(YES):
+                yes = mot['counter']['for']
+            if opts_set.intersection(AGAINST):
+                no = mot['counter']['against']
+            if opts_set.intersection(ABSTAIN):
+                kvorum = mot['counter']['abstain']
+
+            # hardcoded croations number of member
+            not_present = 151 - sum(mot['counter'].values())
+
         result = mot['result']
         if mot['amendment_of']:
-            a_orgs = Organization.objects.filter(id_parladata__in=mot['amendment_of'])
+            a_orgs = [Organization.objects.filter(id_parladata__in=org_id) for org_id in mot['amendment_of']]
         else:
             a_orgs = []
+
+        if mot['amendment_of_people']:
+            a_people = Person.objects.filter(id_parladata__in=mot['amendment_of_people'])
+        else:
+            a_people = []
 
         # TODO: replace try with: "if mot['epa']"
         try:
@@ -490,7 +525,10 @@ def setMotionOfSession(request, session_id):
                         law=law,
                         classification=classification,
                         )
-            vote[0].amendment_of.add(*a_orgs)
+            vote[0].amendment_of.clear()
+            for org in  a_orgs:
+                AmendmentOfOrg(vote=vote[0], organization=org).save()
+            vote[0].amendment_of_person.add(*a_people)
             if prev_result != vote[0].result:
                 finish_legislation_by_final_vote(vote[0])
         else:
@@ -513,7 +551,10 @@ def setMotionOfSession(request, session_id):
                                     )
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
-                vote[0].amendment_of.add(*a_orgs)
+                vote[0].amendment_of.clear()
+                for org in  a_orgs:
+                    AmendmentOfOrg(vote=vote[0], organization=org).save()
+                vote[0].amendment_of_person.add(*a_people)
                 finish_legislation_by_final_vote(vote[0])
 
         yes = 0
@@ -526,6 +567,9 @@ def setMotionOfSession(request, session_id):
 
     if laws:
         recacheLegislationsOnSession(session_id)
+
+    deleteRendersOfSessionVotes(session_id)
+
     return JsonResponse({'alliswell': True})
 
 
@@ -551,20 +595,20 @@ def setMotionOfSessionGraph(request, session_id):
         url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
         for vote in votes:
-            if vote['option'] == str('za'):
+            if vote['option'] in YES:
                 yes = yes + 1
                 yesdic[vote['pg_id']] += 1
                 tabyes.append(vote['mp_id'])
-            if vote['option'] == str('proti'):
+            if vote['option'] in AGAINST:
                 no = no + 1
                 nodic[vote['pg_id']] += 1
                 tabno.append(vote['mp_id'])
 
-            if vote['option'] == str('kvorum'):
+            if vote['option'] in ABSTAIN:
                 kvorum = kvorum + 1
                 kvordic[vote['pg_id']] += 1
                 tabkvo.append(vote['mp_id'])
-            if vote['option'] == str('ni'):
+            if vote['option'] in NOT_PRESENT:
                 not_present = not_present + 1
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])
@@ -737,6 +781,7 @@ def getMotionOfSession(request, session_id, date=False):
     """
     out = []
     created_at = None
+    cats = []
     session = Session.objects.get(id_parladata=int(session_id))
     if session:
         sessionData = session.getSessionData()
@@ -746,31 +791,38 @@ def getMotionOfSession(request, session_id, date=False):
             for card in cards:
                 if card.result == None:
                     continue
+
+                has_votes = bool(card.vote.all())
                 out.append({'session': sessionData,
                             'results': {'motion_id': card.id_parladata,
                                         'text': card.motion,
-                                        'votes_for': card.votes_for,
+                                        'for': card.votes_for,
                                         'against': card.against,
                                         'abstain': card.abstain,
-                                        'not_present': card.not_present,
+                                        'absent': card.not_present,
                                         'result': card.result,
                                         'epa': card.epa if card.epa else None,
                                         'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. card.is_outlier,
                                         'tags': card.tags,
                                         'has_outliers': card.has_outlier_voters,
                                         'classification': card.classification,
+                                        'has_votes': has_votes,
                                         }
                             })
+                cats.append(card.classification)
                 dates.append(card.created_at)
             created_at = max(dates).strftime(API_DATE_FORMAT)
         else:
             out = []
         ses_date = session.start_time.strftime(API_DATE_FORMAT)
         tags = list(Tag.objects.all().values_list('name', flat=True))
+
+        filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
+
         return JsonResponse({"results": out,
                              "session": session.getSessionData(),
                              "tags": tags,
-                             "classifications": VOTE_NAMES,
+                             "classifications": filter_cats,
                              "created_for": ses_date,
                              "created_at": created_at}, safe=False)
     else:
@@ -1325,24 +1377,24 @@ def getMotionAnalize(request, motion_id):
     options = {'for': model.votes_for,
                'against': model.against,
                'abstain': model.abstain,
-               'not_present': model.not_present}
+               'absent': model.not_present}
     stats = {'for': model.votes_for,
              'against': model.against,
              'abstain': model.abstain,
-             'not_present': model.not_present}
+             'absent': model.not_present}
     max_vote_opt = max(stats, key=stats.get)
     if stats[max_vote_opt] == 0:
         max_vote_percent_opt = 0
         max_vote_opt = '/'
     else:
-        max_vote_percent_opt = float(stats[max_vote_opt])/(stats['abstain']+stats['against']+stats['for']+stats['not_present'])*100
+        max_vote_percent_opt = float(stats[max_vote_opt])/(stats['abstain']+stats['against']+stats['for']+stats['absent'])*100
 
     tmp_data = model.pgs_data
     orgs_data = {}
     pg_outliers = {}
     for org in tmp_data:
         org_obj = Organization.objects.get(id_parladata=int(org))
-        if org_obj.classification == 'poslanska skupina':
+        if org_obj.classification == PS:
             orgs_data[org] = json.loads(tmp_data[org])
             orgs_data[org]['party'] = org_obj.getOrganizationData()
             if orgs_data[org]['outliers']:
@@ -1353,7 +1405,7 @@ def getMotionAnalize(request, motion_id):
     members = []
     for option, members_ids in [('for', json.loads(model.mp_yes)),
                             ('against', json.loads(model.mp_no)),
-                            ('not_present', json.loads(model.mp_np)),
+                            ('absent', json.loads(model.mp_np)),
                             ('abstain', json.loads(model.mp_kvor))]:
         for mp in members_ids:
             personData = getPersonData(mp, vote.start_time.strftime(API_DATE_FORMAT))
@@ -1412,43 +1464,37 @@ def getMotionAnalize(request, motion_id):
 def setPresenceOfPG(request, session_id):
     """ Stores presence of PGs on specific session
     """
+
+    url = API_URL + '/getAllPGsExt/'
+    PGs = tryHard(url).json().keys()
+
     url = API_URL + '/getBallotsOfSession/' + str(session_id) + '/'
     votes = getDataFromPagerApi(url)
-    motions = tryHard(API_URL + '/motionOfSession/' + str(session_id) + '/').json()
-    session = Session.objects.get(id_parladata=session_id)
-    membersOfPG = tryHard(API_URL + '/getMembersOfPGsOnDate/' + session.start_time.strftime(API_DATE_FORMAT)).json()
 
-    allTimePGs = tryHard(API_URL + '/getAllPGsExt/').json().keys()
+    counters_in = Counter([vote['pg_id'] for vote in votes if vote['option'] not in NOT_PRESENT])
+    counters_out = Counter([vote['pg_id'] for vote in votes if vote['option'] in NOT_PRESENT])
 
-    onSession = {}
-    final = {}
-    allPgs = {}
 
-    if len(votes) != 0:
-        for vote in votes:
-            if vote['option'] != 'ni':
-                if vote['mo_id'] in onSession.keys():
-                    onSession[vote['mo_id']].append(vote['pg_id'])
-                else:
-                    onSession.update({vote['mo_id']: [vote['pg_id']]})
-    else:
-        return JsonResponse({'alliswell': True, "status": "nothin to add"})
+    pgs = list(set(counters_in.keys() + counters_out.keys()))
 
-    counters = dict(Counter([item for sublist in onSession.values() for item in sublist]))
+    results = {}
 
-    for i in membersOfPG:
-        allPgs[i] = len(membersOfPG[i]) * len(motions)
-        print type(i), type(allTimePGs[1])
-        if allPgs[i] == 0 or i not in allTimePGs:
+    for pg in pgs:
+        if not str(pg) in PGs:
             continue
-        if int(i) in counters.keys():
-            final[i] = int((float(counters[int(i)]) / float(allPgs[str(i)])) * 100)
-        else:
-            final[i] = 0
-
+        try:
+            results[pg] = counters_in[pg] * 100 / (counters_in[pg] + counters_out[pg])
+        except:
+            if pg in counters_in.keys():
+                results[pg] = 100
+            elif pg in counters_out.keys(): 
+                results[pg] = 0
+            else:
+                print('this dont work')
+    session = Session.objects.get(id_parladata=session_id)
     result = saveOrAbortNew(model=PresenceOfPG,
                             created_for=session.start_time,
-                            presence=[final],
+                            presence=[results],
                             session=session)
 
     return JsonResponse({'alliswell': True})
@@ -1658,13 +1704,14 @@ def getQuote(request, quote_id):
     }
     """
     quote = get_object_or_404(Quote, id=quote_id)
-    return JsonResponse({"person": getPersonData(quote.speech.person.id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
+    return JsonResponse({"person": getPersonData(quote.speech.person.first().id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
                          "created_for": quote.created_at.strftime(API_DATE_FORMAT),
                          "created_at": quote.created_at.strftime(API_DATE_FORMAT),
                          "results": {"quoted_text": quote.quoted_text,
                                      "start_idx": quote.first_char,
                                      "end_idx": quote.last_char,
                                      "speech_id": quote.speech.id_parladata,
+                                     "the_order": quote.speech.the_order,
                                      "content": quote.speech.content,
                                      'session': quote.speech.session.getSessionData(),
                                      'quote_id': quote.id}})
@@ -1855,7 +1902,7 @@ def getLastSessionLanding(request, date_=None):
     else:
         fdate = datetime.now().today()
     ready = False
-    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for")
+    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for", "-created_at")
     if not presences:
         raise Http404("Nismo našli kartice")
     presence_index = 0
@@ -2672,9 +2719,9 @@ def getComparedVotes(request):
     # select for same people DONE
     for i, e in enumerate(people_same_list):
         if i < len(people_same_list) - 1:
-            select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s, ' % (select_same_people, str(i), str(i), str(i))
+            select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s, parlaseje_activity_person ap%s, ' % (select_same_people, str(i), str(i), str(i), str(i))
         else:
-            select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s' % (select_same_people, str(i), str(i), str(i))
+            select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s, parlaseje_activity_person ap%s ' % (select_same_people, str(i), str(i), str(i), str(i))
     
     # select for same parties DONE
     for i, e in enumerate(parties_same_list):
@@ -2686,9 +2733,9 @@ def getComparedVotes(request):
     # select for different people DONE
     for i, e in enumerate(people_different_list):
         if i < len(people_different_list) - 1:
-            select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s, ' % (select_different_people, str(i), str(i), str(i))
+            select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s, parlaseje_activity_person dap%s, ' % (select_different_people, str(i), str(i), str(i), str(i))
         else:
-            select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s' % (select_different_people, str(i), str(i), str(i))
+            select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s, parlaseje_activity_person dap%s ' % (select_different_people, str(i), str(i), str(i), str(i))
     
     # select for different parties DONE
     for i, e in enumerate(parties_different_list):
@@ -2744,9 +2791,9 @@ def getComparedVotes(request):
     # match same people with persons DONE
     for i, e in enumerate(people_same_list):
         if i < len(people_same_list) - 1:
-            match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.person_id = p%s.id AND p%s.id_parladata = %s AND ' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), e)
+            match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.id = ap%s.activity_id AND ap%s.person_id = p%s.id AND p%s.id_parladata = %s AND ' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
         else:
-            match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.person_id = p%s.id AND p%s.id_parladata = %s' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), e)
+            match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.id = ap%s.activity_id AND ap%s.person_id = p%s.id AND p%s.id_parladata = %s' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
     
     # match same parties with organizations DONE
     for i, e in enumerate(parties_same_list):
@@ -2843,9 +2890,9 @@ def getComparedVotes(request):
     # match different people with person
     for i, e in enumerate(people_different_list):
         if i < len(people_different_list) - 1:
-            match_different_people_persons = '%s db%s.activity_ptr_id = da%s.id AND da%s.person_id = dp%s.id AND dp%s.id_parladata = %s AND ' % (match_different_people_persons, str(i), str(i), str(i), str(i), str(i), e)
+            match_different_people_persons = '%s db%s.activity_ptr_id = da%s.id AND da%s.id = dap%s.activity_id AND dap%s.person_id = dp%s.id AND dp%s.id_parladata = %s AND ' % (match_different_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
         else:
-            match_different_people_persons = '%s db%s.activity_ptr_id = da%s.id AND da%s.person_id = dp%s.id AND dp%s.id_parladata = %s' % (match_different_people_persons, str(i), str(i), str(i), str(i), str(i), e)
+            match_different_people_persons = '%s db%s.activity_ptr_id = da%s.id AND da%s.id = dap%s.activity_id AND dap%s.person_id = dp%s.id AND dp%s.id_parladata = %s ' % (match_different_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
 
     # match different parties with organizations
     for i, e in enumerate(parties_different_list):
@@ -2910,27 +2957,27 @@ def getComparedVotes(request):
 
         for i, e in enumerate(people_same_list):
             if i < len(people_same_list) - 1:
-                exclude_ni_people_same = '%s b%s.option != \'ni\' AND ' % (exclude_ni_people_same, i)
+                exclude_ni_people_same = '%s b%s.option != \'%s\' AND ' % (exclude_ni_people_same, i, NOT_PRESENT[0])
             else:
-                exclude_ni_people_same = '%s b%s.option != \'ni\'' % (exclude_ni_people_same, i)
+                exclude_ni_people_same = '%s b%s.option != \'%s\'' % (exclude_ni_people_same, i, NOT_PRESENT[0])
         
         for i, e in enumerate(parties_same_list):
             if i < len(parties_same_list) - 1:
-                exclude_ni_parties_same = '%s pb%s.option != \'ni\' AND ' % (exclude_ni_parties_same, i)
+                exclude_ni_parties_same = '%s pb%s.option != \'%s\' AND ' % (exclude_ni_parties_same, i, NOT_PRESENT[0])
             else:
-                exclude_ni_parties_same = '%s pb%s.option != \'ni\'' % (exclude_ni_parties_same, i)
+                exclude_ni_parties_same = '%s pb%s.option != \'%s\'' % (exclude_ni_parties_same, i, NOT_PRESENT[0])
         
         for i, e in enumerate(people_different_list):
             if i < len(people_different_list) - 1:
-                exclude_ni_people_different = '%s db%s.option != \'ni\' AND ' % (exclude_ni_people_different, i)
+                exclude_ni_people_different = '%s db%s.option != \'%s\' AND ' % (exclude_ni_people_different, i, NOT_PRESENT[0])
             else:
-                exclude_ni_people_different = '%s db%s.option != \'ni\'' % (exclude_ni_people_different, i)
+                exclude_ni_people_different = '%s db%s.option != \'%s\'' % (exclude_ni_people_different, i, NOT_PRESENT[0])
         
         for i, e in enumerate(parties_different_list):
             if i < len(parties_different_list) - 1:
-                exclude_ni_parties_different = '%s dpb%s.option != \'ni\' AND ' % (exclude_ni_parties_different, i)
+                exclude_ni_parties_different = '%s dpb%s.option != \'%s\' AND ' % (exclude_ni_parties_different, i, NOT_PRESENT[0])
             else:
-                exclude_ni_parties_different = '%s dpb%s.option != \'ni\'' % (exclude_ni_parties_different, i)
+                exclude_ni_parties_different = '%s dpb%s.option != \'%s\'' % (exclude_ni_parties_different, i, NOT_PRESENT[0])
 
         exclude_ni_list = [exclude_ni_people_same, exclude_ni_parties_same, exclude_ni_people_different, exclude_ni_parties_different]
         exclude_ni_list_clean = [s for s in exclude_ni_list if s != '']
@@ -2981,10 +3028,10 @@ def getComparedVotes(request):
             'results': {
                 'motion_id': vote.id_parladata,
                 'text': vote.motion,
-                'votes_for': vote.votes_for,
+                'for': vote.votes_for,
                 'against': vote.against,
                 'abstain': vote.abstain,
-                'not_present': vote.not_present,
+                'absent': vote.not_present,
                 'result': vote.result,
                 'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                 'has_outliers': vote.has_outlier_voters,
@@ -3122,10 +3169,10 @@ def getVotesData(request, votes):
 
                     'motion_id': vote.id_parladata,
                     'text': vote.motion,
-                    'votes_for': vote.votes_for,
+                    'for': vote.votes_for,
                     'against': vote.against,
                     'abstain': vote.abstain,
-                    'not_present': vote.not_present,
+                    'absent': vote.not_present,
                     'result': vote.result,
                     'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'has_outliers': vote.has_outlier_voters}
@@ -3204,10 +3251,10 @@ def legislation(request, epa):
         out.append({'motion_id': vote.id_parladata,
                     'session_id': vote.session.id_parladata,
                     'text': vote.motion,
-                    'votes_for': vote.votes_for,
+                    'for': vote.votes_for,
                     'against': vote.against,
                     'abstain': vote.abstain,
-                    'not_present': vote.not_present,
+                    'absent': vote.not_present,
                     'result': vote.result,
                     'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'tags': vote.tags,
@@ -3244,6 +3291,7 @@ def legislation(request, epa):
 def otherVotes(request, session_id):
     out = []
     dates = []
+    cats = []
     session = Session.objects.get(id_parladata=int(session_id))
     dates = [session.start_time]
     allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
@@ -3251,20 +3299,23 @@ def otherVotes(request, session_id):
         if vote.result == None:
             continue
         print vote
+        has_votes = bool(vote.vote.all())
         out.append({'results': {'motion_id': vote.id_parladata,
                                 'text': vote.motion,
-                                'votes_for': vote.votes_for,
+                                'for': vote.votes_for,
                                 'against': vote.against,
                                 'abstain': vote.abstain,
-                                'not_present': vote.not_present,
+                                'absent': vote.not_present,
                                 'result': vote.result,
                                 'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                                 'tags': vote.tags,
                                 'has_outliers': vote.has_outlier_voters,
                                 'documents': vote.document_url,
                                 'classification': vote.classification,
+                                'has_votes': has_votes
                                 }
                     })
+        cats.append(vote.classification)
         dates.append(vote.created_at)
     if dates:
         created_at = max(dates).strftime(API_DATE_FORMAT)
@@ -3273,11 +3324,57 @@ def otherVotes(request, session_id):
 
     ses_date = session.start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
+    filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
     return JsonResponse({'results': out,
                          'session': session.getSessionData(),
                          'tags': tags,
-                         'classifications': VOTE_NAMES,
+                         'classifications': filter_cats,
                          'created_for': ses_date,
+                         'created_at': created_at}, safe=False)
+
+
+def getAllVotes(request):
+    out = []
+    dates = []
+    tags = []
+    cats = []
+    sessions = json.loads(getAllStaticData(None).content)['sessions']
+    allVotes = Vote.objects.all().prefetch_related('session')
+    for vote in allVotes.order_by('-start_time'):
+        if vote.result == None:
+            continue
+        print vote
+        tags += vote.tags
+        has_votes = bool(vote.vote.all())
+        out.append({'results': {'motion_id': vote.id_parladata,
+                                'text': vote.motion,
+                                'session': sessions[str(vote.session.id_parladata)],
+                                'for': vote.votes_for,
+                                'against': vote.against,
+                                'abstain': vote.abstain,
+                                'absent': vote.not_present,
+                                'result': vote.result,
+                                'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
+                                'tags': vote.tags,
+                                'has_outliers': vote.has_outlier_voters,
+                                'documents': vote.document_url,
+                                'classification': vote.classification,
+                                'has_votes': has_votes
+                                }
+                    })
+        cats.append(vote.classification)
+        dates.append(vote.created_at)
+    if dates:
+        created_at = max(dates).strftime(API_DATE_FORMAT)
+    else:
+        created_at = datetime.now().strftime(API_DATE_FORMAT)
+
+    filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
+
+    return JsonResponse({'results': out,
+                         'tags': list(set(tags)),
+                         'classifications': filter_cats,
+                         'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': created_at}, safe=False)
 
 
@@ -3326,3 +3423,5 @@ def getAllLegislationEpas(request):
     legislations = Legislation.objects.filter(procedure_ended=False)
     epas = legislations.values_list('epa', flat=True)
     return JsonResponse(list(epas), safe=False)
+
+

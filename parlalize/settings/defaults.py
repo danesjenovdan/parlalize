@@ -15,6 +15,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 
 import raven
+from django.utils.translation import gettext as _
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -47,20 +48,22 @@ INSTALLED_APPS = (
     'corsheaders',
     'tinymce',
     'utils',
-
+    'django_celery_monitor',
+    'oauth2_provider',
+    'rest_framework',
+    'django_filters',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-)
+]
 
 ROOT_URLCONF = 'parlalize.urls'
 
@@ -77,6 +80,21 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
         },
+    },
+]
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -102,12 +120,6 @@ LAST_ACTIVITY_COUNT = 10
 
 # PARLALIZE vote options represent for vote analyses
 # in ballots we save the option as string. this is used to transform it to a numerical value
-VOTE_MAP = {
-    "aye": 1, # for
-    "no": -1, # against
-    "tellaye": 0, # abstain
-    "tellno": 0, # not present
-}
 
 LOGGING = {
     'version': 1,
@@ -138,56 +150,65 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Legislation status options: in procedure / procedure ended
 # we use these in the django admin interface to define select dropdown options
 # it is tied to the model, so if you change this please check parlaseje.models.Legislation
-LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
-
+# LEGISLATION_STATUS = [('under_consideration', _('v obravnavi')), ('end_of_hearing', _('konec obravnave'))]
+LEGISLATION_STATUS = [
+    ('enacted', 'enacted'),
+    ('submitted', 'submitted'),
+    ('rejected', 'rejected'),
+    ('retracted', 'retracted'),
+    ('adopted', 'adopted'),
+    ('received', 'received'),
+    ('in_procedure', 'in_procedure')
+]
 # Legislation result: empty / accepted / rejected
 # we use these in the django admin interface to define select dropdown options
 # it is tied to the model, so if you change this please check parlaseje.models.Legislation
-LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
 
-# Vote classificators. Vote text contains. This is tied to VOTE_NAMES.
-VOTE_INDICATORS = { 
-    '1': ['dnevni red', 'širitev dnevnega reda', 'umik točke dnevnega reda'], 
-    '2': ['glasovanje o zakonu v celoti'], 
-    '3': ['amandma'], 
-    '4': ['interpelacija'], 
-    '5': ['evidenčni sklep'], 
-    '6': ['predlog sklepa'], 
-    '7': ['zakon o ratifikaciji'], 
-    '8': ['sklep o imenovanju', 
-          'predlog za imenovanje', 
-          'izvolitev', 
-          'soglasje k imenovanju', 
-          'predlog kandidata', 
-          'predlog kandidatke', 
-          'sklep o izvolitvi', 
-          'predlog za izvolitev'], 
-    '9': ['predlog za razpis'], 
-    '10': ['priporočilo'], 
-    '11': ['poročilo'], 
-    '12': ['proceduralni predlog'], 
-    '13': ['odlok o načrtu ravnanja s stvarnim premoženjem'],
-}
+# LEGISLATION_RESULT = [(None, _('Prazno')), ('accepted', _('sprejet')), ('rejected', _('zavrnjen'))]
+LEGISLATION_RESULT = [
+    ('enacted', 'enacted'),
+    ('submitted', 'submitted'),
+    ('rejected', 'rejected'),
+    ('retracted', 'retracted'),
+    ('adopted', 'adopted'),
+    ('received', 'received'),
+    ('in_procedure', 'in_procedure')
+]
 
 # Vote classification
 VOTE_NAMES = { 
-    '1': 'dnevni red', # agenda
-    '2': 'glasovanje o zakonu v celoti', # final votiong 
-    '3': 'amandma', # amendment
-    '4': 'interpelacija', # interpelation
-    '5': 'evidenčni sklep', # record conclusion
-    '6': 'predlog sklepa', # proposal for a decision
-    '7': 'zakon o ratifikaciji', # ratification law
-    '8': 'imenovanje', # naming
-    '9': 'predlog za razpis', # proposal for a call
-    '10': 'priporočilo', # recommendation 
-    '11': 'poročilo', # report 
-    '12': 'proceduralni predlog', # procedural proposal 
-    '13': 'odlok o načrtu ravnanja s stvarnim premoženjem',
-    '14': 'drugo' # others
+    '1': 'agenda', # agenda
+    '2': 'whole_law', # final votiong 
+    '3': 'amendment', # amendment
+    '4': 'no_confidence', # interpelation
+    '5': 'record_conclusion', # record conclusion
+    '6': 'conclusion_proposal', # proposal for a decision
+    '7': 'ratification', # ratification law
+    '8': 'naming', # naming
+    '9': 'call_proposal', # proposal for a call
+    '10': 'recommendation', # recommendation 
+    '11': 'report', # report 
+    '12': 'procedural_proposal', # procedural proposal 
+    '13': 'personal_property_decree',
+    '14': 'other' # others
 }
 
 TINYMCE_INCLUDE_JQUERY = False
 
-COUNCIL_ID = 9
-DZ = 95
+REST_FRAMEWORK = { 
+    'DEFAULT_PERMISSION_CLASSES': [ 
+        'rest_framework.permissions.IsAdminUser', 
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10, 
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+}
+
+OAUTH2_PROVIDER = {
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore'
+}

@@ -9,6 +9,7 @@ from .exports import exportLegislations
 from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
+from raven.contrib.django.raven_compat.models import client
 
 import requests
 import re
@@ -48,7 +49,7 @@ def updatePeople():
     return 1
 
 
-def updateOrganizations():
+def updateOrganizations(dummy_arg=None):
     data = tryHard(API_URL + '/getAllOrganizations').json()
     for pg in data:
         if Organization.objects.filter(id_parladata=pg):
@@ -81,16 +82,18 @@ def updateSpeeches():
     url = API_URL + '/getAllAllSpeeches'
     existingISs = list(Speech.objects.all().values_list('id_parladata',
                                                         flat=True))
+    orgs = {str(org.id_parladata): org.id for org in Organization.objects.all()}
     for page in getDataFromPagerApiGen(url):
         for dic in page:
             if int(dic['id']) not in existingISs:
                 print 'adding speech'
                 print dic['valid_to']
                 person = Person.objects.get(id_parladata=int(dic['speaker']))
-                speech = Speech(person=person,
-                                organization=Organization.objects.get(
+                speech = Speech(organization=Organization.objects.get(
                                     id_parladata=int(dic['party'])),
-                                content=dic['content'], order=dic['order'],
+                                content=dic['content'],
+                                order=dic['order'],
+                                agenda_item_order=dic['agenda_item_order'],
                                 session=Session.objects.get(
                                     id_parladata=int(dic['session'])),
                                 start_time=dic['start_time'],
@@ -99,11 +102,14 @@ def updateSpeeches():
                                 valid_to=dic['valid_to'],
                                 id_parladata=dic['id'])
                 speech.save()
+                speech.person.add(person)
             else:
                 print 'update speech'
                 speech = Speech.objects.filter(id_parladata=dic['id'])
                 speech.update(valid_from=dic['valid_from'],
-                              valid_to=dic['valid_to'])
+                              valid_to=dic['valid_to'],
+                              agenda_item_order=dic['agenda_item_order'],
+                              organization_id=orgs[str(dic['party'])])
 
     # delete speeches which was deleted in parladata @dirty fix
     #deleteUnconnectedSpeeches()
@@ -123,7 +129,9 @@ def updateQuestions():
             else:
                 session = None
             link = dic['link'] if dic['link'] else None
-            person = Person.objects.get(id_parladata=int(dic['author_id']))
+            person = []
+            for i in dic['author_id']:
+                person.append(Person.objects.get(id_parladata=int(i)))
             if dic['recipient_id']:
                 rec_p = list(Person.objects.filter(id_parladata__in=dic['recipient_id']))
             else:
@@ -132,31 +140,33 @@ def updateQuestions():
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
-            if dic['author_org_id']:
-                author_org = Organization.objects.get(id_parladata=dic['author_org_id'])
-            else:
-                author_org = None
+            author_org = []
+            for i in dic['author_org_id']:
+                author_org.append(Organization.objects.get(id_parladata=i))
             rec_posts = []
             for post in dic['recipient_posts']:
                 static = MinisterStatic.objects.filter(person__id=post['membership__person_id'],
                                                        ministry=post['organization_id'])
                 if static:
                     rec_posts.append(static[0])
-            question = Question(person=person,
-                                session=session,
+            question = Question(session=session,
                                 start_time=dic['date'],
                                 id_parladata=dic['id'],
-                                author_org=author_org,
                                 recipient_text=dic['recipient_text'],
                                 title=dic['title'],
                                 content_link=link,
                                 )
             question.save()
+            question.author_orgs.add(*author_org)
+            question.person.add(*person)
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.all(*rec_posts)
         else:
             print "update question"
+            person = []
+            for i in dic['author_id']:
+                person.append(Person.objects.get(id_parladata=int(i)))
             if dic['recipient_id']:
                 rec_p = list(Person.objects.filter(id_parladata__in=dic['recipient_id']))
             else:
@@ -165,10 +175,9 @@ def updateQuestions():
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
-            if dic['author_org_id']:
-                author_org = Organization.objects.get(id_parladata=dic['author_org_id'])
-            else:
-                author_org = None
+            author_org = []
+            for i in dic['author_org_id']:
+                author_org.append(Organization.objects.get(id_parladata=i))
             rec_posts = []
             for post in dic['recipient_posts']:
                 static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
@@ -176,8 +185,9 @@ def updateQuestions():
                 if static:
                     rec_posts.append(static[0])
             question = Question.objects.get(id_parladata=dic["id"])
-            question.author_org = author_org
             question.save()
+            question.author_org.add(*author_org)
+            question.person.add(*person)
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.add(*rec_posts)
@@ -208,13 +218,13 @@ def updateBallots():
             print 'adding ballot ' + str(dic['vote'])
             vote = Vote.objects.get(id_parladata=dic['vote'])
             person = Person.objects.get(id_parladata=int(dic['voter']))
-            ballots = Ballot(person=person,
-                             option=dic['option'],
+            ballots = Ballot(option=dic['option'],
                              vote=vote,
                              start_time=vote.start_time,
                              end_time=None,
                              id_parladata=dic['id'])
             ballots.save()
+            ballots.person.add(person)
     return 1
 
 
@@ -376,49 +386,86 @@ def update():
     return 1
 
 
+# This is just for empty Legislation table
 def updateLegislation(request):
     allLaws = []
-    epas = []
-    laws = requests.get(API_URL + '/law/',
-                       auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
-    count = 144
-    while laws['next'] != None:
-        
-        laws = requests.get(API_URL + '/law/?page=' + str(count),
-                            auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
-        for law in laws['results']:
-            epas.append(str(law['epa']))
-        count = count + 1
+    
+    laws = getDataFromPagerApiDRF(API_URL + '/law/')
+    epas = list(set([law['epa'] for law in laws if law['epa']]))
+    hr_acts = [law for law in laws if not law['epa']]
     for epa in set(epas):
+        print(epa)
         laws = requests.get(API_URL + '/law?epa=' + str(epa),
-                        auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
+            auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
+        print(laws)
         if int(laws['count']) > 1:
-            for law in laws['results']:
-                sorted_date = sorted(laws['results'], key=lambda x: datetime.strptime(x['date'].split('T')[0], '%Y-%m-%d'))
-                print sorted_date[0]
-                result = Legislation(#session=Session.objects.get(id_parladata=int(law['session'])),
-                                       text=sorted_date['text'],
-                                       epa=sorted_date['epa'],
-                                       mdt=sorted_date['mdt'],
-                                       proposer_text=sorted_date['proposer_text'],
-                                       procedure_phase=sorted_date['procedure_phase'],
-                                       procedure=sorted_date['procedure'],
-                                       type_of_law=sorted_date['type_of_law'],
-                                       mdt_fk=sorted_date['mdt_fk']
-                                       )      
-                result.save()
-        else:
-            result = Legislation(#session=Session.objects.get(id_parladata=int(law['session'])),
-                                       text=laws['results']['text'],
-                                       epa=laws['results']['epa'],
-                                       mdt=laws['results']['mdt'],
-                                       proposer_text=laws['results']['proposer_text'],
-                                       procedure_phase=laws['results']['procedure_phase'],
-                                       procedure=laws['results']['procedure'],
-                                       type_of_law=laws['results']['type_of_law'],
-                                       mdt_fk=laws['results']['mdt_fk']
-                                       )      
+            sorted_date = sorted(laws['results'], key=lambda x: datetime.strptime(x['date'].split('T')[0], '%Y-%m-%d'))
+            print(sorted_date)
+            sessions = list(set(list([Session.objects.get(id_parladata=int(l['session']))
+                        for l 
+                        in sorted_date
+                        if l['session']])))
+            sorted_date = sorted_date[0]
+            result = Legislation(text=sorted_date['text'],
+                                 epa=sorted_date['epa'],
+                                 mdt=sorted_date['mdt'],
+                                 proposer_text=sorted_date['proposer_text'] if sorted_date['proposer_text'] else None,
+                                 procedure_phase=sorted_date['procedure_phase'],
+                                 procedure=sorted_date['procedure'],
+                                 type_of_law=sorted_date['type_of_law'],
+                                 classification=sorted_date['classification'],
+                                 status=sorted_date['status'],
+                                 #mdt_fk=sorted_date['mdt_fk']
+                                 )
+            if sorted_date['result']:
+                result.result = sorted_date['result']
             result.save()
+            print(sessions)
+            if sessions:
+                result.sessions.add(*sessions)
+        else:
+            result = Legislation(text=laws['results'][0]['text'],
+                                 epa=laws['results'][0]['epa'],
+                                 mdt=laws['results'][0]['mdt'],
+                                 proposer_text=laws['results'][0]['proposer_text'],
+                                 procedure_phase=laws['results'][0]['procedure_phase'],
+                                 procedure=laws['results'][0]['procedure'],
+                                 type_of_law=laws['results'][0]['type_of_law'],
+                                 classification=laws['results'][0]['classification'],
+                                 status=laws['results'][0]['status'],
+                                 #mdt_fk=laws['results']['mdt_fk']
+                                 )
+            result.save()
+
+            if law['session']:
+                print(law['session'])
+                result.sessions.add(Session.objects.get(id_parladata=int(law['session'])))
+            if laws['results'][0]['result']:
+                result.result = laws['results'][0]['result']
+            result.save()
+    for act in hr_acts:
+        result = Legislation(text=act['text'],
+                             epa='akt-'+act['uid'],
+                             mdt=act['mdt'][:255]  if sorted_date['mdt'] else None,
+                             proposer_text=act['proposer_text'][:255]  if sorted_date['proposer_text'] else None,
+                             procedure_phase=act['procedure_phase'],
+                             procedure=act['procedure'],
+                             type_of_law=act['type_of_law'],
+                             classification='akt',
+                             status=act['status'],
+                             #mdt_fk=act['results']['mdt_fk']
+                             )
+        result.save()
+        if act['session']:
+            result.sessions.add(Session.objects.get(id_parladata=int(law['session'])))
+        if act['result']:
+            result.result = act['result']
+        result.save()
+try:
+    updateLegislation(None)
+except:
+    client.captureException()
+
 
 
 def importDraftLegislationsFromFeed(): 
@@ -476,3 +523,16 @@ def importDraftLegislationsFromFeed():
         update = True
     if update:
         exportLegislations()
+
+
+def getDataFromPagerApiDRF(url):
+    print(url)
+    data = []
+    end = False
+    page = 1
+    url = url+'?limit=300'
+    while url:
+        response = requests.get(url, auth=HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
+        data += response['results']
+        url = response['next']
+    return data

@@ -25,6 +25,7 @@ import json
 import time
 import csv
 import itertools
+from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from parlalize.settings import SETTER_KEY, VOTE_NAMES
@@ -331,7 +332,8 @@ def getPersonData(id_parladata, date_=None):
                 'party': {'acronym': None,
                           'id': None,
                           'name': None,
-                          'is_coalition': None},
+                          'is_coalition': None,
+                          'classification': None},
                 'name': guest['name'] if guest else None,
                 'gov_id': guest['gov_id'],
                 'id': id_parladata,
@@ -345,7 +347,8 @@ def getPersonData(id_parladata, date_=None):
                     'party': {'acronym': None,
                               'id': None,
                               'name': None,
-                              'is_coalition': None},
+                              'is_coalition': None,
+                              'classification': None},
                     'name': guest['name'] if guest else None,
                     'gov_id': None,
                     'id': id_parladata,
@@ -361,7 +364,8 @@ def getPersonData(id_parladata, date_=None):
         partyData = {'acronym': None,
                      'id': None,
                      'name': None,
-                     'is_coalition': None}
+                     'is_coalition': None,
+                     'classification': None}
     return {
             'type': 'mp',
             'name': data.person.name,
@@ -425,16 +429,15 @@ def getAllStaticData(request, force_render=False):
                     channel="#parlalize_notif",
                     text='StaticDataDebug start: ' + str(c_data)[:100] + ' ' + str(force_render))
 
-        PS_NP = ['poslanska skupina', 'nepovezani poslanec']
         date_ = datetime.now().strftime(API_DATE_FORMAT)
-
+        print("asdasdasd")
         out = {'persons': {}, 'partys': {}, 'wbs': {}, 'sessions': {}, 'ministrs': {}}
         for person in Person.objects.all():
             personData = getPersonData(person.id_parladata,
                                        date_)
             out['persons'][person.id_parladata] = personData
-
-        parliamentary_group = Organization.objects.filter(classification__in=PS_NP)
+        print("asdasdasd")
+        parliamentary_group = Organization.objects.filter(classification__in=settings.PS_NP)
         for party in parliamentary_group:
             out['partys'][party.id_parladata] = party.getOrganizationData()
 
@@ -628,7 +631,7 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
     """
     generic method which return tagged ballots for partys and members
     """
-    votes = Vote.objects.filter(start_time__lte=datetime_obj).order_by('start_time')
+    votes = Vote.objects.filter(start_time__lte=datetime_obj).order_by('start_time').prefetch_related('session')
     votes = votes.filter(id__in=ballots.keys())
     # add start_time_date to querySetObjets
     votes = votes.extra(select={'start_time_date': 'DATE(start_time)'})
@@ -636,6 +639,7 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
     dates = list(set(list(votes.values_list("start_time_date", flat=True))))
     dates.sort()
     data = {date: [] for date in dates}
+    cats = []
     #current_data = {'date': votes[0].start_time_date, 'ballots': []}
     for vote in votes:
         try:
@@ -648,6 +652,7 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
                 'option': ballots[vote.id][1],
                 'tags': vote.tags,
             }
+            cats.append(vote.classification)
             # if party
             if 'party' in  card_owner_data.keys():
                 temp_data['party'] = card_owner_data['party']['id']
@@ -665,11 +670,12 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
            for date in dates]
 
     tags = list(Tag.objects.all().values_list('name', flat=True))
+    filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
     result = {
         'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
         'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
         'all_tags': tags,
-        "classifications": VOTE_NAMES,
+        "classifications": filter_cats,
         'results': list(reversed(out))
         }
     result.update(card_owner_data)
@@ -746,9 +752,21 @@ def getDataFromPagerApiGen(url, per_page = None):
     end = False
     page = 1
     while not end:
+        print(page)
         response = requests.get(url + '?page=' + str(page) + ('&per_page='+str(per_page) if per_page else '')).json()
+        yield response['data']
         if page >= response['pages']:
+            print("brejk")
             break
         page += 1
-        yield response['data']
 
+
+def getPersonAmendmentsCount(person_id, date_of):
+    person = Person.objects.get(id_parladata=person_id)
+    card = person.amendments.filter(start_time__lte=date_of)
+    count = card.count()
+    if not card:
+        date = datetime.now()
+    else:
+        date = card.latest('created_for').created_for
+    return person, count, date

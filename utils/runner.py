@@ -26,8 +26,9 @@ from utils.votes_pg import set_mismatch_of_pg
 from utils.exports import exportLegislations
 
 from .votes import VotesAnalysis
+from .delete_renders import deleteMPandPGsRenders
 
-from parlalize.utils_ import tryHard, datesGenerator, printProgressBar, getPersonData
+from parlalize.utils_ import tryHard, datesGenerator, printProgressBar, getPersonData, getAllStaticData
 
 import json
 from slackclient import SlackClient
@@ -75,10 +76,15 @@ def onDateMPCardRunner(date_=None):
     else:
         date_of = (datetime.now() - timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
+
+    votez = VotesAnalysis(date_of)
+    votez.setAll()
+    set_mismatch_of_pg(None, date_)
     setters = [
         setMembershipsOfMember,
         setPresenceThroughTime,
         setPercentOFAttendedSession,
+        setMPStaticPL
     ]
 
     memberships = tryHard(API_URL + '/getMPs/' + date_).json()
@@ -103,6 +109,7 @@ def onDateMPCardRunner(date_=None):
         setAverageNumberOfSpeechesPerSessionAll,
         setNumberOfQuestionsAll,
         setCompass,
+        setVocabularySizeAndSpokenWords,
     ]
 
     zero = datetime(day=2, month=8, year=2014).date()
@@ -112,6 +119,61 @@ def onDateMPCardRunner(date_=None):
             setter(request_with_key, date_)
         except:
             print 'FAIL on: ' + str(setter)
+
+"""
+    When are membersips changed, run this method for update data and page
+"""
+def onMembershipChangePGRunner(data, date_=None):
+    if date_:
+        dateObj = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = dateObj.date()
+    else:
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
+
+    pg_ids = data['pgs']
+    mp_ids = data['mps']
+
+    votez = VotesAnalysis(date_of)
+    votez.setAll()
+    set_mismatch_of_pg(None)
+
+    setters_mp = [
+        setMembershipsOfMember,
+        setMPStaticPL
+    ]
+
+    for mp in mp_ids:
+        for setter in setters_mp:
+            try:
+                setter(request_with_key, str(mp), date_)
+            except:
+                msg = ('' + FAIL + ''
+                       'FAIL on: '
+                       '' + str(setter) + ''
+                       ' and with id: '
+                       '' + str(membership['id']) + ''
+                       '' + ENDC + '')
+                print msg
+
+    pg_setters = [
+        setMPsOfPG,
+        setBasicInfOfPG,
+        setPGMismatch,
+    ]
+    for setter in pg_setters:
+        for pg_id in pg_ids:
+            try:
+                setter(request_with_key, str(pg_id), date_)
+            except:
+                text = ('' + FAIL + 'FAIL on: ' + str(setter) + ''
+                        ' and with id: ' + str(pg_id) + ENDC + '')
+                print text
+
+    getAllStaticData(None, force_render=True)
+    getListOfPGs(None, date_, force_render=True)
+    deleteMPandPGsRenders()
+
 
 
 def onDatePGCardRunner(date_=None):
@@ -125,6 +187,9 @@ def onDatePGCardRunner(date_=None):
         date_of = (datetime.now() - timedelta(days=1)).date()
         date_ = date_of.strftime(API_DATE_FORMAT)
     print date_
+    set_mismatch_of_pg(None)
+    votez = VotesAnalysis(date_of)
+    votez.setAll()
     setters = [
         setMPsOfPG,
         setBasicInfOfPG,
@@ -158,8 +223,6 @@ def onDatePGCardRunner(date_=None):
             setter(request_with_key, date_)
         except:
             print FAIL + 'FAIL on: ' + str(setter) + ENDC
-
-    set_mismatch_of_pg(None)
 
     # updateWB()
 
@@ -470,10 +533,11 @@ def fastUpdate(fast=True, date_=None):
         if int(dic['id']) not in existingIDs:
             print 'adding speech'
             person = Person.objects.get(id_parladata=int(dic['speaker']))
-            speech = Speech(person=person,
-                            organization=Organization.objects.get(
+            speech = Speech(organization=Organization.objects.get(
                                 id_parladata=int(dic['party'])),
-                            content=dic['content'], order=dic['order'],
+                            content=dic['content'],
+                            agenda_item_order=dic['agenda_item_order'],
+                            order=dic['order'],
                             session=Session.objects.get(
                                 id_parladata=int(dic['session'])),
                             start_time=dic['start_time'],
@@ -482,6 +546,7 @@ def fastUpdate(fast=True, date_=None):
                             valid_to=dic['valid_to'],
                             id_parladata=dic['id'])
             speech.save()
+            speech.person.add(person)
         else:
             print "update speech"
             person = Person.objects.get(id_parladata=int(dic['speaker']))
@@ -508,13 +573,13 @@ def fastUpdate(fast=True, date_=None):
             print 'adding ballot ' + str(dic['vote'])
             vote = Vote.objects.get(id_parladata=dic['vote'])
             person = Person.objects.get(id_parladata=int(dic['voter']))
-            ballots = Ballot(person=person,
-                             option=dic['option'],
+            ballots = Ballot(option=dic['option'],
                              vote=vote,
                              start_time=vote.start_time,
                              end_time=None,
                              id_parladata=dic['id'])
             ballots.save()
+            ballots.person.add(person)
 
     # update questions
     sc.api_call("chat.postMessage",
@@ -530,7 +595,9 @@ def fastUpdate(fast=True, date_=None):
             else:
                 session = None
             link = dic['link'] if dic['link'] else None
-            person = Person.objects.get(id_parladata=int(dic['author_id']))
+            person = []
+            for i in dic['author_id']:
+                person.append(Person.objects.get(id_parladata=int(i)))
             if dic['recipient_id']:
                 rec_p = list(Person.objects.filter(id_parladata__in=dic['recipient_id']))
             else:
@@ -539,26 +606,25 @@ def fastUpdate(fast=True, date_=None):
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
-            if dic['author_org_id']:
-                author_org = Organization.objects.get(id_parladata=dic['author_org_id'])
-            else:
-                author_org = None
+            author_org = []
+            for i in dic['author_org_id']:
+                author_org.append(Organization.objects.get(id_parladata=i))
             rec_posts = []
             for post in dic['recipient_posts']:
                 static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
                                                        ministry__id_parladata=post['organization_id']).order_by('-created_for')
                 if static:
                     rec_posts.append(static[0])
-            question = Question(person=person,
-                                session=session,
+            question = Question(session=session,
                                 start_time=dic['date'],
                                 id_parladata=dic['id'],
                                 recipient_text=dic['recipient_text'],
                                 title=dic['title'],
                                 content_link=link,
-                                author_org=author_org,
                                 )
             question.save()
+            question.person.add(*person)
+            question.author_orgs.add(*author_org)
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
             question.recipient_persons_static.add(*rec_posts)

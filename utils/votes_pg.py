@@ -9,6 +9,7 @@ from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi
 
+from django.conf import settings
 from django.http import JsonResponse
 
 def set_mismatch_of_pg(request, date_=''):
@@ -17,33 +18,32 @@ def set_mismatch_of_pg(request, date_=''):
         f_date = datetime.strptime(date_, '%d.%m.%Y')
     else:
         f_date = datetime.now()
-    API_URL = 'https://data.parlameter.si/v1'
-    url = API_URL + '/getVotesTableExtended/' + date_
+    url = settings.API_URL + '/getVotesTableExtended/' + date_
     data = getDataFromPagerApi(url)
     data = pd.DataFrame(data)
-    url = API_URL + '/getMPs/' + date_
+    url = settings.API_URL + '/getMPs/' + date_
     mps = requests.get(url).json()
     members = [mp['id'] for mp in mps]
-    url = API_URL + '/getMembersOfPGsOnDate/' + date_
+    url = settings.API_URL + '/getMembersOfPGsOnDate/' + date_
     memsOfPGs = requests.get(url).json()
-    url = API_URL + '/getAllPGs/' + date_
+    url = settings.API_URL + '/getAllPGs/' + date_
     pgs = requests.get(url).json()
 
-    coalition = requests.get(API_URL + '/getCoalitionPGs').json()['coalition']
-    orgs = requests.get(API_URL + '/getAllPGsExt/')
-    data['option_ni'] = 0
-    data['option_za'] = 0
-    data['option_proti'] = 0
-    data['option_kvorum'] = 0
-    data.loc[data['option'] == 'ni', 'option_ni'] = 1
-    data.loc[data['option'] == 'za', 'option_za'] = 1
-    data.loc[data['option'] == 'proti', 'option_proti'] = 1
-    data.loc[data['option'] == 'kvorum', 'option_kvorum'] = 1
+    coalition = requests.get(settings.API_URL + '/getCoalitionPGs').json()['coalition']
+    orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
+    data['option_absent'] = 0
+    data['option_for'] = 0
+    data['option_against'] = 0
+    data['option_abstain'] = 0
+    data.loc[data['option'] == 'absent', 'option_absent'] = 1
+    data.loc[data['option'] == 'for', 'option_for'] = 1
+    data.loc[data['option'] == 'against', 'option_against'] = 1
+    data.loc[data['option'] == 'abstain', 'option_abstain'] = 1
     data['voter_unit'] = 1
 
     print 'start analyze'
 
-    #za proti ni kvorum
+    #for against absent abstain
     all_votes = data.groupby('vote_id').sum()
     m_to_p = {i['id']: i['party_id'] for i in mps}
     mppgs = pd.DataFrame(m_to_p.items(), columns=['voter', 'voterparty'])
@@ -61,10 +61,10 @@ def set_mismatch_of_pg(request, date_=''):
 
         methodology: ignore not_present
         """
-        stats = {'za': row['option_za'],
-                 'proti': row['option_proti'],
-                 'kvorum': row['option_kvorum']}
-                 #'ni': row['option_ni']}
+        stats = {'for': row['option_for'],
+                 'against': row['option_against'],
+                 'abstain': row['option_abstain']}
+                 #'absent': row['option_absent']}
         if max(stats.values()) == 0:
             return None
         max_ids = [key for key, val in stats.iteritems() if val == max(stats.values())]
@@ -79,8 +79,8 @@ def set_mismatch_of_pg(request, date_=''):
     partys = partys.rename(columns = {0:'partyoption'})
 
     result = pd.merge(data2, partys, on=['vote_id', 'voterparty'])
-    #remove ni option
-    result = result[result.option != 'ni']
+    #remove absent option
+    result = result[result.option != 'absent']
 
     members_vote_count = result[['voter','voter_unit']].groupby('voter').count()
 
@@ -110,7 +110,7 @@ def set_mismatch_of_pg(request, date_=''):
         person = Person.objects.get(id_parladata=member)
         party = person.static_data.latest('created_at').party
         party_classification = party.classification
-        if party_classification != 'poslanska skupina':
+        if party_classification != settings.PS:
             value = None
         data.append({'person': person,
                      'value': value})
