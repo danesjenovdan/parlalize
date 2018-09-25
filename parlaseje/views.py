@@ -572,20 +572,20 @@ def setMotionOfSessionGraph(request, session_id):
         url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
         votes = tryHard(url).json()
         for vote in votes:
-            if vote['option'] == str('za'):
+            if vote['option'] in YES:
                 yes = yes + 1
                 yesdic[vote['pg_id']] += 1
                 tabyes.append(vote['mp_id'])
-            if vote['option'] == str('proti'):
+            if vote['option'] in AGAINST:
                 no = no + 1
                 nodic[vote['pg_id']] += 1
                 tabno.append(vote['mp_id'])
 
-            if vote['option'] == str('kvorum'):
+            if vote['option'] in ABSTAIN:
                 kvorum = kvorum + 1
                 kvordic[vote['pg_id']] += 1
                 tabkvo.append(vote['mp_id'])
-            if vote['option'] == str('ni'):
+            if vote['option'] in NOT_PRESENT:
                 not_present = not_present + 1
                 npdic[vote['pg_id']] += 1
                 tabnp.append(vote['mp_id'])

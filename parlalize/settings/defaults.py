@@ -151,14 +151,29 @@ CORS_ORIGIN_ALLOW_ALL = True
 # we use these in the django admin interface to define select dropdown options
 # it is tied to the model, so if you change this please check parlaseje.models.Legislation
 # LEGISLATION_STATUS = [('under_consideration', _('v obravnavi')), ('end_of_hearing', _('konec obravnave'))]
-LEGISLATION_STATUS = [('under_consideration', ('v obravnavi')), ('end_of_hearing', ('konec obravnave'))]
+LEGISLATION_STATUS = [
+    ('enacted', 'enacted'),
+    ('submitted', 'submitted'),
+    ('rejected', 'rejected'),
+    ('retracted', 'retracted'),
+    ('adopted', 'adopted'),
+    ('received', 'received'),
+    ('in_procedure', 'in_procedure')
+]
 # Legislation result: empty / accepted / rejected
 # we use these in the django admin interface to define select dropdown options
 # it is tied to the model, so if you change this please check parlaseje.models.Legislation
 
-
 # LEGISLATION_RESULT = [(None, _('Prazno')), ('accepted', _('sprejet')), ('rejected', _('zavrnjen'))]
-LEGISLATION_RESULT = [(None, ('Prazno')), ('accepted', ('sprejet')), ('rejected',('zavrnjen'))]
+LEGISLATION_RESULT = [
+    ('enacted', 'enacted'),
+    ('submitted', 'submitted'),
+    ('rejected', 'rejected'),
+    ('retracted', 'retracted'),
+    ('adopted', 'adopted'),
+    ('received', 'received'),
+    ('in_procedure', 'in_procedure')
+]
 # Vote classificators. Vote text contains. This is tied to VOTE_NAMES.
 VOTE_INDICATORS = { 
     '1': ['dnevni red', 'širitev dnevnega reda', 'umik točke dnevnega reda'], 
