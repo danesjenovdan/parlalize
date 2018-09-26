@@ -488,7 +488,7 @@ def setMotionOfSession(request, session_id):
 
         result = mot['result']
         if mot['amendment_of']:
-            a_orgs = [Organization.objects.filter(id_parladata_in=mot['amendment_of'])]
+            a_orgs = list(Organization.objects.filter(id_parladata__in=mot['amendment_of']))
         else:
             a_orgs = []
 
