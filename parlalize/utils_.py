@@ -449,8 +449,7 @@ def getAllStaticData(request, force_render=False):
         for ministr in ministrs:
             out['ministrs'][ministr.id] = ministr.getJsonData() 
 
-        working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
-        orgs = Organization.objects.filter(classification__in=working_bodies)
+        orgs = Organization.objects.filter(classification__in=settings.WBS)
         out['wbs'] = [{'id': org.id_parladata,
                        'name': org.name} for org in orgs]
 
