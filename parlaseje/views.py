@@ -3380,7 +3380,7 @@ def getAllVotes(request):
 
 def getExposedLegislation(request):
     legislations = Legislation.objects.filter(is_exposed=True)
-    accepted = legislations.filter(result='sprejet').order_by('-updated_at')[:6]
+    accepted = legislations.filter(result='enacted').order_by('-updated_at')[:6]
     under_consideration = legislations.filter(result=None).order_by('-updated_at')[:6]
     return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': datetime.now().strftime(API_DATE_FORMAT),
