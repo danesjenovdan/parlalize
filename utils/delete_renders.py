@@ -62,17 +62,14 @@ def deleteRendersOfSessionVotes(session_id):
     votes = Vote.objects.filter(session_id__id_parladata=session_id)
 
     # delete renders votes of session
-    requests.get(GLEJ_URL + '/api/cards/renders/delete/all?group=s&seznam-glasovanj&id=' + str(session_id))
+    requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=s&seznam-glasovanj&id=' + str(session_id))
 
     # delete renders vote details
-    url = settings.GLEJ_URL + '/api/cards/renders'
-    renders = requests.get(url).json()
-
     for vote in votes:
-        requests.get(GLEJ_URL + '/api/cards/renders/delete/all?group=s&glasovanje&id=' + str(vote.id_parladata))
+        requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=s&glasovanje&id=' + str(vote.id_parladata))
 
     # delete last session
-    requests.get(GLEJ_URL + '/api/cards/renders/delete/all?group=c&zadnja-seja')
+    requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=c&zadnja-seja')
 
 
 # TODO
