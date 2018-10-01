@@ -212,19 +212,20 @@ def updateBallots():
     url = (API_URL + '/getAllBallots')
     data = getDataFromPagerApi(url)
     existingISs = Ballot.objects.all().values_list('id_parladata', flat=True)
-    for dic in data:
-        # Ballot.objects.filter(id_parladata=dic['id']):
-        if int(dic['id']) not in existingISs:
-            print 'adding ballot ' + str(dic['vote'])
-            vote = Vote.objects.get(id_parladata=dic['vote'])
-            person = Person.objects.get(id_parladata=int(dic['voter']))
-            ballots = Ballot(option=dic['option'],
-                             vote=vote,
-                             start_time=vote.start_time,
-                             end_time=None,
-                             id_parladata=dic['id'])
-            ballots.save()
-            ballots.person.add(person)
+    for page in getDataFromPagerApiGen(url):
+        for dic in page:
+            # Ballot.objects.filter(id_parladata=dic['id']):
+            if int(dic['id']) not in existingISs:
+                print 'adding ballot ' + str(dic['vote'])
+                vote = Vote.objects.get(id_parladata=dic['vote'])
+                person = Person.objects.get(id_parladata=int(dic['voter']))
+                ballots = Ballot(option=dic['option'],
+                                 vote=vote,
+                                 start_time=vote.start_time,
+                                 end_time=None,
+                                 id_parladata=dic['id'])
+                ballots.save()
+                ballots.person.add(person)
     return 1
 
 
