@@ -4201,7 +4201,7 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
                                               int(person_id),
                                               None).data
         except:
-            mismatch = None
+            mismatch = 0
         person_obj['results']['mismatch_of_pg'] = {}
         person_obj['results']['mismatch_of_pg']['score'] = mismatch
         rank_data['mismatch_of_pg'].append(value)
