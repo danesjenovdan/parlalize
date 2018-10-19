@@ -3427,7 +3427,7 @@ def getAllLegislationEpas(request):
 
 def getAgendaItems(request, session_id):
     session = get_object_or_404(Session, id_parladata=session_id)
-    agenda_items = AgendaItem.objects.filter(settings__id_parladata=session_id)
+    agenda_items = AgendaItem.objects.filter(session__id_parladata=session_id)
 
     data = []
 
