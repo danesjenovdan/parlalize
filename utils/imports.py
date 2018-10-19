@@ -565,7 +565,7 @@ def importDebates():
         else:
             # add
             debate = Debate(
-                date=item['date'],
+                date=item['date'].split('T')[0],
                 id_parladata=item['id'],
             )
             debate.save()
