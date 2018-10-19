@@ -3455,6 +3455,7 @@ def getAgendaItems(request, session_id):
             temp_item['debates'].append(debate_data)
         
         temp_item['votings'] = []
+        data.append(temp_item)
 
 
 
