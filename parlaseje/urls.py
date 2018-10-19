@@ -69,7 +69,7 @@ urlpatterns = [
 
     url(r'^allActiveEpas/', getAllLegislationEpas),
 
-    url(r'^getAgendaItems/', getAgendaItems),
+    url(r'^getAgendaItems/(?P<session_id>\d+)$', getAgendaItems),
 
     url(r'^', include(router.urls)),
 ]
