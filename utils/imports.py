@@ -537,3 +537,37 @@ def getDataFromPagerApiDRF(url):
         data += response['results']
         url = response['next']
     return data
+
+def importAgendaItems():
+    existingISs = list(AgendaItem.objects.all().values_list('id_parladata',
+                                                            flat=True))
+    data = getDataFromPagerApiDRF(API_URL + '/agenda-items/')
+    for item in data:
+        if int(item['id']) in existingISs:
+            pass
+        else:
+            AgendaItem(
+                session=Session.objects.get(id_parladata=item['session']),
+                title=item['name'],
+                id_parladata=item['id']
+            ).save()
+
+def importDebates():
+    existingISs = list(Debate.objects.all().values_list('id_parladata',
+                                                        flat=True))
+    data = getDataFromPagerApiDRF(API_URL + '/debates/')
+    for item in data:
+        if int(item['id']) in existingISs:
+            # update
+            debate = Debate.objects.get(id_parladata=item['id'])
+            agenda_items = list(AgendaItem.objects.filter(id_parladata__in=item['agenda_item']))
+            debates.agenda_item.add(*agenda_items)
+        else:
+            # add
+            debate = Debate(
+                date=item['date'],
+                id_parladata=item['id'],
+            )
+            debate.save()
+            agenda_items = list(AgendaItem.objects.filter(id_parladata__in=item['agenda_item']))
+            debate.agenda_item.add(*agenda_items)

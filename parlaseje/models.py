@@ -162,6 +162,13 @@ class Speech(Versionable, Activity):
                                      blank=True, null=True,
                                      help_text='Organization')
 
+    debate = models.ForeignKey('Debate',
+                               blank=True, null=True,
+                               related_name='speeches',
+                               help_text=_('debate '))
+
+
+
     def __init__(self, *args, **kwargs):
         super(Activity, self).__init__(*args, **kwargs)
 
@@ -590,3 +597,37 @@ class Legislation(Timestampable, models.Model):
         #sessions = self.sessions.all().values_list('name', flat=True)
         sessions = []
         return ', '.join(sessions if sessions else '') + ' | ' + self.text if self.text else self.epa
+
+
+class AgendaItem(Timestampable, models.Model):
+    session = models.ForeignKey('Session',
+                                blank=True, null=True,
+                                related_name='agenda_items',
+                                help_text=_('Session '))
+
+    title = models.CharField(blank=True, null=True,
+                             max_length=255,
+                             help_text='Title of AgnedaItem')
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))
+
+class Debate(Timestampable, models.Model):
+    agenda_item = models.ManyToManyField('AgendaItem',
+                                         blank=True, null=True,
+                                         related_name='debates',
+                                         help_text=_('AgendaItem '))
+
+    date = models.DateField(_('date of debate'),
+                            blank=True, null=True,
+                            help_text=_('date of debate'))
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))
+
+    def __str__(self):
+        return unicode(self.session.name) + " --> " + unicode(self.session.organization.name)
