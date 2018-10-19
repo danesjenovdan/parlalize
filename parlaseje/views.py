@@ -3425,3 +3425,40 @@ def getAllLegislationEpas(request):
     return JsonResponse(list(epas), safe=False)
 
 
+def getAgendaItems(request, session_id):
+    session = get_object_or_404(Session, id_parladata=session_id)
+    agenda_items = AgendaItem.objects.filter(settings__id_parladata=session_id)
+
+    data = []
+
+    for item in agenda_items:
+        temp_item = {}
+        debates = item.debates.all()
+        temp_item['id'] = item.id_parladata
+        temp_item['text'] = item.title
+        temp_item['debates'] = []
+        for debate in item.debates.all().order_by('date'):
+            start_speech = debate.speeches.earliest("the_order")
+            end_speech = debate.speeches.latest("the_order")
+            debate_data = {
+                'id': debate.id_parladata,
+                'date': debate.date,
+                'start_speech': {
+                    'the_order': start_speech.the_order,
+                    'speech_id': start_speech.id_parladata
+                },
+                'end_speech': {
+                    'the_order': end_speech.the_order,
+                    'speech_id': end_speech.id_parladata
+                }
+            }
+            temp_item['debates'].append(debate_data)
+        
+        temp_item['votings'] = []
+
+
+
+    return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
+                         'created_at': datetime.now().strftime(API_DATE_FORMAT),
+                         'session': session.getSessionData(),
+                         'results': data})

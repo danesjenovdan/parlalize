@@ -69,5 +69,7 @@ urlpatterns = [
 
     url(r'^allActiveEpas/', getAllLegislationEpas),
 
+    url(r'^getAgendaItems/', getAgendaItems),
+
     url(r'^', include(router.urls)),
 ]
