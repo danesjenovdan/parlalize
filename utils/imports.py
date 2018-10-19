@@ -100,7 +100,8 @@ def updateSpeeches():
                                 end_time=dic['end_time'],
                                 valid_from=dic['valid_from'],
                                 valid_to=dic['valid_to'],
-                                id_parladata=dic['id'])
+                                id_parladata=dic['id'],
+                                debate=Debate.objects.get(id_parladata=dic['debate']))
                 speech.save()
                 speech.person.add(person)
             else:
@@ -109,7 +110,8 @@ def updateSpeeches():
                 speech.update(valid_from=dic['valid_from'],
                               valid_to=dic['valid_to'],
                               agenda_item_order=dic['agenda_item_order'],
-                              organization_id=orgs[str(dic['party'])])
+                              organization_id=orgs[str(dic['party'])],
+                              debate=Debate.objects.get(id_parladata=dic['debate']))
 
     # delete speeches which was deleted in parladata @dirty fix
     #deleteUnconnectedSpeeches()
