@@ -3433,7 +3433,7 @@ def getAllLegislationEpas(request):
     return JsonResponse(list(epas), safe=False)
 
 
-def get_agenda_item_data(item):
+def get_agenda_item_data(item, session_data):
     temp_item = {}
     debates = item.debates.all()
     temp_item['id'] = item.id_parladata
@@ -3488,7 +3488,7 @@ def getAgendaItems(request, session_id):
     data = []
 
     for item in agenda_items:
-        data.append(get_agenda_item_data(item))
+        data.append(get_agenda_item_data(item, session_data))
 
     return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': datetime.now().strftime(API_DATE_FORMAT),
@@ -3500,8 +3500,8 @@ def getAgendaItems(request, session_id):
 def getAgendaItem(request, agenda_item_id):
     agenda_item = AgendaItem.objects.filter(id_parladata=agenda_item_id)
     if agenda_item:
-        get_agenda_item_data(agenda_item[0])
         session_data = agenda_item[0].session.getSessionData()
+        get_agenda_item_data(agenda_item[0], session_data)
         return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
                              'created_at': datetime.now().strftime(API_DATE_FORMAT),
                              'session': session_data,
