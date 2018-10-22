@@ -507,6 +507,12 @@ def setMotionOfSession(request, session_id):
         classification = getMotionClassification(mot['text'])
         vote = Vote.objects.filter(id_parladata=mot['vote_id'])
 
+        agendaItem = AgendaItem.objects.filter(id_parladata=mot['agenda_item_id'])
+        if agendaItem:
+            agendaItem = agendaItem[0]
+        else:
+            agendaItem = None
+
         if vote:
             prev_result = vote[0].result
             vote.update(created_for=session.start_time,
