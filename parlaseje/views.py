@@ -3501,7 +3501,7 @@ def getAgendaItem(request, agenda_item_id):
     agenda_item = AgendaItem.objects.filter(id_parladata=agenda_item_id)
     if agenda_item:
         session_data = agenda_item[0].session.getSessionData()
-        get_agenda_item_data(agenda_item[0], session_data)
+        data = get_agenda_item_data(agenda_item[0], session_data)
         return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
                              'created_at': datetime.now().strftime(API_DATE_FORMAT),
                              'session': session_data,
