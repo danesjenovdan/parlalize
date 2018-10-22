@@ -530,6 +530,7 @@ def setMotionOfSession(request, session_id):
                         epa=mot['epa'],
                         law=law,
                         classification=classification,
+                        agenda_item=agendaItem,
                         )
             vote[0].amendment_of.clear()
             for org in  a_orgs:
@@ -554,6 +555,7 @@ def setMotionOfSession(request, session_id):
                                     epa=mot['epa'],
                                     law=law,
                                     classification=classification,
+                                    agenda_item=agendaItem,
                                     )
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
@@ -3435,6 +3437,8 @@ def getAgendaItems(request, session_id):
     session = get_object_or_404(Session, id_parladata=session_id)
     agenda_items = AgendaItem.objects.filter(session__id_parladata=session_id)
 
+    session_data = session.getSessionData()
+
     data = []
 
     for item in agenda_items:
@@ -3461,11 +3465,31 @@ def getAgendaItems(request, session_id):
             temp_item['debates'].append(debate_data)
         
         temp_item['votings'] = []
+        for vote in item.votes.order_by('-start_time'):
+            if vote.result == None:
+                continue
+            has_votes = bool(vote.vote.all())
+            temp_item['votings'].append({'results': {'motion_id': vote.id_parladata,
+                                                     'text': vote.motion,
+                                                     'session': session_data,
+                                                     'for': vote.votes_for,
+                                                     'against': vote.against,
+                                                     'abstain': vote.abstain,
+                                                     'absent': vote.not_present,
+                                                     'result': vote.result,
+                                                     'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
+                                                     'tags': vote.tags,
+                                                     'has_outliers': vote.has_outlier_voters,
+                                                     'documents': vote.document_url,
+                                                     'classification': vote.classification,
+                                                     'has_votes': has_votes
+                                                     }
+                        })
         data.append(temp_item)
 
 
 
     return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
                          'created_at': datetime.now().strftime(API_DATE_FORMAT),
-                         'session': session.getSessionData(),
+                         'session': session_data,
                          'results': data})
