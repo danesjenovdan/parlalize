@@ -609,7 +609,7 @@ class AgendaItem(Timestampable, models.Model):
                                 help_text=_('Session '))
 
     title = models.CharField(blank=True, null=True,
-                             max_length=255,
+                             max_length=1024,
                              help_text='Title of AgnedaItem')
 
     id_parladata = models.IntegerField(_('parladata id'),
@@ -632,5 +632,3 @@ class Debate(Timestampable, models.Model):
                                        null=True,
                                        help_text=_('id parladata'))
 
-    def __str__(self):
-        return unicode(self.session.name) + " --> " + unicode(self.session.organization.name)
