@@ -3479,7 +3479,7 @@ def get_agenda_item_data(item, session_data):
                                     })
     return temp_item
 
-def getAgendaItems(request, session_id):
+def getAgendaItems(request, session_id, date_=None):
     session = get_object_or_404(Session, id_parladata=session_id)
     agenda_items = AgendaItem.objects.filter(session__id_parladata=session_id)
 
@@ -3497,7 +3497,7 @@ def getAgendaItems(request, session_id):
 
 
 
-def getAgendaItem(request, agenda_item_id):
+def getAgendaItem(request, agenda_item_id, date_=None):
     agenda_item = AgendaItem.objects.filter(id_parladata=agenda_item_id)
     if agenda_item:
         session_data = agenda_item[0].session.getSessionData()
