@@ -3302,7 +3302,10 @@ def otherVotes(request, session_id):
     cats = []
     session = Session.objects.get(id_parladata=int(session_id))
     dates = [session.start_time]
-    allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
+    if AgendaItem.objects.all():
+        allVotes = Vote.objects.filter(agenda_item=None, session__id_parladata = session_id)
+    else:
+        allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
     for vote in allVotes.order_by('start_time'):
         if vote.result == None:
             continue
