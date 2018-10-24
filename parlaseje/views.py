@@ -3296,7 +3296,7 @@ def legislation(request, epa):
                          'created_at': created_at}, safe=False)
 
 
-def getOtherVotes(request, session_id, date=None):
+def getOtherVotes(request, session_id, date_=None):
     out = []
     dates = []
     cats = []
