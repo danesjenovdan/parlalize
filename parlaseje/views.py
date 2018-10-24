@@ -526,7 +526,6 @@ def setMotionOfSession(request, session_id):
                         epa=mot['epa'],
                         law=law,
                         classification=classification,
-                        agenda_item=agendaItem,
                         )
             vote[0].amendment_of.clear()
             for org in  a_orgs:
@@ -554,7 +553,6 @@ def setMotionOfSession(request, session_id):
                                     epa=mot['epa'],
                                     law=law,
                                     classification=classification,
-                                    agenda_item=agendaItem,
                                     )
             if a_orgs:
                 vote = Vote.objects.filter(id_parladata=mot['vote_id'])
