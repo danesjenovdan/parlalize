@@ -4556,7 +4556,10 @@ def setPGMismatch(request, pg_id, date_=None):
     memsOfPGs = tryHard(url).json()
     data = []
     for member in memsOfPGs[str(pg_id)]:
-        mismatch = getPersonCardModelNew(MismatchOfPG, int(member), date_)
+        try:
+            mismatch = getPersonCardModelNew(MismatchOfPG, int(member), date_)
+        except:
+            pass
         data.append({'id': member,
                      'ratio': mismatch.data})
     
