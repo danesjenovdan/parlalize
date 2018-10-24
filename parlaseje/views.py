@@ -507,11 +507,7 @@ def setMotionOfSession(request, session_id):
         classification = getMotionClassification(mot['text'])
         vote = Vote.objects.filter(id_parladata=mot['vote_id'])
 
-        agendaItem = AgendaItem.objects.filter(id_parladata=mot['agenda_item_id'])
-        if agendaItem:
-            agendaItem = agendaItem[0]
-        else:
-            agendaItem = None
+        agendaItems = list(AgendaItem.objects.filter(id_parladata__in=mot['agenda_item_ids']))
 
         if vote:
             prev_result = vote[0].result
@@ -536,6 +532,9 @@ def setMotionOfSession(request, session_id):
             for org in  a_orgs:
                 AmendmentOfOrg(vote=vote[0], organization=org).save()
             vote[0].amendment_of_person.add(*a_people)
+
+            vote[0].agenda_item.add(*agendaItems)
+
             if prev_result != vote[0].result:
                 finish_legislation_by_final_vote(vote[0])
         else:
@@ -563,6 +562,7 @@ def setMotionOfSession(request, session_id):
                 for org in  a_orgs:
                     AmendmentOfOrg(vote=vote[0], organization=org).save()
                 vote[0].amendment_of_person.add(*a_people)
+                vote[0].agenda_item.add(*agendaItems)
                 finish_legislation_by_final_vote(vote[0])
 
         yes = 0

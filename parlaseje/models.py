@@ -340,8 +340,8 @@ class Vote(Timestampable, models.Model):
                                       max_length=255,
                                       help_text='classification')
 
-    agenda_item = models.ForeignKey('AgendaItem', blank=True, null=True,
-                                    help_text='Agenda item', related_name='votes')
+    agenda_item = models.ManyToManyField('AgendaItem', blank=True,
+                                         help_text='Agenda item', related_name='votes')
 
     def __str__(self):
         return self.session.name + ' | ' + self.motion
