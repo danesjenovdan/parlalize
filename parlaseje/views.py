@@ -1463,7 +1463,8 @@ def getMotionAnalize(request, motion_id):
                         'opposition': json.loads(model.oppo_opts)},
            'all': options,
            'abstractVisible': visible,
-           'abstract': abstract}
+           'abstract': abstract,
+           'agenda_items': [ai.title for ai in vote.agenda_item.all()],}
     return JsonResponse(out, safe=False)
 
 
