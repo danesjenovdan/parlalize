@@ -813,6 +813,7 @@ def getMotionOfSession(request, session_id, date=False):
                                         'has_outliers': card.has_outlier_voters,
                                         'classification': card.classification,
                                         'has_votes': has_votes,
+                                        'agenda_items': [ai.title for ai in card.agenda_items.all()],
                                         }
                             })
                 cats.append(card.classification)
@@ -3042,7 +3043,8 @@ def getComparedVotes(request):
                 'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                 'has_outliers': vote.has_outlier_voters,
                 'tags': vote.tags,
-                'date': vote.start_time.strftime(API_DATE_FORMAT)
+                'date': vote.start_time.strftime(API_DATE_FORMAT),
+                'agenda_items': [ai.title for ai in vote.agenda_items.all()],
             }
         })
 
@@ -3266,7 +3268,8 @@ def legislation(request, epa):
                     'tags': vote.tags,
                     'has_outliers': vote.has_outlier_voters,
                     'documents': vote.document_url,
-                    'start_time': vote.start_time
+                    'start_time': vote.start_time,
+                    'agenda_items': [ai.title for ai in vote.agenda_items.all()],
                     })
         dates.append(vote.created_at)
     if dates:
@@ -3321,7 +3324,8 @@ def getOtherVotes(request, session_id, date_=None):
                                 'has_outliers': vote.has_outlier_voters,
                                 'documents': vote.document_url,
                                 'classification': vote.classification,
-                                'has_votes': has_votes
+                                'has_votes': has_votes,
+                                'agenda_items': [ai.title for ai in vote.agenda_items.all()],
                                 }
                     })
         cats.append(vote.classification)
@@ -3368,7 +3372,8 @@ def getAllVotes(request):
                                 'has_outliers': vote.has_outlier_voters,
                                 'documents': vote.document_url,
                                 'classification': vote.classification,
-                                'has_votes': has_votes
+                                'has_votes': has_votes,
+                                'agenda_items': [ai.title for ai in vote.agenda_items.all()]
                                 }
                     })
         cats.append(vote.classification)
@@ -3475,7 +3480,8 @@ def get_agenda_item_data(item, session_data):
                                                  'has_outliers': vote.has_outlier_voters,
                                                  'documents': vote.document_url,
                                                  'classification': vote.classification,
-                                                 'has_votes': has_votes
+                                                 'has_votes': has_votes,
+                                                 'agenda_items': [ai.title for ai in vote.agenda_items.all()],
                                                  }
                                     })
     return temp_item
