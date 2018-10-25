@@ -813,7 +813,7 @@ def getMotionOfSession(request, session_id, date=False):
                                         'has_outliers': card.has_outlier_voters,
                                         'classification': card.classification,
                                         'has_votes': has_votes,
-                                        'agenda_items': [ai.title for ai in card.agenda_items.all()],
+                                        'agenda_items': [ai.title for ai in card.agenda_item.all()],
                                         }
                             })
                 cats.append(card.classification)
