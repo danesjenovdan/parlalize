@@ -3044,7 +3044,7 @@ def getComparedVotes(request):
                 'has_outliers': vote.has_outlier_voters,
                 'tags': vote.tags,
                 'date': vote.start_time.strftime(API_DATE_FORMAT),
-                'agenda_items': [ai.title for ai in vote.agenda_items.all()],
+                'agenda_items': [ai.title for ai in vote.agenda_item.all()],
             }
         })
 
@@ -3269,7 +3269,7 @@ def legislation(request, epa):
                     'has_outliers': vote.has_outlier_voters,
                     'documents': vote.document_url,
                     'start_time': vote.start_time,
-                    'agenda_items': [ai.title for ai in vote.agenda_items.all()],
+                    'agenda_items': [ai.title for ai in vote.agenda_item.all()],
                     })
         dates.append(vote.created_at)
     if dates:
@@ -3325,7 +3325,7 @@ def getOtherVotes(request, session_id, date_=None):
                                 'documents': vote.document_url,
                                 'classification': vote.classification,
                                 'has_votes': has_votes,
-                                'agenda_items': [ai.title for ai in vote.agenda_items.all()],
+                                'agenda_items': [ai.title for ai in vote.agenda_item.all()],
                                 }
                     })
         cats.append(vote.classification)
@@ -3373,7 +3373,7 @@ def getAllVotes(request):
                                 'documents': vote.document_url,
                                 'classification': vote.classification,
                                 'has_votes': has_votes,
-                                'agenda_items': [ai.title for ai in vote.agenda_items.all()]
+                                'agenda_items': [ai.title for ai in vote.agenda_item.all()]
                                 }
                     })
         cats.append(vote.classification)
@@ -3481,7 +3481,7 @@ def get_agenda_item_data(item, session_data):
                                                  'documents': vote.document_url,
                                                  'classification': vote.classification,
                                                  'has_votes': has_votes,
-                                                 'agenda_items': [ai.title for ai in vote.agenda_items.all()],
+                                                 'agenda_items': [ai.title for ai in vote.agenda_item.all()],
                                                  }
                                     })
     return temp_item
