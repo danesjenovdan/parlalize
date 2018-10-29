@@ -564,7 +564,7 @@ def importDebates():
             # update
             debate = Debate.objects.get(id_parladata=item['id'])
             agenda_items = list(AgendaItem.objects.filter(id_parladata__in=item['agenda_item']))
-            debates.agenda_item.add(*agenda_items)
+            debate.agenda_item.add(*agenda_items)
         else:
             # add
             debate = Debate(
