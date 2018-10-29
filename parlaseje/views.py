@@ -452,6 +452,7 @@ def getSpeechesIDsOfSession(request, session_id):
 def setMotionOfSession(request, session_id):
     """Stores all motions with detiled data of specific sesison.
     """
+    print(session_id)
     motion = tryHard(API_URL + '/motionOfSession/' + str(session_id) + '/').json()
     session = Session.objects.get(id_parladata=session_id)
     yes = 0
@@ -474,7 +475,6 @@ def setMotionOfSession(request, session_id):
 
         if mot['counter']:
             # this is for votes without ballots
-
             opts_set = set(mot['counter'].keys())
             if opts_set.intersection(YES):
                 yes = mot['counter']['for']
@@ -482,10 +482,8 @@ def setMotionOfSession(request, session_id):
                 no = mot['counter']['against']
             if opts_set.intersection(ABSTAIN):
                 kvorum = mot['counter']['abstain']
-
             # hardcoded croations number of member
-            not_present = 151 - sum(mot['counter'].values())
-
+            not_present = 151 - sum([int(v) for v in mot['counter'].values()])
         result = mot['result']
         if mot['amendment_of']:
             a_orgs = list(Organization.objects.filter(id_parladata__in=mot['amendment_of']))
