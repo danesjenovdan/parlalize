@@ -157,6 +157,7 @@ def updateQuestions():
                                 recipient_text=dic['recipient_text'],
                                 title=dic['title'],
                                 content_link=link,
+                                type_of_question=dic['type_of_question']
                                 )
             question.save()
             question.author_orgs.add(*author_org)
@@ -188,7 +189,7 @@ def updateQuestions():
                     rec_posts.append(static[0])
             question = Question.objects.get(id_parladata=dic["id"])
             question.save()
-            question.author_org.add(*author_org)
+            question.author_orgs.add(*author_org)
             question.person.add(*person)
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)

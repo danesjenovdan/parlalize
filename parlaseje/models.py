@@ -212,6 +212,10 @@ class Question(Activity):
                                       null=True,
                                       help_text='Recipient name as written on dz-rs.si')
 
+    type_of_question = models.CharField(max_length=64,
+                                        blank=True,
+                                        null=True)
+
     def getQuestionData(self, ministerStatic = None):
         persons = []
         orgs = []
@@ -228,7 +232,8 @@ class Question(Activity):
                 'url': self.content_link,
                 'id': self.id_parladata,
                 'session_name': self.session.name if self.session else None,
-                'session_id': self.session.id_parladata if self.session else None}
+                'session_id': self.session.id_parladata if self.session else None,
+                'type_of_question': type_of_question}
 
 
 class Ballot(Activity):

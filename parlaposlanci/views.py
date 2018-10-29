@@ -1002,6 +1002,7 @@ def getLastActivity(request, person_id, date_=None):
                 'content_url': question.content_link,
                 'recipient_persons': persons,
                 'recipient_orgs': orgs,
+                'type_of_question': question.type_of_question,
                 }
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
