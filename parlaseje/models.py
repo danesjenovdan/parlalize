@@ -233,7 +233,7 @@ class Question(Activity):
                 'id': self.id_parladata,
                 'session_name': self.session.name if self.session else None,
                 'session_id': self.session.id_parladata if self.session else None,
-                'type_of_question': type_of_question}
+                'type_of_question': self.type_of_question}
 
 
 class Ballot(Activity):
