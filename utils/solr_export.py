@@ -82,3 +82,32 @@ def deleteNonValidSpeeches():
     print r.text
 
     return
+
+
+def deleteSpeeches():
+    a = requests.get(SOLR_URL + "/select?wt=json&q=id:*&fl=id&fq=tip_t:govor&rows=100000000")
+    indexes = a.json()["response"]["docs"]
+    idsForDelete = [idx['id'] for idx in indexes]
+    data = {'delete': idsForDelete
+            }
+
+    r = requests.post(SOLR_URL + '/update?commit=true',
+                      data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+
+    print r.text
+    return True
+
+def deleteSessions():
+    a = requests.get(SOLR_URL + "/select?wt=json&q=id:*&fl=id&fq=tip_t:seja&rows=100000000")
+    indexes = a.json()["response"]["docs"]
+    idsForDelete = [idx['id'] for idx in indexes]
+    data = {'delete': idsForDelete
+            }
+
+    r = requests.post(SOLR_URL + '/update?commit=true',
+                      data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+
+    print r.text
+    return True

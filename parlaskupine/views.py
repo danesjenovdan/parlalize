@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.db.models.functions import Trunc
+from django.shortcuts import get_object_or_404
 
 from collections import Counter
 from scipy.stats.stats import pearsonr
@@ -2518,7 +2519,16 @@ def getTFIDF(request, party_id, date_=None):
    ]
 }
     """
-    card = getPGCardModelNew(Tfidf, int(party_id), is_visible=True, date=date_)
+    try:
+        card = getPGCardModelNew(Tfidf, int(party_id), is_visible=True, date=date_)
+    except:
+        org = get_object_or_404(Organization, id_parladata=party_id)
+        return JsonResponse({
+            'party': org.getOrganizationData(),
+            'results': [],
+            'created_for': datetime.now().strftime(API_DATE_FORMAT),
+            'created_at': datetime.now().strftime(API_DATE_FORMAT)
+        })
 
     out = {
         'party': card.organization.getOrganizationData(),
@@ -4556,7 +4566,10 @@ def setPGMismatch(request, pg_id, date_=None):
     memsOfPGs = tryHard(url).json()
     data = []
     for member in memsOfPGs[str(pg_id)]:
-        mismatch = getPersonCardModelNew(MismatchOfPG, int(member), date_)
+        try:
+            mismatch = getPersonCardModelNew(MismatchOfPG, int(member), date_)
+        except:
+            pass
         data.append({'id': member,
                      'ratio': mismatch.data})
     

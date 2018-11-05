@@ -49,11 +49,11 @@ def lockSetter(function):
 def tryHard(url):
     data = None
     counter = 0
-    while data is None:
+    while not data or data.status_code != 200:
         try:
             if counter > 2:
                 client.captureMessage(url+' je zahinavu več ko 2x.')
-                return
+                return 'ivan'
             data = requests.get(url)
         except:
             counter += 1

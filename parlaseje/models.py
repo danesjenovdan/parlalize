@@ -162,6 +162,13 @@ class Speech(Versionable, Activity):
                                      blank=True, null=True,
                                      help_text='Organization')
 
+    debate = models.ForeignKey('Debate',
+                               blank=True, null=True,
+                               related_name='speeches',
+                               help_text=_('debate '))
+
+
+
     def __init__(self, *args, **kwargs):
         super(Activity, self).__init__(*args, **kwargs)
 
@@ -205,6 +212,10 @@ class Question(Activity):
                                       null=True,
                                       help_text='Recipient name as written on dz-rs.si')
 
+    type_of_question = models.CharField(max_length=64,
+                                        blank=True,
+                                        null=True)
+
     def getQuestionData(self, ministerStatic = None):
         persons = []
         orgs = []
@@ -221,7 +232,8 @@ class Question(Activity):
                 'url': self.content_link,
                 'id': self.id_parladata,
                 'session_name': self.session.name if self.session else None,
-                'session_id': self.session.id_parladata if self.session else None}
+                'session_id': self.session.id_parladata if self.session else None,
+                'type_of_question': self.type_of_question}
 
 
 class Ballot(Activity):
@@ -332,6 +344,9 @@ class Vote(Timestampable, models.Model):
     classification = models.CharField(blank=True, null=True,
                                       max_length=255,
                                       help_text='classification')
+
+    agenda_item = models.ManyToManyField('AgendaItem', blank=True,
+                                         help_text='Agenda item', related_name='votes')
 
     def __str__(self):
         return self.session.name + ' | ' + self.motion
@@ -590,3 +605,35 @@ class Legislation(Timestampable, models.Model):
         #sessions = self.sessions.all().values_list('name', flat=True)
         sessions = []
         return ', '.join(sessions if sessions else '') + ' | ' + self.text if self.text else self.epa
+
+
+class AgendaItem(Timestampable, models.Model):
+    session = models.ForeignKey('Session',
+                                blank=True, null=True,
+                                related_name='agenda_items',
+                                help_text=_('Session '))
+
+    title = models.CharField(blank=True, null=True,
+                             max_length=1024,
+                             help_text='Title of AgnedaItem')
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))
+
+class Debate(Timestampable, models.Model):
+    agenda_item = models.ManyToManyField('AgendaItem',
+                                         blank=True, null=True,
+                                         related_name='debates',
+                                         help_text=_('AgendaItem '))
+
+    date = models.DateField(_('date of debate'),
+                            blank=True, null=True,
+                            help_text=_('date of debate'))
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))
+

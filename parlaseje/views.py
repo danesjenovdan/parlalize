@@ -505,6 +505,8 @@ def setMotionOfSession(request, session_id):
         classification = getMotionClassification(mot['text'])
         vote = Vote.objects.filter(id_parladata=mot['vote_id'])
 
+        agendaItems = list(AgendaItem.objects.filter(id_parladata__in=mot['agenda_item_ids']))
+
         if vote:
             prev_result = vote[0].result
             vote.update(created_for=session.start_time,
@@ -527,6 +529,9 @@ def setMotionOfSession(request, session_id):
             for org in  a_orgs:
                 AmendmentOfOrg(vote=vote[0], organization=org).save()
             vote[0].amendment_of_person.add(*a_people)
+
+            vote[0].agenda_item.add(*agendaItems)
+
             if prev_result != vote[0].result:
                 finish_legislation_by_final_vote(vote[0])
         else:
@@ -553,6 +558,7 @@ def setMotionOfSession(request, session_id):
                 for org in  a_orgs:
                     AmendmentOfOrg(vote=vote[0], organization=org).save()
                 vote[0].amendment_of_person.add(*a_people)
+                vote[0].agenda_item.add(*agendaItems)
                 finish_legislation_by_final_vote(vote[0])
 
         yes = 0
@@ -805,6 +811,7 @@ def getMotionOfSession(request, session_id, date=False):
                                         'has_outliers': card.has_outlier_voters,
                                         'classification': card.classification,
                                         'has_votes': has_votes,
+                                        'agenda_items': [ai.title for ai in card.agenda_item.all()],
                                         }
                             })
                 cats.append(card.classification)
@@ -1454,7 +1461,8 @@ def getMotionAnalize(request, motion_id):
                         'opposition': json.loads(model.oppo_opts)},
            'all': options,
            'abstractVisible': visible,
-           'abstract': abstract}
+           'abstract': abstract,
+           'agenda_items': [ai.title for ai in vote.agenda_item.all()],}
     return JsonResponse(out, safe=False)
 
 
@@ -3034,7 +3042,8 @@ def getComparedVotes(request):
                 'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                 'has_outliers': vote.has_outlier_voters,
                 'tags': vote.tags,
-                'date': vote.start_time.strftime(API_DATE_FORMAT)
+                'date': vote.start_time.strftime(API_DATE_FORMAT),
+                'agenda_items': [ai.title for ai in vote.agenda_item.all()],
             }
         })
 
@@ -3258,7 +3267,8 @@ def legislation(request, epa):
                     'tags': vote.tags,
                     'has_outliers': vote.has_outlier_voters,
                     'documents': vote.document_url,
-                    'start_time': vote.start_time
+                    'start_time': vote.start_time,
+                    'agenda_items': [ai.title for ai in vote.agenda_item.all()],
                     })
         dates.append(vote.created_at)
     if dates:
@@ -3286,13 +3296,16 @@ def legislation(request, epa):
                          'created_at': created_at}, safe=False)
 
 
-def otherVotes(request, session_id):
+def getOtherVotes(request, session_id, date_=None):
     out = []
     dates = []
     cats = []
     session = Session.objects.get(id_parladata=int(session_id))
     dates = [session.start_time]
-    allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
+    if AgendaItem.objects.all():
+        allVotes = Vote.objects.filter(agenda_item=None, session__id_parladata = session_id)
+    else:
+        allVotes = Vote.objects.filter(Q(epa=None) | Q(epa=''), session__id_parladata = session_id)
     for vote in allVotes.order_by('start_time'):
         if vote.result == None:
             continue
@@ -3310,7 +3323,8 @@ def otherVotes(request, session_id):
                                 'has_outliers': vote.has_outlier_voters,
                                 'documents': vote.document_url,
                                 'classification': vote.classification,
-                                'has_votes': has_votes
+                                'has_votes': has_votes,
+                                'agenda_items': [ai.title for ai in vote.agenda_item.all()],
                                 }
                     })
         cats.append(vote.classification)
@@ -3357,7 +3371,8 @@ def getAllVotes(request):
                                 'has_outliers': vote.has_outlier_voters,
                                 'documents': vote.document_url,
                                 'classification': vote.classification,
-                                'has_votes': has_votes
+                                'has_votes': has_votes,
+                                'agenda_items': [ai.title for ai in vote.agenda_item.all()]
                                 }
                     })
         cats.append(vote.classification)
@@ -3423,3 +3438,79 @@ def getAllLegislationEpas(request):
     return JsonResponse(list(epas), safe=False)
 
 
+def get_agenda_item_data(item, session_data):
+    temp_item = {}
+    debates = item.debates.all()
+    temp_item['id'] = item.id_parladata
+    temp_item['text'] = item.title
+    temp_item['debates'] = []
+    for debate in item.debates.all().order_by('date'):
+        start_speech = debate.speeches.earliest("the_order")
+        end_speech = debate.speeches.latest("the_order")
+        debate_data = {
+            'id': debate.id_parladata,
+            'date': debate.date,
+            'start_speech': {
+                'the_order': start_speech.the_order,
+                'speech_id': start_speech.id_parladata
+            },
+            'end_speech': {
+                'the_order': end_speech.the_order,
+                'speech_id': end_speech.id_parladata
+            }
+        }
+        temp_item['debates'].append(debate_data)
+    
+    temp_item['votings'] = []
+    for vote in item.votes.order_by('-start_time'):
+        if vote.result == None:
+            continue
+        has_votes = bool(vote.vote.all())
+        temp_item['votings'].append({'results': {'motion_id': vote.id_parladata,
+                                                 'text': vote.motion,
+                                                 'session': session_data,
+                                                 'for': vote.votes_for,
+                                                 'against': vote.against,
+                                                 'abstain': vote.abstain,
+                                                 'absent': vote.not_present,
+                                                 'result': vote.result,
+                                                 'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
+                                                 'tags': vote.tags,
+                                                 'has_outliers': vote.has_outlier_voters,
+                                                 'documents': vote.document_url,
+                                                 'classification': vote.classification,
+                                                 'has_votes': has_votes,
+                                                 'agenda_items': [ai.title for ai in vote.agenda_item.all()],
+                                                 }
+                                    })
+    return temp_item
+
+def getAgendaItems(request, session_id, date_=None):
+    session = get_object_or_404(Session, id_parladata=session_id)
+    agenda_items = AgendaItem.objects.filter(session__id_parladata=session_id)
+
+    session_data = session.getSessionData()
+
+    data = []
+
+    for item in agenda_items:
+        data.append(get_agenda_item_data(item, session_data))
+
+    return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
+                         'created_at': datetime.now().strftime(API_DATE_FORMAT),
+                         'session': session_data,
+                         'results': data})
+
+
+
+def getAgendaItem(request, agenda_item_id, date_=None):
+    agenda_item = AgendaItem.objects.filter(id_parladata=agenda_item_id)
+    if agenda_item:
+        session_data = agenda_item[0].session.getSessionData()
+        data = get_agenda_item_data(agenda_item[0], session_data)
+        return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
+                             'created_at': datetime.now().strftime(API_DATE_FORMAT),
+                             'session': session_data,
+                             'result': data})
+    else:
+        JsonResponse({}, status=204)

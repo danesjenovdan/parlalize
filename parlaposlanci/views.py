@@ -1002,6 +1002,7 @@ def getLastActivity(request, person_id, date_=None):
                 'content_url': question.content_link,
                 'recipient_persons': persons,
                 'recipient_orgs': orgs,
+                'type_of_question': question.type_of_question,
                 }
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
@@ -4201,7 +4202,7 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
                                               int(person_id),
                                               None).data
         except:
-            mismatch = None
+            mismatch = 0
         person_obj['results']['mismatch_of_pg'] = {}
         person_obj['results']['mismatch_of_pg']['score'] = mismatch
         rank_data['mismatch_of_pg'].append(value)
