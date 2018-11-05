@@ -18,7 +18,7 @@ from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, P
 from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
 
 from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
-from parlaseje.utils_ import idsOfSession, getSesDates
+from parlaseje.utils_ import idsOfSession, getSesDates, speech_the_order
 from utils.recache import updatePagesS, updateLastActivity, recacheActivities, recacheWBs
 from utils.imports import update, updateDistricts, updateTags, updatePersonStatus, importDraftLegislationsFromFeed
 from utils.votes_outliers import setMotionAnalize, setOutliers
@@ -124,6 +124,9 @@ def onDateMPCardRunner(date_=None):
     When are membersips changed, run this method for update data and page
 """
 def onMembershipChangePGRunner(data, date_=None):
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+
     if date_:
         dateObj = datetime.strptime(date_, API_DATE_FORMAT)
         date_of = dateObj.date()
@@ -697,6 +700,7 @@ def fastUpdate(fast=True, date_=None):
     print s_update
     if s_update:
         print 'recache'
+        speech_the_order()
         updatePagesS(list(set(s_update)))
         requests.get('https://parlameter.si/fetch/sps?t=vkSzv8Nu4eDkLBk7kUw4BBhyLjysJm')
         if not fast:
