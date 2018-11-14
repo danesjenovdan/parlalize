@@ -49,11 +49,11 @@ def lockSetter(function):
 def tryHard(url):
     data = None
     counter = 0
-    while data is None:
+    while not data or data.status_code != 200:
         try:
             if counter > 2:
                 client.captureMessage(url+' je zahinavu več ko 2x.')
-                return
+                return 'ivan'
             data = requests.get(url)
         except:
             counter += 1
@@ -449,8 +449,7 @@ def getAllStaticData(request, force_render=False):
         for ministr in ministrs:
             out['ministrs'][ministr.id] = ministr.getJsonData() 
 
-        working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
-        orgs = Organization.objects.filter(classification__in=working_bodies)
+        orgs = Organization.objects.filter(classification__in=settings.WBS)
         out['wbs'] = [{'id': org.id_parladata,
                        'name': org.name} for org in orgs]
 

@@ -161,14 +161,19 @@ def setMotionAnalize(request, session_id):
                           vote=vote,
                           maximum=oppoInterCalc[vote_id]
                           ).save()
-
-        if coalIntra:
-            coalIntra.update(maximum=coalInterCalc[vote_id])
-        else:
+        if coalInterCalc.empty:
             IntraDisunion(organization=coalition,
                           vote=vote,
-                          maximum=coalInterCalc[vote_id]
+                          maximum=0
                           ).save()
+        else:
+            if coalIntra:
+                coalIntra.update(maximum=coalInterCalc[vote_id])
+            else:
+                IntraDisunion(organization=coalition,
+                              vote=vote,
+                              maximum=coalInterCalc[vote_id]
+                              ).save()
 
         vote.has_outlier_voters = has_outliers
         vote.intra_disunion = allInter[vote_id]

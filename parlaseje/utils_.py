@@ -106,7 +106,7 @@ def set_status_of_laws():
         votes = votes.filter(motion__icontains='glasovanje o zakonu v celoti')
         if votes:
             if votes.count() > 1:
-                print "FAIL"
+                print("FAIL")
                 continue
             vote = votes[0]
             legislation.status = LEGISLATION_STATUS[1][0]
@@ -126,11 +126,11 @@ def set_status_of_akts():
         votes = votes.filter(motion__iregex=r'glasovanje o \w+ v celoti')
         if votes:
             if votes.count() > 1:
-                print "FAIL"
-                print votes.values_list("motion", flat=True)
+                print("FAIL")
+                print(votes.values_list("motion", flat=True))
                 continue
             vote = votes[0]
-            print vote.motion
+            print(vote.motion)
             legislation.status = LEGISLATION_STATUS[1][0]
             if vote.result:
                 legislation.result = LEGISLATION_RESULT[1][0]
@@ -150,7 +150,7 @@ def set_accepted_laws():
 def get_votes_without_legislation():
     v_e = set(list(Vote.objects.all().values_list("epa", flat=True)))
     l_e = list(Legislation.objects.all().values_list("epa", flat=True))
-    print len(list((v_e-set(l_e)))) 
+    print(len(list((v_e-set(l_e)))))
 
 
 def hasLegislationLink(legislation):
@@ -174,7 +174,7 @@ def getMotionClassification(motion):
 def recacheLegislationsOnSession(session_id):
     base_url = GLEJ_URL + '/'
     card_url = base_url + 'c/' + 'zakonodaja/:id?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislationList%2F' + str(session_id) + '&forceRender=true'
-    print card_url
+    print(card_url)
     tryHard(card_url)
     card_url = base_url + 's/' + 'seznam-glasovanj/' + str(session_id) + '?forceRender=true'
     tryHard(card_url)
@@ -189,13 +189,24 @@ def recacheLegislationsOnSession(session_id):
 
 
 def speech_the_order():
+    sessions = Speech.objects.filter(the_order=None).distinct('session').values_list('session_id')
+    for session_id in sessions:
+        speeches_queryset = Speech.getValidSpeeches(datetime.now())
+        speeches = speeches_queryset.filter(session=session_id).order_by("start_time",
+                                                                         "agenda_item_order",
+                                                                         "order")
+        for i, s in enumerate(speeches):
+            s.the_order = i
+            s.save()
+
+
+def speech_the_order_pl():
     sessions = Session.objects.all()
     for session in sessions:
+        print(session.name)
         speeches_queryset = Speech.getValidSpeeches(datetime.now())
         speeches = speeches_queryset.filter(session=session).order_by("start_time",
-                                                                      "agenda_item_order",
                                                                       "order")
-
         for i, s in enumerate(speeches):
             s.the_order = i
             s.save()

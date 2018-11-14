@@ -3,7 +3,7 @@ from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiGe
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
 from parlaposlanci.views import setMinsterStatic
-from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag, Legislation
+from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag, Legislation, AgendaItem, Debate
 from parlaseje.views import setMotionOfSession
 from .exports import exportLegislations
 from django.test.client import RequestFactory
@@ -100,7 +100,8 @@ def updateSpeeches():
                                 end_time=dic['end_time'],
                                 valid_from=dic['valid_from'],
                                 valid_to=dic['valid_to'],
-                                id_parladata=dic['id'])
+                                id_parladata=dic['id'],
+                                debate=Debate.objects.get(id_parladata=dic['debate']))
                 speech.save()
                 speech.person.add(person)
             else:
@@ -109,7 +110,8 @@ def updateSpeeches():
                 speech.update(valid_from=dic['valid_from'],
                               valid_to=dic['valid_to'],
                               agenda_item_order=dic['agenda_item_order'],
-                              organization_id=orgs[str(dic['party'])])
+                              organization_id=orgs[str(dic['party'])],
+                              debate=Debate.objects.get(id_parladata=dic['debate']))
 
     # delete speeches which was deleted in parladata @dirty fix
     #deleteUnconnectedSpeeches()
@@ -155,6 +157,7 @@ def updateQuestions():
                                 recipient_text=dic['recipient_text'],
                                 title=dic['title'],
                                 content_link=link,
+                                type_of_question=dic['type_of_question']
                                 )
             question.save()
             question.author_orgs.add(*author_org)
@@ -186,7 +189,7 @@ def updateQuestions():
                     rec_posts.append(static[0])
             question = Question.objects.get(id_parladata=dic["id"])
             question.save()
-            question.author_org.add(*author_org)
+            question.author_orgs.add(*author_org)
             question.person.add(*person)
             question.recipient_persons.add(*rec_p)
             question.recipient_organizations.add(*rec_org)
@@ -212,19 +215,20 @@ def updateBallots():
     url = (API_URL + '/getAllBallots')
     data = getDataFromPagerApi(url)
     existingISs = Ballot.objects.all().values_list('id_parladata', flat=True)
-    for dic in data:
-        # Ballot.objects.filter(id_parladata=dic['id']):
-        if int(dic['id']) not in existingISs:
-            print 'adding ballot ' + str(dic['vote'])
-            vote = Vote.objects.get(id_parladata=dic['vote'])
-            person = Person.objects.get(id_parladata=int(dic['voter']))
-            ballots = Ballot(option=dic['option'],
-                             vote=vote,
-                             start_time=vote.start_time,
-                             end_time=None,
-                             id_parladata=dic['id'])
-            ballots.save()
-            ballots.person.add(person)
+    for page in getDataFromPagerApiGen(url):
+        for dic in page:
+            # Ballot.objects.filter(id_parladata=dic['id']):
+            if int(dic['id']) not in existingISs:
+                print 'adding ballot ' + str(dic['vote'])
+                vote = Vote.objects.get(id_parladata=dic['vote'])
+                person = Person.objects.get(id_parladata=int(dic['voter']))
+                ballots = Ballot(option=dic['option'],
+                                 vote=vote,
+                                 start_time=vote.start_time,
+                                 end_time=None,
+                                 id_parladata=dic['id'])
+                ballots.save()
+                ballots.person.add(person)
     return 1
 
 
@@ -461,12 +465,6 @@ def updateLegislation(request):
         if act['result']:
             result.result = act['result']
         result.save()
-try:
-    updateLegislation(None)
-except:
-    client.captureException()
-
-
 
 def importDraftLegislationsFromFeed(): 
     def split_epa_and_name(thing, date): 
@@ -536,3 +534,37 @@ def getDataFromPagerApiDRF(url):
         data += response['results']
         url = response['next']
     return data
+
+def importAgendaItems():
+    existingISs = list(AgendaItem.objects.all().values_list('id_parladata',
+                                                            flat=True))
+    data = getDataFromPagerApiDRF(API_URL + '/agenda-items/')
+    for item in data:
+        if int(item['id']) in existingISs:
+            pass
+        else:
+            AgendaItem(
+                session=Session.objects.get(id_parladata=item['session']),
+                title=item['name'],
+                id_parladata=item['id']
+            ).save()
+
+def importDebates():
+    existingISs = list(Debate.objects.all().values_list('id_parladata',
+                                                        flat=True))
+    data = getDataFromPagerApiDRF(API_URL + '/debates/')
+    for item in data:
+        if int(item['id']) in existingISs:
+            # update
+            debate = Debate.objects.get(id_parladata=item['id'])
+            agenda_items = list(AgendaItem.objects.filter(id_parladata__in=item['agenda_item']))
+            debate.agenda_item.add(*agenda_items)
+        else:
+            # add
+            debate = Debate(
+                date=item['date'].split('T')[0],
+                id_parladata=item['id'],
+            )
+            debate.save()
+            agenda_items = list(AgendaItem.objects.filter(id_parladata__in=item['agenda_item']))
+            debate.agenda_item.add(*agenda_items)

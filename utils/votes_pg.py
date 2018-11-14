@@ -7,7 +7,7 @@ import itertools
 from collections import Counter
 from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
-from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi
+from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi, getDataFromPagerApiGen
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -19,8 +19,10 @@ def set_mismatch_of_pg(request, date_=''):
     else:
         f_date = datetime.now()
     url = settings.API_URL + '/getVotesTableExtended/' + date_
-    data = getDataFromPagerApi(url)
-    data = pd.DataFrame(data)
+    data = pd.DataFrame()
+    for page in getDataFromPagerApiGen(url):
+        temp = pd.DataFrame(page)
+        data = data.append(temp, ignore_index=True)
     url = settings.API_URL + '/getMPs/' + date_
     mps = requests.get(url).json()
     members = [mp['id'] for mp in mps]
