@@ -10,7 +10,7 @@ request_with_key = factory.get('?key=' + SETTER_KEY)
 class Command(BaseCommand):
     help = 'Updates MPs\' static data'
 
-    def handle(self, parser):
+    def handle(self, *args, **options):
         memberships = tryHard(API_URL + '/getMembersOfPGsRanges/').json()
         lastObject = {'members': {}}
         self.stdout.write('[info] update MP static')
