@@ -19,6 +19,9 @@ class Command(BaseCommand):
                 if int(dic['id']) not in existingISs:
                     self.stdout.write('Adding speech %s' % str(dic['id']))
                     person = Person.objects.get(id_parladata=int(dic['speaker']))
+                    debate = None
+                    if Debate.objects.filter(id_parladata=dic['debate']).count() > 0:
+                        debate = Debate.objects.get(id_parladata=dic['debate'])
                     speech = Speech(organization=Organization.objects.get(
                                         id_parladata=int(dic['party'])),
                                     content=dic['content'],
@@ -31,17 +34,20 @@ class Command(BaseCommand):
                                     valid_from=dic['valid_from'],
                                     valid_to=dic['valid_to'],
                                     id_parladata=dic['id'],
-                                    debate=Debate.objects.get(id_parladata=dic['debate']))
+                                    debate=debate)
                     speech.save()
                     speech.person.add(person)
                 else:
                     self.stdout.write('Updating speech %s' % str(dic['id']))
                     speech = Speech.objects.filter(id_parladata=dic['id'])
+                    debate = None
+                    if Debate.objects.filter(id_parladata=dic['debate']).count() > 0:
+                        debate = Debate.objects.get(id_parladata=dic['debate'])
                     speech.update(valid_from=dic['valid_from'],
                                   valid_to=dic['valid_to'],
                                   agenda_item_order=dic['agenda_item_order'],
                                   organization_id=orgs[str(dic['party'])],
-                                  debate=Debate.objects.get(id_parladata=dic['debate']))
+                                  debate=debate)
 
         # delete speeches which was deleted in parladata @dirty fix
         #deleteUnconnectedSpeeches()
