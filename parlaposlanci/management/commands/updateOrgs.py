@@ -17,7 +17,6 @@ class Command(BaseCommand):
                 org.classification = data[pg]['classification']
                 org.acronym = data[pg]['acronym']
                 org.is_coalition = data[pg]['is_coalition']
-                print data[pg]['acronym']
                 org.save()
             else:
                 self.stdout.write('Adding organisation %s' % str(pg))
