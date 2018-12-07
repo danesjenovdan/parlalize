@@ -7,8 +7,10 @@ class Command(BaseCommand):
     help = 'Updates people from Parladata'
 
     def handle(self, *args, **options):
+        self.stdout.write('Fetching data from %s/getAllPeople/' % API_URL)
         url = API_URL + '/getAllPeople/'
         data = getDataFromPagerApi(url)
+        self.stdout.write('Fetching data from %s/getMPs/' % API_URL)
         mps = tryHard(API_URL + '/getMPs/').json()
         mps_ids = [mp['id'] for mp in mps]
         for mp in data:
