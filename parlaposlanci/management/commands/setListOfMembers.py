@@ -19,6 +19,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        start_date = datetime.strptime(options['date'], '%Y-%m-%dT%X')
+        start_date = datetime.strptime(options['date'][0], '%Y-%m-%dT%X')
         start_date = start_date - timedelta(days=1)
         setListOfMembersTickers(request_with_key, start_date.strftime(API_DATE_FORMAT))
