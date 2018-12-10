@@ -14,7 +14,12 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        if options['date']:
+            date_ = options['date']
+        else:
+            date_ = datetime.now().date().strftime(API_DATE_FORMAT)
+
         # TODO refactor votes_pg.py to stop accepting request as an argument
-        set_mismatch_of_pg(None, options['date'])
+        set_mismatch_of_pg(None, date_)
 
         return 0
