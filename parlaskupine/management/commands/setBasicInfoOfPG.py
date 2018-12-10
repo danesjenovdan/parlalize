@@ -77,7 +77,7 @@ class Command(BaseCommand):
             if options['date']:
                 date_ = options['date']
             else:
-                date_ datetime.now().date().strftime(API_DATE_FORMAT)
+                date_ = datetime.now().date().strftime(API_DATE_FORMAT)
             self.stdout.write('Trying hard for %s/getMembersOfPGsOnDate/%s' % (API_URL, str(options['date'])))
             membersOfPGsRanges = tryHard(API_URL + '/getMembersOfPGsRanges/' + str(options['date'])).json()
             pgs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if value]
