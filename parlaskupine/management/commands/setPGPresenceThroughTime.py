@@ -28,8 +28,8 @@ def setPGPresenceThroughTime(commander, pg, date):
     commander.stdout.write('Saving presence for organization %s' % str(pg))
     saveOrAbortNew(model=PresenceThroughTime,
                            organization=org,
-                           created_for=date,
-                           data=data_for_save)
+                           created_for=date_of,
+                          data=data_for_save)
 
     return
 
