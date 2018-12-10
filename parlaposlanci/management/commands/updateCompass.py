@@ -1,23 +1,28 @@
 from django.core.management.base import BaseCommand, CommandError
-from parlaposlanci.models import Person, AverageNumberOfSpeechesPerSession
-from parlalize.utils_ import saveOrAbortNew, tryHard
 from utils.compass import getData as getCompassData
+from parlaposlanci.models import Compass
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, API_URL
+from parlalize.settings import API_DATE_FORMAT
 
 
 class Command(BaseCommand):
     help = 'Updates compas'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--date',
+            nargs=1,
+            help='PG parladata_ids',
+        )
+
     def handle(self, *args, **options):
-        if date_:
-            date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        if options['date']:
+            date_of = datetime.strptime(options['date'], API_DATE_FORMAT).date()
         else:
             date_of = datetime.now().date()
-            date_ = date_of.strftime(API_DATE_FORMAT)
         data = getCompassData(date_of)
         if data == []:
-            commander.stdout.write('No data for compass')
+            self.stdout.write('No data for compass')
             return
         #print data
         existing_compas = Compass.objects.filter(created_for=date_of)
@@ -27,5 +32,5 @@ class Command(BaseCommand):
         else:
             Compass(created_for=date_of,
                     data=data).save()
-        commander.stdout.write('Compass was set.')
+        self.stdout.write('Compass was set.')
         return 0
