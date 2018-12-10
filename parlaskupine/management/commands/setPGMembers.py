@@ -49,7 +49,7 @@ class Command(BaseCommand):
             pgs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if value]
 
         for pg in pgs:
-            self.stdout.write('About to set MPS of %s' % str(pg_id))
+            self.stdout.write('About to set MPS of %s' % str(pg))
             setMPsOfPG(self, pg)
 
         return 0
