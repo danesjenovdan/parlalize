@@ -23,10 +23,11 @@ def setPGMismatch(commander, pg_id, date=None):
     for member in memsOfPGs[str(pg_id)]:
         try:
             mismatch = getPersonCardModelNew(MismatchOfPG, int(member), date)
-        except:
-            pass
-        data.append({'id': member,
+            data.append({'id': member,
                      'ratio': mismatch.data})
+        except:
+            commander.stderr.write('No MismatchOfPG card for person %s' % str(member))
+            pass
     
     saveOrAbortNew(model=PGMismatch,
                   organization=org,
