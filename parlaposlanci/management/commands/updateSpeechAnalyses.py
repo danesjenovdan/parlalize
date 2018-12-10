@@ -2,6 +2,8 @@ from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, VocabularySize, VocabularySizeUniqueWords, SpokenWords
 from parlalize.utils_ import saveOrAbortNew
 from utils.speech import WordAnalysis
+from datetime import datetime
+from parlalize.settings import API_DATE_FORMAT
 
 
 class Command(BaseCommand):
@@ -22,8 +24,9 @@ class Command(BaseCommand):
         date_of = sw.getDate()
         maxMP = Person.objects.get(id_parladata=maxMPid)
 
-        commander.stdout.write('[INFO] saving vocabulary size')
+        self.stdout.write('[INFO] saving vocabulary size')
         for p in all_score:
+            self.stdout.write('[INFO] saving vocabulary size for person %s' % str(p['counter_id']))
             saveOrAbortNew(model=VocabularySize,
                            person=Person.objects.get(id_parladata=int(p['counter_id'])),
                            created_for=date_of,
@@ -39,8 +42,9 @@ class Command(BaseCommand):
         date_of = sw.getDate()
         maxMP = Person.objects.get(id_parladata=maxMPid)
 
-        commander.stdout.write('[INFO] saving unique words')
+        self.stdout.write('[INFO] saving unique words')
         for p in all_score:
+            self.stdout.write('[INFO] saving unique words for person %s' % str(p['counter_id']))
             saveOrAbortNew(model=VocabularySizeUniqueWords,
                            person=Person.objects.get(id_parladata=int(p['counter_id'])),
                            created_for=date_of,
@@ -56,8 +60,9 @@ class Command(BaseCommand):
         date_of = sw.getDate()
         maxMP = Person.objects.get(id_parladata=maxWordsMPid)
 
-        commander.stdout.write('[INFO] saving spoken words')
+        self.stdout.write('[INFO] saving spoken words')
         for p in all_words:
+            self.stdout.write('[INFO] saving spoken words for person %s' % str(p['counter_id']))
             saveOrAbortNew(model=SpokenWords,
                            created_for=date_of,
                            person=Person.objects.get(id_parladata=int(p['counter_id'])),
@@ -66,6 +71,6 @@ class Command(BaseCommand):
                            average=avgSpokenWords,
                            maximum=max_words)
 
-        commander.stdout.write('All MPs updated')
+        self.stdout.write('[INFO] All MPs updated')
 
         return 0
