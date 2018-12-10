@@ -1,15 +1,12 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
-from django.test.client import RequestFactory
 from parlaposlanci.models import Person, MPStaticPL, MPStaticGroup
 from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew
 from datetime import datetime
 from django.utils import dateparse
-from parlalize.settings import API_URL, SETTER_KEY, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT
 
-factory = RequestFactory()
-request_with_key = factory.get('?key=' + SETTER_KEY)
 
 def setMPStaticPL(commander, person_id, date_=None):
     if date_:
