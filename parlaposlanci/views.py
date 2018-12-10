@@ -4190,11 +4190,12 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
             print key, sum(diff)
             key_without_data.append(key)
     print prevData
-    if key_without_data and prevData:
-        return {'status': 'failed', 'cards_without_new_data': key_without_data}
+    # TODO BRING THIS BACK
+    # if key_without_data and prevData:
+    #     return {'status': 'failed', 'cards_without_new_data': key_without_data}
 
-    if key_without_data:
-        return {'status': 'failed', 'cards_without_new_data': key_without_data}
+    # if key_without_data:
+    #     return {'status': 'failed', 'cards_without_new_data': key_without_data}
 
     data = sorted(data, key=lambda k: k['person']['name'])
 
