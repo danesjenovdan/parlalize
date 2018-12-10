@@ -42,12 +42,11 @@ class Command(BaseCommand):
         pgs = []
 
         if options['pgs']:
-            if len(options['pgs']) > 0:
-                pgs = options['pgs']
-            else:
-                self.stdout.write('Trying hard for %s/getMembersOfPGsOnDate/%s' % (API_URL, str(date_of)))
-                membersOfPGsRanges = tryHard(API_URL + '/getMembersOfPGsRanges/' + date_).json()
-                pgs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if value]
+            pgs = options['pgs']
+        else:
+            self.stdout.write('Trying hard for %s/getMembersOfPGsOnDate/%s' % (API_URL, str(date_of)))
+            membersOfPGsRanges = tryHard(API_URL + '/getMembersOfPGsRanges/' + date_).json()
+            pgs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if value]
 
         for pg in pgs:
             self.stdout.write('About to set MPS of %s' % str(pg_id))
