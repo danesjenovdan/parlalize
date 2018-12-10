@@ -465,12 +465,6 @@ def updateLegislation(request):
         if act['result']:
             result.result = act['result']
         result.save()
-try:
-    updateLegislation(None)
-except:
-    client.captureException()
-
-
 
 def importDraftLegislationsFromFeed(): 
     def split_epa_and_name(thing, date): 
