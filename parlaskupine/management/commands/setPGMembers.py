@@ -10,7 +10,7 @@ def setMPsOfPG(commander, pg_id, date_=None):
         commander.stdout.write('Setting for date %s' % str(date_of))
     else:
         date_of = datetime.now().date()
-        date_ = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
         commander.stdout.write('Setting for today (%s)' % str(date_of))
 
     commander.stdout.write('Trying hard for %s/getMembersOfPGsOnDate/%s' % (API_URL, str(date_of)))
@@ -37,7 +37,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         date_of = datetime.now().date()
-        date_ = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
 
         pgs = []
 
