@@ -26,7 +26,8 @@ def setMPStaticPL(commander, person_id, date_=None):
         commander.stderr.write('Didn\'t get data.')
         raise CommandError('No data returned.')
 
-    wbfs = data['working_bodies_functions']
+    if 'error' in data.keys():
+        commander.stderr.write('[API ERROR] %s' % data['error'])
 
     result = saveOrAbortNew(model=MPStaticPL,
                             created_for=date_of,
@@ -48,7 +49,7 @@ def setMPStaticPL(commander, person_id, date_=None):
                             acronym=data['acronym'],
                             gov_id=data['gov_id'],
                             gender=data['gender'],
-                            working_bodies_functions=wbfs)
+                            working_bodies_functions=data['working_bodies_functions'])
 
     if result:
         for group in data['groups']:
