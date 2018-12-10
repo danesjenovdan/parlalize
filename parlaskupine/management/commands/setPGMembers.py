@@ -39,6 +39,8 @@ class Command(BaseCommand):
         date_of = datetime.now().date()
         date_ = datetime.now().date()
 
+        pgs = []
+
         if options['pgs']:
             if len(options['pgs']) > 0:
                 pgs = options['pgs']
