@@ -14,16 +14,17 @@ request_with_key = factory.get('?key=' + SETTER_KEY)
 def setMPStaticPL(commander, person_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        commander.stdout.write('Fetching data from %s/getMPStatic/ with date' % API_URL)
+        commander.stdout.write('Fetching data from %s/getMPStatic/%s/%s with date' % (API_URL, str(person_id), str(date_)))
         data = tryHard(API_URL + '/getMPStatic/' + person_id + "/" + date_).json()
     else:
         date_of = datetime.now().date()
-        commander.stdout.write('Fetching data from %s/getMPStatic/ with today' % API_URL)
+        commander.stdout.write('Fetching data from %s/getMPStatic/%s/%s with today' % (API_URL, str(person_id), str(date_)))
         data = tryHard(API_URL + '/getMPStatic/' + person_id).json()
 
     person = Person.objects.get(id_parladata=int(person_id))
     if not data:
         commander.stderr.write('Didn\'t get data.')
+        raise CommandError('No data returned.')
 
     wbfs = data['working_bodies_functions']
 
