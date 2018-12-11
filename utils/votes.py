@@ -253,6 +253,7 @@ class VotesAnalysis(object):
             org = Organization.objects.get(id_parladata=int(pg))
             r = results[pg]
             r = r.reset_index().sort_values(pg, ascending=False)
+            # TODO notify someone if this fails
             thisPG = r[r.voter.isin(self.memsOfPGs[str(pg)])]
             otherMembers = [m
                             for pg_key
