@@ -1,3 +1,4 @@
+# TODO needs testing
 from django.core.management.base import BaseCommand, CommandError
 
 from parlaposlanci.models import Person, NumberOfQuestions

@@ -1,4 +1,3 @@
-
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaseje.models import Debate, AgendaItem
