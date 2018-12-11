@@ -45,7 +45,7 @@ class Command(BaseCommand):
         self.stdout.write('Trying hard for %s/getMPs/%s' % (API_URL, str(date_)))
         mps = tryHard(API_URL+'/getMPs/' + date_).json()
         for mp in mps:
-            self.stdout.write('Running setMembershipsOfMember on %s' % str(mp['id_parladata']))
-            setMembershipsOfMember(self, str(mp['id_parladata']), date_)
+            self.stdout.write('Running setMembershipsOfMember on %s' % str(mp['id']))
+            setMembershipsOfMember(self, str(mp['id']), date_)
 
         return 0
