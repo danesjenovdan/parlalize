@@ -5,6 +5,10 @@ from parlaskupine.models import Organization
 from parlaseje.models import Session, Speech, Debate
 from parlalize.settings import API_URL
 
+# TODO MAKE ME INTERNATIONAL
+def get_the_order(speech_id):
+    return speech_id
+
 class Command(BaseCommand):
     help = 'Updates people from Parladata'
 
@@ -26,6 +30,7 @@ class Command(BaseCommand):
                                         id_parladata=int(dic['party'])),
                                     content=dic['content'],
                                     order=dic['order'],
+                                    the_order=get_the_order(dic['order']),
                                     agenda_item_order=dic['agenda_item_order'],
                                     session=Session.objects.get(
                                         id_parladata=int(dic['session'])),
