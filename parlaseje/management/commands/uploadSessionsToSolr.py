@@ -50,7 +50,7 @@ class Command(BaseCommand):
                 'org_i': session.organization.id,
                 'datetime_dt': session.start_time.isoformat(),
                 'content_t': getSessionContent(session),
-                'sklic_t': 'VII',
+                'sklic_t': 'VIII',
                 'tip_t': 'seja'
             }]
 
@@ -60,5 +60,6 @@ class Command(BaseCommand):
             r = requests.post(url,
                               data=output,
                               headers={'Content-Type': 'application/json'})
+            self.stdout.write(str(r.content))
 
         return 0
