@@ -1,3 +1,5 @@
+# TODO needs more output when calculating
+
 import json
 
 from collections import Counter
