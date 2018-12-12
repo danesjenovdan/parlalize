@@ -38,14 +38,15 @@ class Command(BaseCommand):
 
         for session_id in ses_ids:
             self.stdout.write('About to begin with session %s' % str(session_id))
-            session = Session.objects.filter(id=session_id)
+            session = Session.objects.filter(id_parladata=session_id)
             if not session:
-                self.stdout.write('Session with id %s does not exists' % str(session_id))
+                self.stdout.write('Session with id %s does not exist' % str(session_id))
+                return
             else:
                 session = session[0]
 
             output = [{
-                'id': 's' + str(session.id),
+                'id': 's' + str(session.id_parladata),
                 'org_i': session.organization.id,
                 'datetime_dt': session.start_time.isoformat(),
                 'content_t': getSessionContent(session),

@@ -40,7 +40,7 @@ class Command(BaseCommand):
                 'content_t': speech.content,
                 'tip_t': 'govor',
                 'the_order': speech.the_order,
-                'person': static_data['persons'][str(speech.speaker.id_parladata)]
+                'person': static_data['persons'][str(speech.person.id_parladata)]
             }]
 
             output = json.dumps(output)

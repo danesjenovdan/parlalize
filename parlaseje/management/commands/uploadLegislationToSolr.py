@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.html import strip_tags
 from parlalize.utils_ import tryHard
