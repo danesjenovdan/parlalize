@@ -27,7 +27,7 @@ class Command(BaseCommand):
 
         i = 0
 
-        self.stdout.write('Getting all staic data')
+        self.stdout.write('Getting all static data')
         static_data = json.loads(getAllStaticData(None).content)
         for speech in speeches.exclude(id__in=idsInSolr):
             output = [{
@@ -40,7 +40,7 @@ class Command(BaseCommand):
                 'content_t': speech.content,
                 'tip_t': 'govor',
                 'the_order': speech.the_order,
-                'person': static_data['persons'][str(speech.person.id_parladata)]
+                'person': static_data['persons'][str(speech.person.first().id_parladata)]
             }]
 
             output = json.dumps(output)
