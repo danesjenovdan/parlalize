@@ -52,6 +52,7 @@ class Command(BaseCommand):
                                   valid_to=dic['valid_to'],
                                   agenda_item_order=dic['agenda_item_order'],
                                   organization_id=orgs[str(dic['party'])],
+                                  the_order=get_the_order(dic['order']),
                                   debate=debate)
 
         # delete speeches which was deleted in parladata @dirty fix
