@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from parlaseje.models import Session, Tfidf
 from parlalize.utils_ import saveOrAbortNew
 from datetime import datetime
+from parlalize.settings import SOLR_URL
 
 import requests
 import json
