@@ -154,11 +154,23 @@ def setMotionOfSession(commander, session_id):
 class Command(BaseCommand):
     help = 'Update motion of session - what?'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--session_ids',
+            nargs='+',
+            help='IDs of session to run this for',
+        )
+
     def handle(self, *args, **options):
-      ses = Session.objects.all()
-      for s in ses:
-          self.stdout.write('Updating session %s' % str(s.id_parladata))
-          status = setMotionOfSession(self, str(s.id_parladata))
-          self.stdout.write('setMotionOfSession returned %s' % str(status))
-      
-      return 0
+        session_ids = []
+        if options['session_ids']:
+            session_ids = options['session_ids']
+        else:
+            session_ids = Session.objects.all().values_list('id_parladata', flat=True)
+        
+        for s in session_ids:
+            self.stdout.write('Updating session %s' % str(s.id_parladata))
+            status = setMotionOfSession(self, str(s))
+            self.stdout.write('setMotionOfSession returned %s' % str(status))
+        
+        return 0
