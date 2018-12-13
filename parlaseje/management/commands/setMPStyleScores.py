@@ -25,21 +25,25 @@ def getCountList(speaker_id, date_):
 
     results = []
 
-    for i, term in enumerate(data['termVectors'][1][3]):
-        if i % 2 == 0:
+    try:
+        for i, term in enumerate(data['termVectors'][1][3]):
+            if i % 2 == 0:
 
-            tkey = data['termVectors'][1][3][i]
-            tvalue = data['termVectors'][1][3][i + 1]
+                tkey = data['termVectors'][1][3][i]
+                tvalue = data['termVectors'][1][3][i + 1]
 
-            results.append({'term': tkey,
-                            'scores': {tvalue[0]: tvalue[1],
-                                       tvalue[2]: tvalue[3],
-                                       tvalue[4]: tvalue[5]}})
-            del data['termVectors'][1][3][i]
-        else:
-            del data['termVectors'][1][3][i]
+                results.append({'term': tkey,
+                                'scores': {tvalue[0]: tvalue[1],
+                                        tvalue[2]: tvalue[3],
+                                        tvalue[4]: tvalue[5]}})
+                del data['termVectors'][1][3][i]
+            else:
+                del data['termVectors'][1][3][i]
 
-    wordlist = {word["term"]: word["scores"]["tf"] for word in results}
+        wordlist = {word["term"]: word["scores"]["tf"] for word in results}
+    except IndexError:
+        commander.stderr.write('No data for this person, saving empty object.')
+        wordlist = {}
 
     return wordlist
 
