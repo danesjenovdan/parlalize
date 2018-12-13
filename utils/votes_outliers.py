@@ -39,6 +39,7 @@ def setOutliers():
 
     return 'finished'
 
+# TODO remove request
 def setMotionAnalize(request, session_id):
     """
     request argument is here just because runner put 2 arguments in setter

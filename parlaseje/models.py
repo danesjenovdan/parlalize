@@ -560,8 +560,7 @@ class Legislation(Timestampable, models.Model):
                                        null=True,
                                        help_text=_('id parladata'))
 
-    proposer_text = models.CharField(blank=True, null=True,
-                                     max_length=255,
+    proposer_text = models.TextField(blank=True, null=True,
                                      help_text='Proposer of law')
 
     procedure_phase = models.CharField(blank=True, null=True,
