@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from parlaposlanci.models import Person, StyleScores
+from parlaskupine.models import Organization, StyleScores
 from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData
 from datetime import datetime
 from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
@@ -11,17 +11,18 @@ import requests
 import json
 
 
-def getCountList(commander, speaker_id, date_):
+def getCountList(commander, pg_id, date_):
     """
-    speaker_id: id of speaker
+    pg_id: id of the organization
     date_: date of analysis
 
     method return term frequency for each word spoken by speaker
     """
     data = None
 
+    commander.stdout.write('Trying hard for %s/tvrh/?q=id:pg%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content_t' % (SOLR_URL, str(pg_id)))
     data = tryHard(
-        '%s/tvrh/?q=id:p%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content_t' % (SOLR_URL, str(speaker_id))).json()
+        '%s/tvrh/?q=id:pg%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content_t' % (SOLR_URL, str(pg_id))).json()
 
     results = []
 
@@ -42,7 +43,7 @@ def getCountList(commander, speaker_id, date_):
 
         wordlist = {word["term"]: word["scores"]["tf"] for word in results}
     except IndexError:
-        commander.stderr.write('No data for this person, saving empty object.')
+        commander.stderr.write('No data for this organization, saving empty object.')
         wordlist = {}
 
     return wordlist
@@ -81,34 +82,37 @@ def getScores(words_list, counter, total):
 
 
 class Command(BaseCommand):
-    help = 'Sets style scores for all MPs'
+    help = 'Updates PresenceThroughTime'
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--date',
-            nargs=1,
-            help='Speaker parladata_id'
+            '--organization_ids',
+            nargs='+',
+            help='Organization parladata_id',
+            type=int,
         )
 
     def handle(self, *args, **options):
-        if options['date']:
-            date_ = options['date']
-            date_of = datetime.strptime(API_DATE_FORMAT).date()
-        else:
-            date_of = datetime.now().date()
-            date_ = date_of.strftime(API_DATE_FORMAT)
+        date_of = datetime.now().date()
+        date_ = date_of.strftime(API_DATE_FORMAT)
 
-        self.stdout.write('About to try hard with %s/getMPS/%s' %
-                          (API_URL, date_))
-        mps = tryHard(API_URL+'/getMPs/'+date_).json()
+        organization_ids = []
+        if options['organization_ids']:
+            organization_ids = options['organization_ids']
+        else:
+            self.stdout.write(
+                'Trying hard with %s/getMembersOfPGsRanges/' % API_URL)
+            url = API_URL + '/getMembersOfPGsRanges/' + date_
+            membersOfPGsRanges = tryHard(url).json()
+            organization_ids = [
+                key for key, value in membersOfPGsRanges[-1]['members'].items()]
 
         scores = {}
-        for mp in mps:
-            person_id = mp['id']
+        for organization_id in organization_ids:
 
-            self.stdout.write('MP id: %s' % str(person_id))
+            self.stdout.write('Org id: %s' % str(organization_id))
             # get word counts with solr
-            counter = Counter(getCountList(self, int(person_id), date_))
+            counter = Counter(getCountList(self, int(organization_id), date_))
             total = sum(counter.values())
 
             scores_local = getScores([problematicno, privzdignjeno, preprosto],
@@ -117,7 +121,7 @@ class Command(BaseCommand):
 
             self.stdout.write('Outputting scores_local: %s' %
                               str(scores_local))
-            scores[person_id] = scores_local
+            scores[organization_id] = scores_local
 
         self.stdout.write('Outputting scores: %s' % str(scores))
         average = {"problematicno": sum([score['problematicno']
@@ -130,8 +134,8 @@ class Command(BaseCommand):
                                      for score
                                      in scores.values()])/len(scores)}
         data = []
-        for person, score in scores.items():
-            data.append({'member': person,
+        for org_id, score in scores.items():
+            data.append({'org': org_id,
                          'problematicno': score['problematicno'],
                          'privzdignjeno': score['privzdignjeno'],
                          'preprosto': score['preprosto'],
@@ -142,8 +146,8 @@ class Command(BaseCommand):
         for score in data:
             self.stdout.write('About to save %s' % str(score))
             status = saveOrAbortNew(StyleScores,
-                                    person=Person.objects.get(
-                                        id_parladata=int(score["member"])),
+                                    organization=Organization.objects.get(
+                                        id_parladata=int(score['org'])),
                                     created_for=date_of,
                                     problematicno=float(
                                         score['problematicno']),
