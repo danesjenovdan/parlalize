@@ -169,7 +169,7 @@ class Command(BaseCommand):
             session_ids = Session.objects.all().values_list('id_parladata', flat=True)
         
         for s in session_ids:
-            self.stdout.write('Updating session %s' % str(s.id_parladata))
+            self.stdout.write('Updating session %s' % str(s))
             status = setMotionOfSession(self, str(s))
             self.stdout.write('setMotionOfSession returned %s' % str(status))
         
