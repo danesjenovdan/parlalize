@@ -2,11 +2,12 @@ from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person
 from parlaseje.models import Session, Legislation, Vote, AgendaItem, AmendmentOfOrg
 from parlaskupine.models import Organization
-from parlaseje.utils_ import getMotionClassification, finish_legislation_by_final_vote
+from parlaseje.utils_ import getMotionClassification
 from parlalize.settings import API_URL, DZ, SETTER_KEY, YES, AGAINST, ABSTAIN, NOT_PRESENT
 from parlalize.utils_ import tryHard, saveOrAbortNew
 from utils.votes_outliers import setMotionAnalize
 from utils.delete_renders import deleteRendersOfSessionVotes
+from utils.legislations import finish_legislation_by_final_vote
 from django.test.client import RequestFactory
 
 factory = RequestFactory()
