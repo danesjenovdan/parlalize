@@ -191,7 +191,7 @@ def onDatePGCardRunner(date_=None):
         date_ = date_of.strftime(API_DATE_FORMAT)
     print date_
     set_mismatch_of_pg(None)
-    votez = VotesAnalysis(date_of)
+    votez = VotesAnalysis(date_of) # TODO
     votez.setAll()
     setters = [
         setMPsOfPG,

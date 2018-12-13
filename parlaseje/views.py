@@ -793,30 +793,34 @@ def getMotionOfSession(request, session_id, date=False):
         if cards:
             dates = []
             for card in cards:
-                if card.result == None:
+                if card.result != None:
+                    has_votes = bool(card.vote.all())
+                    out.append({'session': sessionData,
+                                'results': {'motion_id': card.id_parladata,
+                                            'text': card.motion,
+                                            'for': card.votes_for,
+                                            'against': card.against,
+                                            'abstain': card.abstain,
+                                            'absent': card.not_present,
+                                            'result': card.result,
+                                            'epa': card.epa if card.epa else None,
+                                            'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. card.is_outlier,
+                                            'tags': card.tags,
+                                            'has_outliers': card.has_outlier_voters,
+                                            'classification': card.classification,
+                                            'has_votes': has_votes,
+                                            'agenda_items': [ai.title for ai in card.agenda_item.all()],
+                                            }
+                                })
+                    cats.append(card.classification)
+                    dates.append(card.created_at)
+                else:
                     continue
-
-                has_votes = bool(card.vote.all())
-                out.append({'session': sessionData,
-                            'results': {'motion_id': card.id_parladata,
-                                        'text': card.motion,
-                                        'for': card.votes_for,
-                                        'against': card.against,
-                                        'abstain': card.abstain,
-                                        'absent': card.not_present,
-                                        'result': card.result,
-                                        'epa': card.epa if card.epa else None,
-                                        'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. card.is_outlier,
-                                        'tags': card.tags,
-                                        'has_outliers': card.has_outlier_voters,
-                                        'classification': card.classification,
-                                        'has_votes': has_votes,
-                                        'agenda_items': [ai.title for ai in card.agenda_item.all()],
-                                        }
-                            })
-                cats.append(card.classification)
-                dates.append(card.created_at)
-            created_at = max(dates).strftime(API_DATE_FORMAT)
+            if len(dates) > 0:
+                # TODO this if was added because dates is sometimes an empty list which breaks max()I
+                created_at = max(dates).strftime(API_DATE_FORMAT)
+            else:
+                created_at = datetime.now().date().strftime(API_DATE_FORMAT)
         else:
             out = []
         ses_date = session.start_time.strftime(API_DATE_FORMAT)
