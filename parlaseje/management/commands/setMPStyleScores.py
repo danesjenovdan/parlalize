@@ -21,7 +21,7 @@ def getCountList(speaker_id, date_):
     data = None
 
     data = tryHard(
-        '%s/tvrh/?q=id:p36&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content_t' % SOLR_URL).json()
+        '%s/tvrh/?q=id:p%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content_t' % (SOLR_URL, str(speaker_id))).json()
 
     results = []
 
