@@ -76,7 +76,7 @@ def setMotionOfSession(commander, session_id):
         agendaItems = list(AgendaItem.objects.filter(id_parladata__in=mot['agenda_item_ids']))
 
         if vote:
-            commander.stdout.write('Updating vote %s' % str(mot['vode_id']))
+            commander.stdout.write('Updating vote %s' % str(mot['vote_id']))
             prev_result = vote[0].result
             vote.update(created_for=session.start_time,
                         start_time=mot['start_time'],
@@ -105,7 +105,7 @@ def setMotionOfSession(commander, session_id):
                 commander.stdout.write('Running finish_legislation_by_final_vote(vote[0])')
                 finish_legislation_by_final_vote(vote[0])
         else:
-            commander.stdout.write('Saving new vote %s' % str(mot['vode_id']))
+            commander.stdout.write('Saving new vote %s' % str(mot['vote_id']))
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
                                     start_time=mot['start_time'],
