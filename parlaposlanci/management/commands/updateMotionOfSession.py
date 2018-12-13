@@ -158,6 +158,6 @@ class Command(BaseCommand):
       for s in ses:
           self.stdout.write('Updating session %s' % str(s.id_parladata))
           status = setMotionOfSession(self, str(s.id_parladata))
-          self.stdout.write('setMotionOfSession returned %s' str(status))
+          self.stdout.write('setMotionOfSession returned %s' % str(status))
       
       return 0
