@@ -14,7 +14,7 @@ import json
 def getPGMegastring(org):
 
     megastring = u''
-    speeches = Speech.getValidSpeeches(datetime.now()).filter(person__organisation=org)
+    speeches = Speech.getValidSpeeches(datetime.now()).filter(person__organisation__id_parladata=org.id_parladata)
     for speech in speeches:
         megastring = megastring + ' ' + speech.content
 
