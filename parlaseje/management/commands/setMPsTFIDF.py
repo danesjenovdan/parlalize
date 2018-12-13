@@ -79,7 +79,7 @@ def setTfidfOfMP(commander, mp_id):
     except IndexError:
         commander.stderr.write('No data for this person, saving empty array.')
         date_of = datetime.now().date()
-        person = Person.objects.get(id_parladata=output['person']['id'])
+        person = Person.objects.get(id_parladata=mp_id)
         saveOrAbortNew(Tfidf,
                        person=person,
                        created_for=date_of,
