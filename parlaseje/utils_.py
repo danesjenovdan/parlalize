@@ -173,7 +173,7 @@ def getMotionClassification(motion):
 
 def recacheLegislationsOnSession(session_id):
     base_url = GLEJ_URL + '/'
-    card_url = base_url + 'c/' + 'zakonodaja/:id?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislationList%2F' + str(session_id) + '&forceRender=true'
+    card_url = base_url + 'c/' + 'zakonodaja/?customUrl=http%3A%2F%2Fanalize.parlameter.si%2Fv1%2Fs%2FgetLegislationList%2F' + str(session_id) + '&forceRender=true'
     print(card_url)
     tryHard(card_url)
     card_url = base_url + 's/' + 'seznam-glasovanj/' + str(session_id) + '?forceRender=true'
