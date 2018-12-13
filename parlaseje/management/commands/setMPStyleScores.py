@@ -11,7 +11,7 @@ import requests
 import json
 
 
-def getCountList(speaker_id, date_):
+def getCountList(commander, speaker_id, date_):
     """
     speaker_id: id of speaker
     date_: date of analysis
@@ -108,7 +108,7 @@ class Command(BaseCommand):
 
             self.stdout.write('MP id: %s' % str(person_id))
             # get word counts with solr
-            counter = Counter(getCountList(int(person_id), date_))
+            counter = Counter(getCountList(self, int(person_id), date_))
             total = sum(counter.values())
 
             scores_local = getScores([problematicno, privzdignjeno, preprosto],
