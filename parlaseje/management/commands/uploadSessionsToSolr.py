@@ -13,7 +13,7 @@ def getSessionContent(session):
 
     megastring = u''
     speeches = Speech.getValidSpeeches(datetime.now()).filter(session=session)
-    for speech in speeches:
+    for i, speech in enumerate(speeches):
         megastring = megastring + ' ' + speech.content
 
     return megastring

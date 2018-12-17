@@ -8,22 +8,25 @@ from parlalize.settings import SOLR_URL
 import requests
 import json
 
+
 class Command(BaseCommand):
-    help = 'Updates PresenceThroughTime'
+    help = 'Uploads speeches to SOLR'
 
     def handle(self, *args, **options):
         # get all valid speeches
         speeches = Speech.getValidSpeeches(datetime.now())
 
         # get all ids from solr
-        self.stdout.write('Getting all IDs from %s/select?wt=json&q=id:*&fl=id&rows=100000000' % SOLR_URL)
-        a = requests.get(SOLR_URL + '/select?wt=json&q=id:*&fl=id&rows=100000000')
+        self.stdout.write(
+            'Getting all IDs from %s/select?wt=json&q=id:g*&fl=id&rows=100000000' % SOLR_URL)
+        a = requests.get(
+            SOLR_URL + '/select?wt=json&q=id:*&fl=id&rows=100000000')
         indexes = a.json()['response']['docs']
 
         # find ids of speeches and remove g from begining of id string
-        idsInSolr = [int(line["id"].replace('g', ''))
-                    for line
-                    in indexes if "g" in line["id"]]
+        idsInSolr = [int(line['id'].replace('g', ''))
+                     for line
+                     in indexes if 'g' in line['id']]
 
         i = 0
 
@@ -47,16 +50,16 @@ class Command(BaseCommand):
 
             if i % 100 == 0:
                 url = SOLR_URL + '/update?commit=true'
-                self.stdout.write('About to commit another 100 speeches to %s/update?commit=true' % SOLR_URL)
+                self.stdout.write(
+                    'About to commit another 100 speeches to %s/update?commit=true' % SOLR_URL)
                 requests.post(url,
                               data=output,
                               headers={'Content-Type': 'application/json'})
 
-
             else:
                 requests.post(SOLR_URL + '/update',
-                                  data=output,
-                                  headers={'Content-Type': 'application/json'})
+                              data=output,
+                              headers={'Content-Type': 'application/json'})
 
             i += 1
 
