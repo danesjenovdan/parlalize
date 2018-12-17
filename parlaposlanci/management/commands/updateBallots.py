@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaseje.models import Ballot, Vote
 from parlaposlanci.models import Person
-from parlalize.settings import API_URL, DZ, SETTER_KEY
+from parlalize.settings import API_URL, SETTER_KEY
 from django.test.client import RequestFactory
 from parlalize.utils_ import getDataFromPagerApi, getDataFromPagerApiGen
 
