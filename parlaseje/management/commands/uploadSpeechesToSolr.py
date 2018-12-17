@@ -20,7 +20,7 @@ class Command(BaseCommand):
         self.stdout.write(
             'Getting all IDs from %s/select?wt=json&q=id:g*&fl=id&rows=100000000' % SOLR_URL)
         a = requests.get(
-            SOLR_URL + '/select?wt=json&q=id:*&fl=id&rows=100000000')
+            SOLR_URL + '/select?wt=json&q=id:f*&fl=id&rows=100000000')
         indexes = a.json()['response']['docs']
 
         # find ids of speeches and remove g from begining of id string
