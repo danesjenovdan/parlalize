@@ -623,7 +623,7 @@ class AgendaItem(Timestampable, models.Model):
 
 class Debate(Timestampable, models.Model):
     agenda_item = models.ManyToManyField('AgendaItem',
-                                         blank=True, null=True,
+                                         blank=True,
                                          related_name='debates',
                                          help_text=_('AgendaItem '))
 
