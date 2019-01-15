@@ -13,10 +13,12 @@ def setPresenceThroughTime(commander, person_id, date_=None):
         fdate = datetime.now().date()
 
     url = API_URL + '/getBallotsCounterOfPerson/' + person_id + '/' + fdate.strftime(API_DATE_FORMAT)
+    commander.stdout.write('Trying hard with %s' % str(url))
     data = tryHard(url).json()
 
     data_for_save = []
 
+    commander.stdout.write('Iterating through months for person %s' % str(person_id))
     for month in data:
         options = YES + NOT_PRESENT + AGAINST + ABSTAIN
         stats = sum([month[option] for option in options if option in month.keys()])

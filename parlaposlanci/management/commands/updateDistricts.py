@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, District
-from parlalize.settings import API_URL, DZ, SETTER_KEY
+from parlalize.settings import API_URL, SETTER_KEY
 from parlalize.utils_ import tryHard
 from parlalize.utils_ import getDataFromPagerApi, getDataFromPagerApiGen
 

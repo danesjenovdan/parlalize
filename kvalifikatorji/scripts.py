@@ -12,7 +12,7 @@ import tfidf
 from itertools import repeat
 
 from parlalize.utils_ import tryHard
-from parlalize.settings import ISCI_URL
+from parlalize.settings import ISCI_URL, PROJECT_DIR
 
 import requests
 import csv
@@ -27,9 +27,9 @@ def getWordsDict(filename):
 
     return wordsdict
 
-problematicno = getWordsDict('kvalifikatorji/problematicno_nase.txt')
-privzdignjeno = getWordsDict('kvalifikatorji/privzdignjeno_nase.txt')
-preprosto = getWordsDict('kvalifikatorji/preprosto_nase.txt')
+problematicno = getWordsDict('%skvalifikatorji/problematicno_nase.txt' % PROJECT_DIR)
+privzdignjeno = getWordsDict('%skvalifikatorji/privzdignjeno_nase.txt' % PROJECT_DIR)
+preprosto = getWordsDict('%skvalifikatorji/preprosto_nase.txt' % PROJECT_DIR)
 
 text = 'Tudi v Poslanski skupini Socialnih demokratov ne bomo podprli proračunov za leti 2013 in 2014. Že v uvodnem nagovoru v imenu poslanske skupine smo opozorili, da ta dva proračuna nista odgovor na dogajanje v Sloveniji. Ljudje pričakujejo, da bosta ta dva proračuna omogočala gospodarski razvoj, da bosta omogočala zagotavljanje novih delovnih mest, da bosta omogočala nadaljnji obstoj in razvoj javnega šolstva, tako osnovnega kot tudi do nivoja univerz, in predvsem da bomo imeli vsi tudi temu primerno socialno varnost. Vseh teh problemov ta dva proračuna ne odpravljata, nasprotno. Kaže se, da vladajoča koalicija razume in sledi samo cilju čimprejšnje razprodaje državnega premoženja in želi pri tem omogočiti vsem tistim, ki imajo te informacije, da se vključijo v ta proces na način, da dajo prioriteto osebnim interesom, ne pa interesom države, ne interesom ljudi, ki pričakujejo, da bomo ravnali po našem mnenju, tudi v Državnem zboru, povsem drugače kot je zapisano v teh dveh proračunih.'
 

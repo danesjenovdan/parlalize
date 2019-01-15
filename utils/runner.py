@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 from parlaposlanci.views import setMPStaticPL
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY
+from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY, DZ
 from parlalize.utils_ import getPGIDs, findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
@@ -35,7 +35,6 @@ from slackclient import SlackClient
 
 from time import time
 
-DZ = 95
 factory = RequestFactory()
 request_with_key = factory.get('?key=' + SETTER_KEY)
 

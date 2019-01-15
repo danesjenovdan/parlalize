@@ -1,4 +1,4 @@
-from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, PARSER_PASS, BASE_URL
+from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, PARSER_PASS, BASE_URL, DZ
 from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiGen
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
@@ -16,7 +16,6 @@ import re
 import feedparser
 # parlalize initial runner methods #
 
-DZ = 95
 factory = RequestFactory()
 request_with_key = factory.get('?key=' + SETTER_KEY)
 

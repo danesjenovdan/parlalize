@@ -5,8 +5,10 @@ from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from parlaposlanci.views import setListOfMembersTickers
 
+# TODO refactor setListOfMembersTickers into this file
 factory = RequestFactory()
 request_with_key = factory.get('?key=' + SETTER_KEY)
+
 
 class Command(BaseCommand):
     help = 'Update motion of session - what?'
@@ -15,10 +17,15 @@ class Command(BaseCommand):
         parser.add_argument(
             '--date',
             nargs=1,
-            help='Date from',
+            help='Date for which to run the card',
         )
 
     def handle(self, *args, **options):
-        start_date = datetime.strptime(options['date'][0], '%Y-%m-%dT%X')
+        if options['date']:
+            start_date = datetime.strptime(options['date'], API_DATE_FORMAT)
+        else:
+            start_date = datetime.now().date()
+
         start_date = start_date - timedelta(days=1)
-        setListOfMembersTickers(request_with_key, start_date.strftime(API_DATE_FORMAT))
+        setListOfMembersTickers(
+            request_with_key, start_date.strftime(API_DATE_FORMAT))

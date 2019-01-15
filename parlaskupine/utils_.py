@@ -18,6 +18,19 @@ def getPgDataAPI(request, id_parladata, date_=None):
                   'acronym': "unknown",
                })
 
+def getPgData(id_parladata, date_=None):
+    if not date_:
+        date_ = datetime.now().strftime(API_DATE_FORMAT)
+    org = Organization.objects.filter(id_parladata=id_parladata)
+    if org:
+    	return org[0].getOrganizationData()
+    else:
+    	return {
+                  'id': id_parladata,
+                  'name': "unknown",
+                  'acronym': "unknown"
+                }
+
 def getDisunionInOrgHelper(pg_id, date_of):
     ids = IntraDisunion.objects.filter(organization__id_parladata=pg_id,
                                        vote__start_time__lte=date_of)
