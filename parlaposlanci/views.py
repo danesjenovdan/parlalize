@@ -4441,7 +4441,9 @@ def getListOfMembersTickers(request, date_=None):
     if not lists:
         return JsonResponse({'created_at': date_,
                              'created_for': date_,
-                             'data': []},
+                             'data': [],
+                             'districts': [{dist.id_parladata: dist.name}
+                                       for dist in District.objects.all()]},
                             safe=False)
     last_day = lists.latest('created_for').created_for
     cards = MembersList.objects.filter(created_for=last_day)
