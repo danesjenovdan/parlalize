@@ -1036,9 +1036,14 @@ def getLastActivity(request, person_id, date_=None):
                 'events': data[date]}
                for date in dates]
 
+    if dates:
+        card_date = dates[-1].strftime(API_OUT_DATE_FORMAT)
+    else:
+        card_date = datetime.now().strftime(API_OUT_DATE_FORMAT)
+
     result = {
-        'created_at': dates[-1].strftime(API_OUT_DATE_FORMAT),
-        'created_for': dates[-1].strftime(API_OUT_DATE_FORMAT),
+        'created_at': card_date,
+        'created_for': card_date,
         'person': getPersonData(person_id, date_),
         'results': list(reversed(out))
         }
