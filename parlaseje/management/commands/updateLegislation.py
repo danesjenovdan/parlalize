@@ -51,6 +51,7 @@ class Command(BaseCommand):
                                     procedure=sorted_date['procedure'],
                                     type_of_law=sorted_date['type_of_law'],
                                     classification=sorted_date['classification'],
+                                    date=sorted_date['date'],
                                     status=sorted_date['status'],
                                     #mdt_fk=sorted_date['mdt_fk']
                                     )
@@ -71,6 +72,7 @@ class Command(BaseCommand):
                                     type_of_law=laws['results'][0]['type_of_law'],
                                     classification=laws['results'][0]['classification'],
                                     status=laws['results'][0]['status'],
+                                    date=sorted_date['date'],
                                     #mdt_fk=laws['results']['mdt_fk']
                                     )
                 result.save()
