@@ -1023,6 +1023,7 @@ def getLastActivity(request, person_id, date_=None):
     dates = list(set(list(a.values_list("start_time_date", flat=True))))
     dates.sort()
     data = {date: [] for date in dates}
+    out=[]
     for activity in a:
         act_obj = activity.get_child()
         if type(act_obj) == Ballot:
@@ -1926,8 +1927,16 @@ def getTFIDF(request, person_id, date_=None):
         }]
     }
     """
-
-    card = getPersonCardModelNew(Tfidf, int(person_id), date=date_, is_visible=True)
+    try:
+        card = getPersonCardModelNew(Tfidf, int(person_id), date=date_, is_visible=True)
+    except:
+        # if perons has not card, returns empty results
+        return JsonResponse({
+            'person': getPersonData(person_id, date_),
+            'results': [],
+            "created_for": datetime.now().strftime(API_DATE_FORMAT), 
+            "created_at": datetime.now().strftime(API_DATE_FORMAT)
+            })
 
     out = {
         'person': getPersonData(person_id, date_),
