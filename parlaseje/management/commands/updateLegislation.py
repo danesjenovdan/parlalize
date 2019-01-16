@@ -72,7 +72,7 @@ class Command(BaseCommand):
                                     type_of_law=laws['results'][0]['type_of_law'],
                                     classification=laws['results'][0]['classification'],
                                     status=laws['results'][0]['status'],
-                                    date=sorted_date['date'],
+                                    date=laws['results'][0]['date'],
                                     #mdt_fk=laws['results']['mdt_fk']
                                     )
                 result.save()
