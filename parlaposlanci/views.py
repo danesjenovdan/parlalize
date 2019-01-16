@@ -1023,7 +1023,6 @@ def getLastActivity(request, person_id, date_=None):
     dates = list(set(list(a.values_list("start_time_date", flat=True))))
     dates.sort()
     data = {date: [] for date in dates}
-    out=[]
     for activity in a:
         act_obj = activity.get_child()
         if type(act_obj) == Ballot:
@@ -1033,9 +1032,9 @@ def getLastActivity(request, person_id, date_=None):
         elif type(act_obj) == Question:
             data[activity.start_time_date].append(getQuestionData(act_obj, staticData['sessions']))
 
-        out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
-                'events': data[date]}
-               for date in dates]
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'events': data[date]}
+            for date in dates]
 
     if dates:
         card_date = dates[-1].strftime(API_OUT_DATE_FORMAT)
