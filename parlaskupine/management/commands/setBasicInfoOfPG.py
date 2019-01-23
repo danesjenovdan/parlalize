@@ -78,9 +78,9 @@ class Command(BaseCommand):
                 date_ = options['date']
             else:
                 date_ = datetime.now().date().strftime(API_DATE_FORMAT)
-            self.stdout.write('Trying hard for %s/getMembersOfPGsOnDate/%s' % (API_URL, date_))
-            membersOfPGsRanges = tryHard(API_URL + '/getMembersOfPGsRanges/' + date_).json()
-            pgs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if value]
+            self.stdout.write('Trying hard for %s/getAllPGs/%s' % (API_URL, date_))
+            PGs = tryHard(API_URL + '/getAllPGs/' + date_).json()
+            pgs = PGs.keys()
 
         for pg in pgs:
             setBasicInfoOfPG(self, pg, options['date'])
