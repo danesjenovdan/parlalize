@@ -30,8 +30,7 @@ class Command(BaseCommand):
         self.stdout.write('Iterating through EPAs')
         for epa in set(epas):
             self.stdout.write(str(epa))
-            laws = requests.get(API_URL + '/law?epa=' + str(epa),
-                auth=requests.auth.HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
+            laws = getDataFromPagerApiDRF(API_URL + '/law?epa=' + str(epa))
             last_obj = None
             sessions = []
             is_ended = False
