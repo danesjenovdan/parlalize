@@ -48,7 +48,6 @@ INSTALLED_APPS = (
     'corsheaders',
     'tinymce',
     'utils',
-    'django_celery_monitor',
     'oauth2_provider',
     'rest_framework',
     'django_filters',

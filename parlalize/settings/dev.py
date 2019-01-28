@@ -133,4 +133,4 @@ VOTE_NAMES = {
     '14': 'other' # others
 }
 
-PROJECT_DIR = '/home/user/parlalize/'
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
