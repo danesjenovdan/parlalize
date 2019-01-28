@@ -171,24 +171,6 @@ def getMotionClassification(motion):
     return '14' # others
 
 
-# TODO do not hard code URLs
-def recacheLegislationsOnSession(session_id):
-    base_url = GLEJ_URL + '/'
-    card_url = base_url + 'c/' + 'zakonodaja/?customUrl=http%3A%2F%2Fanalize.nov.parlameter.si%2Fv1%2Fs%2FgetLegislationList%2F' + str(session_id) + '&forceRender=true'
-    print(card_url)
-    tryHard(card_url)
-    card_url = base_url + 's/' + 'seznam-glasovanj/' + str(session_id) + '?forceRender=true'
-    tryHard(card_url)
-    votes = Vote.objects.filter(session__id_parladata=session_id)
-    epas = votes.exclude(epa=None).distinct('epa').values_list('epa', flat=True)
-    for epa in epas:
-        if epa in [None, '']:
-            continue
-        card_url = base_url + 's/' + 'zakon/?customUrl=http%3A%2F%2Fanalize.nov.parlameter.si%2Fv1%2Fs%2FgetLegislation%2F' + str(epa) + '&forceRender=true'
-        print card_url
-        tryHard(card_url)
-
-
 def speech_the_order():
     sessions = Speech.objects.filter(the_order=None).distinct('session').values_list('session_id')
     for session_id in sessions:

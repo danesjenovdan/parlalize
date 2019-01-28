@@ -12,7 +12,7 @@ from django.core.paginator import Paginator
 
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
-from parlaseje.utils_ import hasLegislationLink, getMotionClassification, recacheLegislationsOnSession
+from parlaseje.utils_ import hasLegislationLink, getMotionClassification
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
                                 DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT, PS, WBS)
 from parlaposlanci.models import Person
@@ -20,8 +20,6 @@ from parlaskupine.models import Organization
 
 from utils.legislations import finish_legislation_by_final_vote
 from utils.votes_outliers import setMotionAnalize
-from utils.delete_renders import deleteRendersOfSessionVotes
-
 
 import json
 import re
@@ -568,11 +566,6 @@ def setMotionOfSession(request, session_id):
 
     # set motion analize
     setMotionAnalize(None, session_id)
-
-    if laws:
-        recacheLegislationsOnSession(session_id)
-
-    deleteRendersOfSessionVotes(session_id)
 
     return JsonResponse({'alliswell': True})
 
