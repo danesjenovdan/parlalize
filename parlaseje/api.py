@@ -55,7 +55,7 @@ class LegislationView(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     ordering_fields = ('date', 'id')
     filter_fields = ('is_exposed', 'status', 'result')
-    search_fields = ('text',)
+    search_fields = ('text', 'epa')
 
     def list(self, request, *args, **kwargs):
         response = super(LegislationView, self).list(request, args, kwargs)

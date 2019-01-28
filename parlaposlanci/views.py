@@ -1013,8 +1013,10 @@ def getLastActivity(request, person_id, date_=None):
     dates = list(set(list(a.values_list("start_time_date", flat=True))))
     dates.sort()
     limit = min([15, len(dates)])
-    a = a.filter(person__id_parladata=person_id,
-                 start_time__gte=dates[-limit]).order_by('-start_time')
+
+    if limit != 0:
+        a = a.filter(person__id_parladata=person_id,
+                    start_time__gte=dates[-limit]).order_by('-start_time')
  
     staticData = requests.get(BASE_URL + '/utils/getAllStaticData/').json()
     result = []
@@ -1030,13 +1032,18 @@ def getLastActivity(request, person_id, date_=None):
         elif type(act_obj) == Question:
             data[activity.start_time_date].append(getQuestionData(act_obj, staticData['sessions']))
 
-        out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
-                'events': data[date]}
-               for date in dates]
+    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+            'events': data[date]}
+            for date in dates]
+
+    if dates:
+        card_date = dates[-1].strftime(API_OUT_DATE_FORMAT)
+    else:
+        card_date = datetime.now().strftime(API_OUT_DATE_FORMAT)
 
     result = {
-        'created_at': dates[-1].strftime(API_OUT_DATE_FORMAT),
-        'created_for': dates[-1].strftime(API_OUT_DATE_FORMAT),
+        'created_at': card_date,
+        'created_for': card_date,
         'person': getPersonData(person_id, date_),
         'results': list(reversed(out))
         }
@@ -1919,8 +1926,16 @@ def getTFIDF(request, person_id, date_=None):
         }]
     }
     """
-
-    card = getPersonCardModelNew(Tfidf, int(person_id), date=date_, is_visible=True)
+    try:
+        card = getPersonCardModelNew(Tfidf, int(person_id), date=date_, is_visible=True)
+    except:
+        # if perons has not card, returns empty results
+        return JsonResponse({
+            'person': getPersonData(person_id, date_),
+            'results': [],
+            "created_for": datetime.now().strftime(API_DATE_FORMAT), 
+            "created_at": datetime.now().strftime(API_DATE_FORMAT)
+            })
 
     out = {
         'person': getPersonData(person_id, date_),
@@ -4441,7 +4456,9 @@ def getListOfMembersTickers(request, date_=None):
     if not lists:
         return JsonResponse({'created_at': date_,
                              'created_for': date_,
-                             'data': []},
+                             'data': [],
+                             'districts': [{dist.id_parladata: dist.name}
+                                       for dist in District.objects.all()]},
                             safe=False)
     last_day = lists.latest('created_for').created_for
     cards = MembersList.objects.filter(created_for=last_day)

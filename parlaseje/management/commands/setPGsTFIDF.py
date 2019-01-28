@@ -81,7 +81,7 @@ def setTfidfOfPG(commander, pg_id):
         commander.stderr.write('No data for this PG, saving empty array.')
         date_of = datetime.now().date()
         organization = Organization.objects.get(
-            id_parladata=output['organization']['id'])
+            id_parladata=pg_id)
         saveOrAbortNew(Tfidf,
                        organization=organization,
                        created_for=date_of,
