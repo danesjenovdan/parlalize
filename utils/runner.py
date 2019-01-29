@@ -19,14 +19,13 @@ from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Questio
 
 from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
 from parlaseje.utils_ import idsOfSession, getSesDates, speech_the_order
-from utils.recache import updatePagesS, updateLastActivity, recacheActivities, recacheWBs
 from utils.imports import update, updateDistricts, updateTags, updatePersonStatus, importDraftLegislationsFromFeed
 from utils.votes_outliers import setMotionAnalize, setOutliers
 from utils.votes_pg import set_mismatch_of_pg
 from utils.exports import exportLegislations
 
 from .votes import VotesAnalysis
-from .delete_renders import deleteMPandPGsRenders
+from .delete_renders import deleteMPandPGsRenders, deleteRendersOfSession, deleteRendersOfIDs, delete_renders, refetch
 
 from parlalize.utils_ import tryHard, datesGenerator, printProgressBar, getPersonData, getAllStaticData
 
@@ -700,10 +699,8 @@ def fastUpdate(fast=True, date_=None):
     if s_update:
         print 'recache'
         speech_the_order()
-        updatePagesS(list(set(s_update)))
-        requests.get('https://parlameter.si/fetch/sps?t=vkSzv8Nu4eDkLBk7kUw4BBhyLjysJm')
-        if not fast:
-            updateWB()
+        deleteRendersOfSession(list(set(s_update)))
+        refetch()
 
     p_update += list(speeches.values_list("person__id_parladata", flat=True))
 
@@ -719,14 +716,12 @@ def fastUpdate(fast=True, date_=None):
         # read draft legislations
         importDraftLegislationsFromFeed()
         # update last activites
-        updateLastActivity(list(set(p_update)))
-        recacheActivities(('poslanska-vprasanja-in-pobude',
-                           'poslanska-vprasanja-in-pobude'),
-                          list(set(q_update)))
-        recacheActivities(('povezave-do-govorov',
-                           'vsi-govori-poslanske-skupine'),
-                          list(set(s_p_update)))
-        recacheWBs()
+        deleteRendersOfIDs(list(set(p_update)), 'p', 'zadnje-aktivnosti')
+        deleteRendersOfIDs(list(set(q_update)), 'p', 'poslanska-vprasanja-in-pobude')
+        deleteRendersOfIDs(list(set(s_p_update)), 'p', 'povezave-do-govorov')
+
+        delete_renders(group='pg', method='poslanska-vprasanja-in-pobude')
+        delete_renders(group='pg', method='vsi-govori-poslanske-skupine')
 
     t_delta = time() - start_time
 
@@ -757,6 +752,6 @@ def setListOfMembers(date_time):
     """
     start_date = datetime.strptime(date_time, '%Y-%m-%dT%X')
     start_date = start_date - timedelta(days=1)
-    setListOfMembersTickers(request_with_key, start_time.strftime(API_DATE_FORMAT))
+    setListOfMembersTickers(request_with_key, start_date.strftime(API_DATE_FORMAT))
 
 
