@@ -17,29 +17,22 @@ methods = {
 }
 
 
-def delete_renders(method=None, group='p', owner_id=None, renders=None):
-    return
-    # TODO use new api for delete renders
+def delete_renders(method=None, group=None, owner_id=None, renders=None):
     if settings.GLEJ_URL:
-        def match(item):
-            if owner_id:
-                if str(item['id']) != str(owner_id):
-                    return False
-            if group != item['group']:
-                return False
-            if method:
-                if method != item['method']:
-                    return False
-            return True
+        url = settings.GLEJ_URL+'/api/cards/renders/delete/all'
 
-        if not renders:
-            url = settings.GLEJ_URL + '/api/cards/renders'
-            renders = requests.get(url).json()
+        attrs = []
 
-        cards = [render['_id'] for render in filter(lambda x: match(x), renders['docs'])]
-        for card_id in cards:
-            url = settings.GLEJ_URL + '/api/cards/renders/delete/' + card_id
-            requests.get(url)
+        if method:
+            attrs.append('method='+method)
+        if group:
+            attrs.append('group='+group)
+        if owner_id:
+            attrs.append('id='+owner_id)
+        if attrs:
+            url = url + '?' + '&'.join(attrs)
+        requests.get(url)
+        
 
 
 @receiver(post_save, sender=pTfidf)
@@ -62,14 +55,14 @@ def deleteRendersOfSessionVotes(session_id):
     votes = Vote.objects.filter(session_id__id_parladata=session_id)
 
     # delete renders votes of session
-    requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=s&seznam-glasovanj&id=' + str(session_id))
+    requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=s&method=seznam-glasovanj&id=' + str(session_id))
 
     # delete renders vote details
     for vote in votes:
-        requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=s&glasovanje&id=' + str(vote.id_parladata))
+        requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=s&method=glasovanje&id=' + str(vote.id_parladata))
 
     # delete last session
-    requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=c&zadnja-seja')
+    requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=c&method=zadnja-seja')
 
 
 # TODO
@@ -78,3 +71,9 @@ def deleteRendersOfSessionVotes(session_id):
 def deleteMPandPGsRenders():
     delete_renders(group='p')
     delete_renders(group='ps')
+
+def deleteSessionsRenders():
+    delete_renders(group='s')
+
+
+
