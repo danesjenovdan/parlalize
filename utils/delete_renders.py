@@ -89,7 +89,7 @@ def deleteSessionsRenders():
 def refetch():
     getAllStaticData(None, force_render=True)
     requests.get(settings.GLEJ_URL+'/api/data/refetch')
-    requests.get(settings.GLEJ_URL+'/api/data/refetch')
+    requests.get(settings.FRONT_URL+'/api/data/refetch')
 
 
 
