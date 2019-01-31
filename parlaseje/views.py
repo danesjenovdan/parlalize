@@ -2064,10 +2064,9 @@ def getSessionsByClassification(request):
     }
     """
     sessions = json.loads(getAllStaticData(None).content)['sessions']
-    working_bodies = ["odbor", "komisija", "preiskovalna komisija"]
     out = {"kolegij": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=COUNCIL_ID).order_by("-start_time")],
            "dz": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=DZ).order_by("-start_time")],
-           "dt": [org.getOrganizationData() for org in Organization.objects.filter(classification__in=working_bodies)]}
+           "dt": [org.getOrganizationData() for org in Organization.objects.filter(classification__in=WBS)]}
 
     for dt in out["dt"]:
         dt["sessions"] = [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=dt["id"]).order_by("-start_time")]
@@ -2175,7 +2174,6 @@ def getSessionsList(request, date_=None, force_render=False):
     }
     }
     """
-    working_bodies = ['odbor', 'komisija', 'preiskovalna komisija']
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
         key = date_
@@ -2190,7 +2188,7 @@ def getSessionsList(request, date_=None, force_render=False):
     else:
         orgs = Organization.objects.filter(Q(id_parladata=COUNCIL_ID) |
                                            Q(id_parladata=DZ) |
-                                           Q(classification__in=working_bodies))
+                                           Q(classification__in=WBS))
         sessions = Session.objects.filter(organizations__in=orgs)
         sessions = sessions.order_by("-start_time")
         out = {'sessions': [session.getSessionData() for session in sessions],
