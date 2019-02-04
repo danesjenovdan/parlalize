@@ -2,10 +2,11 @@ from django.core.management.base import BaseCommand, CommandError
 from django.test.client import RequestFactory
 
 from parlalize.settings import API_URL, slack_token, API_DATE_FORMAT, DZ, SETTER_KEY
-from parlalize.utils_ import tryHard, speech_the_order
+from parlalize.utils_ import tryHard
 
 from parlaseje.models import Ballot, Vote, Speech, Question, Legislation, Session
 from parlaseje.views import getSessionsList, setMotionOfSession
+from parlaseje.utils_ import speech_the_order
 from parlaposlanci.models import Person, MinisterStatic
 from parlaskupine.models import Organization
 from utils.exports import exportLegislations
