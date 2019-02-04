@@ -32,7 +32,7 @@ class Command(BaseCommand):
             help='Date for which to run the card',
         )
 
-    def getModelStartTime(model):
+    def getModelStartTime(self, model):
         try:
             lastObjectTime = model.objects.latest('updated_at').updated_at
         except:
