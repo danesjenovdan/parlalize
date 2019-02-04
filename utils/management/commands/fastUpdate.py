@@ -85,11 +85,11 @@ class Command(BaseCommand):
 
         data = tryHard(url[:-1]).json()
 
-        self.stdout.write('Speeches: ', len(data['speeches']))
-        self.stdout.write('Sessions: ', len(data['sessions']))
-        self.stdout.write('Persons: ', len(data['persons']))
-        self.stdout.write('Questions: ', len(data['questions']))
-        self.stdout.write('Legislation: ', len(data['laws']))
+        self.stdout.write('Speeches: ' + str(len(data['speeches'])))
+        self.stdout.write('Sessions: ' + str(len(data['sessions'])))
+        self.stdout.write('Persons: ' + str(len(data['persons'])))
+        self.stdout.write('Questions: ' + str(len(data['questions'])))
+        self.stdout.write('Legislation: ' + str(len(data['laws'])))
 
         text = ('Received data: \n'
                 'Speeches: ' + str(len(data['speeches'])) + '\n'
@@ -394,7 +394,7 @@ class Command(BaseCommand):
         date_ = (datetime.now() + timedelta(days=1)).strftime(API_DATE_FORMAT)
         if s_update:
             getSessionsList(None, date_, force_render=True)
-        self.stdout.write(s_update)
+        self.stdout.write(str(s_update))
         if s_update:
             self.stdout.write('recache')
             speech_the_order()
