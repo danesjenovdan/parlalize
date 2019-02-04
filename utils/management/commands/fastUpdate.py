@@ -32,6 +32,12 @@ class Command(BaseCommand):
             help='Date for which to run the card',
         )
 
+    def getModelStartTime(model):
+        try:
+            lastObjectTime = model.objects.latest('updated_at').updated_at
+        except:
+            lastObjectTime = datetime(day=1, month=1, year=2000)
+        return lastObjectTime
 
     def handle(self, *args, **options):
         factory = RequestFactory()
@@ -52,20 +58,20 @@ class Command(BaseCommand):
                     text='Start fast update at: ' + str(datetime.now()))
         dates = []
 
-        lastBallotTime = Ballot.objects.latest('updated_at').updated_at
-        lastVoteTime = Vote.objects.latest('updated_at').updated_at
-        lastSpeechTime = Speech.objects.latest('updated_at').updated_at
-        lastQustionTime = Question.objects.latest('updated_at').updated_at
-        lastLegislationTime = Legislation.objects.latest('updated_at').updated_at
+        lastBallotTime = self.getModelStartTime(Ballot)
+        lastVoteTime = self.getModelStartTime(Vote)
+        lastSpeechTime = self.getModelStartTime(Speech)
+        lastQustionTime = self.getModelStartTime(Question)
+        lastLegislationTime = self.getModelStartTime(Legislation)
         if date_:
             dates = [date_ + '_00:00' for i in range(5)]
         else:
             # get dates of last update
-            dates.append(Person.objects.latest('updated_at').updated_at)
-            dates.append(Session.objects.latest('updated_at').updated_at)
+            dates.append(self.getModelStartTime(Person))
+            dates.append(self.getModelStartTime(Session))
             dates.append(lastSpeechTime)
             dates.append(lastBallotTime)
-            dates.append(Question.objects.latest('updated_at').updated_at)
+            dates.append(lastQustionTime)
             
             #lastLegislationTime=datetime.now()-timedelta(days=10)
             dates.append(lastLegislationTime)
