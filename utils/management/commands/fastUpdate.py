@@ -384,10 +384,9 @@ class Command(BaseCommand):
         # recache
 
         # add sesessions of updated speeches to recache
-        if fast:
-            speeches = Speech.objects.filter(updated_at__gt=lastSpeechTime)
-        else:
-            speeches = Speech.objects.filter(updated_at__gt=yesterday)
+
+        speeches = Speech.objects.filter(updated_at__gt=lastSpeechTime)
+
         s_update += list(speeches.values_list("session__id_parladata", flat=True))
         s_p_update = list(speeches.values_list("person__id_parladata", flat=True))
 
@@ -403,10 +402,8 @@ class Command(BaseCommand):
 
         p_update += list(speeches.values_list("person__id_parladata", flat=True))
 
-        if fast:
-            questions = Question.objects.filter(updated_at__gt=lastQustionTime)
-        else:
-            questions = Question.objects.filter(updated_at__gt=yesterday)
+        questions = Question.objects.filter(updated_at__gt=lastQustionTime)
+
         q_update = list(questions.values_list("person__id_parladata", flat=True))
         p_update += q_update
 
