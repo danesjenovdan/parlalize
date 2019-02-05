@@ -29,7 +29,7 @@ def delete_renders(method=None, group=None, owner_id=None, renders=None):
         if group:
             attrs.append('group='+group)
         if owner_id:
-            attrs.append('id='+owner_id)
+            attrs.append('id='+str(owner_id))
         if attrs:
             url = url + '?' + '&'.join(attrs)
         requests.get(url)
