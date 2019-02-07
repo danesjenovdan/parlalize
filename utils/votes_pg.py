@@ -13,7 +13,7 @@ from django.conf import settings
 from django.http import JsonResponse
 
 def set_mismatch_of_pg(request, date_=''):
-    print 'prepare date'
+    print 'Preparing date'
     if date_:
         f_date = datetime.strptime(date_, '%d.%m.%Y')
     else:
@@ -25,14 +25,16 @@ def set_mismatch_of_pg(request, date_=''):
         data = data.append(temp, ignore_index=True)
     url = settings.API_URL + '/getMPs/' + date_
     mps = requests.get(url).json()
-    members = [mp['id'] for mp in mps]
-    url = settings.API_URL + '/getMembersOfPGsOnDate/' + date_
-    memsOfPGs = requests.get(url).json()
-    url = settings.API_URL + '/getAllPGs/' + date_
-    pgs = requests.get(url).json()
+    # members = [mp['id'] for mp in mps]
+    # url = settings.API_URL + '/getMembersOfPGsOnDate/' + date_
+    # memsOfPGs = requests.get(url).json()
+    # url = settings.API_URL + '/getAllPGs/' + date_
+    # pgs = requests.get(url).json()
 
-    coalition = requests.get(settings.API_URL + '/getCoalitionPGs').json()['coalition']
-    orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
+    # coalition = requests.get(settings.API_URL + '/getCoalitionPGs').json()['coalition']
+    # orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
+
+    print 'Preparing pandas DataFrame'
     data['option_absent'] = 0
     data['option_for'] = 0
     data['option_against'] = 0
@@ -43,10 +45,10 @@ def set_mismatch_of_pg(request, date_=''):
     data.loc[data['option'] == 'abstain', 'option_abstain'] = 1
     data['voter_unit'] = 1
 
-    print 'start analyze'
+    print 'Prepared pandas DataFrame, about to start analyzing things.'
 
     #for against absent abstain
-    all_votes = data.groupby('vote_id').sum()
+    # all_votes = data.groupby('vote_id').sum()
     m_to_p = {i['id']: i['party_id'] for i in mps}
     mppgs = pd.DataFrame(m_to_p.items(), columns=['voter', 'voterparty'])
 
@@ -65,8 +67,8 @@ def set_mismatch_of_pg(request, date_=''):
         """
         stats = {'for': row['option_for'],
                  'against': row['option_against'],
-                 'abstain': row['option_abstain']}
-                 #'absent': row['option_absent']}
+                 'abstain': row['option_abstain'],
+                 'absent': row['option_absent']}
         if max(stats.values()) == 0:
             return None
         max_ids = [key for key, val in stats.iteritems() if val == max(stats.values())]
@@ -81,8 +83,8 @@ def set_mismatch_of_pg(request, date_=''):
     partys = partys.rename(columns = {0:'partyoption'})
 
     result = pd.merge(data2, partys, on=['vote_id', 'voterparty'])
-    #remove absent option
-    result = result[result.option != 'absent']
+    #remove absent option TURNED OFF
+    # result = result[result.option != 'absent']
 
     members_vote_count = result[['voter','voter_unit']].groupby('voter').count()
 

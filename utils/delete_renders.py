@@ -5,6 +5,7 @@ from django.conf import settings
 from parlaposlanci.models import Tfidf as pTfidf, MPStaticPL
 from parlaskupine.models import Tfidf as pgTfidf, PGStatic
 from parlaseje.models import Tfidf as sTfidf, Vote
+from parlalize.utils_ import getAllStaticData
 
 import requests
 
@@ -17,29 +18,22 @@ methods = {
 }
 
 
-def delete_renders(method=None, group='p', owner_id=None, renders=None):
-    return
-    # TODO use new api for delete renders
+def delete_renders(method=None, group=None, owner_id=None, renders=None):
     if settings.GLEJ_URL:
-        def match(item):
-            if owner_id:
-                if str(item['id']) != str(owner_id):
-                    return False
-            if group != item['group']:
-                return False
-            if method:
-                if method != item['method']:
-                    return False
-            return True
+        url = settings.GLEJ_URL+'/api/cards/renders/delete/all'
 
-        if not renders:
-            url = settings.GLEJ_URL + '/api/cards/renders'
-            renders = requests.get(url).json()
+        attrs = []
 
-        cards = [render['_id'] for render in filter(lambda x: match(x), renders['docs'])]
-        for card_id in cards:
-            url = settings.GLEJ_URL + '/api/cards/renders/delete/' + card_id
-            requests.get(url)
+        if method:
+            attrs.append('method='+method)
+        if group:
+            attrs.append('group='+group)
+        if owner_id:
+            attrs.append('id='+str(owner_id))
+        if attrs:
+            url = url + '?' + '&'.join(attrs)
+        requests.get(url)
+        
 
 
 @receiver(post_save, sender=pTfidf)
@@ -58,23 +52,44 @@ def deleteRendersOfCard(sender, instance, **kwargs):
     delete_renders(method=attrs['method'], group=attrs['group'], owner_id=owner_id)
 
 
-def deleteRendersOfSessionVotes(session_id):
-    votes = Vote.objects.filter(session_id__id_parladata=session_id)
-
+def deleteRendersOfSession(session_ids, update_votes_details=False, update_speeches=False):
     # delete renders votes of session
-    requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=s&seznam-glasovanj&id=' + str(session_id))
+    for session_id in session_ids:
+        delete_renders(group='s', method='seznam-glasovanj', owner_id=str(session_id))
 
-    # delete renders vote details
-    for vote in votes:
-        requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=s&glasovanje&id=' + str(vote.id_parladata))
+        # delete renders vote details
+        if update_votes_details:
+            votes = Vote.objects.filter(session_id__id_parladata=session_id)
+            for vote in votes:
+                delete_renders(group='s', method='glasovanje', owner_id=str(vote.id_parladata))
 
-    # delete last session
-    requests.get(settings.GLEJ_URL + '/api/cards/renders/delete/all?group=c&zadnja-seja')
+        # delete last session
+        delete_renders(group='c', method='zadnja-seja')
+
+        if update_speeches:
+            delete_renders(group='s', method='govori', owner_id=str(session_id))
+
 
 
 # TODO
 # settings.HAS_LEGISLATIONS
 
+def deleteRendersOfIDs(owner_ids, group, method):
+    for owner_id in owner_ids:
+        delete_renders(group=group, method=method, owner_id=owner_id)
+
 def deleteMPandPGsRenders():
     delete_renders(group='p')
     delete_renders(group='ps')
+
+def deleteSessionsRenders():
+    delete_renders(group='s')
+
+
+def refetch():
+    getAllStaticData(None, force_render=True)
+    requests.get(settings.GLEJ_URL+'/api/data/refetch')
+    requests.get(settings.FRONT_URL+'/api/data/refetch')
+
+
+

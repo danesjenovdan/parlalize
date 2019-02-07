@@ -3,10 +3,10 @@ from parlaposlanci.models import Person
 from parlaseje.models import Session, Legislation, Vote, AgendaItem, AmendmentOfOrg
 from parlaskupine.models import Organization
 from parlaseje.utils_ import getMotionClassification
-from parlalize.settings import API_URL, DZ, SETTER_KEY, YES, AGAINST, ABSTAIN, NOT_PRESENT
+from parlalize.settings import API_URL, SETTER_KEY, YES, AGAINST, ABSTAIN, NOT_PRESENT
 from parlalize.utils_ import tryHard, saveOrAbortNew
 from utils.votes_outliers import setMotionAnalize
-from utils.delete_renders import deleteRendersOfSessionVotes
+from utils.delete_renders import deleteRendersOfSession
 from utils.legislations import finish_legislation_by_final_vote
 from django.test.client import RequestFactory
 
@@ -147,7 +147,7 @@ def setMotionOfSession(commander, session_id):
     #     recacheLegislationsOnSession(session_id)
 
     commander.stdout.write('Running deleteRendersOfSessionVotes for %s' % str(session_id))
-    deleteRendersOfSessionVotes(session_id)
+    deleteRendersOfSession([session_id])
 
     return 0
 

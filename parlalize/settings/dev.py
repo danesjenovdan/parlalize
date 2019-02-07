@@ -132,3 +132,5 @@ VOTE_NAMES = {
     '13': 'personal_property_decree',
     '14': 'other' # others
 }
+
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
