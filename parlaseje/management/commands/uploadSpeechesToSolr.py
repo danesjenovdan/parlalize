@@ -10,57 +10,58 @@ import json
 
 
 class Command(BaseCommand):
-    help = 'Uploads speeches to SOLR'
+    help = 'Uploads speeches to Solr'
+
+    def commit_to_solr(self, output):
+        url = SOLR_URL + '/update?commit=true'
+        self.stdout.write('About to commit %s speeches to %s' % (str(len(output)), url))
+        data = json.dumps(output)
+        requests.post(url,
+                      data=data,
+                      headers={'Content-Type': 'application/json'})
 
     def handle(self, *args, **options):
-        # get all valid speeches
-        speeches = Speech.getValidSpeeches(datetime.now())
-
         # get all ids from solr
-        self.stdout.write(
-            'Getting all IDs from %s/select?wt=json&q=id:g*&fl=id&rows=100000000' % SOLR_URL)
-        a = requests.get(
-            SOLR_URL + '/select?wt=json&q=id:f*&fl=id&rows=100000000')
-        indexes = a.json()['response']['docs']
+        url = SOLR_URL + '/select?wt=json&q=type:speech&fl=speech_id&rows=100000000'
+        self.stdout.write('Getting all IDs from %s' % url)
+        a = requests.get(url)
+        docs = a.json()['response']['docs']
+        idsInSolr = [doc['speech_id'] for doc in docs if 'speech_id' in doc]
 
-        # find ids of speeches and remove g from begining of id string
-        idsInSolr = [int(line['id'].replace('g', ''))
-                     for line
-                     in indexes if 'g' in line['id']]
-
-        i = 0
-
+        # get static data
         self.stdout.write('Getting all static data')
         static_data = json.loads(getAllStaticData(None).content)
-        for speech in speeches.exclude(id__in=idsInSolr):
-            output = [{
-                'id': 'g' + str(speech.id_parladata),
-                'speaker_i': speech.person.first().id_parladata,
-                'session_i': speech.session.id_parladata,
-                'org_i': speech.session.organization.id,
-                'party_i': speech.organization.id_parladata,
-                'datetime_dt': speech.start_time.isoformat(),
-                'content_t': speech.content,
-                'tip_t': 'govor',
-                'the_order': speech.the_order,
-                'person': json.dumps(static_data['persons'][str(speech.person.first().id_parladata)])
-            }]
 
-            output = json.dumps(output)
+        # get all valid speeches
+        self.stdout.write('Getting valid speeches')
+        speeches = Speech.getValidSpeeches(datetime.now())
+
+        i = 1
+        output = []
+        for speech in speeches.exclude(id_parladata__in=idsInSolr):
+            output.append({
+                'term': 'VIII',
+                'type': 'speech',
+                'id': 'speech_' + str(speech.id_parladata),
+                'speech_id': speech.id_parladata,
+                'person_id': speech.person.first().id_parladata,
+                'person_json': json.dumps(static_data['persons'][str(speech.person.first().id_parladata)]),
+                'party_id': speech.organization.id_parladata,
+                'session_id': speech.session.id_parladata,
+                'session_json': json.dumps(static_data['sessions'][str(speech.session.id_parladata)]),
+                'org_id': speech.session.organization.id_parladata,
+                'start_time': speech.start_time.isoformat(),
+                'the_order': speech.the_order,
+                'content': speech.content,
+            })
 
             if i % 100 == 0:
-                url = SOLR_URL + '/update?commit=true'
-                self.stdout.write(
-                    'About to commit another 100 speeches to %s/update?commit=true' % SOLR_URL)
-                requests.post(url,
-                              data=output,
-                              headers={'Content-Type': 'application/json'})
-
-            else:
-                requests.post(SOLR_URL + '/update',
-                              data=output,
-                              headers={'Content-Type': 'application/json'})
+                self.commit_to_solr(output)
+                output = []
 
             i += 1
+
+        if len(output):
+            self.commit_to_solr(output)
 
         return 0

@@ -4,63 +4,73 @@ from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Speech
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
-from parlalize.utils_ import saveOrAbortNew
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData
 from datetime import datetime
 from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
 
 import requests
 import json
 
-def getPGMegastring(org):
 
-    megastring = u''
+def getOrgMegastring(org):
     speeches = Speech.getValidSpeeches(datetime.now()).filter(organization__id_parladata=org.id_parladata)
-    for speech in speeches:
-        megastring = megastring + ' ' + speech.content
-
+    megastring = u' '.join([speech.content for speech in speeches])
     return megastring
 
+
 class Command(BaseCommand):
-    help = 'Updates PresenceThroughTime'
+    help = 'Upload pg megastring to Solr'
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--speaker_ids',
+            '--pg_ids',
             nargs='+',
-            help='Speaker parladata_id',
+            help='PG parladata_id',
             type=int,
         )
 
-    def handle(self, *args, **options):
-        date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+    def commit_to_solr(self, output):
+        url = SOLR_URL + '/update?commit=true'
+        self.stdout.write('About to commit %s pg megastrings to %s' % (str(len(output)), url))
+        data = json.dumps(output)
+        requests.post(url,
+                      data=data,
+                      headers={'Content-Type': 'application/json'})
 
-        self.stdout.write('Trying hard with %s/getMembersOfPGsRanges/' % API_URL)
-        url = API_URL + '/getMembersOfPGsRanges/' + date_
-        membersOfPGsRanges = tryHard(url).json()
-        pg_ids = [key for key, value in membersOfPGsRanges[-1]['members'].items()]
-        
+    def handle(self, *args, **options):
+        pg_ids = []
+        if options['pg_ids']:
+            pg_ids = options['pg_ids']
+        else:
+            date_of = datetime.now().date()
+            date_ = date_of.strftime(API_DATE_FORMAT)
+            url = API_URL + '/getMembersOfPGsRanges/' + date_
+            self.stdout.write('Trying hard with %s' % url)
+            membersOfPGsRanges = tryHard(url).json()
+            pg_ids = [key for key, value in membersOfPGsRanges[-1]['members'].items()]
+
+        # get static data
+        self.stdout.write('Getting all static data')
+        static_data = json.loads(getAllStaticData(None).content)
+
         for pg_id in pg_ids:
             self.stdout.write('About to begin with PG %s' % str(pg_id))
             pg = Organization.objects.filter(id_parladata=pg_id)
             if not pg:
                 self.stdout.write('Organization with id %s does not exist' % str(pg_id))
-                return
+                continue
             else:
                 pg = pg[0]
-            
+
             output = [{
-                'id': 'pg' + str(pg.id_parladata),
-                'content_t': getPGMegastring(pg),
-                'sklic_t': 'VIII',
-                'tip_t': 'pgmegastring'
+                'term': 'VIII',
+                'type': 'pgmegastring',
+                'id': 'pgms_' + str(pg.id_parladata),
+                'party_id': pg.id_parladata,
+                'party_json': json.dumps(static_data['partys'][str(pg.id_parladata)]),
+                'content': getOrgMegastring(pg),
             }]
 
-            output = json.dumps(output)
+            self.commit_to_solr(output)
 
-            url = SOLR_URL + '/update?commit=true'
-            r = requests.post(url,
-                              data=output,
-                              headers={'Content-Type': 'application/json'})
-            self.stdout.write(str(r.content))
         return 0
