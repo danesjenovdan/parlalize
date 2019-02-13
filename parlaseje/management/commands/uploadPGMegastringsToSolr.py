@@ -18,9 +18,9 @@ def getOrgMegastring(org):
     return megastring
 
 
-def commit_to_solr(command, output):
+def commit_to_solr(commander, output):
     url = SOLR_URL + '/update?commit=true'
-    command.stdout.write('About to commit %s pg megastrings to %s' % (str(len(output)), url))
+    commander.stdout.write('About to commit %s pg megastrings to %s' % (str(len(output)), url))
     data = json.dumps(output)
     requests.post(url,
                   data=data,
