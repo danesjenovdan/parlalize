@@ -12,16 +12,17 @@ import requests
 import json
 
 
+def commit_to_solr(command, output):
+    url = SOLR_URL + '/update?commit=true'
+    command.stdout.write('About to commit %s legislations to %s' % (str(len(output)), url))
+    data = json.dumps(output)
+    requests.post(url,
+                  data=data,
+                  headers={'Content-Type': 'application/json'})
+
+
 class Command(BaseCommand):
     help = 'Upload legislation to Solr'
-
-    def commit_to_solr(self, output):
-        url = SOLR_URL + '/update?commit=true'
-        self.stdout.write('About to commit %s legislations to %s' % (str(len(output)), url))
-        data = json.dumps(output)
-        requests.post(url,
-                      data=data,
-                      headers={'Content-Type': 'application/json'})
 
     def handle(self, *args, **options):
         # get static data
@@ -54,12 +55,12 @@ class Command(BaseCommand):
             })
 
             if i % 100 == 0:
-                self.commit_to_solr(output)
+                commit_to_solr(self, output)
                 output = []
 
             i += 1
 
         if len(output):
-            self.commit_to_solr(output)
+            commit_to_solr(self, output)
 
         return 0

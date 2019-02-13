@@ -18,6 +18,15 @@ def getOrgMegastring(org):
     return megastring
 
 
+def commit_to_solr(command, output):
+    url = SOLR_URL + '/update?commit=true'
+    command.stdout.write('About to commit %s pg megastrings to %s' % (str(len(output)), url))
+    data = json.dumps(output)
+    requests.post(url,
+                  data=data,
+                  headers={'Content-Type': 'application/json'})
+
+
 class Command(BaseCommand):
     help = 'Upload pg megastring to Solr'
 
@@ -28,14 +37,6 @@ class Command(BaseCommand):
             help='PG parladata_id',
             type=int,
         )
-
-    def commit_to_solr(self, output):
-        url = SOLR_URL + '/update?commit=true'
-        self.stdout.write('About to commit %s pg megastrings to %s' % (str(len(output)), url))
-        data = json.dumps(output)
-        requests.post(url,
-                      data=data,
-                      headers={'Content-Type': 'application/json'})
 
     def handle(self, *args, **options):
         pg_ids = []
@@ -71,6 +72,6 @@ class Command(BaseCommand):
                 'content': getOrgMegastring(pg),
             }]
 
-            self.commit_to_solr(output)
+            commit_to_solr(self, output)
 
         return 0
