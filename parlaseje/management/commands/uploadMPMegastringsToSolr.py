@@ -3,24 +3,31 @@ from django.utils.html import strip_tags
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Speech
 from parlaposlanci.models import Person
-from parlalize.utils_ import saveOrAbortNew
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData
 from datetime import datetime
 from parlalize.settings import SOLR_URL, API_URL
 
 import requests
 import json
 
+
 def getSpeakerMegastring(speaker):
-
-    megastring = u''
     speeches = Speech.getValidSpeeches(datetime.now()).filter(person=speaker)
-    for speech in speeches:
-        megastring = megastring + ' ' + speech.content
-
+    megastring = u' '.join([speech.content for speech in speeches])
     return megastring
 
+
+def commit_to_solr(commander, output):
+    url = SOLR_URL + '/update?commit=true'
+    commander.stdout.write('About to commit %s person megastrings to %s' % (str(len(output)), url))
+    data = json.dumps(output)
+    requests.post(url,
+                  data=data,
+                  headers={'Content-Type': 'application/json'})
+
+
 class Command(BaseCommand):
-    help = 'Updates PresenceThroughTime'
+    help = 'Upload person megastring to Solr'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -39,28 +46,28 @@ class Command(BaseCommand):
             members = tryHard(API_URL + '/getMPs/').json()
             speaker_ids = [member['id'] for member in members]
 
+        # get static data
+        self.stdout.write('Getting all static data')
+        static_data = json.loads(getAllStaticData(None).content)
+
         for speaker_id in speaker_ids:
             self.stdout.write('About to begin with speaker %s' % str(speaker_id))
             speaker = Person.objects.filter(id_parladata=speaker_id)
             if not speaker:
                 self.stdout.write('Speaker with id %s does not exist' % str(speaker_id))
-                return
+                continue
             else:
                 speaker = speaker[0]
 
             output = [{
-                'id': 'p' + str(speaker.id_parladata),
-                'content_t': getSpeakerMegastring(speaker),
-                'sklic_t': 'VIII',
-                'tip_t': 'pmegastring'
+                'term': 'VIII',
+                'type': 'pmegastring',
+                'id': 'pms_' + str(speaker.id_parladata),
+                'person_id': speaker.id_parladata,
+                'person_json': json.dumps(static_data['persons'][str(speaker.id_parladata)]),
+                'content': getSpeakerMegastring(speaker),
             }]
 
-            output = json.dumps(output)
-
-            url = SOLR_URL + '/update?commit=true'
-            r = requests.post(url,
-                              data=output,
-                              headers={'Content-Type': 'application/json'})
-            self.stdout.write(str(r.content))
+            commit_to_solr(self, output)
 
         return 0

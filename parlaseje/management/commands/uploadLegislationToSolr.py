@@ -4,54 +4,63 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils.html import strip_tags
 from parlalize.utils_ import tryHard
 from parlaseje.models import Legislation
-from parlalize.utils_ import saveOrAbortNew
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData
 from datetime import datetime
 from parlalize.settings import SOLR_URL
 
 import requests
 import json
 
+
+def commit_to_solr(commander, output):
+    url = SOLR_URL + '/update?commit=true'
+    commander.stdout.write('About to commit %s legislations to %s' % (str(len(output)), url))
+    data = json.dumps(output)
+    requests.post(url,
+                  data=data,
+                  headers={'Content-Type': 'application/json'})
+
+
 class Command(BaseCommand):
-    help = 'Updates PresenceThroughTime'
+    help = 'Upload legislation to Solr'
 
     def handle(self, *args, **options):
-        i = 0
+        # get static data
+        self.stdout.write('Getting all static data')
+        static_data = json.loads(getAllStaticData(None).content)
+
+        # get all legislations
+        self.stdout.write('Getting legislations')
+        legislations = Legislation.objects.all()
+
+        i = 1
         output = []
-        self.stdout.write('Beginning legislation export ...')
-        for legislation in Legislation.objects.all():
-            i += 1
-            sessions = list(map(str, list(legislation.sessions.all().values_list('id_parladata', flat=True))))
+        for legislation in legislations:
+            sessions = list(legislation.sessions.all().values_list('id_parladata', flat=True))
             note = legislation.note
             if note:
-                note = strip_tags(note).replace("&nbsp;", "").replace("\r", "").replace("\n", "").replace("&scaron;", "š")
+                note = strip_tags(note).replace("&nbsp;", " ").replace("\r", "").replace("\n", " ").replace("&scaron;", "š")
+
             output.append({
-                'id': legislation.epa,
-                'sessions_i': sessions,
-                'mdt': legislation.mdt,
-                'text_t': legislation.text,
-                'content_t': note,
+                'term': 'VIII',
+                'type': 'legislation',
+                'id': 'legislation_' + str(legislation.id_parladata),
+                'act_id': legislation.epa,
+                'sessions': sessions,
+                'content': note,
+                'title': legislation.text,
                 'status': legislation.status,
-                'result': legislation.result,
-                'sklic_t': legislation.epa.split('-')[1],
-                'tip_t': 'l'
+                # 'result': legislation.result, # TODO: this is duplicated from status, remove for now
+                'wb': legislation.mdt,
             })
 
-            
-
             if i % 100 == 0:
-                data = json.dumps(output)
-                self.stdout.write('About to commit another 100 pieces of legislation to %s/update?commit=true' % SOLR_URL)
-                requests.post(SOLR_URL + '/update?commit=true',
-                                  data=data,
-                                  headers={'Content-Type': 'application/json'})
+                commit_to_solr(self, output)
                 output = []
 
-        self.stdout.write('Final legislation commit to %s/update?commit=true' % SOLR_URL)
-        data = json.dumps(output)
-        r = requests.post(SOLR_URL + '/update?commit=true',
-                          data=data,
-                          headers={'Content-Type': 'application/json'})
+            i += 1
 
-        self.stdout.write(str(r.text))
+        if len(output):
+            commit_to_solr(self, output)
 
         return 0

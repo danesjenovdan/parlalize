@@ -2,24 +2,31 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils.html import strip_tags
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Speech
-from parlalize.utils_ import saveOrAbortNew
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData
 from datetime import datetime
 from parlalize.settings import SOLR_URL
 
 import requests
 import json
 
-def getSessionContent(session):
 
-    megastring = u''
+def getSessionMegastring(session):
     speeches = Speech.getValidSpeeches(datetime.now()).filter(session=session)
-    for i, speech in enumerate(speeches):
-        megastring = megastring + ' ' + speech.content
-
+    megastring = u' '.join([speech.content for speech in speeches])
     return megastring
 
+
+def commit_to_solr(commander, output):
+    url = SOLR_URL + '/update?commit=true'
+    commander.stdout.write('About to commit %s sessions to %s' % (str(len(output)), url))
+    data = json.dumps(output)
+    requests.post(url,
+                  data=data,
+                  headers={'Content-Type': 'application/json'})
+
+
 class Command(BaseCommand):
-    help = 'Updates PresenceThroughTime'
+    help = 'Upload sessions to Solr'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -36,30 +43,31 @@ class Command(BaseCommand):
         else:
             ses_ids = Session.objects.all().values_list('id_parladata', flat=True)
 
+        # get static data
+        self.stdout.write('Getting all static data')
+        static_data = json.loads(getAllStaticData(None).content)
+
         for session_id in ses_ids:
             self.stdout.write('About to begin with session %s' % str(session_id))
             session = Session.objects.filter(id_parladata=session_id)
             if not session:
                 self.stdout.write('Session with id %s does not exist' % str(session_id))
-                return
+                continue
             else:
                 session = session[0]
 
             output = [{
-                'id': 's' + str(session.id_parladata),
-                'org_i': session.organization.id,
-                'datetime_dt': session.start_time.isoformat(),
-                'content_t': getSessionContent(session),
-                'sklic_t': 'VIII',
-                'tip_t': 'seja'
+                'term': 'VIII',
+                'type': 'session',
+                'id': 'session_' + str(session.id_parladata),
+                'session_id': session.id_parladata,
+                'session_json': json.dumps(static_data['sessions'][str(session.id_parladata)]),
+                'org_id': session.organization.id_parladata,
+                'start_time': session.start_time.isoformat(),
+                'content': getSessionMegastring(session),
+                'title': session.name,
             }]
 
-            output = json.dumps(output)
-
-            url = SOLR_URL + '/update?commit=true'
-            r = requests.post(url,
-                              data=output,
-                              headers={'Content-Type': 'application/json'})
-            self.stdout.write(str(r.content))
+            commit_to_solr(self, output)
 
         return 0
