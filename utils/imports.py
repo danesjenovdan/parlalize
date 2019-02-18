@@ -467,7 +467,7 @@ def updateLegislation(request):
 
 def importDraftLegislationsFromFeed(): 
     def split_epa_and_name(thing, date): 
-        epa_regex = re.compile(r'\d+-VII') 
+        epa_regex = re.compile(r'\d+-VIII') 
         current_epa = epa_regex.findall(thing)[0] 
         current_name = thing.split(current_epa)[1].strip()
         date = getDate(date)
