@@ -76,7 +76,7 @@ class Command(BaseCommand):
                                     id_parladata=last_obj['id'],
                                     date=last_obj['date'],
                                     procedure_ended=is_ended,
-                                    classification=['classification'],
+                                    classification=last_obj['classification'],
                                     )
                 result.save()
             sessions = list(set(sessions))
