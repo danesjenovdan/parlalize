@@ -56,7 +56,7 @@ def enrichTFIDF(data):
     return enrichedData
 
 def setTfidfOfSession(commander, session_id):
-    url = '%s/tvrh/?q=id:s%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content_t' % (SOLR_URL, session_id)
+    url = '%s/tvrh/?q=id:session_%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content' % (SOLR_URL, session_id)
 
     commander.stdout.write('About to fetch %s' % url)
     r = requests.get(url)
@@ -92,8 +92,8 @@ class Command(BaseCommand):
             ses_ids = options['session_ids']
         else:
             ses_ids = Session.objects.all().values_list('id_parladata', flat=True)
-        
+
         for session_id in ses_ids:
-          setTfidfOfSession(self, session_id)       
+          setTfidfOfSession(self, session_id)
 
         return 0
