@@ -50,7 +50,7 @@ def enrichTFIDF(data):
                            key=lambda k: k['scores']['tf-idf'],
                            reverse=True)[:25]
 
-    enrichedData = {'session': data['termVectors'][0].split('s')[1],
+    enrichedData = {'session': data['termVectors'][0].split('_')[1],
                     'results': sortedResults}
 
     return enrichedData
