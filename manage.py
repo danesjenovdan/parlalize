@@ -4,7 +4,7 @@ import os
 import sys
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "parlalize.settings")
+    os.environ.setdefault(str("DJANGO_SETTINGS_MODULE"), str("parlalize.settings"))
 
     from django.core.management import execute_from_command_line
 

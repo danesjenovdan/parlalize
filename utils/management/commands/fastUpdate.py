@@ -9,7 +9,6 @@ from parlaseje.views import getSessionsList, setMotionOfSession
 from parlaseje.utils_ import speech_the_order
 from parlaposlanci.models import Person, MinisterStatic
 from parlaskupine.models import Organization
-from utils.exports import exportLegislations
 from utils.imports import updateDistricts, updateTags, updatePersonStatus, importDraftLegislationsFromFeed
 from utils.runner import runSettersSessions
 
@@ -72,7 +71,7 @@ class Command(BaseCommand):
             dates.append(lastSpeechTime)
             dates.append(lastBallotTime)
             dates.append(lastQustionTime)
-            
+
             #lastLegislationTime=datetime.now()-timedelta(days=10)
             dates.append(lastLegislationTime)
 
@@ -188,7 +187,7 @@ class Command(BaseCommand):
                 if last_obj:
                     if law['date'] > last_obj['date']:
                         last_obj = law
-                else: 
+                else:
                     last_obj = law
             result = Legislation.objects.filter(epa=epa)
 
@@ -229,9 +228,6 @@ class Command(BaseCommand):
             sessions = list(Session.objects.filter(id_parladata__in=sessions))
             result.sessions.add(*sessions)
             self.stdout.write(epa)
-        if data['laws']:
-            self.stdout.write('legislation')
-            exportLegislations()
 
         # update speeches
         existingIDs = list(Speech.objects.all().values_list('id_parladata',
