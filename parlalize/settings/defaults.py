@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
 
 import raven
 from django.utils.translation import gettext as _
@@ -142,6 +143,8 @@ LOGGING = {
 
 API_DATE_FORMAT = '%d.%m.%Y'
 API_OUT_DATE_FORMAT = '%-d. %-m. %Y'
+if sys.platform == 'win32':
+    API_OUT_DATE_FORMAT = '%#d. %#m. %Y'
 
 # CORS config
 CORS_ORIGIN_ALLOW_ALL = True
@@ -175,9 +178,9 @@ LEGISLATION_RESULT = [
 ]
 
 # Vote classification
-VOTE_NAMES = { 
+VOTE_NAMES = {
     '1': 'agenda', # agenda
-    '2': 'whole_law', # final votiong 
+    '2': 'whole_law', # final votiong
     '3': 'amendment', # amendment
     '4': 'no_confidence', # interpelation
     '5': 'record_conclusion', # record conclusion
@@ -185,22 +188,22 @@ VOTE_NAMES = {
     '7': 'ratification', # ratification law
     '8': 'naming', # naming
     '9': 'call_proposal', # proposal for a call
-    '10': 'recommendation', # recommendation 
-    '11': 'report', # report 
-    '12': 'procedural_proposal', # procedural proposal 
+    '10': 'recommendation', # recommendation
+    '11': 'report', # report
+    '12': 'procedural_proposal', # procedural proposal
     '13': 'personal_property_decree',
     '14': 'other' # others
 }
 
 TINYMCE_INCLUDE_JQUERY = False
 
-REST_FRAMEWORK = { 
-    'DEFAULT_PERMISSION_CLASSES': [ 
-        'rest_framework.permissions.IsAdminUser', 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAdminUser',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10, 
+    'PAGE_SIZE': 10,
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
