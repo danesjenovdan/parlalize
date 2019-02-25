@@ -12,62 +12,6 @@ import requests
 import json
 import csv
 
-def exportLegislations():
-    i = 0
-    output = []
-    for legislation in Legislation.objects.all():
-        i += 1
-        sessions = list(map(str, list(legislation.sessions.all().values_list('id_parladata', flat=True))))
-        note = legislation.note
-        if note:
-            note = strip_tags(note).replace("&nbsp;", "").replace("\r", "").replace("\n", "").replace("&scaron;", "š")
-        output.append({
-            'id': legislation.epa,
-            'sessions_i': sessions,
-            'mdt': legislation.mdt,
-            'text_t': legislation.text,
-            'content_t': note,
-            'status': legislation.status,
-            'result': legislation.result,
-            'sklic_t': legislation.epa.split('-')[1],
-            'tip_t': 'l'
-        })
-
-        
-
-        if i % 100 == 0:
-            data = json.dumps(output)
-            r = requests.post(settings.SOLR_URL + '/update?commit=true',
-                              data=data,
-                              headers={'Content-Type': 'application/json'})
-            output = []
-
-            print r.text
-    data = json.dumps(output)
-    r = requests.post(settings.SOLR_URL + '/update?commit=true',
-                              data=data,
-                              headers={'Content-Type': 'application/json'})
-
-    print r.text
-
-    return 1
-
-
-def deleteLegislations():
-    a = requests.get(settings.SOLR_URL + "/select?wt=json&q=id:*&fl=id&fq=tip_t:l&rows=100000000")
-    indexes = a.json()["response"]["docs"]
-    idsForDelete = [idx['id'] for idx in indexes]
-    data = {'delete': idsForDelete
-            }
-
-    r = requests.post(settings.SOLR_URL + '/update?commit=true',
-                      data=json.dumps(data),
-                      headers={'Content-Type': 'application/json'})
-
-    print r.text
-    return True
-
-
 
 def backupNotes():
     data = {}

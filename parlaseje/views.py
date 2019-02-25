@@ -2662,10 +2662,10 @@ def getComparedVotes(request):
         }]
     }
     """
-    people_same = request.GET.get('people_same')
-    parties_same = request.GET.get('parties_same')
-    people_different = request.GET.get('people_different')
-    parties_different = request.GET.get('parties_different')
+    people_same = request.GET.get('people_same', '')
+    parties_same = request.GET.get('parties_same', '')
+    people_different = request.GET.get('people_different', '')
+    parties_different = request.GET.get('parties_different', '')
 
     if people_same != '':
         people_same_list = people_same.split(',')
@@ -2692,6 +2692,10 @@ def getComparedVotes(request):
         }
         return JsonResponse(out, safe=False)
     if len(people_same_list) + len(parties_same_list) < 2 and len(people_different_list) + len(parties_different_list) < 1:
+        out = {
+            'total': Vote.objects.all().count(),
+            'results': []
+        }
         return JsonResponse(out, safe=False)
 
     beginning = 'SELECT * FROM '

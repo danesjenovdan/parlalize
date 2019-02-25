@@ -59,7 +59,7 @@ def enrichPersonData(data, person_id):
 
 
 def setTfidfOfMP(commander, mp_id):
-    url = '%s/tvrh/?q=id:p%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content_t' % (
+    url = '%s/tvrh/?q=id:pms_%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content' % (
         SOLR_URL, mp_id)
 
     commander.stdout.write('About to fetch %s' % url)

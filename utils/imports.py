@@ -5,7 +5,6 @@ from parlaskupine.models import Organization
 from parlaposlanci.views import setMinsterStatic
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag, Legislation, AgendaItem, Debate
 from parlaseje.views import setMotionOfSession
-from .exports import exportLegislations
 from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
@@ -392,7 +391,7 @@ def update():
 # This is just for empty Legislation table
 def updateLegislation(request):
     allLaws = []
-    
+
     laws = getDataFromPagerApiDRF(API_URL + '/law/')
     epas = list(set([law['epa'] for law in laws if law['epa']]))
     hr_acts = [law for law in laws if not law['epa']]
@@ -405,7 +404,7 @@ def updateLegislation(request):
             sorted_date = sorted(laws['results'], key=lambda x: datetime.strptime(x['date'].split('T')[0], '%Y-%m-%d'))
             print(sorted_date)
             sessions = list(set(list([Session.objects.get(id_parladata=int(l['session']))
-                        for l 
+                        for l
                         in sorted_date
                         if l['session']])))
             sorted_date = sorted_date[0]
@@ -465,10 +464,10 @@ def updateLegislation(request):
             result.result = act['result']
         result.save()
 
-def importDraftLegislationsFromFeed(): 
-    def split_epa_and_name(thing, date): 
-        epa_regex = re.compile(r'\d+-VII') 
-        current_epa = epa_regex.findall(thing)[0] 
+def importDraftLegislationsFromFeed():
+    def split_epa_and_name(thing, date):
+        epa_regex = re.compile(r'\d+-VIII')
+        current_epa = epa_regex.findall(thing)[0]
         current_name = thing.split(current_epa)[1].strip()
         date = getDate(date)
         return (current_epa, current_name, date)
@@ -498,13 +497,13 @@ def importDraftLegislationsFromFeed():
 
     url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak'
     url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt'
-    
-    # najprej epe od zakonov 
+
+    # najprej epe od zakonov
     feed_zakoni = feedparser.parse(url_zakoni)
     epas_and_names_zakoni = list([(getEpaFromText(post.title), post['published']) for post in feed_zakoni.entries if getEpaFromText(post.title)])
     epas_and_names_tuple_zakoni = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_zakoni]
 
-    # potem epe od aktov 
+    # potem epe od aktov
     feed_akti = feedparser.parse(url_akti)
     epas_and_names_akti = list([(getEpaFromText(post.title), post['published']) for post in feed_akti.entries  if getEpaFromText(post.title)])
     epas_and_names_tuple_akti = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_akti]
@@ -518,8 +517,8 @@ def importDraftLegislationsFromFeed():
     print report, 'akti'
     if report['saved']:
         update = True
-    if update:
-        exportLegislations()
+    # if update:
+    #     exportLegislations()
 
 
 def getDataFromPagerApiDRF(url):
