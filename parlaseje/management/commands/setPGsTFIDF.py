@@ -59,7 +59,7 @@ def enrichPGData(data, pg_id):
 
 
 def setTfidfOfPG(commander, pg_id):
-    url = '%s/tvrh/?q=id:pg%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content_t' % (
+    url = '%s/tvrh/?q=id:pgms_%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content' % (
         SOLR_URL, pg_id)
 
     commander.stdout.write('About to fetch %s' % url)

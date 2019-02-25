@@ -33,7 +33,7 @@ def delete_renders(method=None, group=None, owner_id=None, renders=None):
         if attrs:
             url = url + '?' + '&'.join(attrs)
         requests.get(url)
-        
+
 
 
 @receiver(post_save, sender=pTfidf)
@@ -90,6 +90,4 @@ def refetch():
     getAllStaticData(None, force_render=True)
     requests.get(settings.GLEJ_URL+'/api/data/refetch')
     requests.get(settings.FRONT_URL+'/api/data/refetch')
-
-
-
+    requests.get(settings.ISCI_URL+'/api/data/refetch')

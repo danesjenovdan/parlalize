@@ -122,8 +122,8 @@ def setMotionAnalize(request, session_id):
         for party in parties[vote_id].keys():
             # save just parlimetary groups
             if party in paries_ids:
-                party_data[party] = parties[vote_id][party]
-                if json.loads(party_data[party])['outliers']:
+                party_data[str(party)] = parties[vote_id][party]
+                if json.loads(party_data[str(party)])['outliers']:
                     has_outliers = True
                 # update/add IntraDisunion
                 intra = IntraDisunion.objects.filter(organization__id_parladata=party,
@@ -329,4 +329,3 @@ def updateMotionAnalizeOfAllSessions():
     for session_id in session_ids:
         printProgressBar(session_ids.index(session_id), len(session_ids), prefix='Sessions: ')
         setMotionAnalize(None, str(session_id))
-

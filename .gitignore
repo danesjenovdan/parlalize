@@ -66,6 +66,7 @@ target/
 # Static
 static/
 .vscode/.ropeproject/config.py
+.vscode/
 
 # settings files
 parlalize/settings/stage.py
