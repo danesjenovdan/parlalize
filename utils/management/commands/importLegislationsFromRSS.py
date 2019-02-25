@@ -15,26 +15,26 @@ class Command(BaseCommand):
 
         url_zakoni = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=zak'
         url_akti = 'https://www.dz-rs.si/DZ-LN-RSS/RSSProvider?rss=akt'
-        
-        # najprej epe od zakonov 
+
+        # najprej epe od zakonov
         feed_zakoni = feedparser.parse(url_zakoni)
         epas_and_names_zakoni = list([(getEpaFromText(post.title), post['published']) for post in feed_zakoni.entries if getEpaFromText(post.title)])
         epas_and_names_tuple_zakoni = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_zakoni]
 
-        # potem epe od aktov 
+        # potem epe od aktov
         feed_akti = feedparser.parse(url_akti)
         epas_and_names_akti = list([(getEpaFromText(post.title), post['published']) for post in feed_akti.entries  if getEpaFromText(post.title)])
         epas_and_names_tuple_akti = [split_epa_and_name(thing[0], thing[1]) for thing in epas_and_names_akti]
 
         result = check_and_save_legislation(epas_and_names_tuple_zakoni, 'zakon')
-        self.stdout.write(result)
+        self.stdout.write(str(result))
 
         result = check_and_save_legislation(epas_and_names_tuple_akti, 'akt')
-        self.stdout.write(result)
+        self.stdout.write(str(result))
 
-def split_epa_and_name(thing, date): 
-    epa_regex = re.compile(r'\d+-VIII') 
-    current_epa = epa_regex.findall(thing)[0] 
+def split_epa_and_name(thing, date):
+    epa_regex = re.compile(r'\d+-VIII')
+    current_epa = epa_regex.findall(thing)[0]
     current_name = thing.split(current_epa)[1].strip()
     date = getDate(date)
     return (current_epa, current_name, date)
