@@ -28,19 +28,22 @@ class Command(BaseCommand):
             for record in records:
                 ex_record = Record.objects.filter(id_parladata=record['id'])
                 if ex_record:
-                    ex_record = ex_record[0]
-                    ex_record.content=record['content'],
-                    ex_record.session=Session.objects.get(id=record['session']),
-                    ex_record.agenda_item=AgendaItem.objects.get(id=record['agenda_item']),
-                    ex_record.gov_id=record['gov_id'],
-                    ex_record.save()
-                    self.stdout.write('update record')
+                    try:
+                        ex_record = ex_record[0]
+                        ex_record.content=record['content'],
+                        ex_record.session=Session.objects.get(id_parladata=record['session']),
+                        ex_record.agenda_item=AgendaItem.objects.get(id_parladata=record['agenda_item']),
+                        ex_record.gov_id=record['gov_id'],
+                        ex_record.save()
+                        self.stdout.write('update record')
+                    except Exception as e:
+                        self.stdout.write(str(e))
                 else:
                     try:
                         Record(
                             content=record['content'],
-                            session=Session.objects.get(id=record['session']),
-                            agenda_item=AgendaItem.objects.get(id=record['agenda_item']),
+                            session=Session.objects.get(id_parladata=record['session']),
+                            agenda_item=AgendaItem.objects.get(id_parladata=record['agenda_item']),
                             gov_id=record['gov_id'],
                             id_parladata=record['id']
                         ).save()
