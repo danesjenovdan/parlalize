@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
-from parlaseje.models import Session, Record
+from parlaseje.models import Session, Record, AgendaItem
 from parlalize.settings import API_URL, PARSER_UN, PARSER_PASS
 from datetime import datetime
 
