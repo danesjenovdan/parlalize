@@ -3460,7 +3460,7 @@ def get_agenda_item_data(item, session_data):
             }
         }
         temp_item['debates'].append(debate_data)
-    for record in item.records.all().order_by('order'):
+    for record in item.records.all():
         temp_item['records'].append(record.id)
 
     temp_item['votings'] = []
