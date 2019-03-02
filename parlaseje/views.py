@@ -3518,7 +3518,7 @@ def getAgendaItem(request, agenda_item_id, date_=None):
         return JsonResponse({}, status=204)
 
 def getRecord(request, record_id):
-    record = get_object_or_404(Record, pk=record_id)
+    record = get_object_or_404(Record, id_parladata=record_id)
     session_data = record.session.getSessionData()
     return JsonResponse({
         'id': record.id_parladata,
