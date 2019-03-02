@@ -612,8 +612,7 @@ class AgendaItem(Timestampable, models.Model):
                                 related_name='agenda_items',
                                 help_text=_('Session '))
 
-    title = models.CharField(blank=True, null=True,
-                             max_length=1024,
+    title = models.TextField(blank=True, null=True,
                              help_text='Title of AgnedaItem')
 
     id_parladata = models.IntegerField(_('parladata id'),
