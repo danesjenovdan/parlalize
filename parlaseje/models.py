@@ -636,3 +636,22 @@ class Debate(Timestampable, models.Model):
                                        null=True,
                                        help_text=_('id parladata'))
 
+
+class Record(Timestampable, models.Model):
+    content = models.TextField(help_text='Record content')
+
+    session = models.ForeignKey('Session',
+                                blank=True, null=True,
+                                help_text='Record session')
+
+    agenda_item = models.ForeignKey('AgendaItem', blank=True, null=True,
+                                    help_text='Agenda item', related_name='records')
+
+    gov_id = models.CharField(max_length=255,
+                              blank=True, null=True,
+                              help_text='Government website id')
+
+    id_parladata = models.IntegerField(_('parladata id'),
+                                       blank=True,
+                                       null=True,
+                                       help_text=_('id parladata'))

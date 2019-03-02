@@ -57,7 +57,7 @@ urlpatterns = [
     url(r'^getVotesData/(?P<votes>[\w,]+)$', getVotesData),
 
     url(r'^getLegislationList/(?P<session_id>\d+)$', legislationList),
-    
+
     url(r'^getLegislation/(?P<epa>[A-Z0-9, \-\+\/]+)', legislation),
     url(r'^getOtherVotes/(?P<session_id>\d+)$', getOtherVotes),
     url(r'^getOtherVotes/(?P<session_id>\d+)/(?P<date_>[\w].+)$', getOtherVotes),
@@ -75,6 +75,8 @@ urlpatterns = [
 
     url(r'^getAgendaItem/(?P<agenda_item_id>\d+)$', getAgendaItem),
     url(r'^getAgendaItem/(?P<agenda_item_id>\d+)/(?P<date_>[\w].+)$', getAgendaItem),
+
+    url(r'^getRecord/(?P<record_id>\d+)$', getRecord),
 
     url(r'^', include(router.urls)),
 ]

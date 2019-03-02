@@ -3443,6 +3443,7 @@ def get_agenda_item_data(item, session_data):
     temp_item['id'] = item.id_parladata
     temp_item['text'] = item.title
     temp_item['debates'] = []
+    temp_item['records'] = []
     for debate in item.debates.all().order_by('date'):
         start_speech = debate.speeches.earliest("the_order")
         end_speech = debate.speeches.latest("the_order")
@@ -3459,7 +3460,9 @@ def get_agenda_item_data(item, session_data):
             }
         }
         temp_item['debates'].append(debate_data)
-    
+    for record in item.records.all().order_by('order'):
+        temp_item['records'].append(record.id)
+
     temp_item['votings'] = []
     for vote in item.votes.order_by('-start_time'):
         if vote.result == None:
@@ -3512,4 +3515,14 @@ def getAgendaItem(request, agenda_item_id, date_=None):
                              'session': session_data,
                              'result': data})
     else:
-        JsonResponse({}, status=204)
+        return JsonResponse({}, status=204)
+
+def getRecord(request, record_id):
+    record = get_object_or_404(Record, pk=record_id)
+    session_data = record.session.getSessionData()
+    return JsonResponse({
+        'id': record.id_parladata,
+        'content': record.content,
+        'agenda_item_title': record.agenda_item.title,
+        'session': session_data,
+    })
