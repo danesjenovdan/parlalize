@@ -3461,7 +3461,7 @@ def get_agenda_item_data(item, session_data):
         }
         temp_item['debates'].append(debate_data)
     for record in item.records.all():
-        temp_item['records'].append(record.id)
+        temp_item['records'].append(record.id_parladata)
 
     temp_item['votings'] = []
     for vote in item.votes.order_by('-start_time'):
