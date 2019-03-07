@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime, timedelta
 from django.http import Http404, JsonResponse, HttpResponse
+from raven.contrib.django.raven_compat.models import client
 import requests
 from parlaposlanci.models import (Person, StyleScores, CutVotes, MPStaticPL,
                                   MembershipsOfMember, LessEqualVoters,
