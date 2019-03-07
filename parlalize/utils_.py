@@ -51,15 +51,17 @@ def tryHard(url):
     counter = 0
     while not data or data.status_code != 200:
         try:
-            if counter > 2:
-                client.captureMessage(url+' je zahinavu več ko 2x.')
-                return 'ivan'
             data = requests.get(url)
         except:
-            counter += 1
-            time.sleep(5)
             pass
+        if counter > 5:
+            client.captureMessage(url + ' je zahinavu več ko 2x.')
+            print(url + ' je zahinavu več ko 2x.')
+            return None
         counter += 1
+        if not data:
+            time.sleep(1)
+            print("sleep")
     return data
 
 
@@ -447,7 +449,7 @@ def getAllStaticData(request, force_render=False):
 
         ministrs = MinisterStatic.objects.all()
         for ministr in ministrs:
-            out['ministrs'][ministr.id] = ministr.getJsonData() 
+            out['ministrs'][ministr.id] = ministr.getJsonData()
 
         orgs = Organization.objects.filter(classification__in=settings.WBS)
         out['wbs'] = [{'id': org.id_parladata,
