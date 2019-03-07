@@ -266,6 +266,7 @@ class Command(BaseCommand):
                     channel="#parlalize_notif",
                     text='Start update votes at: ' + str(datetime.now()))
         for session_id in data['sessions_of_updated_votes']:
+            self.stdout.write('set motion of session ' + str(session_id))
             setMotionOfSession(request_with_key, str(session_id))
 
         # update ballots
