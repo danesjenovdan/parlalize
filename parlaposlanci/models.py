@@ -367,6 +367,9 @@ class MPStaticPL(Timestampable, models.Model):
     voters = models.IntegerField(
         blank=True, null=True, help_text=_('Number of voters'))
 
+    points = models.IntegerField(
+        blank=True, null=True, help_text=_('Number of points'))
+
     age = models.IntegerField(blank=True, null=True,
                               help_text=_('Person\'s age.'))
 
