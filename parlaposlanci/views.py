@@ -120,7 +120,7 @@ def getMPStaticPL(request, person_id, date_=None):
     * @api {get} /p/getMPStatic/{id}/{?date} MP's static info
     * @apiName getMPStatic
     * @apiGroup MPs
-    * @apiDescription This function returns an object with all 
+    * @apiDescription This function returns an object with all
       "static" data belonging to an MP. By static we mean that it
       is entered and maintained by hand and rarely, if ever, changes.
     * @apiParam {Integer} id MP's Parladata id.
@@ -140,7 +140,7 @@ def getMPStaticPL(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -402,13 +402,13 @@ def getPercentOFAttendedSession(request, person_id, date=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
     * @apiSuccess {Object} results
 
-    * @apiSuccess {Object} results.votes MP's calculated presence at voting events.    
+    * @apiSuccess {Object} results.votes MP's calculated presence at voting events.
     * @apiSuccess {Object} results.votes.max MP (or MPs) who has the highest attendance and their score.
     * @apiSuccess {Float} results.votes.max.score Max MP's score.
     * @apiSuccess {Object[]} results.votes.max.mps A list of MP's with the same maximum score.
@@ -426,7 +426,7 @@ def getPercentOFAttendedSession(request, person_id, date=None):
     * @apiSuccess {Boolean} results.votes.max.mps.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
     * @apiSuccess {Float} results.votes.average The average score for this metric accross the parliament.
     * @apiSuccess {Float} results.votes.score Score for the MP in question.
-    
+
     * @apiSuccess {Object} results.sessions MP's calculated presence at sessions.
     * @apiSuccess {Object} results.sessions.max MP (or MPs) who has the highest attendance and their score.
     * @apiSuccess {Float} results.sessions.max.score Max MP's score.
@@ -446,7 +446,7 @@ def getPercentOFAttendedSession(request, person_id, date=None):
 
     * @apiSuccess {Float} results.votes.average The average score for this metric accross the parliament.
     * @apiSuccess {Float} results.votes.score Score for the MP in question.
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getPresence/12
@@ -670,7 +670,7 @@ def getNumberOfSpokenWords(request, person_id, date=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -692,7 +692,7 @@ def getNumberOfSpokenWords(request, person_id, date=None):
     * @apiSuccess {Boolean} results.max.mps.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
     * @apiSuccess {Float} results.average The average score for this metric accross the parliament.
     * @apiSuccess {Float} results.score Score for the MP in question.
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getNumberOfSpokenWords/12
@@ -851,14 +851,14 @@ def getLastActivity(request, person_id, date_=None):
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the
       president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
     * @apiSuccess {Object[]} results
     * @apiSuccess {date} results.date The date of the events in this object.
     * @apiSuccess {Object[]} results.events List of event objects for this date.
-    
+
     * @apiSuccess {String} results.events.option The option on the ballot, if the event was
       a ballot.
     * @apiSuccess {Integer} results.session_id Parladata id of the session at which the event
@@ -868,7 +868,7 @@ def getLastActivity(request, person_id, date_=None):
     * @apiSuccess {String} results.vote_name The name of the vote / text of the motion, if the
       event was a ballot.
     * @apiSuccess {Integer} results.vote_id Parladata id of the vote, if the event was a ballot.
-    
+
     * @apiSuccess {String} results.recipient_text Who was the question addressed to, if the
       event was a question.
     * @apiSuccess {String} results.title The title of the question, if the event was a question.
@@ -893,9 +893,9 @@ def getLastActivity(request, person_id, date_=None):
     * @apiSuccess {Integer} results.session.org.id Parladata id of the organization, if the event was a speech.
     * @apiSuccess {String} results.session.org.name Name of the organization, if the event was a speech.
     * @apiSuccess {Integer} results.session.id Parladata id of the session, if the event ws a speech.
-    
+
     * @apiSuccess {String} results.type Denotes the type of event (ballot/speech/question).
-    
+
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getLastActivity/12
     * @apiExample {curl} Example with date:
@@ -978,7 +978,7 @@ def getLastActivity(request, person_id, date_=None):
                 'type': 'ballot',
                 'session_id': vote.session.id_parladata,
                 }
- 
+
     def getSpeechData(speech, sessions_data):
         this_session = sessions_data[str(speech.session.id_parladata)]
         return {'speech_id': speech.id_parladata,
@@ -986,7 +986,7 @@ def getLastActivity(request, person_id, date_=None):
                 'session': this_session,
                 'the_order': speech.the_order,
                 }
- 
+
     def getQuestionData(question, sessions_data):
         persons = [ministr.getJsonData() for ministr in question.recipient_persons_static.all()]
         orgs = []
@@ -1019,7 +1019,7 @@ def getLastActivity(request, person_id, date_=None):
     if limit != 0:
         a = a.filter(person__id_parladata=person_id,
                     start_time__gte=dates[-limit]).order_by('-start_time')
- 
+
     staticData = requests.get(BASE_URL + '/utils/getAllStaticData/').json()
     result = []
     dates = list(set(list(a.values_list("start_time_date", flat=True))))
@@ -1049,7 +1049,7 @@ def getLastActivity(request, person_id, date_=None):
         'person': getPersonData(person_id, date_),
         'results': list(reversed(out))
         }
- 
+
     return JsonResponse(result, safe=False)
 
 
@@ -1080,7 +1080,7 @@ def getAllSpeeches(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -1219,7 +1219,7 @@ def getMostEqualVoters(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -1421,7 +1421,7 @@ def getLessEqualVoters(request, person_id, date_=None): # TODO refactor rename
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -1618,7 +1618,7 @@ def getStyleScores(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -1626,7 +1626,7 @@ def getStyleScores(request, person_id, date_=None):
     * @apiSuccess {Float} results.problematicno MP's "problematic" language score.
     * @apiSuccess {Float} results.preprosto MP's "simple" language score.
     * @apiSuccess {Float} results.privzdignjeno MP's "fancy" language score.
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getStyleScores/12
@@ -1668,10 +1668,10 @@ def getStyleScores(request, person_id, date_=None):
 
     if card.privzdignjeno != 0 and card.privzdignjeno_average != 0:
         privzdignjeno = card.privzdignjeno/card.privzdignjeno_average
-    
+
     if card.problematicno != 0 and card.problematicno_average != 0:
         problematicno = card.problematicno/card.problematicno_average
-    
+
     if card.preprosto != 0 and card.preprosto_average != 0:
         preprosto = card.preprosto/card.preprosto_average
 
@@ -1721,7 +1721,7 @@ def getTFIDF(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -1935,14 +1935,14 @@ def getTFIDF(request, person_id, date_=None):
         return JsonResponse({
             'person': getPersonData(person_id, date_),
             'results': [],
-            "created_for": datetime.now().strftime(API_DATE_FORMAT), 
+            "created_for": datetime.now().strftime(API_DATE_FORMAT),
             "created_at": datetime.now().strftime(API_DATE_FORMAT)
             })
 
     out = {
         'person': getPersonData(person_id, date_),
         'results': card.data,
-        "created_for": card.created_for.strftime(API_DATE_FORMAT), 
+        "created_for": card.created_for.strftime(API_DATE_FORMAT),
         "created_at": card.created_at.strftime(API_DATE_FORMAT)
     }
 
@@ -2036,7 +2036,7 @@ def getVocabularySize(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -2058,7 +2058,7 @@ def getVocabularySize(request, person_id, date_=None):
     * @apiSuccess {Boolean} results.max.mps.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
     * @apiSuccess {Float} results.average The average score for this metric accross the parliament.
     * @apiSuccess {Float} results.score Score for the MP in question.
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getVocabularySize/12
@@ -2162,7 +2162,7 @@ def getVocabolarySizeLanding(request, date_=None): # TODO refactor typo getVocab
     * @apiSuccess {Boolean} data.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
 
     * @apiSucces {Float} data.score MP's vocabulary size
-    
+
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getVocabularySizeLanding/
     * @apiExample {curl} Example with date:
@@ -2239,16 +2239,16 @@ def getVocabolarySizeLanding(request, date_=None): # TODO refactor typo getVocab
         date_ = date_of.strftime(API_DATE_FORMAT)
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
     datas = []
-    for mp in mps: 
+    for mp in mps:
         try:
             datas.append(getPersonCardModelNew(VocabularySize, mp["id"], date_))
         except:
             print "ni se goborila"
     print datas
-    return JsonResponse({"created_for": date_, 
-                         "created_at": datas[0].created_at.strftime(API_DATE_FORMAT) if datas else date_, 
-                         "data": sorted([{"person": getPersonData(data.person.id_parladata, date_), 
-                            "score": data.score} for data in datas if data.score > 0], key=lambda k: k['score'])}, 
+    return JsonResponse({"created_for": date_,
+                         "created_at": datas[0].created_at.strftime(API_DATE_FORMAT) if datas else date_,
+                         "data": sorted([{"person": getPersonData(data.person.id_parladata, date_),
+                            "score": data.score} for data in datas if data.score > 0], key=lambda k: k['score'])},
                          safe=False)
 
 
@@ -2281,7 +2281,7 @@ def getVocabolarySizeUniqueWordsLanding(request, date_=None): # TODO refactor ty
     * @apiSuccess {Boolean} /.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
 
     * @apiSucces {Integer} /.score MP's number of unique spoken words.
-    
+
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getUniqueWordsLanding/
     * @apiExample {curl} Example with date:
@@ -2355,7 +2355,7 @@ def getVocabolarySizeUniqueWordsLanding(request, date_=None): # TODO refactor ty
     mps = tryHard(API_URL+'/getMPs/'+date_).json()
     datas = [getPersonCardModelNew(VocabularySizeUniqueWords, mp["id"], date_) for mp in mps]
     print datas
-    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_), 
+    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_),
                                  "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
 
 
@@ -2468,7 +2468,7 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -2490,7 +2490,7 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
     * @apiSuccess {Boolean} results.max.mps.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
     * @apiSuccess {Integer} results.average The average score for this metric accross the parliament.
     * @apiSuccess {Integer} results.score Score for the MP in question.
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getAverageNumberOfSpeechesPerSession/12
@@ -2635,7 +2635,7 @@ def getCompass(request, date_=None): # TODO make proper setters and getters
     * @apiSucces {Object} data.score MP's coordinates
     * @apiSuccess {Float} data.score.vT1 First coordinate
     * @apiSuccess {Float} data.score.vT2 Second coordinate
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getCompass/
@@ -2705,9 +2705,9 @@ def getCompass(request, date_=None): # TODO make proper setters and getters
         person.update({"person": getPersonData(person["person_id"], compas.created_for.strftime(API_DATE_FORMAT))})
         person.pop('person_id', None)
 
-    return JsonResponse({"created_for": compas.created_for.strftime(API_DATE_FORMAT), 
-                         "created_at": compas.created_at.strftime(API_DATE_FORMAT), 
-                         "data": data}, 
+    return JsonResponse({"created_for": compas.created_for.strftime(API_DATE_FORMAT),
+                         "created_at": compas.created_at.strftime(API_DATE_FORMAT),
+                         "data": data},
                         safe=False)
 
 
@@ -2742,7 +2742,7 @@ def getMembershipsOfMember(request, person_id, date=None): # TODO refactor keys 
     * @apiParam {date} date Optional date
 
     * @apiSuccess {Object} memberships MP's memberships categorised by organization type.
-    
+
     * @apiSuccess {Object[]} memberships.kolegij MP's memberships in "kolegij"-type organizations.
     * @apiSuccess {String} memberships.kolegij.url Organization's url.
     * @apiSuccess {String} memberships.kolegij.org_type Organization type.
@@ -2802,7 +2802,7 @@ def getMembershipsOfMember(request, person_id, date=None): # TODO refactor keys 
 
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getMembershipsOfMember/
@@ -2897,7 +2897,7 @@ def getTaggedBallots(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -2913,7 +2913,7 @@ def getTaggedBallots(request, person_id, date_=None):
     * @apiSuccess {Integer} results.ballots.vote_id Parladata id of the vote this ballot belongs to.
 
     * @apiSuccess {String[]} all_tags List of all tags used for tagging ballots.
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getTaggedBallots/12
@@ -3081,7 +3081,7 @@ def getNumberOfQuestions(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -3203,7 +3203,7 @@ def getQuestions(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -3216,7 +3216,7 @@ def getQuestions(request, person_id, date_=None):
     * @apiSuccess {Integer} results.questions.id Parladata id of the question.
     * @apiSuccess {Integer} results.questions.session_id Parladata id of the session where this question was asked.
     * @apiSuccess {Integer} results.questions.session_name Name of the session where this question was asked.
-    
+
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getQuestions/12
     * @apiExample {curl} Example with date:
@@ -3355,7 +3355,7 @@ def getListOfMembers(request, date_=None, force_render=False):
     * @apiSuccess {Float}  data.vocabulary_size MP's calculated vocabulary size.
     * @apiSuccess {Integer} data.spoken_words Number of words this MP has spoken.
     * @apiSUccess {Float} data.preprosto "Simple" language style score.
-    
+
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getListOfMembers
     * @apiExample {curl} Example with date:
@@ -3473,7 +3473,7 @@ def getListOfMembers(request, date_=None, force_render=False):
     else:
         mps = tryHard(API_URL+'/getMPs/'+date_).json()
         data = []
-        for mp in mps: 
+        for mp in mps:
             person_obj = {}
             person_obj["results"] = {}
             person_id = mp["id"]
@@ -3506,20 +3506,20 @@ def getListOfMembers(request, date_=None, force_render=False):
                 styleScores = getPersonCardModelNew(StyleScores, int(person_id), date_)
             except:
                 styleScores = None
-            
+
             privzdignjeno = 0
             problematicno = 0
             preprosto = 0
 
             if styleScores.privzdignjeno != 0 and styleScores.privzdignjeno_average != 0:
                 privzdignjeno = styleScores.privzdignjeno/styleScores.privzdignjeno_average
-            
+
             if styleScores.problematicno != 0 and styleScores.problematicno_average != 0:
                 problematicno = styleScores.problematicno/styleScores.problematicno_average
-            
+
             if styleScores.preprosto != 0 and styleScores.preprosto_average != 0:
                 preprosto = styleScores.preprosto/styleScores.preprosto_average
-            
+
             person_obj["results"]["privzdignjeno"] = privzdignjeno
             person_obj["results"]["preprosto"] = preprosto
             person_obj["results"]["problematicno"] = problematicno
@@ -3527,7 +3527,7 @@ def getListOfMembers(request, date_=None, force_render=False):
             data.append(person_obj)
         data = sorted(data, key=lambda k: k['person']["name"])
         data = {"districts": [{dist.id_parladata : dist.name} for dist in District.objects.all()], "data": data}
-        cache.set("mp_list_" + key, data, 60 * 60 * 48)    
+        cache.set("mp_list_" + key, data, 60 * 60 * 48)
 
     return JsonResponse(data)
 
@@ -3555,7 +3555,7 @@ def getAllActiveMembers(request):
     * @apiSuccess {String} /.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} /.id The person's Parladata id.
     * @apiSuccess {Boolean} /.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getAllActiveMembers/
@@ -3647,7 +3647,7 @@ def getSlugs(request):
     * @apiSuccess {String} party.PARTY_ID.acronym Party's acronym.
     * @apiSuccess {String} party.PARTY_ID.realAcronym Party's acronym with proper capitalisation.
     * @apiSuccess {String} party.PARTY_ID.slug Party's slug
-    
+
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getSlugs/
 
@@ -3867,7 +3867,7 @@ def getPresenceThroughTime(request, person_id, date_=None):
     * @apiSuccess {String} person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} person.id The person's Parladata id.
     * @apiSuccess {Boolean} person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {date} created_at When was this data created?
     * @apiSuccess {date} created_for What historic date does this data correspond with?
 
@@ -4011,7 +4011,7 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
                  #'problematicno': [],
                  'mismatch_of_pg': [],
                  }
-    
+
     diffs = copy.deepcopy(rank_data)
 
     data = []
@@ -4252,7 +4252,7 @@ def getListOfMembersTickers(request, date_=None):
     * @apiSuccess {Integer} data.person.id The person's Parladata id.
     * @apiSuccess {Boolean} data.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
     * @apiSuccess {Object} data.results Analysis results for this person.
-    
+
     * @apiSuccess {Object} data.results.privzdignjeno "Elevated" language style score object.
     * @apiSuccess {Float} data.results.privzdignjeno.diff "Elevated" language style score difference.
     * @apiSuccess {Float} data.results.privzdignjeno.score "Elevated" language style score.
@@ -4282,7 +4282,7 @@ def getListOfMembersTickers(request, date_=None):
     * @apiSuccess {Float} data.results.problematicno.diff "Problematic" language style score difference.
     * @apiSuccess {Float} data.results.problematicno.score "Problematic" language style score.
     * @apiSuccess {Integer} data.results.problematicno.rank "Problematic" language style score rank.
-    
+
     * @apiSuccess {Object} data.results.vocabulary_size MP's calculated vocabulary size object.
     * @apiSuccess {Integer} data.results.vocabulary_size.diff MP's calculated vocabulary size difference.
     * @apiSuccess {Integer} data.results.vocabulary_size.score MP's calculated vocabulary size.
@@ -4297,7 +4297,7 @@ def getListOfMembersTickers(request, date_=None):
     * @apiSuccess {Float} data.results.preprosto.diff "Simple" language style score difference.
     * @apiSuccess {Float} data.results.preprosto.score "Simple" language style score.
     * @apiSuccess {Integer} data.results.preprosto.rank "Simple" language style score rank.
-    
+
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/p/getListOfMembersTickers
     * @apiExample {curl} Example with date:
@@ -4498,7 +4498,7 @@ def getMismatchWithPG(request, person_id, date_=None):
 
 def getNumberOfAmendmetsOfMember(request, person_id, date_=None):
     """
-    * @api {get} getNumberOfAmendmetsOfMember/{pg_id}/{?date} Gets number of amendments of specific organization 
+    * @api {get} getNumberOfAmendmetsOfMember/{pg_id}/{?date} Gets number of amendments of specific organization
     * @apiName getNumberOfAmendmetsOfMember
     * @apiGroup MPs
     * @apiDescription This function returns number of amendments of specific member
@@ -4508,7 +4508,7 @@ def getNumberOfAmendmetsOfMember(request, person_id, date_=None):
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfMember/1
     * @apiExample {curl} Example with date:
-        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfMember/1/12.12.2015    
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfMember/1/12.12.2015
     """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)

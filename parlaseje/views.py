@@ -860,13 +860,13 @@ def getMotionGraph(request, id_mo, date=False):
     * @apiSuccess {Object} all.kvorum object
     * @apiSuccess {String} all.kvorum.option Name of option
     * @apiSuccess {Integer} all.kvorum.total_votes Total votes for this option
-    * @apiSuccess {Object[]} all.kvorum.breakdown   
+    * @apiSuccess {Object[]} all.kvorum.breakdown
     * @apiSuccess {Object} all.kvorum.breakdown.pg
     * @apiSuccess {String} rall.kvorum.breakdown.pg.acronym Organization acronym
     * @apiSuccess {Boolean} rall.kvorum.breakdown.pg.is_coalition True of False if organization is in coalition
     * @apiSuccess {Integer} all.kvorum.breakdown.pg.id Id of organization
     * @apiSuccess {Integer} all.kvorum.breakdown.pg.name Name of organization
-    * @apiSuccess {Object[]} all.kvorum.breakdown.mps MP's person object 
+    * @apiSuccess {Object[]} all.kvorum.breakdown.mps MP's person object
     * @apiSuccess {Boolean} all.kvorum.breakdown.mps.is_active Answer the question: Is this MP currently active?
     * @apiSuccess {Integer[]} all.kvorum.breakdown.mps.district List of Parladata ids for districts this person was elected in.
     * @apiSuccess {String} all.kvorum.breakdown.mps.name MP's full name.
@@ -883,13 +883,13 @@ def getMotionGraph(request, id_mo, date=False):
     * @apiSuccess {Object} all.not_present object
     * @apiSuccess {String} all.not_present.option Name of option
     * @apiSuccess {Integer} all.not_present.total_votes Total votes for this option
-    * @apiSuccess {Object[]} all.not_present.breakdown   
+    * @apiSuccess {Object[]} all.not_present.breakdown
     * @apiSuccess {Object} all.not_present.breakdown.pg
     * @apiSuccess {String} rall.not_present.breakdown.pg.acronym Organization acronym
     * @apiSuccess {Boolean} rall.not_present.breakdown.pg.is_coalition True of False if organization is in coalition
     * @apiSuccess {Integer} all.not_present.breakdown.pg.id Id of organization
     * @apiSuccess {Integer} all.not_present.breakdown.pg.name Name of organization
-    * @apiSuccess {Object[]} all.not_present.breakdown.mps MP's person object 
+    * @apiSuccess {Object[]} all.not_present.breakdown.mps MP's person object
     * @apiSuccess {Boolean} all.not_present.breakdown.mps.is_active Answer the question: Is this MP currently active?
     * @apiSuccess {Integer[]} all.not_present.breakdown.mps.district List of Parladata ids for districts this person was elected in.
     * @apiSuccess {String} all.not_present.breakdown.mps.name MP's full name.
@@ -906,13 +906,13 @@ def getMotionGraph(request, id_mo, date=False):
     * @apiSuccess {Object} all.against object
     * @apiSuccess {String} all.against.option Name of option
     * @apiSuccess {Integer} all.against.total_votes Total votes for this option
-    * @apiSuccess {Object[]} all.against.breakdown   
+    * @apiSuccess {Object[]} all.against.breakdown
     * @apiSuccess {Object} all.against.breakdown.pg
     * @apiSuccess {String} rall.against.breakdown.pg.acronym Organization acronym
     * @apiSuccess {Boolean} rall.against.breakdown.pg.is_coalition True of False if organization is in coalition
     * @apiSuccess {Integer} all.against.breakdown.pg.id Id of organization
     * @apiSuccess {Integer} all.against.breakdown.pg.name Name of organization
-    * @apiSuccess {Object[]} all.against.breakdown.mps MP's person object 
+    * @apiSuccess {Object[]} all.against.breakdown.mps MP's person object
     * @apiSuccess {Boolean} all.against.breakdown.mps.is_active Answer the question: Is this MP currently active?
     * @apiSuccess {Integer[]} all.against.breakdown.mps.district List of Parladata ids for districts this person was elected in.
     * @apiSuccess {String} all.against.breakdown.mps.name MP's full name.
@@ -929,13 +929,13 @@ def getMotionGraph(request, id_mo, date=False):
     * @apiSuccess {Object} all.for object
     * @apiSuccess {String} all.for.option Name of option
     * @apiSuccess {Integer} all.for.total_votes Total votes for this option
-    * @apiSuccess {Object[]} all.for.breakdown   
+    * @apiSuccess {Object[]} all.for.breakdown
     * @apiSuccess {Object} all.for.breakdown.pg
     * @apiSuccess {String} rall.for.breakdown.pg.acronym Organization acronym
     * @apiSuccess {Boolean} rall.for.breakdown.pg.is_coalition True of False if organization is in coalition
     * @apiSuccess {Integer} all.for.breakdown.pg.id Id of organization
     * @apiSuccess {Integer} all.for.breakdown.pg.name Name of organization
-    * @apiSuccess {Object[]} all.for.breakdown.mps MP's person object 
+    * @apiSuccess {Object[]} all.for.breakdown.mps MP's person object
     * @apiSuccess {Boolean} all.for.breakdown.mps.is_active Answer the question: Is this MP currently active?
     * @apiSuccess {Integer[]} all.for.breakdown.mps.district List of Parladata ids for districts this person was elected in.
     * @apiSuccess {String} all.for.breakdown.mps.name MP's full name.
@@ -1103,7 +1103,7 @@ def getMotionAnalize(request, motion_id):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {String} id This vote's id
-    * @apiSuccess {String[]} documents List of documents associated with this vote 
+    * @apiSuccess {String[]} documents List of documents associated with this vote
     * @apiSuccess {String} name The name of this vote
     * @apiSuccess {date} created_at When was this card created?
     * @apiSuccess {Object} session Session data
@@ -1490,7 +1490,7 @@ def setPresenceOfPG(request, session_id):
         except:
             if pg in counters_in.keys():
                 results[pg] = 100
-            elif pg in counters_out.keys(): 
+            elif pg in counters_out.keys():
                 results[pg] = 0
             else:
                 print('this dont work')
@@ -1523,7 +1523,7 @@ def getPresenceOfPG(request, session_id, date=False):
     * @apiSuccess {Boolean} session.orgs.is_coalition True of False if organization is in coalition
     * @apiSuccess {Integer} session.orgs.id Id of organization
     * @apiSuccess {Integer} session.orgs.name Name of organization
-    * @apiSuccess {Object[]} results 
+    * @apiSuccess {Object[]} results
     * @apiSuccess {Integer} results.percent Percent of presence on session for each PG.
     * @apiSuccess {Object} results.organization
     * @apiSuccess {String} results.organization.acronym Organization acronym
@@ -2370,7 +2370,7 @@ def getWorkingBodies(request):
     * @apiSuccess {Integer} id Id of working bodie.
     * @apiSuccess {String} name Name of working bodie.
     * @apiExample {curl} Example:
-        curl -i     
+        curl -i
     * @apiSuccessExample {json} Example response:
     [
     {
@@ -2675,7 +2675,7 @@ def getComparedVotes(request):
         parties_same_list = parties_same.split(',')
     else:
         parties_same_list = []
-    
+
     if people_different != '':
         people_different_list = people_different.split(',')
     else:
@@ -2684,7 +2684,7 @@ def getComparedVotes(request):
         parties_different_list = parties_different.split(',')
     else:
         parties_different_list = []
-    
+
     if len(people_same_list) + len(parties_same_list) == 0:
         out = {
             'total': Vote.objects.all().count(),
@@ -2701,7 +2701,7 @@ def getComparedVotes(request):
     beginning = 'SELECT * FROM '
     select_same_people = ''
     select_same_parties = ''
-    
+
     match_same_people_ballots = ''
     match_same_people_persons = ''
     match_same_people_options = ''
@@ -2712,7 +2712,7 @@ def getComparedVotes(request):
 
     select_different_people = ''
     select_different_parties = ''
-    
+
     match_different_people_ballots = ''
     match_different_people_persons = ''
     match_different_people_options = ''
@@ -2727,7 +2727,7 @@ def getComparedVotes(request):
             select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s, parlaseje_activity_person ap%s, ' % (select_same_people, str(i), str(i), str(i), str(i))
         else:
             select_same_people = '%s parlaseje_ballot b%s, parlaseje_activity a%s, parlaposlanci_person p%s, parlaseje_activity_person ap%s ' % (select_same_people, str(i), str(i), str(i), str(i))
-    
+
     # select for same parties DONE
     for i, e in enumerate(parties_same_list):
         if i < len(parties_same_list) - 1:
@@ -2741,7 +2741,7 @@ def getComparedVotes(request):
             select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s, parlaseje_activity_person dap%s, ' % (select_different_people, str(i), str(i), str(i), str(i))
         else:
             select_different_people = '%s parlaseje_ballot db%s, parlaseje_activity da%s, parlaposlanci_person dp%s, parlaseje_activity_person dap%s ' % (select_different_people, str(i), str(i), str(i), str(i))
-    
+
     # select for different parties DONE
     for i, e in enumerate(parties_different_list):
         if i < len(parties_different_list) - 1:
@@ -2757,7 +2757,7 @@ def getComparedVotes(request):
                 match_same_people_ballots = '%s b0.vote_id = b%s.vote_id AND ' % (match_same_people_ballots, str(i))
             else:
                 match_same_people_ballots = '%s b0.vote_id = b%s.vote_id' % (match_same_people_ballots, str(i))
-    
+
     # match same parties ballots by vote id DONE
     # if only one same party was passed match_same_parties_ballots will remain an empty string
     if len(people_same_list) == 0:
@@ -2790,8 +2790,8 @@ def getComparedVotes(request):
             else:
                 # last
                 match_same_parties_ballots = '%s b0.vote_id = pb%s.vote_id' % (match_same_parties_ballots, str(i))
-    
-    
+
+
 
     # match same people with persons DONE
     for i, e in enumerate(people_same_list):
@@ -2799,7 +2799,7 @@ def getComparedVotes(request):
             match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.id = ap%s.activity_id AND ap%s.person_id = p%s.id AND p%s.id_parladata = %s AND ' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
         else:
             match_same_people_persons = '%s b%s.activity_ptr_id = a%s.id AND a%s.id = ap%s.activity_id AND ap%s.person_id = p%s.id AND p%s.id_parladata = %s' % (match_same_people_persons, str(i), str(i), str(i), str(i), str(i), str(i), str(i), e)
-    
+
     # match same parties with organizations DONE
     for i, e in enumerate(parties_same_list):
         if i < len(parties_same_list) -1:
@@ -2814,21 +2814,21 @@ def getComparedVotes(request):
                 match_same_people_options = '%s b0.option = b%s.option AND ' % (match_same_people_options, str(i))
             else:
                 match_same_people_options = '%s b0.option = b%s.option' % (match_same_people_options, str(i))
-    
+
     # match same parties based on options
     for i, e in enumerate(parties_same_list):
         if i == 0:
             if select_same_people != '':
                 if len(parties_same_list) > 1:
                     match_same_parties_options = '%s b0.option = pb0.option AND ' % (match_same_parties_options)
-                else: 
+                else:
                     match_same_parties_options = '%s b0.option = pb0.option ' % (match_same_parties_options)
         else:
             if i != len(parties_same_list) - 1:
                 match_same_parties_options = '%s pb0.option = pb%s.option AND ' % (match_same_parties_options, str(i))
             else:
                 match_same_parties_options = '%s pb0.option = pb%s.option' % (match_same_parties_options, str(i))
-    
+
     # compare different people and parties
     if len(people_same_list) > 0:
         # we compare with same people
@@ -2839,7 +2839,7 @@ def getComparedVotes(request):
                 match_different_people_ballots = '%s b0.vote_id = db%s.vote_id AND ' % (match_different_people_ballots, str(i))
             else:
                 match_different_people_ballots = '%s b0.vote_id = db%s.vote_id' % (match_different_people_ballots, str(i))
-        
+
         # match different parties ballots by vote id
         for i, e in enumerate(parties_different_list):
             if i < len(parties_different_list) - 1:
@@ -2853,14 +2853,14 @@ def getComparedVotes(request):
                 match_different_people_options = '%s b0.option != db%s.option AND ' % (match_different_people_options, str(i))
             else:
                 match_different_people_options = '%s b0.option != db%s.option' % (match_different_people_options, str(i))
-        
+
         # match different parties based on options
         for i, e in enumerate(parties_different_list):
                 if i < len(parties_different_list) - 1:
                     match_different_parties_options = '%s b0.option != dpb%s.option AND ' % (match_different_parties_options, str(i))
-                else: 
+                else:
                     match_different_parties_options = '%s b0.option != dpb%s.option ' % (match_different_parties_options, str(i))
-    
+
     else:
         # we compare with same parties
 
@@ -2870,7 +2870,7 @@ def getComparedVotes(request):
                 match_different_people_ballots = '%s pb0.vote_id = db%s.vote_id AND ' % (match_different_people_ballots, str(i))
             else:
                 match_different_people_ballots = '%s pb0.vote_id = db%s.vote_id' % (match_different_people_ballots, str(i))
-        
+
         # match different parties ballots by vote id
         for i, e in enumerate(parties_different_list):
             if i < len(parties_different_list) - 1:
@@ -2884,14 +2884,14 @@ def getComparedVotes(request):
                 match_different_people_options = '%s pb0.option != db%s.option AND ' % (match_different_people_options, str(i))
             else:
                 match_different_people_options = '%s pb0.option != db%s.option' % (match_different_people_options, str(i))
-        
+
         # match different parties based on options
         for i, e in enumerate(parties_different_list):
                 if i < len(parties_different_list) - 1:
                     match_different_parties_options = '%s pb0.option != dpb%s.option AND ' % (match_different_parties_options, str(i))
-                else: 
+                else:
                     match_different_parties_options = '%s pb0.option != dpb%s.option ' % (match_different_parties_options, str(i))
-    
+
     # match different people with person
     for i, e in enumerate(people_different_list):
         if i < len(people_different_list) - 1:
@@ -2905,15 +2905,15 @@ def getComparedVotes(request):
             match_different_parties_organizations = '%s dpb%s.org_voter_id = do%s.id AND do%s.id_parladata = %s AND ' % (match_different_parties_organizations, str(i), str(i), str(i), e)
         else:
             match_different_parties_organizations = '%s dpb%s.org_voter_id = do%s.id AND do%s.id_parladata = %s' % (match_different_parties_organizations, str(i), str(i), str(i), e)
-    
-    
+
+
     query = beginning
-    
+
     q_selectors_list = [select_same_people, select_same_parties, select_different_people, select_different_parties]
     q_selectors_list_clean = [s for s in q_selectors_list if s != '']
     q_selectors = ', '.join(q_selectors_list_clean)
     print 'q_selectors ' + q_selectors
-    
+
     query = query + ' ' + q_selectors + ' WHERE'
 
     q_match_ballots_list = [match_same_people_ballots, match_same_parties_ballots, match_different_people_ballots, match_different_parties_ballots]
@@ -2952,7 +2952,7 @@ def getComparedVotes(request):
     after_where = ' AND '.join(after_where_list_clean)
 
     query = query + after_where
-    
+
     if request.GET.get('special'):
         # exclude 'ni'
         exclude_ni_people_same = ''
@@ -2965,19 +2965,19 @@ def getComparedVotes(request):
                 exclude_ni_people_same = '%s b%s.option != \'%s\' AND ' % (exclude_ni_people_same, i, NOT_PRESENT[0])
             else:
                 exclude_ni_people_same = '%s b%s.option != \'%s\'' % (exclude_ni_people_same, i, NOT_PRESENT[0])
-        
+
         for i, e in enumerate(parties_same_list):
             if i < len(parties_same_list) - 1:
                 exclude_ni_parties_same = '%s pb%s.option != \'%s\' AND ' % (exclude_ni_parties_same, i, NOT_PRESENT[0])
             else:
                 exclude_ni_parties_same = '%s pb%s.option != \'%s\'' % (exclude_ni_parties_same, i, NOT_PRESENT[0])
-        
+
         for i, e in enumerate(people_different_list):
             if i < len(people_different_list) - 1:
                 exclude_ni_people_different = '%s db%s.option != \'%s\' AND ' % (exclude_ni_people_different, i, NOT_PRESENT[0])
             else:
                 exclude_ni_people_different = '%s db%s.option != \'%s\'' % (exclude_ni_people_different, i, NOT_PRESENT[0])
-        
+
         for i, e in enumerate(parties_different_list):
             if i < len(parties_different_list) - 1:
                 exclude_ni_parties_different = '%s dpb%s.option != \'%s\' AND ' % (exclude_ni_parties_different, i, NOT_PRESENT[0])
@@ -3191,7 +3191,7 @@ def legislationList(request, session_id):
     wbs_data = json.loads(getAllStaticData(None).content)['wbs']
     wbs = {}
     for wb in wbs_data:
-        wbs[str(wb['id'])] = wb 
+        wbs[str(wb['id'])] = wb
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
     epas=session.in_session.exclude(epa='').distinct('epa').values_list('epa', flat=True)
@@ -3275,7 +3275,7 @@ def legislation(request, epa):
         created_at = max_date.strftime(API_DATE_FORMAT)
     else:
         created_at = law.created_at.strftime(API_DATE_FORMAT)
-        
+
 
     ses_date = start_time.strftime(API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
@@ -3460,7 +3460,7 @@ def get_agenda_item_data(item, session_data):
             }
         }
         temp_item['debates'].append(debate_data)
-    
+
     temp_item['votings'] = []
     for vote in item.votes.order_by('-start_time'):
         if vote.result == None:
