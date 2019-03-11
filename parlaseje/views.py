@@ -3425,6 +3425,7 @@ def getAllLegislation(request):
                                                                                                                    'id': None},
                                       'classification': legislation.classification,
                                       'result': legislation.result,
+                                      'icon': legislation.icon,
                                       'type_of_law': legislation.type_of_law,
                                       'has_link': hasLegislationLink(legislation),
                                       'abstractVisible': legislation.abstractVisible,
