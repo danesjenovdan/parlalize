@@ -1,96 +1,31 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, Tfidf
 from parlalize.utils_ import saveOrAbortNew, tryHard
-from parlaskupine.utils_ import getPgData
 from datetime import datetime
-from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
+from parlalize.settings import API_URL, API_DATE_FORMAT, ISCI_URL
 
 import requests
-import json
-
-
-def truncateTFIDF(data):
-    """
-    remove terms with to lowest frequency
-    """
-    newdata = []
-    for term in data:
-        if ' ' not in term['term']:
-            if term['scores']['tf'] > 10:
-                try:
-                    float(term['term'])
-                    pass
-                except ValueError:
-                    newdata.append(term)
-
-    return newdata
-
-
-def enrichPGData(data, pg_id):
-    """
-    make solr json preety and sort results by tf-idf
-    """
-    results = []
-
-    for i, term in enumerate(data['termVectors'][1][3]):
-        if i % 2 == 0:
-
-            tkey = data['termVectors'][1][3][i]
-            tvalue = data['termVectors'][1][3][i + 1]
-
-            results.append({'term': tkey,
-                            'scores': {tvalue[0]: tvalue[1],
-                                       tvalue[2]: tvalue[3],
-                                       tvalue[4]: tvalue[5]}})
-            del data['termVectors'][1][3][i]
-        else:
-            del data['termVectors'][1][3][i]
-
-    truncatedResults = truncateTFIDF(results)
-
-    sortedResults = sorted(truncatedResults,
-                           key=lambda k: k['scores']['tf-idf'],
-                           reverse=True)[:25]
-
-    enrichedData = {'organization': getPgData(pg_id),
-                    'results': sortedResults}
-
-    return enrichedData
 
 
 def setTfidfOfPG(commander, pg_id):
-    url = '%s/tvrh/?q=id:pgms_%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content' % (
-        SOLR_URL, pg_id)
-
+    url = '%s/tfidf/party?id=%s' % (ISCI_URL, pg_id)
     commander.stdout.write('About to fetch %s' % url)
     r = requests.get(url)
-
     commander.stdout.write('Saving PG %s' % str(pg_id))
-    try:
-        output = enrichPGData(r.json(), pg_id)
 
-        date_of = datetime.now().date()
-        organization = Organization.objects.get(
-            id_parladata=output['organization']['id'])
-        saveOrAbortNew(Tfidf,
-                       organization=organization,
-                       created_for=date_of,
-                       is_visible=False,
-                       data=output['results'])
-    except IndexError:
-        commander.stderr.write('No data for this PG, saving empty array.')
-        date_of = datetime.now().date()
-        organization = Organization.objects.get(
-            id_parladata=pg_id)
-        saveOrAbortNew(Tfidf,
-                       organization=organization,
-                       created_for=date_of,
-                       is_visible=False,
-                       data=[])
+    output = r.json()
+    date_of = datetime.now().date()
+    organization = Organization.objects.get(id_parladata=pg_id)
+    data = output.get('tfidf', [])
+    saveOrAbortNew(Tfidf,
+                   organization=organization,
+                   created_for=date_of,
+                   is_visible=False,
+                   data=data)
 
 
 class Command(BaseCommand):
-    help = 'Updates PresenceThroughTime'
+    help = 'Generate tf-idf for PGs'
 
     def add_arguments(self, parser):
         parser.add_argument(
