@@ -3220,6 +3220,7 @@ def legislationList(request, session_id):
                     'type_of_law': law.type_of_law,
                     'has_link': hasLegislationLink(law),
                     'abstractVisible': law.abstractVisible,
+                    'has_discussion': law.has_discussion,
                     })
 
     return JsonResponse({'results': out,
@@ -3292,7 +3293,8 @@ def legislation(request, epa):
                          'epa': law.epa,
                          'classification': law.classification,
                          'created_for': ses_date,
-                         'created_at': created_at}, safe=False)
+                         'created_at': created_at,
+                         'has_discussion': law.has_discussion,}, safe=False)
 
 
 def getOtherVotes(request, session_id, date_=None):
@@ -3429,6 +3431,7 @@ def getAllLegislation(request):
                                       'type_of_law': legislation.type_of_law,
                                       'has_link': hasLegislationLink(legislation),
                                       'abstractVisible': legislation.abstractVisible,
+                                      'has_discussion': legislation.has_discussion,
                                      }for legislation in legislations]})
 
 
