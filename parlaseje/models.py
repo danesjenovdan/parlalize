@@ -599,6 +599,8 @@ class Legislation(Timestampable, models.Model):
     classification = models.CharField(blank=True, null=True,
                                       max_length=255,
                                       help_text='Classification of law')
+    has_discussion = models.BooleanField(default=False,
+                                         help_text='Legislation has discusion')
 
     def __str__(self):
         #sessions = self.sessions.all().values_list('name', flat=True)

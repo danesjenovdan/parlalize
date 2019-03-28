@@ -54,13 +54,11 @@ class LegislationView(viewsets.ModelViewSet):
     serializer_class = LegislationSerializer
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     ordering_fields = ('date', 'id')
-    filter_fields = ('is_exposed', 'status', 'result')
-    search_fields = ('text', 'epa')
+    filter_fields = ('is_exposed', 'status', 'result', 'has_discussion')
+    search_fields = ('text', 'epa',)
 
     def list(self, request, *args, **kwargs):
         response = super(LegislationView, self).list(request, args, kwargs)
         response.data['status_options'] = settings.LEGISLATION_STATUS
         response.data['result_options'] = settings.LEGISLATION_RESULT
         return response
-
- 
