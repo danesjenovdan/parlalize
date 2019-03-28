@@ -30,6 +30,7 @@ def setMPStaticPL(commander, person_id, date_=None):
                             created_for=date_of,
                             person=person,
                             voters=data['voters'],
+                            points=data['points'],
                             age=data['age'],
                             birth_date=dateparse.parse_datetime(data['birth_date']) if data['birth_date'] else None,
                             mandates=data['mandates'],
