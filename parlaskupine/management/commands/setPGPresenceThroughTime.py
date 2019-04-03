@@ -11,7 +11,7 @@ def setPGPresenceThroughTime(commander, pg, date):
     else:
         date_of = datetime.now().date()
 
-    url = API_URL + '/getBallotsCounterOfParty/' + pg + '/' + date_of.strftime(API_DATE_FORMAT)
+    url = API_URL + '/getBallotsCounterOfParty/' + str(pg) + '/' + date_of.strftime(API_DATE_FORMAT)
     data = tryHard(url).json()
 
     data_for_save = []

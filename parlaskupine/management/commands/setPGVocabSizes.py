@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, VocabularySize
-from parlalize.settings import API_DATE_FORMAT, DZ, H_P
+from parlalize.settings import API_DATE_FORMAT
 from parlalize.utils_ import saveOrAbortNew, getParentOrganizationsWithVoters
 from datetime import datetime
 from utils.speech import WordAnalysis

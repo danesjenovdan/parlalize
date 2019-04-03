@@ -12,7 +12,7 @@ def setPresenceThroughTime(commander, person_id, date_=None):
     else:
         fdate = datetime.now().date()
 
-    url = API_URL + '/getBallotsCounterOfPerson/' + person_id + '/' + fdate.strftime(API_DATE_FORMAT)
+    url = API_URL + '/getBallotsCounterOfPerson/' + str(person_id) + '/' + fdate.strftime(API_DATE_FORMAT)
     commander.stdout.write('Trying hard with %s' % str(url))
     data = tryHard(url).json()
 
