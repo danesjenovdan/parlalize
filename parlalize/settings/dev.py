@@ -44,6 +44,7 @@ STATIC_URL ='/parlastatic/parlalize/'
 STATIC_ROOT = '/home/parlauser/parlastatic/parlalize/'
 
 API_URL = "http://localhost:8000/v1"
+API_URL_V2 = "http://localhost:8000/v2"
 ISCI_URL = "http://localhost:8888"
 BASE_URL = 'http://localhost:8080/v1'
 DASHBOARD_URL = 'http://localhost:8881'

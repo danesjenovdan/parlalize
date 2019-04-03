@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.settings import SETTER_KEY, API_DATE_FORMAT
+from parlalize.utils_ import getParentOrganizationsWithVoters
 from django.test.client import RequestFactory
 
 from datetime import datetime, timedelta
@@ -27,5 +28,9 @@ class Command(BaseCommand):
             start_date = datetime.now().date()
 
         start_date = start_date - timedelta(days=1)
-        setListOfMembersTickers(
-            request_with_key, start_date.strftime(API_DATE_FORMAT))
+        for org_id in getParentOrganizationsWithVoters():
+            setListOfMembersTickers(
+                request_with_key,
+                org_id,
+                start_date.strftime(API_DATE_FORMAT),
+            )

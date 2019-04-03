@@ -7,7 +7,7 @@ from parlaposlanci.models import (Person, StyleScores, CutVotes, MPStaticPL,
                                   MembershipsOfMember, LessEqualVoters,
                                   EqualVoters, Presence,
                                   AverageNumberOfSpeechesPerSession,
-                                  VocabularySize, Compass, SpokenWords,
+                                  VocabularySize, SpokenWords,
                                   LastActivity, MinisterStatic)
 from parlaskupine.models import (Organization, WorkingBodies,
                                  CutVotes as CutVotesPG,
@@ -15,7 +15,7 @@ from parlaskupine.models import (Organization, WorkingBodies,
                                  MostMatchingThem, PercentOFAttendedSession,
                                  MPOfPg, PGStatic,
                                  VocabularySize as VocabularySizePG,
-                                 StyleScores as StyleScoresPG)
+                                 StyleScores as StyleScoresPG, Compass)
 from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
                               PresenceOfPG, AbsentMPs, VoteDetailed, Quote, Question)
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
@@ -762,6 +762,16 @@ def getDataFromPagerApiGen(url, per_page = None):
             break
         page += 1
 
+def getDataFromPagerApiDRFGen(url):
+    # print(url)
+    end = False
+    page = 1
+    while url:
+        response = requests.get(url, auth=requests.auth.HTTPBasicAuth(settings.PARSER_UN, settings.PARSER_PASS)).json()
+        print(response.keys())
+        yield response['results']
+        url = response['next']
+
 
 def getPersonAmendmentsCount(person_id, date_of):
     person = Person.objects.get(id_parladata=person_id)
@@ -772,3 +782,52 @@ def getPersonAmendmentsCount(person_id, date_of):
     else:
         date = card.latest('created_for').created_for
     return person, count, date
+
+
+def getVotersIDs(date_=datetime.now(), organization_id=None,):
+    voters_url = settings.API_URL + '/memberships/?role=voter'
+    voters_ids = []
+    for voters in getDataFromPagerApiDRFGen(voters_url):
+        for voter in voters:
+            if organization_id:
+                # skip person if is not voter of required organization
+                if voter['organization'] != organization_id:
+                    continue
+            # check if person is voter on required date
+            if voter['start_time'] < date_.isoformat():
+                if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
+                    voters_ids.append(voter['person'])
+    return voters_ids
+
+def getOrganizationsWithVoters(date_=datetime.now(), organization_id=None):
+    voters_url = settings.API_URL + '/memberships/?role=voter'
+    organization_ids = []
+    for voters in getDataFromPagerApiDRFGen(voters_url):
+        for voter in voters:
+            if organization_id:
+                # skip person if is not voter of required organization
+                if voter['organization'] != organization_id:
+                    continue
+            if voter['start_time'] < date_.isoformat():
+                if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
+                    organization_ids.append(voter['on_behalf_of'])
+
+    return list(set(organization_ids))
+
+def getVotersPairsWithOrg(date_=datetime.now(), organization_id=None,):
+    voters_url = settings.API_URL + '/memberships/?role=voter'
+    voters_ids = {}
+    for voters in getDataFromPagerApiDRFGen(voters_url):
+        for voter in voters:
+            if organization_id:
+                # skip person if is not voter of required organization
+                if voter['organization'] != organization_id:
+                    continue
+            # check if person is voter on required date
+            if voter['start_time'] < date_.isoformat():
+                if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
+                    voters_ids[voter['person']] = voter['on_behalf_of']
+    return voters_ids
+
+def getParentOrganizationsWithVoters():
+    return Organization.objects.filter(has_voters=True).values_list('id_parladata', flat=True)

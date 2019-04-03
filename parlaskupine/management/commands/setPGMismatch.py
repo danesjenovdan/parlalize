@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import MismatchOfPG
 from parlaskupine.models import Organization, PGMismatch
-from parlalize.utils_ import tryHard, saveOrAbortNew, getAllStaticData, getPersonCardModelNew
+from parlalize.utils_ import tryHard, saveOrAbortNew, getAllStaticData, getPersonCardModelNew, getOrganizationsWithVoters
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, API_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN
+from parlalize.settings import API_DATE_FORMAT, API_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN, API_URL_V2
 
 def setPGMismatch(commander, pg_id, date=None):
     """
@@ -16,7 +16,7 @@ def setPGMismatch(commander, pg_id, date=None):
         date = ''
 
     org = Organization.objects.get(id_parladata=pg_id)
-    url = API_URL + '/getMembersOfPGsOnDate/' + date
+    url = API_URL_V2 + '/getVotersByOrganizations/' + date
     commander.stdout.write('Trying hard with %s' % url)
     memsOfPGs = tryHard(url).json()
     data = []
@@ -28,7 +28,7 @@ def setPGMismatch(commander, pg_id, date=None):
         except:
             commander.stderr.write('No MismatchOfPG card for person %s' % str(member))
             pass
-    
+
     saveOrAbortNew(model=PGMismatch,
                   organization=org,
                   created_for=date_of,
@@ -57,12 +57,10 @@ class Command(BaseCommand):
             pgs = options['pgs']
         else:
             if options['date']:
-                date_ = options['date']
+                date_ = datetime.strptime(options['date'], API_DATE_FORMAT)
             else:
-                date_ = datetime.now().date().strftime(API_DATE_FORMAT)
-            self.stdout.write('Trying hard for %s/getMembersOfPGsOnDate/%s' % (API_URL, date_))
-            membersOfPGsRanges = tryHard(API_URL + '/getMembersOfPGsRanges/' + date_).json()
-            pgs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if value]
+                date_ = datetime.now()
+            pgs = getOrganizationsWithVoters(date_=date_)
 
         for pg in pgs:
             setPGMismatch(self, pg, options['date'])

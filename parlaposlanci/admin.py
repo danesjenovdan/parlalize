@@ -7,7 +7,7 @@ sys.setdefaultencoding('utf-8')
 
 class PersonAdmin(admin.ModelAdmin):
     search_fields = ['name']
-    
+
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Presence)
 admin.site.register(SpokenWords)
@@ -23,12 +23,8 @@ admin.site.register(VocabularySizeUniqueWords)
 admin.site.register(StyleScores)
 admin.site.register(Tfidf)
 admin.site.register(AverageNumberOfSpeechesPerSession)
-admin.site.register(Compass)
+#admin.site.register(Compass)
 admin.site.register(TaggedBallots)
 admin.site.register(MembershipsOfMember)
 admin.site.register(District)
 admin.site.register(MinisterStatic)
-
-
-
-

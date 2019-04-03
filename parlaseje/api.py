@@ -38,7 +38,6 @@ class TFIDFView(viewsets.ModelViewSet):
     ordering_fields = ('created_for',)
 
 
-
 class VoteNoteView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Vote.objects.all()

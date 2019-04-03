@@ -677,22 +677,6 @@ class AverageNumberOfSpeechesPerSession(Timestampable, models.Model):
         'Maximum MP'), related_name='max_person')
 
 
-class Compass(Timestampable, models.Model):
-
-    calculated_from = models.DateField(
-        _('date of first ballot entered'),
-        blank=True,
-        null=True,
-        help_text=_('date of first ballot entered'))
-
-    created_for = models.DateField(_('date of analize'),
-                                   blank=True,
-                                   null=True,
-                                   help_text=_('date of activity'))
-
-    data = JSONField(blank=True, null=True)
-
-
 class TaggedBallots(Timestampable, models.Model):
 
     person = models.ForeignKey('Person',
@@ -768,6 +752,12 @@ class MembersList(Timestampable, models.Model):
                                    blank=True,
                                    null=True,
                                    help_text=_('date of analize'))
+
+    organization = models.ForeignKey('parlaskupine.Organization',
+                                     help_text=_('organization'),
+                                     related_name='members_list',
+                                     null=True,
+                                     blank=True)
 
     data = JSONField(blank=True, null=True)
 

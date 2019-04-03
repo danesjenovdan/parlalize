@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, Tfidf
-from parlalize.utils_ import saveOrAbortNew, tryHard
+from parlalize.utils_ import saveOrAbortNew, tryHard, getOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT, ISCI_URL
 
@@ -43,12 +43,8 @@ class Command(BaseCommand):
         if options['organization_ids']:
             organization_ids = options['organization_ids']
         else:
-            self.stdout.write(
-                'Trying hard with %s/getMembersOfPGsRanges/' % API_URL)
-            url = API_URL + '/getMembersOfPGsRanges/' + date_
-            membersOfPGsRanges = tryHard(url).json()
-            organization_ids = [
-                key for key, value in membersOfPGsRanges[-1]['members'].items()]
+            self.stdout.write('getting organizations with voters')
+            organization_ids = getOrganizationsWithVoters(date_=date_of)
 
         for organization_id in organization_ids:
             setTfidfOfPG(self, organization_id)

@@ -1396,11 +1396,10 @@ def getMotionAnalize(request, motion_id):
     pg_outliers = {}
     for org in tmp_data:
         org_obj = Organization.objects.get(id_parladata=int(org))
-        if org_obj.classification == PS:
-            orgs_data[org] = json.loads(tmp_data[org])
-            orgs_data[org]['party'] = org_obj.getOrganizationData()
-            if orgs_data[org]['outliers']:
-                pg_outliers[int(org)] = orgs_data[org]['outliers']
+        orgs_data[org] = json.loads(tmp_data[org])
+        orgs_data[org]['party'] = org_obj.getOrganizationData()
+        if orgs_data[org]['outliers']:
+            pg_outliers[int(org)] = orgs_data[org]['outliers']
 
     orgs_data = sorted(orgs_data.values(), key=lambda party: sum(party['votes'].values()), reverse=True)
 
@@ -1454,8 +1453,8 @@ def getMotionAnalize(request, motion_id):
            'documents': docs if docs else [],
            'members': members,
            'parties': orgs_data,
-           'gov_side': {'coalition': json.loads(model.coal_opts),
-                        'opposition': json.loads(model.oppo_opts)},
+           'gov_side': {'coalition': json.loads(model.coal_opts) if model.coal_opts else None,
+                        'opposition': json.loads(model.oppo_opts) if model.coal_opts else None},
            'all': options,
            'abstractVisible': visible,
            'abstract': abstract,

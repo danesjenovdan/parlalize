@@ -4,7 +4,7 @@ from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Speech
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
-from parlalize.utils_ import saveOrAbortNew, getAllStaticData
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData, getOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
 
@@ -45,10 +45,8 @@ class Command(BaseCommand):
         else:
             date_of = datetime.now().date()
             date_ = date_of.strftime(API_DATE_FORMAT)
-            url = API_URL + '/getMembersOfPGsRanges/' + date_
-            self.stdout.write('Trying hard with %s' % url)
-            membersOfPGsRanges = tryHard(url).json()
-            pg_ids = [key for key, value in membersOfPGsRanges[-1]['members'].items()]
+
+            pg_ids = getOrganizationsWithVoters(date_=date_of)
 
         # get static data
         self.stdout.write('Getting all static data')

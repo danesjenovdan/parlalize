@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaseje.models import Session, PresenceOfPG
-from parlalize.utils_ import saveOrAbortNew, tryHard, getDataFromPagerApi
+from parlalize.utils_ import saveOrAbortNew, tryHard, getDataFromPagerApi, getOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import API_URL, NOT_PRESENT
 
@@ -13,10 +13,7 @@ import json
 def setPresenceOfPG(commander, session_id):
     """ Stores presence of PGs on specific session
     """
-
-    url = API_URL + '/getAllPGsExt/'
-    commander.stdout.write('About to try hard for %s' % str(url))
-    PGs = tryHard(url).json().keys()
+    PGs = getOrganizationsWithVoters()
 
     url = API_URL + '/getBallotsOfSession/' + str(session_id) + '/'
     commander.stdout.write(

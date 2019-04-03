@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, MPOfPg
 from parlalize.settings import API_DATE_FORMAT, API_URL
-from parlalize.utils_ import saveOrAbortNew, tryHard
+from parlalize.utils_ import saveOrAbortNew, tryHard, getOrganizationsWithVoters
 from datetime import datetime
 
 def setMPsOfPG(commander, pg_id, date_=None):
@@ -44,9 +44,7 @@ class Command(BaseCommand):
         if options['pgs']:
             pgs = options['pgs']
         else:
-            self.stdout.write('Trying hard for %s/getMembersOfPGsOnDate/%s' % (API_URL, str(date_of)))
-            membersOfPGsRanges = tryHard(API_URL + '/getMembersOfPGsRanges/' + date_).json()
-            pgs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if value]
+            pgs = getOrganizationsWithVoters(date_=date_of)
 
         for pg in pgs:
             self.stdout.write('About to set MPS of %s' % str(pg))

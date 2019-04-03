@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from parlalize.utils_ import tryHard, getDataFromPagerApi
+from parlalize.utils_ import tryHard, getDataFromPagerApi, getVotersIDs
 from parlaposlanci.models import Person
 from parlalize.settings import API_URL
 
@@ -11,8 +11,7 @@ class Command(BaseCommand):
         url = API_URL + '/getAllPeople/'
         data = getDataFromPagerApi(url)
         self.stdout.write('Fetching data from %s/getMPs/' % API_URL)
-        mps = tryHard(API_URL + '/getMPs/').json()
-        mps_ids = [mp['id'] for mp in mps]
+        mps_ids = getVotersIDs()
         for mp in data:
             if Person.objects.filter(id_parladata=mp['id']):
                 self.stdout.write('Updating person %d %s' % (mp['id'], mp['name']))

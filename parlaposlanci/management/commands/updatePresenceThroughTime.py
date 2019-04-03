@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaposlanci.models import Person, PresenceThroughTime
-from parlalize.utils_ import saveOrAbortNew
+from parlalize.utils_ import saveOrAbortNew, getVotersIDs
 from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
 
@@ -58,10 +58,10 @@ class Command(BaseCommand):
             date_of = datetime.now().date()
             date_ = date_of.strftime(API_DATE_FORMAT)
 
-        self.stdout.write('Trying hard for %s/getMPs/%s' % (API_URL, str(date_)))
-        mps = tryHard(API_URL+'/getMPs/' + date_).json()
+        self.stdout.write('Get voters'))
+        mps = getVotersIDs(date_=date_of)
         for mp in mps:
-            self.stdout.write('Running setPresenceThroughTime on %s' % str(mp['id']))
-            setPresenceThroughTime(self, str(mp['id']), date_)
+            self.stdout.write('Running setPresenceThroughTime on %s' % str(mp))
+            setPresenceThroughTime(self, str(mp), date_)
 
         return 0

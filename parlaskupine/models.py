@@ -34,6 +34,10 @@ class Organization(Timestampable, models.Model):
                                       null=True,
                                       help_text=_('Organization calssification.'))
 
+    has_voters = models.BooleanField(_('has voters'),
+                                     default=False,
+                                     help_text=_('Has organization voters?'))
+
     acronym = models.CharField(_('acronym'),
                                blank = True,
                                null = True,
@@ -57,7 +61,7 @@ class Organization(Timestampable, models.Model):
 
 
 class PGStatic(Timestampable, models.Model):
-    organization = models.ForeignKey('Organization', 
+    organization = models.ForeignKey('Organization',
                                      help_text=_('Organization foreign key relationship'))
 
     created_for = models.DateField(_('date of activity'),
@@ -71,27 +75,27 @@ class PGStatic(Timestampable, models.Model):
 
     viceOfPG = JSONField(blank=True, null=True)
 
-    numberOfSeats = models.IntegerField(blank = True, 
-                                        null = True, 
+    numberOfSeats = models.IntegerField(blank = True,
+                                        null = True,
                                         help_text = _('Number of seats in parlament of PG'))
 
-    allVoters = models.IntegerField(blank=True, 
-                                    null=True, 
+    allVoters = models.IntegerField(blank=True,
+                                    null=True,
                                     help_text=_('Number of voters'))
 
-    facebook = models.TextField(blank=True, 
-                                null=True, 
-                                default=None, 
+    facebook = models.TextField(blank=True,
+                                null=True,
+                                default=None,
                                 help_text=_('Facebook profile URL'))
 
-    twitter = models.TextField(blank=True, 
-                               null=True, 
-                               default=None, 
+    twitter = models.TextField(blank=True,
+                               null=True,
+                               default=None,
                                help_text=_('Twitter profile URL'))
 
-    email = models.TextField(blank=True, 
-                             null=True, 
-                             default=None, 
+    email = models.TextField(blank=True,
+                             null=True,
+                             default=None,
                              help_text=_('email profile URL'))
 
 class PercentOFAttendedSession(Timestampable, models.Model): #Model for presence of PG on sessions
@@ -499,3 +503,23 @@ class IntraDisunion(Timestampable, models.Model):
                                null = True,
                                max_length = 128,
                                help_text=_('Maximum of organization disunion.'))
+
+
+class Compass(Timestampable, models.Model):
+    organization = models.ForeignKey('Organization',
+                                     blank=True, null=True,
+                                     related_name='Compass',
+                                     help_text=_('Org'))
+
+    calculated_from = models.DateField(
+        _('date of first ballot entered'),
+        blank=True,
+        null=True,
+        help_text=_('date of first ballot entered'))
+
+    created_for = models.DateField(_('date of analize'),
+                                   blank=True,
+                                   null=True,
+                                   help_text=_('date of activity'))
+
+    data = JSONField(blank=True, null=True)
