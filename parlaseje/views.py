@@ -2184,10 +2184,12 @@ def getSessionsList(request, date_=None, force_render=False):
     out = cache.get("sessions_list_" + key)
     if out and not force_render:
         data = out
+        print("wup wup")
     else:
         orgs = Organization.objects.filter(Q(id_parladata=COUNCIL_ID) |
-                                           Q(id_parladata=DZ) |
-                                           Q(classification__in=WBS))
+                                           Q(classification__in=WBS) |
+                                           Q(has_voters=True))
+        print(orgs)
         sessions = Session.objects.filter(organizations__in=orgs)
         sessions = sessions.order_by("-start_time")
         out = {'sessions': [session.getSessionData() for session in sessions],

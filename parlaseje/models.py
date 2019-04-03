@@ -107,7 +107,8 @@ class Session(Timestampable, models.Model):
                 'id': self.id_parladata,
                 'org': self.organization.getOrganizationData(),
                 'orgs': orgs_data,
-                'in_review': self.in_review}
+                'in_review': self.in_review,
+                'has_voters': self.has_voters}
 
 
 class Activity(Timestampable, models.Model):

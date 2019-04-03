@@ -28,6 +28,24 @@ class LegislationSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'sessions', 'epa')
 
 
+class SessionSerializer(serializers.ModelSerializer):
+    votes = serializers.SerializerMethodField()
+    speeches = serializers.SerializerMethodField()
+    organization = serializers.SerializerMethodField()
+    class Meta:
+        model = Session
+        fields = ('id', 'created_at', 'updated_at', 'name', 'start_time', 'id_parladata', 'start_time', 'gov_id', 'votes', 'speeches', 'organization', 'in_review')
+
+    def get_votes(self, obj):
+        return bool(Vote.objects.filter(session=obj))
+
+    def get_speeches(self, obj):
+        return bool(Speech.objects.filter(session=obj))
+
+    def get_organization(self, obj):
+        return obj.organization.getOrganizationData()
+
+
 class TFIDFView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Tfidf.objects.all().order_by('-created_for')
@@ -61,3 +79,9 @@ class LegislationView(viewsets.ModelViewSet):
         response.data['status_options'] = settings.LEGISLATION_STATUS
         response.data['result_options'] = settings.LEGISLATION_RESULT
         return response
+
+class SessionsView(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    queryset = Session.objects.all()
+    serializer_class = SessionSerializer
+    ordering_fields = ('start_time', 'id')
