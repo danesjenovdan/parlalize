@@ -33,7 +33,6 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
     # orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
 
     print 'Preparing pandas DataFrame'
-    print(data.head())
     data['option_absent'] = 0
     data['option_for'] = 0
     data['option_against'] = 0
@@ -103,8 +102,7 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
     final = pd.concat([members_equal_count, members_vote_count], axis=1)
 
     final['percent'] = final.apply(lambda x: float(x['equal_vote'])/x['voter_unit']*100.0, axis=1)
-    print 'saveing'
-    print final.index.values
+    print 'saving'
     data = []
     for member, row in final.iterrows():
         print member
@@ -120,7 +118,6 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
     maxMismatch = max(data, key=lambda x:x['value'] if x['value'] else 0)
 
     values = [i['value'] for i in data if i['value']]
-    print(data)
     avg = float(sum(values))/len(values)
 
     for d in data:
