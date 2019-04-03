@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT
 from utils.votes_pg import set_mismatch_of_pg
+from parlalize.utils_ import getParentOrganizationsWithVoters
 
 class Command(BaseCommand):
     help = 'Updates deviation'
@@ -20,6 +21,7 @@ class Command(BaseCommand):
             date_ = datetime.now().date().strftime(API_DATE_FORMAT)
 
         # TODO refactor votes_pg.py to stop accepting request as an argument
-        set_mismatch_of_pg(None, date_)
+        for org_id in getParentOrganizationsWithVoters():
+            set_mismatch_of_pg(None, by_organization=org_id, date_=date_)
 
         return 0
