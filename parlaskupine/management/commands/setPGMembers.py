@@ -15,7 +15,7 @@ def setMPsOfPG(commander, pg_id, date_=None):
 
     pairs = getVotersPairsWithOrg()
     membersOfPG = {i: []for i in set(pairs.values())}
-    for mem, org in a.items():
+    for mem, org in pairs.items():
         membersOfPG[org].append(mem)
     org = Organization.objects.get(id_parladata=pg_id)
     commander.stdout.write('Setting for organisation %s' % str(pg_id))

@@ -33,6 +33,7 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
     # orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
 
     print 'Preparing pandas DataFrame'
+    print(data.head())
     data['option_absent'] = 0
     data['option_for'] = 0
     data['option_against'] = 0

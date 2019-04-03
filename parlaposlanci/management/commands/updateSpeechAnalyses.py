@@ -3,7 +3,7 @@ from parlaposlanci.models import Person, VocabularySize, VocabularySizeUniqueWor
 from parlalize.utils_ import saveOrAbortNew, getParentOrganizationsWithVoters
 from utils.speech import WordAnalysis
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, DZ, H_P
+from parlalize.settings import API_DATE_FORMAT
 
 
 class Command(BaseCommand):
