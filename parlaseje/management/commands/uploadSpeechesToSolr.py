@@ -18,6 +18,24 @@ def commit_to_solr(commander, output):
                   headers={'Content-Type': 'application/json'})
 
 
+def deleteUnvalidSpeeches(solr_ids, speeches):
+    speeches = list(speeches.values_list('id_parladata', flat=True))
+
+    idsForDelete = list(set(solr_ids) - set(speeches))
+
+    idsForDelete = ['speech_' + str(i) for i in idsForDelete]
+
+    data = {'delete': idsForDelete
+            }
+
+    r = requests.post(SOLR_URL + '/update?commit=true',
+                        data=json.dumps(data),
+                        headers={'Content-Type': 'application/json'})
+
+    print r.text
+    return True
+
+
 class Command(BaseCommand):
     help = 'Uploads speeches to Solr'
 
@@ -36,6 +54,8 @@ class Command(BaseCommand):
         # get all valid speeches
         self.stdout.write('Getting valid speeches')
         speeches = Speech.getValidSpeeches(datetime.now())
+
+        deleteUnvalidSpeeches(idsInSolr, speeches)
 
         i = 1
         output = []
