@@ -768,7 +768,6 @@ def getDataFromPagerApiDRFGen(url):
     page = 1
     while url:
         response = requests.get(url, auth=requests.auth.HTTPBasicAuth(settings.PARSER_UN, settings.PARSER_PASS)).json()
-        print(response.keys())
         yield response['results']
         url = response['next']
 

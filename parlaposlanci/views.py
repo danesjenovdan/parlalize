@@ -3962,13 +3962,11 @@ def setListOfMembersTickers(request, org_id, date_=None):
         session_time = prev_session.order_by("-start_time")[0].start_time
 
         prevCard = getListOfMembersTickers(request, session_time.strftime(API_DATE_FORMAT)).content
-        print(json.loads(prevCard)['created_for'], org_id, json.loads(prevCard)['created_at'])
         prevData = json.loads(prevCard)['data']
     except:
         prevData = []
 
     data = setListOfMembersTickersCore(org_id, date_, date_of, prevData)
-    print(data)
 
     return JsonResponse(data, safe=False)
 

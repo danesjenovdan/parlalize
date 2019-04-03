@@ -25,7 +25,6 @@ def setPercentOFAttendedSession(commander, person_id, members, date_=None):
         commander.stdout.write('Member with id %s didn\'t exist' % str(person_id))
         return
 
-    print(data["sessions"], members)
     org_sessions_values = [value for key, value in data["sessions"].items() if int(key) in members]
     maximum = max(org_sessions_values)
     maximumMP = [pId for pId in data["sessions"]
