@@ -58,7 +58,7 @@ class Command(BaseCommand):
             date_of = datetime.now().date()
             date_ = date_of.strftime(API_DATE_FORMAT)
 
-        self.stdout.write('Get voters'))
+        self.stdout.write('Get voters')
         mps = getVotersIDs(date_=date_of)
         for mp in mps:
             self.stdout.write('Running setPresenceThroughTime on %s' % str(mp))

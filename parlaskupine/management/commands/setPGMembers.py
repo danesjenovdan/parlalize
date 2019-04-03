@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, MPOfPg
 from parlalize.settings import API_DATE_FORMAT, API_URL
-from parlalize.utils_ import saveOrAbortNew, tryHard, getOrganizationsWithVoters
+from parlalize.utils_ import saveOrAbortNew, tryHard, getOrganizationsWithVoters, getVotersPairsWithOrg
 from datetime import datetime
 
 def setMPsOfPG(commander, pg_id, date_=None):
@@ -13,8 +13,10 @@ def setMPsOfPG(commander, pg_id, date_=None):
         date_ = date_of.strftime(API_DATE_FORMAT)
         commander.stdout.write('Setting for today (%s)' % str(date_of))
 
-    commander.stdout.write('Trying hard for %s/getMembersOfPGsOnDate/%s' % (API_URL, str(date_of)))
-    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/' + date_).json()
+    pairs = getVotersPairsWithOrg()
+    membersOfPG = {i: []for i in set(pairs.values())}
+    for mem, org in a.items():
+        membersOfPG[org].append(mem)
     org = Organization.objects.get(id_parladata=pg_id)
     commander.stdout.write('Setting for organisation %s' % str(pg_id))
     saveOrAbortNew(model=MPOfPg,

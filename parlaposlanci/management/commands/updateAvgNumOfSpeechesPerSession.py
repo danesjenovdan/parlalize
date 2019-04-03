@@ -27,7 +27,6 @@ class Command(BaseCommand):
             date_of = datetime.now().date()
             date_ = date_of.strftime(API_DATE_FORMAT)
 
-        self.stdout.write('Trying hard for %s/getMPs/%s' % (API_URL, str(date_)))
         mps = getVotersIDs()
         mp_scores = []
 
@@ -53,7 +52,7 @@ class Command(BaseCommand):
         average = sum([mp['score'] for mp in mp_scores])/len(mp_scores)
 
         for mp in mp_scores_sorted:
-            person = Person.objects.get(id_parladata=int(mp))
+            person = Person.objects.get(id_parladata=int(mp['id']))
             score = mp['score']
             self.stdout.write('Saving MP %s' % str(mp))
 
