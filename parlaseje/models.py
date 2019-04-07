@@ -227,6 +227,7 @@ class Question(Activity):
             orgs.append(org.getOrganizationData())
         return {'title': self.title,
                 'recipient_text': self.recipient_text,
+                'content_url': self.content_link,
                 'recipient_persons': persons,
                 'recipient_orgs': orgs,
                 'url': self.content_link,

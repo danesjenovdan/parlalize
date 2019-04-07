@@ -4047,14 +4047,15 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     tab = []
     org = Organization.objects.get(id_parladata=org_id)
     acr = org.acronym
-    votes = Vote.objects.all().order_by('start_time')
+    votes = Vote.objects.all().order_by('start_time').prefetch_related('session')
     for vote in votes:
         votesData[vote.id_parladata] = {'text': vote.motion,
                                         'result': vote.result,
                                         'date': vote.start_time,
                                         'tag': vote.tags,
                                         'classification': vote.classification,
-                                        'id_parladata': vote.id_parladata}
+                                        'id_parladata': vote.id_parladata,
+                                        'session_id': vote.session.id_parladata}
 
     c_data = cache.get('pg_disunion' + org_id)
     if c_data and not force_render:
@@ -4068,7 +4069,8 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                             'tag': vote.tags,
                             'classification': vote.classification,
                             'maximum': vote.intra_disunion,
-                            'id_parladata': vote.id_parladata})
+                            'id_parladata': vote.id_parladata,
+                            'session_id': vote.session.id_parladata})
                 out['results'] = {'organization': 'dz',
                              'votes': tab}
 

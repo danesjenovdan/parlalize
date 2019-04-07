@@ -11,7 +11,7 @@ def getDataFromPagerApiDRF(url):
     data = []
     end = False
     page = 1
-    url = url+'?limit=300'
+    #url = url+'?limit=300'
     while url:
         response = requests.get(url, auth=requests.auth.HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
         data += response['results']
@@ -30,10 +30,11 @@ class Command(BaseCommand):
         self.stdout.write('Iterating through EPAs')
         for epa in set(epas):
             self.stdout.write(str(epa))
-            laws = getDataFromPagerApiDRF(API_URL + '/law?epa=' + str(epa))
+            laws = getDataFromPagerApiDRF(API_URL + '/law/?epa=' + str(epa))
             last_obj = None
             sessions = []
             is_ended = False
+            print(len(laws), laws)
             for law in laws:
                 sessions.append(law['session'])
                 law['date'] = datetime.strptime(law['date'], '%Y-%m-%dT%X')
