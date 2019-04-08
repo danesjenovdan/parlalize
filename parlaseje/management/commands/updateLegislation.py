@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Legislation
-from parlalize.settings import API_URL, PARSER_UN, PARSER_PASS
+from parlalize.settings import API_URL, PARSER_UN, PARSER_PASS, LEGISLATION_STATUS
 from datetime import datetime
 
 import requests
@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write('Updating legislation')
-    
+
         self.stdout.write('Getting data from %s/law/' % API_URL)
         laws = getDataFromPagerApiDRF(API_URL + '/law/')
         epas = list(set([law['epa'] for law in laws if law['epa']]))
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                 if last_obj:
                     if law['date'] > last_obj['date']:
                         last_obj = law
-                else: 
+                else:
                     last_obj = law
             result = Legislation.objects.filter(epa=epa)
 
@@ -78,10 +78,10 @@ class Command(BaseCommand):
                                     date=last_obj['date'],
                                     procedure_ended=is_ended,
                                     classification=last_obj['classification'],
+                                    result=LEGISLATION_STATUS[0][0]
                                     )
                 result.save()
             sessions = list(set(sessions))
             sessions = list(Session.objects.filter(id_parladata__in=sessions))
             result.sessions.add(*sessions)
         return 0
-

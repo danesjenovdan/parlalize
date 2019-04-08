@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.test.client import RequestFactory
 
-from parlalize.settings import API_URL, slack_token, API_DATE_FORMAT, DZ, SETTER_KEY
+from parlalize.settings import API_URL, slack_token, API_DATE_FORMAT, DZ, SETTER_KEY, LEGISLATION_STATUS
 from parlalize.utils_ import tryHard
 
 from parlaseje.models import Ballot, Vote, Speech, Question, Legislation, Session
@@ -222,6 +222,7 @@ class Command(BaseCommand):
                                     date=last_obj['date'],
                                     procedure_ended=is_ended,
                                     classification=['classification'],
+                                    result=LEGISLATION_STATUS[0][0]
                                     )
                 result.save()
             sessions = list(set(sessions))
