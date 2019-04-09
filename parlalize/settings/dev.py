@@ -83,6 +83,7 @@ COUNCIL_ID = 9
 
 PS_NP = ['pg', 'unaligned MP']
 PS = 'pg'
+UNALIGNED = 'unaligned MP'
 
 WBS = ['committee',
        'comission',
