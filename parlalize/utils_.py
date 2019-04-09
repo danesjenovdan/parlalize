@@ -813,14 +813,14 @@ def getOrganizationsWithVoters(date_=datetime.now(), organization_id=None):
 
     return list(set(organization_ids))
 
-def getVotersPairsWithOrg(date_=datetime.now(), organization_id=None,):
+def getVotersPairsWithOrg(date_=datetime.now(), organization_id=None):
     voters_url = settings.API_URL + '/memberships/?role=voter'
     voters_ids = {}
     for voters in getDataFromPagerApiDRFGen(voters_url):
         for voter in voters:
             if organization_id:
                 # skip person if is not voter of required organization
-                if voter['organization'] != organization_id:
+                if voter['organization'] != int(organization_id):
                     continue
             # check if person is voter on required date
             if voter['start_time'] < date_.isoformat():
