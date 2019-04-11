@@ -92,8 +92,8 @@ urlpatterns = [
 
     url(r'^getMPsIDs', getMPsIDs),
 
-    url(r'^getCompass/(?P<date_>[\w].+)', getCompass),
-    url(r'^getCompass', getCompass),
+    url(r'^getCompass/(?P<date_>[\w].+)', getCompass, {'org_id': settings.DZ}),
+    url(r'^getCompass', getCompass, {'org_id': settings.DZ}),
 
     url(r'^getTaggedBallots/(?P<person_id>\d+)/(?P<date_>[\w].+)', getTaggedBallots),
     url(r'^getTaggedBallots/(?P<person_id>\d+)', getTaggedBallots),

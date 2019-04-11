@@ -2601,7 +2601,7 @@ def setCompass(request, date_=None):
 
     return JsonResponse({'alliswell': True, "status":'OK', "saved": True})
 
-def getCompass(request, date_=None): # TODO make proper setters and getters
+def getCompass(request, org_id, date_=None): # TODO make proper setters and getters
     """
     * @api {get} /p/getCompass/{?date} Political compass
     * @apiName getCompass
@@ -2697,7 +2697,10 @@ def getCompass(request, date_=None): # TODO make proper setters and getters
         date_of = datetime.now().date()
         date_=""
     try:
-        compas = Compass.objects.filter(created_for__lte=date_of).order_by('-created_for')[0]
+        compas = Compass.objects.filter(
+            created_for__lte=date_of,
+            org_id=organization_id
+        ).order_by('-created_for')[0]
     except:
         raise Http404("Nismo našli kartice")
     data = compas.data
