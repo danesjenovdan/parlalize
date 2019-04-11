@@ -2699,7 +2699,7 @@ def getCompass(request, org_id, date_=None): # TODO make proper setters and gett
     try:
         compas = Compass.objects.filter(
             created_for__lte=date_of,
-            organization_id=org_id
+            organization__id_parladata=org_id
         ).order_by('-created_for')[0]
     except:
         raise Http404("Nismo našli kartice")
