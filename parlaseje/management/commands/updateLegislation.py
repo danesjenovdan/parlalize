@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Legislation
-from parlalize.settings import API_URL, PARSER_UN, PARSER_PASS
+from parlalize.settings import API_URL, PARSER_UN, PARSER_PASS, LEGISLATION_STATUS
 from datetime import datetime
 
 import requests
@@ -11,7 +11,7 @@ def getDataFromPagerApiDRF(url):
     data = []
     end = False
     page = 1
-    url = url+'?limit=300'
+    #url = url+'?limit=300'
     while url:
         response = requests.get(url, auth=requests.auth.HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
         data += response['results']
@@ -23,17 +23,18 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write('Updating legislation')
-    
+
         self.stdout.write('Getting data from %s/law/' % API_URL)
         laws = getDataFromPagerApiDRF(API_URL + '/law/')
         epas = list(set([law['epa'] for law in laws if law['epa']]))
         self.stdout.write('Iterating through EPAs')
         for epa in set(epas):
             self.stdout.write(str(epa))
-            laws = getDataFromPagerApiDRF(API_URL + '/law?epa=' + str(epa))
+            laws = getDataFromPagerApiDRF(API_URL + '/law/?epa=' + str(epa))
             last_obj = None
             sessions = []
             is_ended = False
+            print(len(laws), laws)
             for law in laws:
                 sessions.append(law['session'])
                 law['date'] = datetime.strptime(law['date'], '%Y-%m-%dT%X')
@@ -43,7 +44,7 @@ class Command(BaseCommand):
                 if last_obj:
                     if law['date'] > last_obj['date']:
                         last_obj = law
-                else: 
+                else:
                     last_obj = law
             result = Legislation.objects.filter(epa=epa)
 
@@ -77,10 +78,10 @@ class Command(BaseCommand):
                                     date=last_obj['date'],
                                     procedure_ended=is_ended,
                                     classification=last_obj['classification'],
+                                    result=LEGISLATION_STATUS[0][0]
                                     )
                 result.save()
             sessions = list(set(sessions))
             sessions = list(Session.objects.filter(id_parladata__in=sessions))
             result.sessions.add(*sessions)
         return 0
-

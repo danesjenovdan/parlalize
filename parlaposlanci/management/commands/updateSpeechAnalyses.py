@@ -9,8 +9,18 @@ from parlalize.settings import API_DATE_FORMAT
 class Command(BaseCommand):
     help = 'Updates votes analyses static data'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--date',
+            #nargs='+',
+            help='Date for which to run the card',
+        )
+
     def handle(self, *args, **options):
-        date_of = datetime.now().date()
+	if options['date']:
+            date_of = datetime.strptime(options['date'], API_DATE_FORMAT)
+        else:
+            date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
         for org_id in getParentOrganizationsWithVoters():
             sw = WordAnalysis(organization_id=org_id, count_of='members', date_=date_)

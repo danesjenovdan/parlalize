@@ -16,7 +16,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             '--date',
-            nargs=1,
+            #nargs=1,
             help='PG parladata_ids',
         )
 

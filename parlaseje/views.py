@@ -3436,6 +3436,7 @@ def getAllLegislation(request):
                                       'has_link': hasLegislationLink(legislation),
                                       'abstractVisible': legislation.abstractVisible,
                                       'has_discussion': legislation.has_discussion,
+                                      'hasVotes': bool(Vote.objects.filter(epa=legislation.epa))
                                      }for legislation in legislations]})
 
 

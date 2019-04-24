@@ -3959,14 +3959,19 @@ def setListOfMembersTickers(request, org_id, date_=None):
     # get start_time of previous session and find older card of this date
 
     try:
-        prev_session = Session.objects.filter(start_time__lte=date_of,
-                                              organization__id_parladata=org_id,
-                                              name__icontains=' redna')
-        session_time = prev_session.order_by("-start_time")[0].start_time
+        #prev_session = Session.objects.filter(start_time__lte=date_of,
+        #                                      organization__id_parladata=95,
+        #                                      name__icontains=' redna')
+        #session_time = prev_session.order_by("-start_time")[0].start_time
 
-        prevCard = getListOfMembersTickers(request, session_time.strftime(API_DATE_FORMAT)).content
+
+        month_ago = date_of-timedelta(days=30)
+        print("mesc nazaj", month_ago)
+        prevCard = getListOfMembersTickers(request, month_ago.strftime(API_DATE_FORMAT)).content
+        print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
         prevData = json.loads(prevCard)['data']
-    except:
+    except Exception as exp:
+        print exp
         prevData = []
 
     data = setListOfMembersTickersCore(org_id, date_, date_of, prevData)
@@ -4135,7 +4140,7 @@ def setListOfMembersTickersCore(org_id, date_, date_of, prevData):
         try:
             mismatch = getPersonCardModelNew(MismatchOfPG,
                                               int(person_id),
-                                              None).data
+                                              date_).data
         except:
             mismatch = 0
         person_obj['results']['mismatch_of_pg'] = {}

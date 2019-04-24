@@ -4061,7 +4061,8 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                                         'organization_id': sessionsData[str(vote.session.id_parladata)]['org']['id'],
                                         'tag': vote.tags,
                                         'classification': vote.classification,
-                                        'id_parladata': vote.id_parladata}
+                                        'id_parladata': vote.id_parladata,
+                                        'session_id': vote.session.id_parladata}
 
     c_data = cache.get('pg_disunion' + org_id)
     if c_data and not force_render:
@@ -4076,7 +4077,8 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                             'classification': vote.classification,
                             'organization_id': sessionsData[str(vote.session.id_parladata)]['org']['id'],
                             'maximum': vote.intra_disunion,
-                            'id_parladata': vote.id_parladata})
+                            'id_parladata': vote.id_parladata,
+                            'session_id': vote.session.id_parladata})
                 out['results'] = {'organization': 'dz',
                              'votes': tab}
 
