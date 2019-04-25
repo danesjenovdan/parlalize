@@ -22,7 +22,7 @@ from utils.speech import WordAnalysis
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getAllStaticData, setCardData, getPersonCardModelNew,
                               getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi,
-                              getVotersPairsWithOrg)
+                              getVotersPairsWithOrg, getParentOrganizationsWithVoters)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
                                 AGAINST, ABSTAIN, DZ)
@@ -4068,7 +4068,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     if c_data and not force_render:
         out = c_data
     else:
-        if int(org_id) == DZ:
+        if int(org_id) in getParentOrganizationsWithVoters():
             for vote in votes:
                 tab.append({'text': vote.motion,
                             'result': vote.result,
