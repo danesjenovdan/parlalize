@@ -4472,11 +4472,14 @@ def getListOfMembersTickers(request, org_id, date_=None):
     last_day = lists.latest('created_for').created_for
     cards = MembersList.objects.filter(organization__id_parladata=org_id, created_for=last_day)
     card = cards.latest('created_at')
+    districts_ids =  [d for obj in card.data
+                        if obj['person']['district']
+                        for d in obj['person']['district']]
     return JsonResponse({'created_at': card.created_at,
                          'created_for': card.created_for,
                          'data': card.data,
                          'districts': [{dist.id_parladata: dist.name}
-                                       for dist in District.objects.all()]},
+                                       for dist in District.objects.filter(id_parladata__in=districts_ids)]},
                         safe=False)
 
 
