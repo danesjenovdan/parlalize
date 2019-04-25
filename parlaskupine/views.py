@@ -4053,7 +4053,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     org = Organization.objects.get(id_parladata=org_id)
     acr = org.acronym
     parent_orgs = getParentOrganizationsWithVoters()
-    if org_id in parent_orgs:
+    if int(org_id) in parent_orgs:
        parent_org = org_id
     else:
         for parent_org in parent_orgs:
