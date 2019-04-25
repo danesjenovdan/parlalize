@@ -4059,7 +4059,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
         for parent_org in parent_orgs:
             if int(org_id) in getOrganizationsWithVoters(organization_id=parent_org):
                 break
-    votes = Vote.objects.filter(session__organization=parent_org).prefetch_related('session').order_by('start_time')
+    votes = Vote.objects.filter(session__organization__id_parladata=parent_org).prefetch_related('session').order_by('start_time')
     sessionsData = json.loads(getAllStaticData(None).content)['sessions']
     for vote in votes:
         votesData[vote.id_parladata] = {'text': vote.motion,
