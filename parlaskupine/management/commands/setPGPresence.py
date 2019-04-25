@@ -38,7 +38,7 @@ def setPercentOFAttendedSessionPG(pg_id, date_of, parenet_org):
     maximumPGSessions = [pgId
                          for pgId
                          in sessions
-                         if sessions[pgId] == maximumSessions]
+                         if sessions[pgId] == maximumSessions][:5]
     averageSessions = sum(data['sessions'].values()) / len(data['sessions'])
 
     thisMPVotes = votes[pg_id]
@@ -46,7 +46,7 @@ def setPercentOFAttendedSessionPG(pg_id, date_of, parenet_org):
     maximumPGVotes = [pgId
                       for pgId
                       in votes
-                      if votes[pgId] == maximumVotes]
+                      if votes[pgId] == maximumVotes][:5]
     averageVotes = sum(data['votes'].values()) / len(data['votes'])
     org = Organization.objects.get(id_parladata=int(pg_id))
 
