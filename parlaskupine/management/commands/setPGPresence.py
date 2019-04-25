@@ -1,18 +1,19 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaskupine.models import Organization, PercentOFAttendedSession
-from parlalize.utils_ import saveOrAbortNew, getParentOrganizationsWithVoters, getVotersIDs, getVotersPairsWithOrg, getOrganizationsWithVoters
+from parlalize.utils_ import (saveOrAbortNew, getParentOrganizationsWithVoters,
+    getVotersIDs, getVotersPairsWithOrg, getOrganizationsWithVoters)
 from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT
 
-def setPercentOFAttendedSessionPG(pg_id, date_of):
+def setPercentOFAttendedSessionPG(pg_id, date_of, parenet_org):
 
     date_ = date_of.strftime(API_DATE_FORMAT)
 
     allSum = {}
     data = {}
 
-    voters = getVotersPairsWithOrg(date_=date_of)
+    voters = getVotersPairsWithOrg(date_=date_of, organization_id=parenet_org)
     membersOfPG = {}
 
     for i, value in sorted(voters.iteritems()):
@@ -70,4 +71,4 @@ class Command(BaseCommand):
         for parent_id in getParentOrganizationsWithVoters():
             mps = getVotersIDs(date_=date_of, organization_id=parent_id)
             for org_id in getOrganizationsWithVoters(organization_id=parent_id, date_=date_of):
-                setPercentOFAttendedSessionPG(org_id, date_of=date_of)
+                setPercentOFAttendedSessionPG(org_id, date_of=date_of, parenet_org=parent_id)
