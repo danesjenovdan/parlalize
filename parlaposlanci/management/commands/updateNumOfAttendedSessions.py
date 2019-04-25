@@ -28,7 +28,7 @@ def setPercentOFAttendedSession(commander, person_id, members, date_=None):
     org_sessions_values = [value for key, value in data["sessions"].items() if int(key) in members]
     maximum = max(org_sessions_values)
     maximumMP = [pId for pId in data["sessions"]
-                 if data["sessions"][pId] == maximum]
+                 if data["sessions"][pId] == maximum and int(pId) in members]
     average = sum(org_sessions_values) / len(org_sessions_values)
 
     if person_id in data["votes"].keys():
@@ -39,7 +39,7 @@ def setPercentOFAttendedSession(commander, person_id, members, date_=None):
     org_votes_values = [value for key, value in data["votes"].items() if int(key) in members]
     maximumVotes = max(org_votes_values)
     maximumMPVotes = [pId for pId in data["votes"]
-                      if data["votes"][pId] == maximumVotes]
+                      if data["votes"][pId] == maximumVotes and int(pId) in members]
 
     averageVotes = sum(org_votes_values) / len(org_votes_values)
 
