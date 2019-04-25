@@ -1,6 +1,7 @@
 import csv
 from datetime import datetime
 from parlaseje.models import Session
+from parlaskupine.models import Organization
 from parlalize.settings import API_URL, API_DATE_FORMAT, ISCI_URL
 import requests
 from collections import Counter
@@ -54,9 +55,11 @@ class WordAnalysis(object):
         elif self.count_of == 'groups':
             print '[INFO] prepering data for groups: '
             for org_id in self.organizations:
-                self.text[org_id] = ''
-                for speechs_chunk in getDataFromPagerApiDRFGen(API_URL + '/speechs/?party='+str(org_id)):
-                    self.text[org_id] += ' '.join([speech['content'] for speech in speechs_chunk])
+                org = Organization.objects.filter(id_parladata=org_id).exclude(classification='unaligned MP')
+                if org:
+                    self.text[org_id] = ''
+                    for speechs_chunk in getDataFromPagerApiDRFGen(API_URL + '/speechs/?party='+str(org_id)):
+                        self.text[org_id] += ' '.join([speech['content'] for speech in speechs_chunk])
 
     def wordCounter(self):
         print '[INFO] counting words'
