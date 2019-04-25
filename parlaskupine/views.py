@@ -22,7 +22,7 @@ from utils.speech import WordAnalysis
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getAllStaticData, setCardData, getPersonCardModelNew,
                               getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi,
-                              getVotersPairsWithOrg, getParentOrganizationsWithVoters)
+                              getVotersPairsWithOrg, getParentOrganizationsWithVoters, getOrganizationsWithVoters)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
                                 AGAINST, ABSTAIN, DZ)
