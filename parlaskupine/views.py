@@ -22,8 +22,7 @@ from utils.speech import WordAnalysis
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getAllStaticData, setCardData, getPersonCardModelNew,
                               getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi,
-                              getVotersPairsWithOrg, getParentOrganizationsWithVoters, getOrganizationsWithVoters,
-                              getOrganizationsWithVoters)
+                              getVotersPairsWithOrg, getParentOrganizationsWithVoters, getOrganizationsWithVoters)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
                                 AGAINST, ABSTAIN, DZ)
@@ -4060,7 +4059,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
         for parent_org in parent_orgs:
             if int(org_id) in getOrganizationsWithVoters(organization_id=parent_org):
                 break
-    votes = Vote.objects.all(session__organization=parent_org).prefetch_related('session').order_by('start_time')
+    votes = Vote.objects.filter(session__organization=parent_org).prefetch_related('session').order_by('start_time')
     sessionsData = json.loads(getAllStaticData(None).content)['sessions']
     for vote in votes:
         votesData[vote.id_parladata] = {'text': vote.motion,
