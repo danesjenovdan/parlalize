@@ -9,8 +9,8 @@ from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
 from itertools import groupby
 
-from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setCompass, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll, setPercentOFAttendedSession
-from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, Compass, MinisterStatic
+from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll, setPercentOFAttendedSession
+from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, MinisterStatic
 
 from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
 from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, PGMismatch
@@ -85,7 +85,6 @@ def onDateMPCardRunner(date_=None):
     all_in_one_setters = [
         setAverageNumberOfSpeechesPerSessionAll,
         setNumberOfQuestionsAll,
-        setCompass,
         setVocabularySizeAndSpokenWords,
     ]
 
