@@ -1485,7 +1485,7 @@ def setPresenceOfPG(request, session_id):
     results = {}
 
     for pg in pgs:
-        if not str(pg) in PGs:
+        if Organization.objects.get(id_parladata=pg).classification == 'unaligned MP':
             continue
         try:
             results[pg] = counters_in[pg] * 100 / (counters_in[pg] + counters_out[pg])
