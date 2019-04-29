@@ -3478,7 +3478,10 @@ def getListOfPGs(request, organization_id, date_=None, force_render=False):
                       reverse=True)
         cache.set('pg_list_' + key, data, 60 * 60 * 48)
 
-    return JsonResponse({'data': data})
+    return JsonResponse({
+        'data': data,
+        'parent_org_id': int(organization_id)
+    })
 
 
 @lockSetter

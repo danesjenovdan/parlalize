@@ -2710,6 +2710,7 @@ def getCompass(request, org_id, date_=None): # TODO make proper setters and gett
 
     return JsonResponse({"created_for": compas.created_for.strftime(API_DATE_FORMAT),
                          "created_at": compas.created_at.strftime(API_DATE_FORMAT),
+                         "parent_org_id": int(org_id),
                          "data": data},
                         safe=False)
 
@@ -3975,6 +3976,7 @@ def setListOfMembersTickers(request, org_id, date_=None):
         prevData = []
 
     data = setListOfMembersTickersCore(org_id, date_, date_of, prevData)
+    data.update({'parent_org_id': int(org_id)})
 
     return JsonResponse(data, safe=False)
 
