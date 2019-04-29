@@ -4468,6 +4468,7 @@ def getListOfMembersTickers(request, org_id, date_=None):
         return JsonResponse({'created_at': date_,
                              'created_for': date_,
                              'data': [],
+                             'parent_org_id': int(org_id),
                              'districts': [{dist.id_parladata: dist.name}
                                        for dist in District.objects.all()]},
                             safe=False)
@@ -4480,6 +4481,7 @@ def getListOfMembersTickers(request, org_id, date_=None):
     return JsonResponse({'created_at': card.created_at,
                          'created_for': card.created_for,
                          'data': card.data,
+                         'parent_org_id': int(org_id),
                          'districts': [{dist.id_parladata: dist.name}
                                        for dist in District.objects.filter(id_parladata__in=districts_ids)]},
                         safe=False)
