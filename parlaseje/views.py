@@ -1722,7 +1722,7 @@ def getQuote(request, quote_id):
                                      'quote_id': quote.id}})
 
 
-def getLastSessionLanding(request, date_=None):
+def getLastSessionLanding(request, org_id, date_=None):
     """
     * @api {get} /getLastSessionLanding/{?date} Data from last session
     * @apiName getLastSessionLanding
@@ -1907,7 +1907,10 @@ def getLastSessionLanding(request, date_=None):
     else:
         fdate = datetime.now().today()
     ready = False
-    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for", "-created_at")
+    presences = PresenceOfPG.objects.filter(
+        session__organization__id_parladata=org_id,
+        created_for__lte=fdate
+    ).order_by("-created_for", "-created_at")
     if not presences:
         raise Http404("Nismo našli kartice")
     presence_index = 0

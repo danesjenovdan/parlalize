@@ -1,5 +1,6 @@
 from django.conf.urls import url, include
 from parlaseje.views import *
+from django.conf import settings
 from rest_framework import routers
 from .api import TFIDFView, VoteNoteView, LegislationView, SessionsView
 
@@ -39,7 +40,7 @@ urlpatterns = [
 
     url(r'^getTFIDF/(?P<session_id>\d+)', getTFIDF),
 
-    url(r'^getLastSessionLanding(/(?P<date_>[\w].+))?', getLastSessionLanding),
+    url(r'^getLastSessionLanding(/(?P<date_>[\w].+))?', getLastSessionLanding, {'org_id': settings.DZ}),
 
     url(r'^getSessionsByClassification/', getSessionsByClassification),
 
