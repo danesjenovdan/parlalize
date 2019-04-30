@@ -1910,9 +1910,9 @@ def getLastSessionLanding(request, org_id, date_=None):
     presences = PresenceOfPG.objects.filter(
         session__organization__id_parladata=org_id,
         created_for__lte=fdate
-    ).order_by("-created_for", "-created_at")
+    ).order_by('-created_for', '-created_at')
     if not presences:
-        raise Http404("Nismo našli kartice")
+        raise Http404('Nismo našli kartice')
     presence_index = 0
     motions = None
     presence = None
@@ -1922,25 +1922,26 @@ def getLastSessionLanding(request, org_id, date_=None):
         presence = presences[presence_index]
         motions = json.loads(getMotionOfSession(None, presence.session.id_parladata).content)
         if type(motions) == dict:
-            if "results" in motions.keys():
+            if 'results' in motions.keys():
                 tfidf = json.loads(getTFIDF(None, presence.session.id_parladata).content)
-                if tfidf["results"]:
+                if tfidf['results']:
                     ready = True
                 else:
                     presence_index += 1
         else:
             presence_index += 1
 
-    results = [{"org": Organization.objects.get(id_parladata=p).getOrganizationData(),
-                                "percent": presence.presence[0][p]} for p in presence.presence[0]]
+    results = [{'org': Organization.objects.get(id_parladata=p).getOrganizationData(),
+                                'percent': presence.presence[0][p]} for p in presence.presence[0]]
     result = sorted(results, key=lambda k: k['percent'], reverse=True)
     session = Session.objects.get(id_parladata=int(presence.session.id_parladata))
-    return JsonResponse({"session": session.getSessionData(),
-                         "created_for": session.start_time.strftime(API_DATE_FORMAT),
-                         "created_at": datetime.today().strftime(API_DATE_FORMAT),
-                         "presence": result,
-                         "motions": motions["results"],
-                         "tfidf": tfidf}, safe=False)
+    return JsonResponse({'session': session.getSessionData(),
+                         'created_for': session.start_time.strftime(API_DATE_FORMAT),
+                         'created_at': datetime.today().strftime(API_DATE_FORMAT),
+                         'presence': result,
+                         'parent_org_id': int(org_id),
+                         'motions': motions['results'],
+                         'tfidf': tfidf}, safe=False)
 
 
 def getSessionsByClassification(request):
