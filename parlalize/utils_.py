@@ -440,7 +440,7 @@ def getAllStaticData(request, force_render=False):
                                        date_)
             out['persons'][person.id_parladata] = personData
         print("asdasdasd")
-        parliamentary_group = Organization.objects.filter(classification__in=settings.PS_NP)
+        parliamentary_group = Organization.objects.filter(id_parladata__in=getOrganizationsWithVoters())
         for party in parliamentary_group:
             out['partys'][party.id_parladata] = party.getOrganizationData()
 
