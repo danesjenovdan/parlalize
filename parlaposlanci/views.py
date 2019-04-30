@@ -3976,7 +3976,6 @@ def setListOfMembersTickers(request, org_id, date_=None):
         prevData = []
 
     data = setListOfMembersTickersCore(org_id, date_, date_of, prevData)
-    data.update({'parent_org_id': int(org_id)})
 
     return JsonResponse(data, safe=False)
 
