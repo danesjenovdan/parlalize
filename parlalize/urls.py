@@ -31,4 +31,5 @@ urlpatterns = [
 
     url(r'^v2/p/', include('parlaposlanci.urls_v2')),
     url(r'^v2/pg/', include('parlaskupine.urls_v2')),
+    url(r'^v2/s/', include('parlaseje.urls_v2')),
 ]
