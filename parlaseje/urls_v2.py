@@ -1,5 +1,5 @@
 from django.conf.urls import include, url
-from parlaposlanci.views import *
+from parlaseje.views import *
 
 
 urlpatterns = [
