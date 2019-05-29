@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
-from parlalize.utils_ import tryHard, getDataFromPagerApi
+from parlalize.utils_ import tryHard, getDataFromPagerApi, getVotersIDs
 from django.conf import settings
 
 
@@ -29,13 +29,13 @@ def assignValueToOption(option):
     """
     if option in settings.NOT_PRESENT:
         return 0
-    if option in settings.YES:
+    elif option in settings.YES:
         return 1
-    if option in settings.AGAINST:
+    elif option in settings.AGAINST:
         return 2
-    if option in settings.ABSTAIN:
+    elif option in settings.ABSTAIN:
         return 3
-    if option == settings.NOT_A_MEMBER:
+    else:
         return 4
 
 
@@ -76,17 +76,17 @@ def enrichData(vT1, vT2, people, date_of):
     return enriched
 
 
-def getData(date_of):
+def getData(date_of, org_id):
     """
     group balots for each person and calculate SVD
     """
     # getting all the necessary data
     allballots = getDataFromPagerApi(API_URL+'/getAllBallots/'+date_of.strftime(API_DATE_FORMAT))
-    people = tryHard(API_URL+'/getMPs/'+date_of.strftime(API_DATE_FORMAT)).json()
 
+    print(allballots, org_id, date_of)
     # sort people's ids
-    people_ids = sorted([person['id'] for person in people])
-
+    people_ids = sorted(getVotersIDs(organization_id=org_id, date_=date_of))
+    print('peplz', people_ids)
     people_without_ballots = []
 
     # group ballots by people
@@ -96,6 +96,8 @@ def getData(date_of):
         if people_ballots[-1]==[]:
             people_without_ballots.append(voter)
     lengths = [len(person) for person in people_ballots]
+
+    print(lengths)
 
     # get ids of all votes
     all_vote_ids = []
@@ -129,7 +131,7 @@ def getData(date_of):
         if (len(people_ballots_sorted_list[i]) - people_ballots_sorted_list[i].count(4)) < 5:
             hijene.append(i)
             print "brisem", i
-    print i
+
     print people_ids
     hijene.sort()
     for i in reversed(hijene):

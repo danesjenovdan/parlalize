@@ -12,7 +12,7 @@ from collections import Counter
 
 from parlaseje.models import Vote_analysis
 from parlaskupine.models import Organization, IntraDisunion
-from parlalize.utils_ import printProgressBar
+from parlalize.utils_ import printProgressBar, getOrganizationsWithVoters
 
 from django.conf import settings
 
@@ -52,8 +52,11 @@ def setMotionAnalize(request, session_id):
     if data.empty:
         return
     coalition = requests.get(settings.API_URL + '/getCoalitionPGs').json()['coalition']
-    partys = Organization.objects.filter(classification=settings.PS)
-    paries_ids = partys.values_list('id_parladata', flat=True)
+    paries_ids = getOrganizationsWithVoters(organization_id=session.organization.id_parladata)
+
+    # if coalition exist
+    calc_sides = bool(len(set(coalition+paries_ids)) != len(coalition+paries_ids))
+
     orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
     data['option_absent'] = 0
     data['option_for'] = 0
@@ -110,8 +113,9 @@ def setMotionAnalize(request, session_id):
     oppoInterCalc = data[data.is_coalition == 0].groupby(['vote_id']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
     allInter = data.groupby(['vote_id']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
 
-    opozition = Organization.objects.get(name="Opozicija")
-    coalition = Organization.objects.get(name="Koalicija")
+    if calc_sides:
+        opozition = Organization.objects.get(name="Opozicija")
+        coalition = Organization.objects.get(name="Koalicija")
 
     for vote_id in all_votes.index.values:
         vote = Vote.objects.get(id_parladata=vote_id)
@@ -149,32 +153,32 @@ def setMotionAnalize(request, session_id):
                                option=option,
                                start_time=vote.start_time,
                                session=vote.session).save()
+        if calc_sides:
+            opoIntra = IntraDisunion.objects.filter(organization=opozition,
+                                                    vote=vote)
+            coalIntra = IntraDisunion.objects.filter(organization=coalition,
+                                                    vote=vote)
 
-        opoIntra = IntraDisunion.objects.filter(organization=opozition,
-                                                vote=vote)
-        coalIntra = IntraDisunion.objects.filter(organization=coalition,
-                                                 vote=vote)
-
-        if opoIntra:
-            opoIntra.update(maximum=oppoInterCalc[vote_id])
-        else:
-            IntraDisunion(organization=opozition,
-                          vote=vote,
-                          maximum=oppoInterCalc[vote_id]
-                          ).save()
-        if coalInterCalc.empty:
-            IntraDisunion(organization=coalition,
-                          vote=vote,
-                          maximum=0
-                          ).save()
-        else:
-            if coalIntra:
-                coalIntra.update(maximum=coalInterCalc[vote_id])
+            if opoIntra:
+                opoIntra.update(maximum=oppoInterCalc[vote_id])
             else:
+                IntraDisunion(organization=opozition,
+                            vote=vote,
+                            maximum=oppoInterCalc[vote_id]
+                            ).save()
+            if coalInterCalc.empty:
                 IntraDisunion(organization=coalition,
-                              vote=vote,
-                              maximum=coalInterCalc[vote_id]
-                              ).save()
+                            vote=vote,
+                            maximum=0
+                            ).save()
+            else:
+                if coalIntra:
+                    coalIntra.update(maximum=coalInterCalc[vote_id])
+                else:
+                    IntraDisunion(organization=coalition,
+                                vote=vote,
+                                maximum=coalInterCalc[vote_id]
+                                ).save()
 
         vote.has_outlier_voters = has_outliers
         vote.intra_disunion = allInter[vote_id]
@@ -190,8 +194,8 @@ def setMotionAnalize(request, session_id):
                           mp_no=all_votes.loc[vote_id, 'm_against'],
                           mp_np=all_votes.loc[vote_id, 'm_absent'],
                           mp_kvor=all_votes.loc[vote_id, 'm_abstain'],
-                          coal_opts=all_votes.loc[vote_id, 'coal'],
-                          oppo_opts=all_votes.loc[vote_id, 'oppo'])
+                          coal_opts=all_votes.loc[vote_id, 'coal'] if calc_sides else None,
+                          oppo_opts=all_votes.loc[vote_id, 'oppo'] if calc_sides else None)
         else:
             Vote_analysis(session=session,
                           vote=vote,
@@ -205,8 +209,8 @@ def setMotionAnalize(request, session_id):
                           mp_no=all_votes.loc[vote_id, 'm_against'],
                           mp_np=all_votes.loc[vote_id, 'm_absent'],
                           mp_kvor=all_votes.loc[vote_id, 'm_abstain'],
-                          coal_opts=all_votes.loc[vote_id, 'coal'],
-                          oppo_opts=all_votes.loc[vote_id, 'oppo']).save()
+                          coal_opts=all_votes.loc[vote_id, 'coal'] if calc_sides else None,
+                          oppo_opts=all_votes.loc[vote_id, 'oppo'] if calc_sides else None).save()
 
 
 def getPercent(a, b, c, d=None):

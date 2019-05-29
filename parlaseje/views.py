@@ -14,7 +14,7 @@ from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonDat
 from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
-                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT, PS, WBS)
+                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT, PS, WBS, UNALIGNED)
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 
@@ -1396,11 +1396,13 @@ def getMotionAnalize(request, motion_id):
     pg_outliers = {}
     for org in tmp_data:
         org_obj = Organization.objects.get(id_parladata=int(org))
-        if org_obj.classification == PS:
-            orgs_data[org] = json.loads(tmp_data[org])
-            orgs_data[org]['party'] = org_obj.getOrganizationData()
-            if orgs_data[org]['outliers']:
-                pg_outliers[int(org)] = orgs_data[org]['outliers']
+        if org_obj.classification == UNALIGNED:
+            continue
+        # check i
+        orgs_data[org] = json.loads(tmp_data[org])
+        orgs_data[org]['party'] = org_obj.getOrganizationData()
+        if orgs_data[org]['outliers']:
+            pg_outliers[int(org)] = orgs_data[org]['outliers']
 
     orgs_data = sorted(orgs_data.values(), key=lambda party: sum(party['votes'].values()), reverse=True)
 
@@ -1454,8 +1456,8 @@ def getMotionAnalize(request, motion_id):
            'documents': docs if docs else [],
            'members': members,
            'parties': orgs_data,
-           'gov_side': {'coalition': json.loads(model.coal_opts),
-                        'opposition': json.loads(model.oppo_opts)},
+           'gov_side': {'coalition': json.loads(model.coal_opts) if model.coal_opts else None,
+                        'opposition': json.loads(model.oppo_opts) if model.coal_opts else None},
            'all': options,
            'abstractVisible': visible,
            'abstract': abstract,
@@ -1483,7 +1485,7 @@ def setPresenceOfPG(request, session_id):
     results = {}
 
     for pg in pgs:
-        if not str(pg) in PGs:
+        if Organization.objects.get(id_parladata=pg).classification == 'unaligned MP':
             continue
         try:
             results[pg] = counters_in[pg] * 100 / (counters_in[pg] + counters_out[pg])
@@ -1720,7 +1722,7 @@ def getQuote(request, quote_id):
                                      'quote_id': quote.id}})
 
 
-def getLastSessionLanding(request, date_=None):
+def getLastSessionLanding(request, org_id, date_=None):
     """
     * @api {get} /getLastSessionLanding/{?date} Data from last session
     * @apiName getLastSessionLanding
@@ -1905,9 +1907,12 @@ def getLastSessionLanding(request, date_=None):
     else:
         fdate = datetime.now().today()
     ready = False
-    presences = PresenceOfPG.objects.filter(created_for__lte=fdate).order_by("-created_for", "-created_at")
+    presences = PresenceOfPG.objects.filter(
+        session__organization__id_parladata=org_id,
+        created_for__lte=fdate
+    ).order_by('-created_for', '-created_at')
     if not presences:
-        raise Http404("Nismo našli kartice")
+        raise Http404('Nismo našli kartice')
     presence_index = 0
     motions = None
     presence = None
@@ -1917,25 +1922,26 @@ def getLastSessionLanding(request, date_=None):
         presence = presences[presence_index]
         motions = json.loads(getMotionOfSession(None, presence.session.id_parladata).content)
         if type(motions) == dict:
-            if "results" in motions.keys():
+            if 'results' in motions.keys():
                 tfidf = json.loads(getTFIDF(None, presence.session.id_parladata).content)
-                if tfidf["results"]:
+                if tfidf['results']:
                     ready = True
                 else:
                     presence_index += 1
         else:
             presence_index += 1
 
-    results = [{"org": Organization.objects.get(id_parladata=p).getOrganizationData(),
-                                "percent": presence.presence[0][p]} for p in presence.presence[0]]
+    results = [{'org': Organization.objects.get(id_parladata=p).getOrganizationData(),
+                                'percent': presence.presence[0][p]} for p in presence.presence[0]]
     result = sorted(results, key=lambda k: k['percent'], reverse=True)
     session = Session.objects.get(id_parladata=int(presence.session.id_parladata))
-    return JsonResponse({"session": session.getSessionData(),
-                         "created_for": session.start_time.strftime(API_DATE_FORMAT),
-                         "created_at": datetime.today().strftime(API_DATE_FORMAT),
-                         "presence": result,
-                         "motions": motions["results"],
-                         "tfidf": tfidf}, safe=False)
+    return JsonResponse({'session': session.getSessionData(),
+                         'created_for': session.start_time.strftime(API_DATE_FORMAT),
+                         'created_at': datetime.today().strftime(API_DATE_FORMAT),
+                         'presence': result,
+                         'parent_org_id': int(org_id),
+                         'motions': motions['results'],
+                         'tfidf': tfidf}, safe=False)
 
 
 def getSessionsByClassification(request):
@@ -2185,10 +2191,12 @@ def getSessionsList(request, date_=None, force_render=False):
     out = cache.get("sessions_list_" + key)
     if out and not force_render:
         data = out
+        print("wup wup")
     else:
         orgs = Organization.objects.filter(Q(id_parladata=COUNCIL_ID) |
-                                           Q(id_parladata=DZ) |
-                                           Q(classification__in=WBS))
+                                           Q(classification__in=WBS) |
+                                           Q(has_voters=True))
+        print(orgs)
         sessions = Session.objects.filter(organizations__in=orgs)
         sessions = sessions.order_by("-start_time")
         out = {'sessions': [session.getSessionData() for session in sessions],

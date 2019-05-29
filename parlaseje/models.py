@@ -638,4 +638,3 @@ class Debate(Timestampable, models.Model):
                                        blank=True,
                                        null=True,
                                        help_text=_('id parladata'))
-

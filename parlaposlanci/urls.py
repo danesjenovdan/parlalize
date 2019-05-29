@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.conf import settings
 from parlaposlanci.views import *
 
 from rest_framework import routers
@@ -86,13 +87,13 @@ urlpatterns = [
     url(r'^getPresenceThroughTime/(?P<person_id>\d+)/(?P<date_>[\w].+)', getPresenceThroughTime),
     url(r'^getPresenceThroughTime/(?P<person_id>\d+)', getPresenceThroughTime),
 
-    url(r'^getListOfMembersTickers/(?P<date_>[\w].+)', getListOfMembersTickers),
-    url(r'^getListOfMembersTickers/', getListOfMembersTickers),
+    url(r'^getListOfMembersTickers/(?P<date_>[\w].+)', getListOfMembersTickers, {'org_id': settings.DZ}),
+    url(r'^getListOfMembersTickers/', getListOfMembersTickers, {'org_id': settings.DZ}),
 
     url(r'^getMPsIDs', getMPsIDs),
 
-    url(r'^getCompass/(?P<date_>[\w].+)', getCompass),
-    url(r'^getCompass', getCompass),
+    url(r'^getCompass/(?P<date_>[\w].+)', getCompass, {'org_id': settings.DZ}),
+    url(r'^getCompass', getCompass, {'org_id': settings.DZ}),
 
     url(r'^getTaggedBallots/(?P<person_id>\d+)/(?P<date_>[\w].+)', getTaggedBallots),
     url(r'^getTaggedBallots/(?P<person_id>\d+)', getTaggedBallots),

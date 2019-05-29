@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, StyleScores
-from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData
+from parlalize.utils_ import (saveOrAbortNew, tryHard, getPersonData, getOrganizationsWithVoters,
+    getParentOrganizationsWithVoters)
 from datetime import datetime
 from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
 from collections import Counter
@@ -84,83 +85,69 @@ def getScores(words_list, counter, total):
 class Command(BaseCommand):
     help = 'Updates PresenceThroughTime'
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--organization_ids',
-            nargs='+',
-            help='Organization parladata_id',
-            type=int,
-        )
-
     def handle(self, *args, **options):
         date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
 
-        organization_ids = []
-        if options['organization_ids']:
-            organization_ids = options['organization_ids']
-        else:
-            self.stdout.write(
-                'Trying hard with %s/getMembersOfPGsRanges/' % API_URL)
-            url = API_URL + '/getMembersOfPGsRanges/' + date_
-            membersOfPGsRanges = tryHard(url).json()
-            organization_ids = [
-                key for key, value in membersOfPGsRanges[-1]['members'].items()]
+        for org in getParentOrganizationsWithVoters():
 
-        scores = {}
-        for organization_id in organization_ids:
+            self.stdout.write('getting organizations with voters')
+            organization_ids = getOrganizationsWithVoters(date_=date_of)
 
-            self.stdout.write('Org id: %s' % str(organization_id))
-            # get word counts with solr
-            counter = Counter(getCountList(self, int(organization_id), date_))
-            total = sum(counter.values())
+            scores = {}
+            for organization_id in organization_ids:
 
-            scores_local = getScores([problematicno, privzdignjeno, preprosto],
-                                     counter,
-                                     total)
+                self.stdout.write('Org id: %s' % str(organization_id))
+                # get word counts with solr
+                counter = Counter(getCountList(self, int(organization_id), date_))
+                total = sum(counter.values())
 
-            self.stdout.write('Outputting scores_local: %s' %
-                              str(scores_local))
-            scores[organization_id] = scores_local
+                scores_local = getScores([problematicno, privzdignjeno, preprosto],
+                                        counter,
+                                        total)
 
-        self.stdout.write('Outputting scores: %s' % str(scores))
-        average = {"problematicno": sum([score['problematicno']
-                                         for score
-                                         in scores.values()])/len(scores),
-                   "privzdignjeno": sum([score['privzdignjeno']
-                                         for score
-                                         in scores.values()])/len(scores),
-                   "preprosto": sum([score['preprosto']
-                                     for score
-                                     in scores.values()])/len(scores)}
-        data = []
-        for org_id, score in scores.items():
-            data.append({'org': org_id,
-                         'problematicno': score['problematicno'],
-                         'privzdignjeno': score['privzdignjeno'],
-                         'preprosto': score['preprosto'],
-                         'problematicno_average': average['problematicno'],
-                         'privzdignjeno_average': average['privzdignjeno'],
-                         'preprosto_average': average['preprosto']})
+                self.stdout.write('Outputting scores_local: %s' %
+                                str(scores_local))
+                scores[organization_id] = scores_local
 
-        for score in data:
-            self.stdout.write('About to save %s' % str(score))
-            status = saveOrAbortNew(StyleScores,
-                                    organization=Organization.objects.get(
-                                        id_parladata=int(score['org'])),
-                                    created_for=date_of,
-                                    problematicno=float(
-                                        score['problematicno']),
-                                    privzdignjeno=float(
-                                        score['privzdignjeno']),
-                                    preprosto=float(score['preprosto']),
-                                    problematicno_average=float(
-                                        score['problematicno_average']),
-                                    privzdignjeno_average=float(
-                                        score['privzdignjeno_average']),
-                                    preprosto_average=float(
-                                        score['preprosto_average'])
-                                    )
-            self.stdout.write('SaveOrAbort status: %s' % str(status))
+            self.stdout.write('Outputting scores: %s' % str(scores))
+            average = {"problematicno": sum([score['problematicno']
+                                            for score
+                                            in scores.values()])/len(scores),
+                    "privzdignjeno": sum([score['privzdignjeno']
+                                            for score
+                                            in scores.values()])/len(scores),
+                    "preprosto": sum([score['preprosto']
+                                        for score
+                                        in scores.values()])/len(scores)}
+            data = []
+            for org_id, score in scores.items():
+                data.append({'org': org_id,
+                            'problematicno': score['problematicno'],
+                            'privzdignjeno': score['privzdignjeno'],
+                            'preprosto': score['preprosto'],
+                            'problematicno_average': average['problematicno'],
+                            'privzdignjeno_average': average['privzdignjeno'],
+                            'preprosto_average': average['preprosto']})
+
+            for score in data:
+                self.stdout.write('About to save %s' % str(score))
+                status = saveOrAbortNew(StyleScores,
+                                        organization=Organization.objects.get(
+                                            id_parladata=int(score['org'])),
+                                        created_for=date_of,
+                                        problematicno=float(
+                                            score['problematicno']),
+                                        privzdignjeno=float(
+                                            score['privzdignjeno']),
+                                        preprosto=float(score['preprosto']),
+                                        problematicno_average=float(
+                                            score['problematicno_average']),
+                                        privzdignjeno_average=float(
+                                            score['privzdignjeno_average']),
+                                        preprosto_average=float(
+                                            score['preprosto_average'])
+                                        )
+                self.stdout.write('SaveOrAbort status: %s' % str(status))
 
         return 0

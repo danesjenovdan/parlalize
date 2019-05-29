@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaposlanci.models import Person, Presence
-from parlalize.utils_ import saveOrAbortNew
+from parlalize.utils_ import saveOrAbortNew, getParentOrganizationsWithVoters, getVotersIDs
 from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT
 
-def setPercentOFAttendedSession(commander, person_id, date_=None):
+def setPercentOFAttendedSession(commander, person_id, members, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -25,21 +25,23 @@ def setPercentOFAttendedSession(commander, person_id, date_=None):
         commander.stdout.write('Member with id %s didn\'t exist' % str(person_id))
         return
 
-    maximum = max(data["sessions"].values())
+    org_sessions_values = [value for key, value in data["sessions"].items() if int(key) in members]
+    maximum = max(org_sessions_values)
     maximumMP = [pId for pId in data["sessions"]
-                 if data["sessions"][pId] == maximum]
-    average = sum(data["sessions"].values()) / len(data["sessions"])
+                 if data["sessions"][pId] == maximum and int(pId) in members]
+    average = sum(org_sessions_values) / len(org_sessions_values)
 
     if person_id in data["votes"].keys():
         thisMPVotes = data["votes"][person_id]
     else:
         thisMPVotes = 0
 
-    maximumVotes = max(data["votes"].values())
+    org_votes_values = [value for key, value in data["votes"].items() if int(key) in members]
+    maximumVotes = max(org_votes_values)
     maximumMPVotes = [pId for pId in data["votes"]
-                      if data["votes"][pId] == maximumVotes]
+                      if data["votes"][pId] == maximumVotes and int(pId) in members]
 
-    averageVotes = sum(data["votes"].values()) / len(data["votes"])
+    averageVotes = sum(org_votes_values) / len(org_votes_values)
 
     person = Person.objects.get(id_parladata=int(person_id))
 
@@ -57,14 +59,19 @@ def setPercentOFAttendedSession(commander, person_id, date_=None):
 
     commander.stdout.write('Set Presence for member with id %s' % str(person_id))
 
+def run_for_orgs(commander, org_id):
+    members = getVotersIDs(organization_id=org_id)
+    for member in members:
+        setPercentOFAttendedSession(commander, str(member), members)
+
+
 class Command(BaseCommand):
     help = 'Updates MPs\' persence data'
 
     def handle(self, *args, **options):
         date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
-        memberships = tryHard(API_URL + '/getMPs/' + date_).json()
 
-        for membership in memberships:
-            setPercentOFAttendedSession(self, str(membership['id']))
+        for org_id in getParentOrganizationsWithVoters():
+            run_for_orgs(self, org_id)
         return 0

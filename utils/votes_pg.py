@@ -7,24 +7,22 @@ import itertools
 from collections import Counter
 from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
-from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi, getDataFromPagerApiGen
+from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi, getDataFromPagerApiGen, getVotersPairsWithOrg
 
 from django.conf import settings
 from django.http import JsonResponse
 
-def set_mismatch_of_pg(request, date_=''):
+def set_mismatch_of_pg(request, by_organization, date_=''):
     print 'Preparing date'
     if date_:
         f_date = datetime.strptime(date_, '%d.%m.%Y')
     else:
         f_date = datetime.now()
-    url = settings.API_URL + '/getVotesTableExtended/' + date_
+    url = settings.API_URL_V2 + '/getVotesTableExtended/'+ str(by_organization) + '/' + date_
     data = pd.DataFrame()
     for page in getDataFromPagerApiGen(url):
         temp = pd.DataFrame(page)
         data = data.append(temp, ignore_index=True)
-    url = settings.API_URL + '/getMPs/' + date_
-    mps = requests.get(url).json()
     # members = [mp['id'] for mp in mps]
     # url = settings.API_URL + '/getMembersOfPGsOnDate/' + date_
     # memsOfPGs = requests.get(url).json()
@@ -49,7 +47,7 @@ def set_mismatch_of_pg(request, date_=''):
 
     #for against absent abstain
     # all_votes = data.groupby('vote_id').sum()
-    m_to_p = {i['id']: i['party_id'] for i in mps}
+    m_to_p = getVotersPairsWithOrg(organization_id=by_organization)
     mppgs = pd.DataFrame(m_to_p.items(), columns=['voter', 'voterparty'])
 
     #Get ballots of last members party
@@ -58,7 +56,6 @@ def set_mismatch_of_pg(request, date_=''):
     i2 = data.set_index(keys).index
     data2 = data[i2.isin(i1)]
 
-    mps[0]['acronym']
     def getPartyBallot(row):
         """
         using for set ballot of party:
@@ -105,8 +102,7 @@ def set_mismatch_of_pg(request, date_=''):
     final = pd.concat([members_equal_count, members_vote_count], axis=1)
 
     final['percent'] = final.apply(lambda x: float(x['equal_vote'])/x['voter_unit']*100.0, axis=1)
-    print 'saveing'
-    print final.index.values
+    print 'saving'
     data = []
     for member, row in final.iterrows():
         print member
@@ -114,8 +110,9 @@ def set_mismatch_of_pg(request, date_=''):
         person = Person.objects.get(id_parladata=member)
         party = person.static_data.latest('created_at').party
         party_classification = party.classification
-        if party_classification != settings.PS:
-            value = None
+        # TODO: make fix code under for people without party
+        #if party_classification != settings.PS:
+        #    value = None
         data.append({'person': person,
                      'value': value})
     maxMismatch = max(data, key=lambda x:x['value'] if x['value'] else 0)

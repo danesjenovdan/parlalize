@@ -3,7 +3,7 @@ from django.utils.html import strip_tags
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Speech
 from parlaposlanci.models import Person
-from parlalize.utils_ import saveOrAbortNew, getAllStaticData
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData, getVotersIDs
 from datetime import datetime
 from parlalize.settings import SOLR_URL, API_URL
 
@@ -42,9 +42,8 @@ class Command(BaseCommand):
         if options['speaker_ids']:
             speaker_ids = options['speaker_ids']
         else:
-            self.stdout.write('Trying hard with %s/getMPs/' % API_URL)
-            members = tryHard(API_URL + '/getMPs/').json()
-            speaker_ids = [member['id'] for member in members]
+            self.stdout.write('Getting voters')
+            speaker_ids = getVotersIDs()
 
         # get static data
         self.stdout.write('Getting all static data')

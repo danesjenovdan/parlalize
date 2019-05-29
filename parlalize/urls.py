@@ -28,4 +28,8 @@ urlpatterns = [
     url(r'^v1/monitoring/', monitorMe),
     url(r'^tinymce/', include('tinymce.urls')),
     url(r'^oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+
+    url(r'^v2/p/', include('parlaposlanci.urls_v2')),
+    url(r'^v2/pg/', include('parlaskupine.urls_v2')),
+    url(r'^v2/s/', include('parlaseje.urls_v2')),
 ]

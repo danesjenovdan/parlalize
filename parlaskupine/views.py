@@ -21,7 +21,8 @@ import numpy as np
 from utils.speech import WordAnalysis
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getAllStaticData, setCardData, getPersonCardModelNew,
-                              getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi)
+                              getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi,
+                              getVotersPairsWithOrg, getParentOrganizationsWithVoters, getOrganizationsWithVoters)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
                                 AGAINST, ABSTAIN, DZ)
@@ -89,7 +90,7 @@ def getBasicInfOfPG(request, pg_id, date=None):
     * @apiSuccess {Integer} allVoters [WRONG] Calculated number of voters who voted for this PG. This number is not reliable, do not use it.
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} headOfPg The president of the PG
     * @apiSuccess {Boolean} headOfPg.is_active Answer the question: Is this MP currently active?
     * @apiSuccess {Integer[]} headOfPg.district List of Parladata ids for districts this person was elected in.
@@ -111,7 +112,7 @@ def getBasicInfOfPG(request, pg_id, date=None):
     * @apiSuccess {String} social.email The email address of the primary contact for this PG
 
     * @apiSuccess {Integer} numberOfSeats The number of seats this PG holds in the parliament.
-    
+
     * @apiSuccess {Object} party The party object
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
@@ -440,7 +441,7 @@ def getMPsOfPG(request, pg_id, date_=None):
     * @apiSuccess {String} results.party.name The party's name.
     * @apiSuccess {String} results.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} results.id The person's Parladata id.
-    * @apiSuccess {Boolean} results.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing). 
+    * @apiSuccess {Boolean} results.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/pg/getMPsOfPG/1
@@ -532,7 +533,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     * @apiSuccess {Object[]} sessions List of sessions on that day
     * @apiSuccess {String} sessions.session_name Name of the session
     * @apiSuccess {String} sessions.session_org The organization in which the session took place.
-    
+
     * @apiSuccess {Object[]} sessions.speakers List of speakers from this PG who spoke at the session.
 
     * @apiSuccess {Object} sessions.speaker.person Person object for this speaker
@@ -548,8 +549,8 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     * @apiSuccess {String} sessions.speaker.person.party.name The party's name.
     * @apiSuccess {String} sessions.speaker.person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} sessions.speaker.person.id The person's Parladata id.
-    * @apiSuccess {Boolean} sessions.speaker.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing). 
-    
+    * @apiSuccess {Boolean} sessions.speaker.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
+
     * @apiSuccess {Integer} sessions.speeches List of speech ids for that speaker.
 
     * @apiSuccess {Integer} sessions.session_id Parladata id of the session in question
@@ -1080,8 +1081,8 @@ def getMostMatchingThem(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getLessMatchingThem/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-    {  
-   "organization":{  
+    {
+   "organization":{
       "acronym":"SMC",
       "is_coalition":true,
       "id":1,
@@ -1089,29 +1090,29 @@ def getMostMatchingThem(request, pg_id, date_=None):
    },
    "created_at":"18.08.2017",
    "created_for":"14.07.2017",
-   "results":[  
-      {  
-         "person":{  
+   "results":[
+      {
+         "person":{
 
          },
          "ratio":16.3235536544989
       },
-      {  
-         "person":{  
+      {
+         "person":{
 
          },
          "ratio":18.674046697835
       },
-      {  
-         "person":{  
+      {
+         "person":{
             "is_active":false,
-            "district":[  
+            "district":[
                19
             ],
             "name":"Franc Jurša",
             "gov_id":"P122",
             "gender":"m",
-            "party":{  
+            "party":{
                "acronym":"DeSUS",
                "is_coalition":true,
                "id":3,
@@ -1123,14 +1124,14 @@ def getMostMatchingThem(request, pg_id, date_=None):
          },
          "ratio":18.7601237281406
       },
-      {  
-         "person":{  
+      {
+         "person":{
 
          },
          "ratio":18.9207916020778
       },
-      {  
-         "person":{  
+      {
+         "person":{
 
          },
          "ratio":19.6466650769119
@@ -1387,7 +1388,7 @@ def getDeviationInOrg(request, pg_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} organization The organization object.
     * @apiSuccess {String} organization.acronym PG's acronym
     * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
@@ -1608,7 +1609,7 @@ def getWorkingBodies(request, org_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} info
     * @apiSuccess {Object[]} info.vice_president Vice presidents of working bodie
     * @apiSuccess {Boolean} info.vice_president.is_active Answer the question: Is this MP currently active?
@@ -1685,7 +1686,7 @@ def getWorkingBodies(request, org_id, date_=None):
     * @apiSuccess {Boolean} seats_per_pg.party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} seats_per_pg.party.id PG's Parladata id.
     * @apiSuccess {String} seats_per_pg.party.name PG's name.
-    
+
     * @apiSuccess {Object[]} session The session object.
     * @apiSuccess {String} session.name Name of session.
     * @apiSuccess {Date} session.date_ts Date and time of session.
@@ -1711,18 +1712,18 @@ def getWorkingBodies(request, org_id, date_=None):
 
     * @apiSuccessExample {json} Example response:
 
-    {  
-   "info":{  
-      "vice_president":[  
-         {  
+    {
+   "info":{
+      "vice_president":[
+         {
             "is_active":false,
-            "district":[  
+            "district":[
                100
             ],
             "name":"Simon Zajc",
             "gov_id":"P293",
             "gender":"m",
-            "party":{  
+            "party":{
                "acronym":"SMC",
                "is_coalition":true,
                "id":1,
@@ -1732,15 +1733,15 @@ def getWorkingBodies(request, org_id, date_=None):
             "id":87,
             "has_function":false
          },
-         {  
+         {
             "is_active":false,
-            "district":[  
+            "district":[
                103
             ],
             "name":"Violeta Tomić",
             "gov_id":"P289",
             "gender":"f",
-            "party":{  
+            "party":{
                "acronym":"Levica",
                "is_coalition":false,
                "id":8,
@@ -1751,15 +1752,15 @@ def getWorkingBodies(request, org_id, date_=None):
             "has_function":false
          }
       ],
-      "president":{  
+      "president":{
          "is_active":false,
-         "district":[  
+         "district":[
             12
          ],
          "name":"Tomaž Lisec",
          "gov_id":"P187",
          "gender":"m",
-         "party":{  
+         "party":{
             "acronym":"SDS",
             "is_coalition":false,
             "id":5,
@@ -1769,16 +1770,16 @@ def getWorkingBodies(request, org_id, date_=None):
          "id":53,
          "has_function":false
       },
-      "members":[  
-         {  
+      "members":[
+         {
             "is_active":false,
-            "district":[  
+            "district":[
                40
             ],
             "name":"Benedikt Kopmajer",
             "gov_id":"P261",
             "gender":"m",
-            "party":{  
+            "party":{
                "acronym":"DeSUS",
                "is_coalition":true,
                "id":3,
@@ -1788,15 +1789,15 @@ def getWorkingBodies(request, org_id, date_=None):
             "id":41,
             "has_function":false
          },
-         {  
+         {
             "is_active":false,
-            "district":[  
+            "district":[
                44
             ],
             "name":"Bojan Podkrajšek",
             "gov_id":"P277",
             "gender":"m",
-            "party":{  
+            "party":{
                "acronym":"SDS",
                "is_coalition":false,
                "id":5,
@@ -1806,15 +1807,15 @@ def getWorkingBodies(request, org_id, date_=None):
             "id":64,
             "has_function":false
          },
-         {  
+         {
             "is_active":false,
-            "district":[  
+            "district":[
                14
             ],
             "name":"Vojka Šergan",
             "gov_id":"P285",
             "gender":"f",
-            "party":{  
+            "party":{
                "acronym":"SMC",
                "is_coalition":true,
                "id":1,
@@ -1825,21 +1826,21 @@ def getWorkingBodies(request, org_id, date_=None):
             "has_function":false
          }
       ],
-      "viceMember":[  
+      "viceMember":[
 
       ]
    },
    "created_for":"20.09.2017",
-   "ratio":{  
+   "ratio":{
       "coalition":58.8235294117647,
       "opposition":41.1764705882353
    },
-   "sessions":[  
-      {  
+   "sessions":[
+      {
          "votes":false,
          "name":"22. redna seja",
-         "orgs":[  
-            {  
+         "orgs":[
+            {
                "acronym":"",
                "is_coalition":false,
                "id":21,
@@ -1847,7 +1848,7 @@ def getWorkingBodies(request, org_id, date_=None):
             }
          ],
          "date":"7. 9. 2017",
-         "org":{  
+         "org":{
             "acronym":"",
             "is_coalition":false,
             "id":21,
@@ -1855,17 +1856,17 @@ def getWorkingBodies(request, org_id, date_=None):
          },
          "date_ts":"2017-09-07T02:00:00",
          "speeches":false,
-         "updated_at":[  
+         "updated_at":[
             "7. 9. 2017"
          ],
          "in_review":false,
          "id":9719
       },
-      {  
+      {
          "votes":false,
          "name":"64. nujna seja",
-         "orgs":[  
-            {  
+         "orgs":[
+            {
                "acronym":"",
                "is_coalition":false,
                "id":21,
@@ -1873,7 +1874,7 @@ def getWorkingBodies(request, org_id, date_=None):
             }
          ],
          "date":"5. 9. 2017",
-         "org":{  
+         "org":{
             "acronym":"",
             "is_coalition":false,
             "id":21,
@@ -1881,17 +1882,17 @@ def getWorkingBodies(request, org_id, date_=None):
          },
          "date_ts":"2017-09-05T02:00:00",
          "speeches":false,
-         "updated_at":[  
+         "updated_at":[
             "5. 9. 2017"
          ],
          "in_review":false,
          "id":9707
       },
-      {  
+      {
          "votes":false,
          "name":"63. nujna seja",
-         "orgs":[  
-            {  
+         "orgs":[
+            {
                "acronym":"",
                "is_coalition":false,
                "id":21,
@@ -1899,7 +1900,7 @@ def getWorkingBodies(request, org_id, date_=None):
             }
          ],
          "date":"5. 7. 2017",
-         "org":{  
+         "org":{
             "acronym":"",
             "is_coalition":false,
             "id":21,
@@ -1911,11 +1912,11 @@ def getWorkingBodies(request, org_id, date_=None):
          "in_review":false,
          "id":9672
       },
-      {  
+      {
          "votes":false,
          "name":"62. nujna seja",
-         "orgs":[  
-            {  
+         "orgs":[
+            {
                "acronym":"",
                "is_coalition":false,
                "id":21,
@@ -1923,7 +1924,7 @@ def getWorkingBodies(request, org_id, date_=None):
             }
          ],
          "date":"29. 6. 2017",
-         "org":{  
+         "org":{
             "acronym":"",
             "is_coalition":false,
             "id":21,
@@ -1935,11 +1936,11 @@ def getWorkingBodies(request, org_id, date_=None):
          "in_review":false,
          "id":9654
       }
-      {  
+      {
          "votes":false,
          "name":"1. nujna seja",
-         "orgs":[  
-            {  
+         "orgs":[
+            {
                "acronym":"",
                "is_coalition":false,
                "id":21,
@@ -1947,7 +1948,7 @@ def getWorkingBodies(request, org_id, date_=None):
             }
          ],
          "date":"12. 9. 2014",
-         "org":{  
+         "org":{
             "acronym":"",
             "is_coalition":false,
             "id":21,
@@ -1961,9 +1962,9 @@ def getWorkingBodies(request, org_id, date_=None):
       }
    ],
    "created_at":"20.09.2017",
-   "seats_per_pg":[  
-      {  
-         "party":{  
+   "seats_per_pg":[
+      {
+         "party":{
             "acronym":"SMC",
             "is_coalition":true,
             "name":"PS Stranka modernega centra",
@@ -1972,8 +1973,8 @@ def getWorkingBodies(request, org_id, date_=None):
          "coalition":"coalition",
          "seats":7
       },
-      {  
-         "party":{  
+      {
+         "party":{
             "acronym":"SDS",
             "is_coalition":false,
             "name":"PS Slovenska Demokratska Stranka",
@@ -1983,7 +1984,7 @@ def getWorkingBodies(request, org_id, date_=None):
          "seats":4
       }
    ],
-   "organization":{  
+   "organization":{
       "acronym":"",
       "is_coalition":false,
       "id":21,
@@ -2096,7 +2097,7 @@ def getTaggedBallots(request, pg_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} organization The organization object.
     * @apiSuccess {String} organization.acronym PG's acronym
     * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
@@ -2120,8 +2121,8 @@ def getTaggedBallots(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-    {  
-   "party":{  
+    {
+   "party":{
       "acronym":"SMC",
       "is_coalition":true,
       "id":1,
@@ -2129,13 +2130,13 @@ def getTaggedBallots(request, pg_id, date_=None):
    },
    "created_at":"18.09.2017",
    "created_for":"18.09.2017",
-   "results":[  
-      {  
+   "results":[
+      {
          "date":"18. 9. 2017",
-         "ballots":[  
-            {  
+         "ballots":[
+            {
                "option":"za",
-               "tags":[  
+               "tags":[
                   "Proceduralna glasovanja"
                ],
                "session_id":9743,
@@ -2145,12 +2146,12 @@ def getTaggedBallots(request, pg_id, date_=None):
             }
          ]
       },
-      {  
+      {
          "date":"14. 9. 2017",
-         "ballots":[  
-            {  
+         "ballots":[
+            {
                "option":"proti",
-               "tags":[  
+               "tags":[
                   "Interpelacija"
                ],
                "session_id":9724,
@@ -2224,7 +2225,7 @@ def getVocabularySize(request, pg_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
@@ -2247,8 +2248,8 @@ def getVocabularySize(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getVocabularySize/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-    {  
-   "party":{  
+    {
+   "party":{
       "acronym":"NeP - AČ",
       "is_coalition":false,
       "id":108,
@@ -2256,11 +2257,11 @@ def getVocabularySize(request, pg_id, date_=None):
    },
    "created_at":"01.12.2016",
    "created_for":"14.11.2016",
-   "results":{  
-      "max":{  
+   "results":{
+      "max":{
          "score":127.347517730496,
-         "parties":[  
-            {  
+         "parties":[
+            {
                "acronym":"NeP - MBK",
                "is_coalition":false,
                "id":107,
@@ -2304,9 +2305,9 @@ def getPGsIDs(request):
         curl -i https://analize.parlameter.si/v1/pg/getPGsIDs
 
     * @apiSuccessExample {json} Example response:
-    {  
+    {
    "lastDate":"18.09.2017",
-   "list":[  
+   "list":[
       "109",
       "1",
       "3",
@@ -2371,7 +2372,7 @@ def getStyleScoresPG(request, pg_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
@@ -2389,8 +2390,8 @@ def getStyleScoresPG(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getStyleScores/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-{  
-   "party":{  
+{
+   "party":{
       "acronym":"SMC",
       "is_coalition":true,
       "id":1,
@@ -2398,7 +2399,7 @@ def getStyleScoresPG(request, pg_id, date_=None):
    },
    "created_at":"01.03.2017",
    "created_for":"01.03.2017",
-   "results":{  
+   "results":{
       "problematicno":0.01409816852772803,
       "preprosto":0.061039753160307866,
       "privzdignjeno":0.055465651048477935
@@ -2470,7 +2471,7 @@ def getTFIDF(request, party_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
@@ -2490,8 +2491,8 @@ def getTFIDF(request, party_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getTFIDF/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-    {  
-   "party":{  
+    {
+   "party":{
       "acronym":"SMC",
       "is_coalition":true,
       "id":1,
@@ -2499,18 +2500,18 @@ def getTFIDF(request, party_id, date_=None):
    },
    "created_at":"27.02.2017",
    "created_for":"27.02.2017",
-   "results":[  
-      {  
+   "results":[
+      {
          "term":"ZDoh",
-         "scores":{  
+         "scores":{
             "tf":11,
             "df":7,
             "tf-idf":1.5714285714285714
          }
       },
-      {  
+      {
          "term":"porotnica",
-         "scores":{  
+         "scores":{
             "tf":24,
             "df":19,
             "tf-idf":1.263157894736842
@@ -2618,7 +2619,7 @@ def getNumberOfQuestions(request, pg_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
@@ -2642,8 +2643,8 @@ def getNumberOfQuestions(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getNumberOfQuestions/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-   {  
-   "party":{  
+   {
+   "party":{
       "acronym":"SMC",
       "is_coalition":true,
       "id":1,
@@ -2651,11 +2652,11 @@ def getNumberOfQuestions(request, pg_id, date_=None):
    },
    "created_at":"18.07.2017",
    "created_for":"18.07.2017",
-   "results":{  
-      "max":{  
+   "results":{
+      "max":{
          "score":2817,
-         "parties":[  
-            {  
+         "parties":[
+            {
                "acronym":"SDS",
                "is_coalition":false,
                "id":5,
@@ -2705,14 +2706,14 @@ def getQuestionsOfPG(request, pg_id, date_=False):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} party.id PG's Parladata id.
     * @apiSuccess {String} party.name PG's name.
 
-    * @apiSuccess {Object[]} all_authors 
+    * @apiSuccess {Object[]} all_authors
     * @apiSuccess {Boolean} all_authors.person.is_active Answer the question: Is this MP currently active?
     * @apiSuccess {Integer[]} all_authors.person.district List of Parladata ids for districts this person was elected in.
     * @apiSuccess {String} all_authors.person.name MP's full name.
@@ -2726,7 +2727,7 @@ def getQuestionsOfPG(request, pg_id, date_=False):
     * @apiSuccess {String} all_authors.person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} all_authors.person.id The person's Parladata id.
     * @apiSuccess {Boolean} all_authors.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {Object[]} results
     * @apiSuccess {date} date The date of question
     * @apiSuccess {Object[]} question
@@ -2744,17 +2745,17 @@ def getQuestionsOfPG(request, pg_id, date_=False):
     * @apiSuccess {String} question.person.person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} question.person.person.id The person's Parladata id.
     * @apiSuccess {Boolean} question.person.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1
     * @apiExample {curl} Example with date:
         curl -i https://analize.parlameter.si/v1/pg/getTaggedBallots/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-    {  
- {  
+    {
+ {
    "created_for":"7. 7. 2017",
-   "all_recipients":[  
+   "all_recipients":[
       "minister za infrastrukturo",
       "ministrica za izobraževanje znanost in šport",
       "ministrica za delo družino socialne zadeve in enake možnosti",
@@ -2786,15 +2787,15 @@ def getQuestionsOfPG(request, pg_id, date_=False):
       "minister za kulturo",
       "ministrica za zdravje"
    ],
-   "all_authors":[  
-      {  
+   "all_authors":[
+      {
          "name":"Klavdija Markež",
-         "district":[  
+         "district":[
             26
          ],
          "gender":"f",
          "is_active":false,
-         "party":{  
+         "party":{
             "acronym":"SMC",
             "id":1,
             "is_coalition":true,
@@ -2805,14 +2806,14 @@ def getQuestionsOfPG(request, pg_id, date_=False):
          "gov_id":"P271",
          "has_function":false
       },
-      {  
+      {
          "name":"Franc Laj",
-         "district":[  
+         "district":[
             17
          ],
          "gender":"m",
          "is_active":false,
-         "party":{  
+         "party":{
             "acronym":"PS NP",
             "id":109,
             "is_coalition":false,
@@ -2823,14 +2824,14 @@ def getQuestionsOfPG(request, pg_id, date_=False):
          "gov_id":"P267",
          "has_function":false
       },
-      {  
+      {
          "name":"Mitja Horvat",
-         "district":[  
+         "district":[
             96
          ],
          "gender":"m",
          "is_active":false,
-         "party":{  
+         "party":{
             "acronym":"SMC",
             "id":1,
             "is_coalition":true,
@@ -2843,19 +2844,19 @@ def getQuestionsOfPG(request, pg_id, date_=False):
       }
    ],
    "created_at":"20.09.2017",
-   "results":[  
-      {  
+   "results":[
+      {
          "date":"7. 7. 2017",
-         "questions":[  
-            {  
-               "person":{  
+         "questions":[
+            {
+               "person":{
                   "name":"Erika Dekleva",
-                  "district":[  
+                  "district":[
                      86
                   ],
                   "gender":"f",
                   "is_active":false,
-                  "party":{  
+                  "party":{
                      "acronym":"SMC",
                      "id":1,
                      "is_coalition":true,
@@ -2866,20 +2867,20 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                   "gov_id":"P247",
                   "has_function":false
                },
-               "recipient_orgs":[  
+               "recipient_orgs":[
 
                ],
                "recipient_text":"ministrica za obrambo",
                "title":"v zvezi z onesnaževanjem na Osrednjem vadišču slovenske vojske Poček",
                "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005ed427c0ac5acb7598a32f500418261a7cb0e0a062cde3585a20ad690",
                "session_name":"Unknown",
-               "recipient_persons":[  
-                  {  
+               "recipient_persons":[
+                  {
                      "name":"Andreja Katič",
-                     "district":[  
+                     "district":[
                         37
                      ],
-                     "ministry":{  
+                     "ministry":{
                         "acronym":"MO",
                         "id":136,
                         "is_coalition":true,
@@ -2887,7 +2888,7 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                      },
                      "gender":"f",
                      "is_active":false,
-                     "party":{  
+                     "party":{
                         "acronym":"SD",
                         "id":7,
                         "is_coalition":true,
@@ -2902,15 +2903,15 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                "id":10658,
                "session_id":"Unknown"
             },
-            {  
-               "person":{  
+            {
+               "person":{
                   "name":"Marko Ferluga",
-                  "district":[  
+                  "district":[
                      83
                   ],
                   "gender":"m",
                   "is_active":false,
-                  "party":{  
+                  "party":{
                      "acronym":"SMC",
                      "id":1,
                      "is_coalition":true,
@@ -2921,18 +2922,18 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                   "gov_id":"P250",
                   "has_function":false
                },
-               "recipient_orgs":[  
+               "recipient_orgs":[
 
                ],
                "recipient_text":"ministrica za notranje zadeve",
                "title":"v zvezi s spodbujanjem gospodarske dejavnosti na turističnih območjih",
                "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005f525f759c12be98eb8d9125ec275748bf814765fe11cc4c30420155e",
                "session_name":"Unknown",
-               "recipient_persons":[  
-                  {  
+               "recipient_persons":[
+                  {
                      "name":"Vesna Györkös Žnidar",
                      "district":null,
-                     "ministry":{  
+                     "ministry":{
                         "acronym":"MNZ",
                         "id":135,
                         "is_coalition":true,
@@ -2950,15 +2951,15 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                "id":10659,
                "session_id":"Unknown"
             },
-            {  
-               "person":{  
+            {
+               "person":{
                   "name":"Dragan Matić",
-                  "district":[  
+                  "district":[
                      74
                   ],
                   "gender":"m",
                   "is_active":false,
-                  "party":{  
+                  "party":{
                      "acronym":"SMC",
                      "id":1,
                      "is_coalition":true,
@@ -2969,20 +2970,20 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                   "gov_id":"P272",
                   "has_function":false
                },
-               "recipient_orgs":[  
+               "recipient_orgs":[
 
                ],
                "recipient_text":"predsednik Vlade",
                "title":"v zvezi s kulturnim turizmom v Republiki Sloveniji",
                "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005e495ebf9d9a4e20d6fc4ced02738eb20f85e833f50134245f1cfcd05",
                "session_name":"Unknown",
-               "recipient_persons":[  
-                  {  
+               "recipient_persons":[
+                  {
                      "name":"Miro Cerar",
-                     "district":[  
+                     "district":[
                         103
                      ],
-                     "ministry":{  
+                     "ministry":{
                         "acronym":"Vlada",
                         "id":126,
                         "is_coalition":true,
@@ -2990,7 +2991,7 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                      },
                      "gender":"m",
                      "is_active":false,
-                     "party":{  
+                     "party":{
                         "acronym":"SMC",
                         "id":1,
                         "is_coalition":true,
@@ -3005,15 +3006,15 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                "id":10657,
                "session_id":"Unknown"
             },
-            {  
-               "person":{  
+            {
+               "person":{
                   "name":"Marko Ferluga",
-                  "district":[  
+                  "district":[
                      83
                   ],
                   "gender":"m",
                   "is_active":false,
-                  "party":{  
+                  "party":{
                      "acronym":"SMC",
                      "id":1,
                      "is_coalition":true,
@@ -3024,18 +3025,18 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                   "gov_id":"P250",
                   "has_function":false
                },
-               "recipient_orgs":[  
+               "recipient_orgs":[
 
                ],
                "recipient_text":"minister za pravosodje",
                "title":"v zvezi z odgovornostjo za izpustitev storilca kaznivega dejanja Preprečitve uradnega dejanja uradni osebi in kršitev pravil cestnega prometa z dne 5. 7. 2017",
                "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e005fe4ca106b0e69211de15cafbf4db7850b7bef83cb15544ab3f8a975a",
                "session_name":"Unknown",
-               "recipient_persons":[  
-                  {  
+               "recipient_persons":[
+                  {
                      "name":"Goran Klemenčič",
                      "district":null,
-                     "ministry":{  
+                     "ministry":{
                         "acronym":"MP",
                         "id":138,
                         "is_coalition":true,
@@ -3055,18 +3056,18 @@ def getQuestionsOfPG(request, pg_id, date_=False):
             }
          ]
       },
-      {  
+      {
          "date":"18. 4. 2017",
-         "questions":[  
-            {  
-               "person":{  
+         "questions":[
+            {
+               "person":{
                   "name":"Ivan Škodnik",
-                  "district":[  
+                  "district":[
                      40
                   ],
                   "gender":"m",
                   "is_active":false,
-                  "party":{  
+                  "party":{
                      "acronym":"SMC",
                      "id":1,
                      "is_coalition":true,
@@ -3077,18 +3078,18 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                   "gov_id":"P286",
                   "has_function":false
                },
-               "recipient_orgs":[  
+               "recipient_orgs":[
 
                ],
                "recipient_text":"minister za kmetijstvo gozdarstvo in prehrano",
                "title":"v zvezi z zagotavljanjem možnosti za predelavo hlodovine v Sloveniji",
                "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e0050996dabab771a034b87412f2d5e511bdecb7167295f4b359f69b6435",
                "session_name":"Unknown",
-               "recipient_persons":[  
-                  {  
+               "recipient_persons":[
+                  {
                      "name":"Dejan Židan",
                      "district":null,
-                     "ministry":{  
+                     "ministry":{
                         "acronym":"MKGP",
                         "id":134,
                         "is_coalition":true,
@@ -3106,15 +3107,15 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                "id":10334,
                "session_id":"Unknown"
             },
-            {  
-               "person":{  
+            {
+               "person":{
                   "name":"Marko Ferluga",
-                  "district":[  
+                  "district":[
                      83
                   ],
                   "gender":"m",
                   "is_active":false,
-                  "party":{  
+                  "party":{
                      "acronym":"SMC",
                      "id":1,
                      "is_coalition":true,
@@ -3125,18 +3126,18 @@ def getQuestionsOfPG(request, pg_id, date_=False):
                   "gov_id":"P250",
                   "has_function":false
                },
-               "recipient_orgs":[  
+               "recipient_orgs":[
 
                ],
                "recipient_text":"minister za kulturo",
                "title":"v zvezi s strategijo upravljanja kulturne dediščine",
                "url":"http://imss.dz-rs.si/IMiS/ImisAdmin.nsf/ImisnetAgent?OpenAgent&2&DZ-MSS-01/ca20e0051b277dfb0926c5817e2903247d0e4b985c5e2c2b22fa3383ff748dc7",
                "session_name":"Unknown",
-               "recipient_persons":[  
-                  {  
+               "recipient_persons":[
+                  {
                      "name":"Anton Peršak",
                      "district":null,
-                     "ministry":{  
+                     "ministry":{
                         "acronym":"MK",
                         "id":133,
                         "is_coalition":true,
@@ -3209,7 +3210,7 @@ def getQuestionsOfPG(request, pg_id, date_=False):
     return JsonResponse(result, safe=False)
 
 
-def getListOfPGs(request, date_=None, force_render=False):
+def getListOfPGs(request, organization_id, date_=None, force_render=False):
     """
     * @api {get} getListOfPGs Gets all parlament groups
     * @apiName getListOfPGs
@@ -3239,16 +3240,16 @@ def getListOfPGs(request, date_=None, force_render=False):
 
 
     * @apiSuccessExample {json} Example response:
-    {  
-   "data":[  
-      {  
-         "party":{  
+    {
+   "data":[
+      {
+         "party":{
             "acronym":"SMC",
             "is_coalition":true,
             "name":"PS Stranka modernega centra",
             "id":1
          },
-         "results":{  
+         "results":{
             "intra_disunion":0.5813533236000595,
             "number_of_amendments":135,
             "privzdignjeno":0.055465651048477935,
@@ -3261,14 +3262,14 @@ def getListOfPGs(request, date_=None, force_render=False):
             "preprosto":0.061039753160307866
          }
       },
-      {  
-         "party":{  
+      {
+         "party":{
             "acronym":"SDS",
             "is_coalition":false,
             "name":"PS Slovenska Demokratska Stranka",
             "id":5
          },
-         "results":{  
+         "results":{
             "intra_disunion":2.19689804102997,
             "number_of_amendments":280,
             "privzdignjeno":0.04106208331786034,
@@ -3281,14 +3282,14 @@ def getListOfPGs(request, date_=None, force_render=False):
             "preprosto":0.06005854467272461
          }
       },
-      {  
-         "party":{  
+      {
+         "party":{
             "acronym":"DeSUS",
             "is_coalition":true,
             "name":"PS Demokratska Stranka Upokojencev Slovenije",
             "id":3
          },
-         "results":{  
+         "results":{
             "intra_disunion":2.8766187998167894,
             "number_of_amendments":9,
             "privzdignjeno":0.11774129845219254,
@@ -3301,14 +3302,14 @@ def getListOfPGs(request, date_=None, force_render=False):
             "preprosto":0.14625485569575708
          }
       },
-      {  
-         "party":{  
+      {
+         "party":{
             "acronym":"SD",
             "is_coalition":true,
             "name":"PS Socialni Demokrati",
             "id":7
          },
-         "results":{  
+         "results":{
             "intra_disunion":3.861954387556319,
             "number_of_amendments":12,
             "privzdignjeno":0.11489519477220245,
@@ -3321,14 +3322,14 @@ def getListOfPGs(request, date_=None, force_render=False):
             "preprosto":0.12539864696681088
          }
       },
-      {  
-         "party":{  
+      {
+         "party":{
             "acronym":"NSI",
             "is_coalition":false,
             "name":"PS Nova Slovenija",
             "id":6
          },
-         "results":{  
+         "results":{
             "intra_disunion":0.6328349191963298,
             "number_of_amendments":75,
             "privzdignjeno":0.09300856518783383,
@@ -3341,14 +3342,14 @@ def getListOfPGs(request, date_=None, force_render=False):
             "preprosto":0.12645125272103677
          }
       },
-      {  
-         "party":{  
+      {
+         "party":{
             "acronym":"Levica",
             "is_coalition":false,
             "name":"PS Levica",
             "id":8
          },
-         "results":{  
+         "results":{
             "intra_disunion":4.326385742334801,
             "number_of_amendments":181,
             "privzdignjeno":0.10688668819409212,
@@ -3361,14 +3362,14 @@ def getListOfPGs(request, date_=None, force_render=False):
             "preprosto":0.1494215397402997
          }
       },
-      {  
-         "party":{  
+      {
+         "party":{
             "acronym":"PS NP",
             "is_coalition":false,
             "name":"PS nepovezanih poslancev ",
             "id":109
          },
-         "results":{  
+         "results":{
             "intra_disunion":7.026884156470127,
             "number_of_amendments":5,
             "privzdignjeno":0.23519830984664467,
@@ -3381,14 +3382,14 @@ def getListOfPGs(request, date_=None, force_render=False):
             "preprosto":0.28066606227414975
          }
       },
-      {  
-         "party":{  
+      {
+         "party":{
             "acronym":"IMNS",
             "is_coalition":false,
             "name":"PS italijanske in madžarske narodne skupnosti",
             "id":2
          },
-         "results":{  
+         "results":{
             "intra_disunion":7.58948799275034,
             "number_of_amendments":5,
             "privzdignjeno":0.4560700680451448,
@@ -3407,19 +3408,21 @@ def getListOfPGs(request, date_=None, force_render=False):
     """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        key = date_
+        key = organization_id + '_' + date_
     else:
         date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
-        key = date_
-
+        key = organization_id + '_' + date_
     c_data = cache.get('pg_list_' + key)
     if c_data and not force_render:
         data = c_data
     else:
-        allPGs = tryHard(API_URL + '/getAllPGsExt/').json().keys()
-        url = API_URL + '/getMembersOfPGsRanges/' + date_
-        pgs = tryHard(url).json()[-1]['members']
+        members_orgs = getVotersPairsWithOrg(date_=date_of, organization_id=organization_id)
+        pgs = {}
+
+        for i, value in sorted(members_orgs.iteritems()):
+            pgs.setdefault(value, []).append(i)
+
         list_of_cards = [{'method': getPercentOFAttendedSessionPG,
                           'data_path': ('sessions', 'organization_value'),
                           'out_path': ('results', 'presence_sessions')},
@@ -3450,7 +3453,7 @@ def getListOfPGs(request, date_=None, force_render=False):
                          ]
         data = []
         for pg, members in pgs.items():
-            if pg in allPGs and members:
+            if members:
                 pg_obj = {}
                 pg_obj['results'] = {}
                 pg_id = pg
@@ -3475,7 +3478,10 @@ def getListOfPGs(request, date_=None, force_render=False):
                       reverse=True)
         cache.set('pg_list_' + key, data, 60 * 60 * 48)
 
-    return JsonResponse({'data': data})
+    return JsonResponse({
+        'data': data,
+        'parent_org_id': int(organization_id)
+    })
 
 
 @lockSetter
@@ -3521,7 +3527,7 @@ def getPresenceThroughTime(request, party_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
@@ -3538,9 +3544,9 @@ def getPresenceThroughTime(request, party_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getPresenceThroughTime/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-    {  
-{  
-   "party":{  
+    {
+{
+   "party":{
       "acronym":"SMC",
       "is_coalition":true,
       "id":1,
@@ -3548,146 +3554,146 @@ def getPresenceThroughTime(request, party_id, date_=None):
    },
    "created_at":"21.08.2017",
    "created_for":"21.08.2017",
-   "results":[  
-      {  
+   "results":[
+      {
          "date_ts":"2014-08-01T00:00:00",
          "presence":96.07843137254902
       },
-      {  
+      {
          "date_ts":"2014-09-01T00:00:00",
          "presence":93.7037037037037
       },
-      {  
+      {
          "date_ts":"2014-10-01T00:00:00",
          "presence":93.05555555555556
       },
-      {  
+      {
          "date_ts":"2014-11-01T00:00:00",
          "presence":96.0727969348659
       },
-      {  
+      {
          "date_ts":"2014-12-01T00:00:00",
          "presence":93.12386156648452
       },
-      {  
+      {
          "date_ts":"2015-01-01T00:00:00",
          "presence":92.52645502645503
       },
-      {  
+      {
          "date_ts":"2015-02-01T00:00:00",
          "presence":94.94535519125684
       },
-      {  
+      {
          "date_ts":"2015-03-01T00:00:00",
          "presence":88.62745098039215
       },
-      {  
+      {
          "date_ts":"2015-04-01T00:00:00",
          "presence":87.72609819121448
       },
-      {  
+      {
          "date_ts":"2015-05-01T00:00:00",
          "presence":90.42145593869732
       },
-      {  
+      {
          "date_ts":"2015-06-01T00:00:00",
          "presence":91.22574955908289
       },
-      {  
+      {
          "date_ts":"2015-07-01T00:00:00",
          "presence":98.47619047619047
       },
-      {  
+      {
          "date_ts":"2015-09-01T00:00:00",
          "presence":94.28571428571428
       },
-      {  
+      {
          "date_ts":"2015-10-01T00:00:00",
          "presence":90.10989010989012
       },
-      {  
+      {
          "date_ts":"2015-11-01T00:00:00",
          "presence":94.80243161094225
       },
-      {  
+      {
          "date_ts":"2015-12-01T00:00:00",
          "presence":95.33527696793003
       },
-      {  
+      {
          "date_ts":"2016-01-01T00:00:00",
          "presence":89.1891891891892
       },
-      {  
+      {
          "date_ts":"2016-02-01T00:00:00",
          "presence":92.06349206349206
       },
-      {  
+      {
          "date_ts":"2016-03-01T00:00:00",
          "presence":90.53360125027908
       },
-      {  
+      {
          "date_ts":"2016-04-01T00:00:00",
          "presence":91.27272727272727
       },
-      {  
+      {
          "date_ts":"2016-05-01T00:00:00",
          "presence":91.4868804664723
       },
-      {  
+      {
          "date_ts":"2016-06-01T00:00:00",
          "presence":89.07142857142857
       },
-      {  
+      {
          "date_ts":"2016-07-01T00:00:00",
          "presence":96.67189952904238
       },
-      {  
+      {
          "date_ts":"2016-09-01T00:00:00",
          "presence":91.32996632996633
       },
-      {  
+      {
          "date_ts":"2016-10-01T00:00:00",
          "presence":94.5
       },
-      {  
+      {
          "date_ts":"2016-11-01T00:00:00",
          "presence":94.18367346938776
       },
-      {  
+      {
          "date_ts":"2016-12-01T00:00:00",
          "presence":96.03174603174604
       },
-      {  
+      {
          "date_ts":"2017-01-01T00:00:00",
          "presence":88.57142857142857
       },
-      {  
+      {
          "date_ts":"2017-02-01T00:00:00",
          "presence":92.62548262548262
       },
-      {  
+      {
          "date_ts":"2017-03-01T00:00:00",
          "presence":92.66846361185983
       },
-      {  
+      {
          "date_ts":"2017-04-01T00:00:00",
          "presence":91.49425287356323
       },
-      {  
+      {
          "date_ts":"2017-05-01T00:00:00",
          "presence":95.13553657630895
       },
-      {  
+      {
          "date_ts":"2017-06-01T00:00:00",
          "presence":89.45783132530121
       },
-      {  
+      {
          "date_ts":"2017-07-01T00:00:00",
          "presence":92.52525252525253
       }
    ]
 }
-    """     
+    """
     card = getPGCardModelNew(PresenceThroughTime,
                              party_id,
                              date_)
@@ -3709,9 +3715,9 @@ def getIntraDisunion(request):
     * @apiName getIntraDisunion
     * @apiGroup PGs
     * @apiDescription This function returns all data for analysis intra-disunion
-   
-    * @apiSuccess {Object} results 
-    * @apiSuccess {Object} Name of PG 
+
+    * @apiSuccess {Object} results
+    * @apiSuccess {Object} Name of PG
     * @apiSuccess {String} results.organization.acronym PG's acronym
     * @apiSuccess {Boolean} results.organization.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} results.organization.id PG's Parladata id.
@@ -3731,141 +3737,141 @@ def getIntraDisunion(request):
         curl -i https://analize.parlameter.si/v1/pg/getIntraDisunion
 
     * @apiSuccessExample {json} Example response:
-{  
-   "results":{  
-      "NSI":{  
-         "organization":{  
+{
+   "results":{
+      "NSI":{
+         "organization":{
             "acronym":"NSI",
             "is_coalition":false,
             "id":6,
             "name":"PS Nova Slovenija"
          },
-         "votes":[  
-            {  
+         "votes":[
+            {
                "text":"Dnevni red v celoti",
                "id_parladata":6513,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Proceduralna glasovanja"
                ],
                "result":true,
                "date":"2014-08-01T12:16:54"
             },
-            {  
+            {
                "text":"Proceduralni predlog za prekinitev 1. točke dnevnega reda",
                "id_parladata":6512,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Proceduralna glasovanja"
                ],
                "result":false,
                "date":"2014-08-01T12:43:48"
             },
-            {  
+            {
                "text":"Sklep o imenovanju predsednika in podpredsednika Mandatno-volilne komisije - Sklep",
                "id_parladata":6511,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Mandatno-volilna komisija"
                ],
                "result":true,
                "date":"2014-08-01T12:49:10"
             },
-            {  
+            {
                "text":"Poročilo o izidu predčasnih volitev v Državni zbor Republike Slovenije - Glasovanje o predlogu sklepa",
                "id_parladata":6510,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Proceduralna glasovanja"
                ],
                "result":true,
                "date":"2014-08-01T14:18:26"
             },
-            {  
+            {
                "text":"Predlog za izvolitev predsednika Državnega zbora Republike Slovenije - Glasovanje o sestavi komisije",
                "id_parladata":6509,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Mandatno-volilna komisija"
                ],
                "result":true,
                "date":"2014-08-01T15:54:29"
             },
-            {  
+            {
                "text":"Dnevni red v celoti",
                "id_parladata":6639,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Proceduralna glasovanja"
                ],
                "result":true,
                "date":"2014-08-25T12:06:57"
             },
-            {  
+            {
                "text":"Predlog za izvolitev podpredsednika Državnega zbora - Glasovanje o sestavi komisije za tajno glasovanje (EPA 12 - VII, EPA 15 - VII)",
                "id_parladata":6638,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Mandatno-volilna komisija"
                ],
                "result":true,
                "date":"2014-08-25T12:26:05"
             },
-            {  
+            {
                "text":"Odlok o ustanovitvi in nalogah delovnih teles Državnega zbora - Glasovanje",
                "id_parladata":6637,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Proceduralna glasovanja"
                ],
                "result":true,
                "date":"2014-08-25T20:16:36"
             },
-            {  
+            {
                "text":"Sklep o imenovanju generalne sekretarke Državnega zbora - Glasovanje",
                "id_parladata":6636,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Mandatno-volilna komisija"
                ],
                "result":true,
                "date":"2014-08-25T20:37:48"
             },
-            {  
+            {
                "text":"Sklep o imenovanju predsednikov in podpredsednikov delovnih teles Državnega zbora - Glasovanje",
                "id_parladata":6635,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Mandatno-volilna komisija"
                ],
                "result":true,
                "date":"2014-08-25T21:00:14"
             },
-            {  
+            {
                "text":"Sklep o izvolitvi predsednika, podpredsednika in članov Komisije za nadzor obveščevalnih in varnostnih služb - Sklep o prestavitvi obravnave in odločanja na naslednjo sejo",
                "id_parladata":6634,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Mandatno-volilna komisija"
                ],
                "result":true,
                "date":"2014-08-25T21:09:06"
             },
-            {  
+            {
                "text":"Dnevni red v celoti",
                "id_parladata":6633,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Proceduralna glasovanja"
                ],
                "result":true,
                "date":"2014-08-28T12:04:07"
             },
-            {  
+            {
                "text":"Obvestilo s Sklepom o pravici nadomeščanja poslanca Državnega zbora - Glasovanje",
                "id_parladata":6632,
                "maximum":"0.0",
-               "tag":[  
+               "tag":[
                   "Mandatno-volilna komisija"
                ],
                "result":true,
@@ -3908,7 +3914,7 @@ def getIntraDisunion(request):
     ]
     }
 }
-    """     
+    """
     out = {}
     votesData = {}
     tab = []
@@ -3923,12 +3929,13 @@ def getIntraDisunion(request):
         votespag = paginator.page(1)
     except EmptyPage:
         votespag = paginator.page(paginator.num_pages)
-
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
     for vote in votespag:
         votesData[vote.id_parladata] = {'text': vote.motion,
                                         'result': vote.result,
                                         'date': vote.start_time,
                                         'tag': vote.tags,
+                                        'organization_id': sessionsData[str(vote.session.id_parladata)]['org']['id'],
                                         'id_parladata': vote.id_parladata}
 
     for vote in votespag:
@@ -3950,6 +3957,7 @@ def getIntraDisunion(request):
                     'result': vote.result,
                     'date': vote.start_time,
                     'tag': vote.tags,
+                    'organization_id': sessionsData[str(vote.session.id_parladata)]['org']['id'],
                     'maximum': vote.intra_disunion,
                     'id_parladata': vote.id_parladata})
 
@@ -3983,30 +3991,30 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
         curl -i https://analize.parlameter.si/v1/pg/getIntraDisunionOrg/1
 
     * @apiSuccessExample {json} Example response:
-    {  
-   "results":[  
-      {  
+    {
+   "results":[
+      {
          "text":"Dnevni red v celoti",
          "id_parladata":6513,
          "maximum":0,
-         "tag":[  
+         "tag":[
             "Proceduralna glasovanja"
          ],
          "result":true,
          "date":"2014-08-01T12:16:54"
       },
-      {  
+      {
          "text":"Proceduralni predlog za prekinitev 1. točke dnevnega reda",
          "id_parladata":6512,
          "maximum":0,
-         "tag":[  
+         "tag":[
             "Proceduralna glasovanja"
          ],
          "result":false,
          "date":"2014-08-01T12:43:48"
       }
    ],
-   "all_tags":[  
+   "all_tags":[
       "Komisija za nadzor javnih financ",
       "Kolegij predsednika Državnega zbora",
       "Komisija za narodni skupnosti",
@@ -4047,11 +4055,20 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     tab = []
     org = Organization.objects.get(id_parladata=org_id)
     acr = org.acronym
-    votes = Vote.objects.all().order_by('start_time').prefetch_related('session')
+    parent_orgs = getParentOrganizationsWithVoters()
+    if int(org_id) in parent_orgs:
+       parent_org = org_id
+    else:
+        for parent_org in parent_orgs:
+            if int(org_id) in getOrganizationsWithVoters(organization_id=parent_org):
+                break
+    votes = Vote.objects.filter(session__organization__id_parladata=parent_org).prefetch_related('session').order_by('start_time')
+    sessionsData = json.loads(getAllStaticData(None).content)['sessions']
     for vote in votes:
         votesData[vote.id_parladata] = {'text': vote.motion,
                                         'result': vote.result,
                                         'date': vote.start_time,
+                                        'organization_id': sessionsData[str(vote.session.id_parladata)]['org']['id'],
                                         'tag': vote.tags,
                                         'classification': vote.classification,
                                         'id_parladata': vote.id_parladata,
@@ -4061,13 +4078,14 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
     if c_data and not force_render:
         out = c_data
     else:
-        if int(org_id) == DZ:
+        if int(org_id) in getParentOrganizationsWithVoters():
             for vote in votes:
                 tab.append({'text': vote.motion,
                             'result': vote.result,
                             'date': vote.start_time,
                             'tag': vote.tags,
                             'classification': vote.classification,
+                            'organization_id': sessionsData[str(vote.session.id_parladata)]['org']['id'],
                             'maximum': vote.intra_disunion,
                             'id_parladata': vote.id_parladata,
                             'session_id': vote.session.id_parladata})
@@ -4112,7 +4130,7 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} party The organization object.
     * @apiSuccess {String} party.acronym PG's acronym
     * @apiSuccess {Boolean} party.is_coalition Is this PG a member of the coalition?
@@ -4160,9 +4178,9 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getAmendmentsOfPG/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-    {  
-  {  
-   "party":{  
+    {
+  {
+   "party":{
       "acronym":"SMC",
       "is_coalition":true,
       "id":1,
@@ -4170,17 +4188,17 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
    },
    "created_at":"19.09.2017",
    "created_for":"19.09.2017",
-   "results":[  
-      {  
+   "results":[
+      {
          "date":"19. 9. 2017",
-         "votes":[  
-            {  
-               "session":{  
+         "votes":[
+            {
+               "session":{
                   "name":"33. redna seja",
                   "date_ts":"2017-09-18T02:00:00",
                   "updated_at":"19. 9. 2017",
-                  "orgs":[  
-                     {  
+                  "orgs":[
+                     {
                         "acronym":"DZ",
                         "id":95,
                         "is_coalition":false,
@@ -4188,7 +4206,7 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
                      }
                   ],
                   "date":"18. 9. 2017",
-                  "org":{  
+                  "org":{
                      "acronym":"DZ",
                      "id":95,
                      "is_coalition":false,
@@ -4197,17 +4215,17 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
                   "id":9743,
                   "in_review":false
                },
-               "results":{  
+               "results":{
 
                }
             },
-            {  
-               "session":{  
+            {
+               "session":{
                   "name":"33. redna seja",
                   "date_ts":"2017-09-18T02:00:00",
                   "updated_at":"19. 9. 2017",
-                  "orgs":[  
-                     {  
+                  "orgs":[
+                     {
                         "acronym":"DZ",
                         "id":95,
                         "is_coalition":false,
@@ -4215,7 +4233,7 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
                      }
                   ],
                   "date":"18. 9. 2017",
-                  "org":{  
+                  "org":{
                      "acronym":"DZ",
                      "id":95,
                      "is_coalition":false,
@@ -4228,7 +4246,7 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
          ]
       }
    ],
-   "all_tags":[  
+   "all_tags":[
       "Komisija za nadzor javnih financ",
       "Kolegij predsednika Državnega zbora",
       "Komisija za narodni skupnosti",
@@ -4312,7 +4330,7 @@ def getDisunionOrg(request):
     * @apiName getDisunionOrg
     * @apiGroup PGs
     * @apiDescription This function returns the data for analysis disunion for all parlament groups
-    
+
     * @apiSuccess {Object} organization The organization object.
     * @apiSuccess {String} organization.acronym PG's acronym
     * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
@@ -4326,9 +4344,9 @@ def getDisunionOrg(request):
         curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1
 
     * @apiSuccessExample {json} Example response:
-  [  
-   {  
-      "organization":{  
+  [
+   {
+      "organization":{
          "acronym":"PS NP",
          "is_coalition":false,
          "id":109,
@@ -4336,8 +4354,8 @@ def getDisunionOrg(request):
       },
       "sum":7.095302214241279
    },
-   {  
-      "organization":{  
+   {
+      "organization":{
          "acronym":"SMC",
          "is_coalition":true,
          "id":1,
@@ -4345,8 +4363,8 @@ def getDisunionOrg(request):
       },
       "sum":0.5816681918410643
    },
-   {  
-      "organization":{  
+   {
+      "organization":{
          "acronym":"DeSUS",
          "is_coalition":true,
          "id":3,
@@ -4354,8 +4372,8 @@ def getDisunionOrg(request):
       },
       "sum":2.912466548013221
    },
-   {  
-      "organization":{  
+   {
+      "organization":{
          "acronym":"IMNS",
          "is_coalition":false,
          "id":2,
@@ -4363,8 +4381,8 @@ def getDisunionOrg(request):
       },
       "sum":7.719928186714542
    },
-   {  
-      "organization":{  
+   {
+      "organization":{
          "acronym":"SDS",
          "is_coalition":false,
          "id":5,
@@ -4372,8 +4390,8 @@ def getDisunionOrg(request):
       },
       "sum":2.19749942730155
    },
-   {  
-      "organization":{  
+   {
+      "organization":{
          "acronym":"SD",
          "is_coalition":true,
          "id":7,
@@ -4381,8 +4399,8 @@ def getDisunionOrg(request):
       },
       "sum":3.8524835427903024
    },
-   {  
-      "organization":{  
+   {
+      "organization":{
          "acronym":"NSI",
          "is_coalition":false,
          "id":6,
@@ -4390,8 +4408,8 @@ def getDisunionOrg(request):
       },
       "sum":0.6268701376419659
    },
-   {  
-      "organization":{  
+   {
+      "organization":{
          "acronym":"Levica",
          "is_coalition":false,
          "id":8,
@@ -4400,7 +4418,7 @@ def getDisunionOrg(request):
       "sum":4.345451825254088
    }
 ]
-    """     
+    """
     result = []
     data = tryHard(API_URL + '/getAllPGs/').json()
     for org in data:
@@ -4445,8 +4463,8 @@ def getDisunionOrgID(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getDisunionOrg/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-   {  
-      "organization":{  
+   {
+      "organization":{
          "acronym":"PS NP",
          "is_coalition":false,
          "id":109,
@@ -4454,14 +4472,14 @@ def getDisunionOrgID(request, pg_id, date_=None):
       },
       "sum":7.095302214241279
    }
-    """     
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
 
-    suma, ids = getDisunionInOrgHelper(pg_id, date_of) 
+    suma, ids = getDisunionInOrgHelper(pg_id, date_of)
     org_data = ids[0].organization.getOrganizationData() if ids else {}
     orgs = tryHard(API_URL + '/getAllPGs/').json().keys()
 
@@ -4496,7 +4514,7 @@ def getDisunionOrgID(request, pg_id, date_=None):
 
 def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
     """
-    * @api {get} getNumberOfAmendmetsOfPG/{pg_id}/{?date} Gets number of amendments of specific organization 
+    * @api {get} getNumberOfAmendmetsOfPG/{pg_id}/{?date} Gets number of amendments of specific organization
     * @apiName getNumberOfAmendmetsOfPG
     * @apiGroup PGs
     * @apiDescription This function returns number of amendments of specific organization
@@ -4506,7 +4524,7 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfPG/1
     * @apiExample {curl} Example with date:
-        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfPG/1/12.12.2015    
+        curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfPG/1/12.12.2015
     """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
@@ -4516,7 +4534,7 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
     orgs = tryHard(API_URL + '/getAllPGs/').json().keys()
     org = count = last_card_date = None
     data = []
-    for org_id in orgs:            
+    for org_id in orgs:
         temp_org, temp_count, last_card = getAmendmentsCount(org_id, date_of)
         data.append({'value': temp_count,
                      'org_obj': temp_org,
@@ -4574,7 +4592,7 @@ def setPGMismatch(request, pg_id, date_=None):
             pass
         data.append({'id': member,
                      'ratio': mismatch.data})
-    
+
     saved = saveOrAbortNew(model=PGMismatch,
                            organization=org,
                            created_for=date_of,
@@ -4593,14 +4611,14 @@ def getPGMismatch(request, pg_id, date_=None):
 
     * @apiSuccess {date} created_for The date this card was created for
     * @apiSuccess {date} created_at The date on which this card was created
-    
+
     * @apiSuccess {Object} organization The organization object.
     * @apiSuccess {String} organization.acronym PG's acronym
     * @apiSuccess {Boolean} organization.is_coalition Is this PG a member of the coalition?
     * @apiSuccess {Integer} organization.id PG's Parladata id.
     * @apiSuccess {String} organization.name PG's name.
 
-    * @apiSuccess {Object[]} results 
+    * @apiSuccess {Object[]} results
     * @apiSuccess {Object} results.person MP's person object
     * @apiSuccess {Boolean} results.person.is_active Answer the question: Is this MP currently active?
     * @apiSuccess {Integer[]} results.person.district List of Parladata ids for districts this person was elected in.
@@ -4615,9 +4633,9 @@ def getPGMismatch(request, pg_id, date_=None):
     * @apiSuccess {String} results.person.type The person's parlalize type. Always "mp" for MPs.
     * @apiSuccess {Integer} results.person.id The person's Parladata id.
     * @apiSuccess {Boolean} results.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-    
+
     * @apiSuccess {Float} results.ratio Ratio of MP, how does mismatch from PG
-    
+
 
     * @apiExample {curl} Example:
         curl -i https://analize.parlameter.si/v1/pg/getPGMismatch/1
@@ -4625,8 +4643,8 @@ def getPGMismatch(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getPGMismatch/1/12.12.2015
 
     * @apiSuccessExample {json} Example response:
-  {  
-   "organization":{  
+  {
+   "organization":{
       "acronym":"SMC",
       "is_coalition":true,
       "id":1,
@@ -4634,22 +4652,22 @@ def getPGMismatch(request, pg_id, date_=None):
    },
    "created_at":"16.08.2017",
    "created_for":"16.08.2017",
-   "results":[  
-      {  
-         "person":{  
+   "results":[
+      {
+         "person":{
 
          },
          "ratio":2.17821782178218
       },
-      {  
-         "person":{  
+      {
+         "person":{
             "name":"Ivan Prelog",
-            "district":[  
+            "district":[
                52
             ],
             "gender":"m",
             "is_active":false,
-            "party":{  
+            "party":{
                "acronym":"SMC",
                "id":1,
                "is_coalition":true,
@@ -4662,15 +4680,15 @@ def getPGMismatch(request, pg_id, date_=None):
          },
          "ratio":2.01972757162987
       },
-      {  
-         "person":{  
+      {
+         "person":{
             "name":"Branko Zorman",
-            "district":[  
+            "district":[
                62
             ],
             "gender":"m",
             "is_active":false,
-            "party":{  
+            "party":{
                "acronym":"SMC",
                "id":1,
                "is_coalition":true,
@@ -4685,7 +4703,7 @@ def getPGMismatch(request, pg_id, date_=None):
       }
    ]
 }
-    """     
+    """
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:

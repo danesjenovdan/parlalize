@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaposlanci.models import Person, MembershipsOfMember
 from parlaskupine.models import Organization
-from parlalize.utils_ import saveOrAbortNew
+from parlalize.utils_ import saveOrAbortNew, getVotersIDs
 from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT
 
@@ -42,10 +42,9 @@ class Command(BaseCommand):
             date_of = datetime.now().date()
             date_ = date_of.strftime(API_DATE_FORMAT)
 
-        self.stdout.write('Trying hard for %s/getMPs/%s' % (API_URL, str(date_)))
-        mps = tryHard(API_URL+'/getMPs/' + date_).json()
-        for mp in mps:
-            self.stdout.write('Running setMembershipsOfMember on %s' % str(mp['id']))
-            setMembershipsOfMember(self, str(mp['id']), date_)
+        self.stdout.write('Getting voters')
+        for mp in getVotersIDs(date_=date_of):
+            self.stdout.write('Running setMembershipsOfMember on %s' % str(mp))
+            setMembershipsOfMember(self, str(mp), date_)
 
         return 0
