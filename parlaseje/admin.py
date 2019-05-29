@@ -85,6 +85,7 @@ def clean_abstract(l):
 admin.site.register(Session, SessionAdmin)
 admin.site.register(VoteDetailed)
 admin.site.register(Vote)
+admin.site.register(Vote_analysis)
 admin.site.register(VoteNote, VoteNotes)
 admin.site.register(Legislation)
 admin.site.register(LegislationNote, LegislationNotes)

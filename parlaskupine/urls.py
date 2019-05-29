@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.conf import settings
 from .views import *
 from .admin import WBAutocomplete
 
@@ -43,12 +44,12 @@ urlpatterns = [
 
     url(r'^getSpeechesOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getSpeechesOfPG),
     url(r'^getSpeechesOfPG/(?P<pg_id>\d+)', getSpeechesOfPG),
-    
+
     url(r'^getPercentOFAttendedSessionPG/(?P<pg_id>\d+)', getPercentOFAttendedSessionPG),
 
     url(r'^getMPsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getMPsOfPG),
     url(r'^getMPsOfPG/(?P<pg_id>\d+)', getMPsOfPG),
-    
+
     url(r'^getMostMatchingThem/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getMostMatchingThem),
     url(r'^getMostMatchingThem/(?P<pg_id>\d+)/', getMostMatchingThem),
 
@@ -108,8 +109,8 @@ urlpatterns = [
     # runenr
     #url(r'^runSetters/(?P<date_to>[\w].+)', runSetters),
 
-    url(r'^getListOfPGs/(?P<date_>[\w].+)/', getListOfPGs),
-    url(r'^getListOfPGs/', getListOfPGs),
+    url(r'^getListOfPGs/(?P<date_>[\w].+)/', getListOfPGs, {'organization_id': str(settings.DZ)}),
+    url(r'^getListOfPGs/', getListOfPGs, {'organization_id': str(settings.DZ)}),
 
     url(r'^getWorkingBodiesLive/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies_live),
 

@@ -1,12 +1,14 @@
 from django.conf.urls import url, include
 from parlaseje.views import *
+from django.conf import settings
 from rest_framework import routers
-from .api import TFIDFView, VoteNoteView, LegislationView
+from .api import TFIDFView, VoteNoteView, LegislationView, SessionsView
 
 router = routers.DefaultRouter()
 router.register(r'tfidfs', TFIDFView)
 router.register(r'vote-notes', VoteNoteView)
 router.register(r'legislations', LegislationView)
+router.register(r'sessions', SessionsView)
 
 
 urlpatterns = [
@@ -38,7 +40,7 @@ urlpatterns = [
 
     url(r'^getTFIDF/(?P<session_id>\d+)', getTFIDF),
 
-    url(r'^getLastSessionLanding(/(?P<date_>[\w].+))?', getLastSessionLanding),
+    url(r'^getLastSessionLanding(/(?P<date_>[\w].+))?', getLastSessionLanding, {'org_id': settings.DZ}),
 
     url(r'^getSessionsByClassification/', getSessionsByClassification),
 
@@ -57,7 +59,7 @@ urlpatterns = [
     url(r'^getVotesData/(?P<votes>[\w,]+)$', getVotesData),
 
     url(r'^getLegislationList/(?P<session_id>\d+)$', legislationList),
-    
+
     url(r'^getLegislation/(?P<epa>[A-Z0-9, \-\+\/]+)', legislation),
     url(r'^getOtherVotes/(?P<session_id>\d+)$', getOtherVotes),
     url(r'^getOtherVotes/(?P<session_id>\d+)/(?P<date_>[\w].+)$', getOtherVotes),

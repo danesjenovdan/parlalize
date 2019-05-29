@@ -3,7 +3,7 @@ import json
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization, PGStatic
-from parlalize.utils_ import tryHard, saveOrAbortNew
+from parlalize.utils_ import tryHard, saveOrAbortNew, getOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT, API_URL
 
@@ -50,7 +50,7 @@ def setBasicInfoOfPG(commander, pg, date):
                   email=data['Mail']
                   )
 
-    return 
+    return
 
 
 class Command(BaseCommand):
@@ -76,11 +76,10 @@ class Command(BaseCommand):
         else:
             if options['date']:
                 date_ = options['date']
+                date_of = datetime.strptime(date_, API_DATE_FORMAT)
             else:
-                date_ = datetime.now().date().strftime(API_DATE_FORMAT)
-            self.stdout.write('Trying hard for %s/getAllPGs/%s' % (API_URL, date_))
-            PGs = tryHard(API_URL + '/getAllPGs/' + date_).json()
-            pgs = PGs.keys()
+                date_of = datetime.now()
+            pgs = getOrganizationsWithVoters(date_=date_of)
 
         for pg in pgs:
             setBasicInfoOfPG(self, pg, options['date'])

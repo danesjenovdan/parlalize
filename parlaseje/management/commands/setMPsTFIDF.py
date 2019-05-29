@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, Tfidf
-from parlalize.utils_ import saveOrAbortNew, tryHard
+from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData, getVotersIDs
 from datetime import datetime
 from parlalize.settings import API_URL, ISCI_URL
 
@@ -40,9 +40,8 @@ class Command(BaseCommand):
         if options['speaker_ids']:
             speaker_ids = options['speaker_ids']
         else:
-            self.stdout.write('Trying hard with %s/getMPs/' % API_URL)
-            members = tryHard(API_URL + '/getMPs/').json()
-            speaker_ids = [member['id'] for member in members]
+            self.stdout.write('getVotersIDs')
+            speaker_ids = mps_ids = getVotersIDs()
 
         for speaker_id in speaker_ids:
             setTfidfOfMP(self, speaker_id)

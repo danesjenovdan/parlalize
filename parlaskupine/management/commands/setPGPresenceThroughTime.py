@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization, PresenceThroughTime
-from parlalize.utils_ import tryHard, saveOrAbortNew
+from parlalize.utils_ import tryHard, saveOrAbortNew, getOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT, API_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN
 
@@ -11,7 +11,7 @@ def setPGPresenceThroughTime(commander, pg, date):
     else:
         date_of = datetime.now().date()
 
-    url = API_URL + '/getBallotsCounterOfParty/' + pg + '/' + date_of.strftime(API_DATE_FORMAT)
+    url = API_URL + '/getBallotsCounterOfParty/' + str(pg) + '/' + date_of.strftime(API_DATE_FORMAT)
     data = tryHard(url).json()
 
     data_for_save = []
@@ -56,12 +56,10 @@ class Command(BaseCommand):
             pgs = options['pgs']
         else:
             if options['date']:
-                date_ = options['date']
+                date_ = datetime.strptime(options['date'], API_DATE_FORMAT)
             else:
-                date_ = datetime.now().date().strftime(API_DATE_FORMAT)
-            self.stdout.write('Trying hard for %s/getMembersOfPGsOnDate/%s' % (API_URL, date_))
-            membersOfPGsRanges = tryHard(API_URL + '/getMembersOfPGsRanges/' + date_).json()
-            pgs = [key for key, value in membersOfPGsRanges[-1]['members'].items() if value]
+                date_ = datetime.now()
+            pgs = getOrganizationsWithVoters(date_=date_)
 
         for pg in pgs:
             setPGPresenceThroughTime(self, pg, options['date'])

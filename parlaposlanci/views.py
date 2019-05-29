@@ -17,7 +17,7 @@ from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 NOTIFICATIONS_API)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi,
-                              getPersonAmendmentsCount)
+                              getPersonAmendmentsCount, getVotersIDs)
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)
@@ -25,7 +25,7 @@ from parlaseje.models import Session, Tag, Question
 from utils.speech import WordAnalysis
 from utils.compass import getData as getCompassData
 from .models import *
-from parlaskupine.models import Organization
+from parlaskupine.models import Organization, Compass
 
 import numpy
 import requests
@@ -2601,7 +2601,7 @@ def setCompass(request, date_=None):
 
     return JsonResponse({'alliswell': True, "status":'OK', "saved": True})
 
-def getCompass(request, date_=None): # TODO make proper setters and getters
+def getCompass(request, org_id, date_=None): # TODO make proper setters and getters
     """
     * @api {get} /p/getCompass/{?date} Political compass
     * @apiName getCompass
@@ -2697,7 +2697,10 @@ def getCompass(request, date_=None): # TODO make proper setters and getters
         date_of = datetime.now().date()
         date_=""
     try:
-        compas = Compass.objects.filter(created_for__lte=date_of).order_by('-created_for')[0]
+        compas = Compass.objects.filter(
+            created_for__lte=date_of,
+            organization__id_parladata=org_id
+        ).order_by('-created_for')[0]
     except:
         raise Http404("Nismo našli kartice")
     data = compas.data
@@ -2707,6 +2710,7 @@ def getCompass(request, date_=None): # TODO make proper setters and getters
 
     return JsonResponse({"created_for": compas.created_for.strftime(API_DATE_FORMAT),
                          "created_at": compas.created_at.strftime(API_DATE_FORMAT),
+                         "parent_org_id": int(org_id),
                          "data": data},
                         safe=False)
 
@@ -3946,7 +3950,7 @@ def getPresenceThroughTime(request, person_id, date_=None):
 
 
 @lockSetter
-def setListOfMembersTickers(request, date_=None):
+def setListOfMembersTickers(request, org_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -3971,13 +3975,12 @@ def setListOfMembersTickers(request, date_=None):
         print exp
         prevData = []
 
-    data = setListOfMembersTickersCore(date_, date_of, prevData)
-    print(data)
+    data = setListOfMembersTickersCore(org_id, date_, date_of, prevData)
 
     return JsonResponse(data, safe=False)
 
 @lockSetter
-def setListOfMembersTickersMonthly(request, date_=None):
+def setListOfMembersTickersMonthly(request, org_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
     else:
@@ -3989,20 +3992,21 @@ def setListOfMembersTickersMonthly(request, date_=None):
     try:
         previous_time = date_of - timedelta(days=28)
 
-        prevCard = getListOfMembersTickers(request, previous_time.strftime(API_DATE_FORMAT)).content
+        prevCard = getListOfMembersTickers(request, org_id, previous_time.strftime(API_DATE_FORMAT)).content
         print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
         prevData = json.loads(prevCard)['data']
     except:
         prevData = []
 
-    data = setListOfMembersTickersCore(date_, date_of, prevData)
+    data = setListOfMembersTickersCore(org_id, date_, date_of, prevData)
     print(data)
 
     return JsonResponse(data, safe=False)
 
-def setListOfMembersTickersCore(date_, date_of, prevData):
+def setListOfMembersTickersCore(org_id, date_, date_of, prevData):
     print("CORE")
-    mps = tryHard(API_URL+'/getMPs/'+date_).json()
+    #mps = tryHard(API_URL+'/getMPs/'+date_).json()
+    mps = getVotersIDs(organization_id=org_id, date_=date_of)
 
     rank_data = {'presence_sessions': [],
                  'presence_votes': [],
@@ -4019,10 +4023,9 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
     diffs = copy.deepcopy(rank_data)
 
     data = []
-    for mp in mps:
+    for person_id in mps:
         person_obj = {}
         person_obj['results'] = {}
-        person_id = mp['id']
         person_obj['person'] = getPersonData(person_id)
 
         try:
@@ -4221,11 +4224,12 @@ def setListOfMembersTickersCore(date_, date_of, prevData):
     data = sorted(data, key=lambda k: k['person']['name'])
 
     MembersList(created_for=date_of,
+                organization=Organization.objects.get(id_parladata=org_id),
                 data=data).save()
     return data
 
 
-def getListOfMembersTickers(request, date_=None):
+def getListOfMembersTickers(request, org_id, date_=None):
     """
     * @api {get} /p/getListOfMembersTickers/{?date} List of MPs and their scores with differences from last regular plenary session
     * @apiName getListOfMembersTickers
@@ -4458,22 +4462,27 @@ def getListOfMembersTickers(request, date_=None):
     else:
         date_of = datetime.now().date()
         date_ = date_of.strftime(API_DATE_FORMAT)
-    lists = MembersList.objects.filter(created_for__lte=date_of)
+    lists = MembersList.objects.filter(organization__id_parladata=org_id, created_for__lte=date_of)
     if not lists:
         return JsonResponse({'created_at': date_,
                              'created_for': date_,
                              'data': [],
+                             'parent_org_id': int(org_id),
                              'districts': [{dist.id_parladata: dist.name}
                                        for dist in District.objects.all()]},
                             safe=False)
     last_day = lists.latest('created_for').created_for
-    cards = MembersList.objects.filter(created_for=last_day)
+    cards = MembersList.objects.filter(organization__id_parladata=org_id, created_for=last_day)
     card = cards.latest('created_at')
+    districts_ids =  [d for obj in card.data
+                        if obj['person']['district']
+                        for d in obj['person']['district']]
     return JsonResponse({'created_at': card.created_at,
                          'created_for': card.created_for,
                          'data': card.data,
+                         'parent_org_id': int(org_id),
                          'districts': [{dist.id_parladata: dist.name}
-                                       for dist in District.objects.all()]},
+                                       for dist in District.objects.filter(id_parladata__in=districts_ids)]},
                         safe=False)
 
 

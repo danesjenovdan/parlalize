@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, StyleScores
-from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData
+from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData, getVotersIDs, getParentOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
 from collections import Counter
@@ -100,63 +100,63 @@ class Command(BaseCommand):
 
         self.stdout.write('About to try hard with %s/getMPS/%s' %
                           (API_URL, date_))
-        mps = tryHard(API_URL+'/getMPs/'+date_).json()
+        for org in getParentOrganizationsWithVoters():
+            self.stdout.write('Starting style score for organization %s' % (org))
+            mps = getVotersIDs(organization_id=org, date_=date_of)
+            scores = {}
+            for person_id in mps:
 
-        scores = {}
-        for mp in mps:
-            person_id = mp['id']
+                self.stdout.write('MP id: %s' % str(person_id))
+                # get word counts with solr
+                counter = Counter(getCountList(self, int(person_id), date_))
+                total = sum(counter.values())
 
-            self.stdout.write('MP id: %s' % str(person_id))
-            # get word counts with solr
-            counter = Counter(getCountList(self, int(person_id), date_))
-            total = sum(counter.values())
+                scores_local = getScores([problematicno, privzdignjeno, preprosto],
+                                        counter,
+                                        total)
 
-            scores_local = getScores([problematicno, privzdignjeno, preprosto],
-                                     counter,
-                                     total)
+                self.stdout.write('Outputting scores_local: %s' %
+                                str(scores_local))
+                scores[person_id] = scores_local
 
-            self.stdout.write('Outputting scores_local: %s' %
-                              str(scores_local))
-            scores[person_id] = scores_local
+            self.stdout.write('Outputting scores: %s' % str(scores))
+            average = {"problematicno": sum([score['problematicno']
+                                            for score
+                                            in scores.values()])/len(scores),
+                    "privzdignjeno": sum([score['privzdignjeno']
+                                            for score
+                                            in scores.values()])/len(scores),
+                    "preprosto": sum([score['preprosto']
+                                        for score
+                                        in scores.values()])/len(scores)}
+            data = []
+            for person, score in scores.items():
+                data.append({'member': person,
+                            'problematicno': score['problematicno'],
+                            'privzdignjeno': score['privzdignjeno'],
+                            'preprosto': score['preprosto'],
+                            'problematicno_average': average['problematicno'],
+                            'privzdignjeno_average': average['privzdignjeno'],
+                            'preprosto_average': average['preprosto']})
 
-        self.stdout.write('Outputting scores: %s' % str(scores))
-        average = {"problematicno": sum([score['problematicno']
-                                         for score
-                                         in scores.values()])/len(scores),
-                   "privzdignjeno": sum([score['privzdignjeno']
-                                         for score
-                                         in scores.values()])/len(scores),
-                   "preprosto": sum([score['preprosto']
-                                     for score
-                                     in scores.values()])/len(scores)}
-        data = []
-        for person, score in scores.items():
-            data.append({'member': person,
-                         'problematicno': score['problematicno'],
-                         'privzdignjeno': score['privzdignjeno'],
-                         'preprosto': score['preprosto'],
-                         'problematicno_average': average['problematicno'],
-                         'privzdignjeno_average': average['privzdignjeno'],
-                         'preprosto_average': average['preprosto']})
-
-        for score in data:
-            self.stdout.write('About to save %s' % str(score))
-            status = saveOrAbortNew(StyleScores,
-                                    person=Person.objects.get(
-                                        id_parladata=int(score["member"])),
-                                    created_for=date_of,
-                                    problematicno=float(
-                                        score['problematicno']),
-                                    privzdignjeno=float(
-                                        score['privzdignjeno']),
-                                    preprosto=float(score['preprosto']),
-                                    problematicno_average=float(
-                                        score['problematicno_average']),
-                                    privzdignjeno_average=float(
-                                        score['privzdignjeno_average']),
-                                    preprosto_average=float(
-                                        score['preprosto_average'])
-                                    )
-            self.stdout.write('SaveOrAbort status: %s' % str(status))
+            for score in data:
+                self.stdout.write('About to save %s' % str(score))
+                status = saveOrAbortNew(StyleScores,
+                                        person=Person.objects.get(
+                                            id_parladata=int(score["member"])),
+                                        created_for=date_of,
+                                        problematicno=float(
+                                            score['problematicno']),
+                                        privzdignjeno=float(
+                                            score['privzdignjeno']),
+                                        preprosto=float(score['preprosto']),
+                                        problematicno_average=float(
+                                            score['problematicno_average']),
+                                        privzdignjeno_average=float(
+                                            score['privzdignjeno_average']),
+                                        preprosto_average=float(
+                                            score['preprosto_average'])
+                                        )
+                self.stdout.write('SaveOrAbort status: %s' % str(status))
 
         return 0

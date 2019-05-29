@@ -34,6 +34,7 @@ class Command(BaseCommand):
         i = 1
         output = []
         for vote in votes:
+            has_votes = bool(vote.vote.all())
             output.append({
                 'term': 'VIII',
                 'type': 'vote',
@@ -54,6 +55,7 @@ class Command(BaseCommand):
                     'result': vote.result,
                     'is_outlier': False, # TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                     'has_outliers': vote.has_outlier_voters,
+                    'has_votes': has_votes
                 }),
             })
 
