@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
 from raven.contrib.django.raven_compat.models import client
 
+
 import requests
 import re
 import feedparser
@@ -567,3 +568,17 @@ def importDebates():
             debate.save()
             agenda_items = list(AgendaItem.objects.filter(id_parladata__in=item['agenda_item']))
             debate.agenda_item.add(*agenda_items)
+
+def parse_for_notes():
+    from bs4 import BeautifulSoup
+    out = {}
+    for vote in Vote.objects.all():
+        print str(vote.id_parladata)
+        url = 'https://glej.nov.parlameter.si/s/glasovanje/' + str(vote.id_parladata) + '?state=%7B%7D'
+        soup = BeautifulSoup(requests.get(url).content)
+        rich = soup.find("div", {"class": "rich-text"})
+        if rich:
+            text = rich.find("text-container")
+            if text:
+                out[str(vote.id_parladata)] = text.encode_contents()
+    return out
