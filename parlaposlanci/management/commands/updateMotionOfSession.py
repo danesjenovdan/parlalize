@@ -77,6 +77,7 @@ def setMotionOfSession(commander, session_id):
 
         if vote:
             commander.stdout.write('Updating vote %s' % str(mot['vote_id']))
+            commander.stdout.write('Updating data %s' % str(mot))
             prev_result = vote[0].result
             vote.update(created_for=session.start_time,
                         start_time=mot['start_time'],

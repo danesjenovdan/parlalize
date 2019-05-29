@@ -26,6 +26,6 @@ class Command(BaseCommand):
         else:
             start_date = datetime.now().date()
 
-        start_date = start_date - timedelta(days=1)
+        #start_date = start_date - timedelta(days=1)
         setListOfMembersTickers(
             request_with_key, start_date.strftime(API_DATE_FORMAT))
