@@ -37,9 +37,8 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--fast',
-            nargs='+',
+            action='store_true',
             help='Upload just last 2 sessions',
-            type=int,
         )
 
     def handle(self, *args, **options):
