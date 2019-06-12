@@ -69,3 +69,17 @@ class Command(BaseCommand):
             commit_to_solr(self, output)
 
         return 0
+
+
+def delete_votes():
+    url = SOLR_URL + '/select?wt=json&q=type:vote&fl=id&rows=100000000'
+    print('Getting all IDs from %s' % url)
+    a = requests.get(url)
+    docs = a.json()['response']['docs']
+    idsInSolr = [doc['id'] for doc in docs if 'id' in doc]
+    data = {'delete': idsInSolr
+            }
+
+    r = requests.post(SOLR_URL + '/update?commit=true',
+                      data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})

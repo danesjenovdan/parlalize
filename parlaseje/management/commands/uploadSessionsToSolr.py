@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils.html import strip_tags
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Speech
-from parlalize.utils_ import saveOrAbortNew, getAllStaticData
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData, getParentOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import SOLR_URL
 
@@ -35,18 +35,30 @@ class Command(BaseCommand):
             help='Session parladata_id',
             type=int,
         )
+        parser.add_argument(
+            '--fast',
+            nargs='+',
+            help='Upload just last 2 sessions',
+            type=int,
+        )
 
     def handle(self, *args, **options):
         ses_ids = []
         if options['session_ids']:
             ses_ids = options['session_ids']
         else:
-            ses_ids = Session.objects.all().values_list('id_parladata', flat=True)
+            if options['fast']:
+                orgs = getParentOrganizationsWithVoters()
+                sessions = Session.objects.filter(organization__id_parladata__in=orgs).order_by('-start_time')
+                ses_ids = sessions[:2].values_list('id_parladata', flat=True)
+            else:
+                ses_ids = Session.objects.all().values_list('id_parladata', flat=True)
 
         # get static data
         self.stdout.write('Getting all static data')
         static_data = json.loads(getAllStaticData(None).content)
 
+        self.stdout.write('Sessions for upload %s' % str(ses_ids))
         for session_id in ses_ids:
             self.stdout.write('About to begin with session %s' % str(session_id))
             session = Session.objects.filter(id_parladata=session_id)
