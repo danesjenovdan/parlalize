@@ -9,14 +9,6 @@ router = routers.DefaultRouter()
 router.register(r'tfidfs', TFIDFView)
 
 urlpatterns = [
-    # setters
-
-    url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
-
-    url(r'^setLastActivity/(?P<person_id>\d+)', setLastActivity),
-
-    ####################################################################################
-
     # getters
     url(r'^getMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', getMPStaticPL),
     url(r'^getMPStatic/(?P<person_id>\d+)/', getMPStaticPL),
