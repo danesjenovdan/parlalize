@@ -24,9 +24,6 @@ urlpatterns = [
     url(r'^setMembershipsOfMember/(?P<person_id>\d+)/(?P<date>[\w].+)', setMembershipsOfMember),
     url(r'^setMembershipsOfMember/(?P<person_id>\d+)', setMembershipsOfMember),
 
-    url(r'^setVocabularySizeAndSpokenWords/(?P<date_>[\w].+)', setVocabularySizeAndSpokenWords),
-    url(r'^setVocabularySizeAndSpokenWords/', setVocabularySizeAndSpokenWords),
-
     url(r'^setNumberOfQuestionsAll/(?P<date_>[\w].+)', setNumberOfQuestionsAll),
     url(r'^setNumberOfQuestionsAll/', setNumberOfQuestionsAll),
 

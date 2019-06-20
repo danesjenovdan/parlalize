@@ -560,63 +560,6 @@ def getNumberOfSpokenWords(request, person_id, date=None):
     return JsonResponse(results)
 
 
-# deprecated
-@lockSetter
-def setLastActivity(request, person_id):
-    out = []
-    activites = {date: [activity.get_child()
-                        for activity
-                        in Activity.objects.filter(person__id_parladata=person_id,
-                                                   start_time__range=[date, date+timedelta(days=1)])]
-                 for date in Activity.objects.filter(person__id_parladata=person_id).order_by("start_time").datetimes('start_time', 'day')}
-    result = []
-    for date in activites.keys():
-        avtivity_ids = []
-        options = []
-        result = []
-        vote_name = []
-        types = []
-        sessions = []
-        for acti in activites[date]:
-            #print acti.id_parladata
-            if type(acti) == Speech:
-                #print "Speech"
-                avtivity_ids.append(acti.id_parladata)
-                types.append("speech")
-                vote_name.append(acti.session.name)
-                result.append("None")
-                options.append("None")
-                sessions.append(str(acti.session.id_parladata))
-            elif type(acti) == Ballot:
-                #print "Ballot"
-                avtivity_ids.append(acti.vote.id_parladata)
-                types.append("ballot")
-                vote_name.append(acti.vote.motion)
-                result.append(acti.vote.result)
-                options.append(acti.option)
-                sessions.append("None")
-            elif type(acti) == Question:
-                print 'question'
-                avtivity_ids.append(acti.id_parladata)
-                types.append("question")
-                vote_name.append(acti.title)
-                result.append("None")
-                options.append("None")
-                sessions.append("None")
-
-        out.append(saveOrAbortNew(model=LastActivity,
-                                  person=Person.objects.get(id_parladata=int(person_id)),
-                                  created_for=date,
-                                  activity_id=";".join(map(str, avtivity_ids)),
-                                  option=";".join(map(str, options)),
-                                  result=";".join(map(str, result)),
-                                  vote_name=";".join(vote_name),
-                                  typee=";".join(types),
-                                  session_id=";".join(sessions)))
-
-    return JsonResponse(out, safe=False)
-
-
 def getLastActivity(request, person_id, date_=None):
     """
     * @api {get} /p/getLastActivity/{id}/{?date} MP's last activity
@@ -1742,67 +1685,6 @@ def getTFIDF(request, person_id, date_=None):
     }
 
     return JsonResponse(out)
-
-
-@lockSetter
-def setVocabularySizeAndSpokenWords(request, date_=None):
-    sw = WordAnalysis(count_of="members", date_=date_)
-
-    #if not sw.isNewSpeech:
-    #    return JsonResponse({'alliswell': False})
-
-    #Vocabolary size
-    all_score = sw.getVocabularySize()
-    max_score, maxMPid = sw.getMaxVocabularySize()
-    avg_score = sw.getAvgVocabularySize()
-    date_of = sw.getDate()
-    maxMP = Person.objects.get(id_parladata=maxMPid)
-
-    print "[INFO] saving vocabulary size"
-    for p in all_score:
-        saveOrAbortNew(model=VocabularySize,
-                       person=Person.objects.get(id_parladata=int(p['counter_id'])),
-                       created_for=date_of,
-                       score=int(p['coef']),
-                       maxMP=maxMP,
-                       average=avg_score,
-                       maximum=max_score)
-
-    #Unique words
-    all_score = sw.getUniqueWords()
-    max_score, maxMPid = sw.getMaxUniqueWords()
-    avg_score = sw.getAvgUniqueWords()
-    date_of = sw.getDate()
-    maxMP = Person.objects.get(id_parladata=maxMPid)
-
-    print "[INFO] saving unique words"
-    for p in all_score:
-        saveOrAbortNew(model=VocabularySizeUniqueWords,
-                       person=Person.objects.get(id_parladata=int(p['counter_id'])),
-                       created_for=date_of,
-                       score=int(p['unique']),
-                       maxMP=maxMP,
-                       average=avg_score,
-                       maximum=max_score)
-
-    #Spoken words
-    all_words = sw.getSpokenWords()
-    max_words, maxWordsMPid = sw.getMaxSpokenWords()
-    avgSpokenWords = sw.getAvgSpokenWords()
-    date_of = sw.getDate()
-    maxMP = Person.objects.get(id_parladata=maxWordsMPid)
-
-    print "[INFO] saving spoken words"
-    for p in all_words:
-        saveOrAbortNew(model=SpokenWords,
-                       created_for=date_of,
-                       person=Person.objects.get(id_parladata=int(p['counter_id'])),
-                       score=int(p['wordcount']),
-                       maxMP=maxMP,
-                       average=avgSpokenWords,
-                       maximum=max_words)
-
-    return HttpResponse('All MPs updated.')
 
 
 def getVocabularySize(request, person_id, date_=None):
