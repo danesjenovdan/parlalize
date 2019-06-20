@@ -86,10 +86,6 @@ urlpatterns = [
     url(r'^getPGMismatch/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getPGMismatch),
     url(r'^getPGMismatch/(?P<pg_id>\d+)/', getPGMismatch),
 
-    ####################################################################################
-    #POST setters
-
-    url(r'^setAllPGsTFIDFsFromSearch/', setAllPGsTFIDFsFromSearch),
 
     ####################################################################################
 
