@@ -189,65 +189,6 @@ def getBasicInfOfPG(request, pg_id, date=None):
     return JsonResponse(data)
 
 
-@lockSetter
-def setPercentOFAttendedSessionPG(request, pg_id, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        date_of = findDatesFromLastCard(PercentOFAttendedSession,
-                                        pg_id,
-                                        datetime.now().date())[0]
-
-    allSum = {}
-    data = {}
-
-    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
-    data = tryHard(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
-
-    sessions = {pg: [] for pg in membersOfPG if membersOfPG[pg]}
-    votes = {pg: [] for pg in membersOfPG if membersOfPG[pg]}
-    for pg in membersOfPG:
-        if not membersOfPG[pg]:
-            continue
-        for member in membersOfPG[pg]:
-            if str(member) in data['sessions'].keys():
-                sessions[pg].append(data['sessions'][str(member)])
-                votes[pg].append(data['votes'][str(member)])
-        sessions[pg] = sum(sessions[pg])/len(sessions[pg])
-        votes[pg] = sum(votes[pg])/len(votes[pg])
-
-    thisMPSessions = sessions[pg_id]
-    maximumSessions = max(sessions.values())
-    maximumPGSessions = [pgId
-                         for pgId
-                         in sessions
-                         if sessions[pgId] == maximumSessions]
-    averageSessions = sum(data['sessions'].values()) / len(data['sessions'])
-
-    thisMPVotes = votes[pg_id]
-    maximumVotes = max(votes.values())
-    maximumPGVotes = [pgId
-                      for pgId
-                      in votes
-                      if votes[pgId] == maximumVotes]
-    averageVotes = sum(data['votes'].values()) / len(data['votes'])
-    org = Organization.objects.get(id_parladata=int(pg_id))
-
-    result = saveOrAbortNew(model=PercentOFAttendedSession,
-                            created_for=date_of,
-                            organization=org,
-                            organization_value_sessions=thisMPSessions,
-                            maxPG_sessions=maximumPGSessions,
-                            average_sessions=averageSessions,
-                            maximum_sessions=maximumSessions,
-                            organization_value_votes=thisMPVotes,
-                            maxPG_votes=maximumPGVotes,
-                            average_votes=averageVotes,
-                            maximum_votes=maximumVotes)
-
-    return JsonResponse({'alliswell': True})
-
-
 def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
     """
     * @api {get} getPercentOFAttendedSessionPG/{pg_id}/{?date} Get percentage of attended sessions

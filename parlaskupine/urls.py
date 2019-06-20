@@ -14,10 +14,6 @@ urlpatterns = [
 #	url(r'^getMPsList/', getMPsList),
     # setters
 
-    url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setPercentOFAttendedSessionPG),
-    url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
-    url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
-
     url(r'^setMPsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setMPsOfPG),
     url(r'^setMPsOfPG/(?P<pg_id>\d+)', setMPsOfPG),
 
