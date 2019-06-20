@@ -1844,29 +1844,6 @@ def getSessionsList(request, date_=None, force_render=False):
     return JsonResponse(out)
 
 
-@csrf_exempt
-@lockSetter
-def setTFIDF(request):
-    """Stores TFIDF analysis.
-    """
-    if request.method == 'POST':
-        post_data = json.loads(request.body)
-        date_of = datetime.now().date()
-        session = Session.objects.get(id_parladata=post_data['session'])
-        is_saved = saveOrAbortNew(Tfidf,
-                                  session=session,
-                                  created_for=date_of,
-                                  is_visible=False,
-                                  data=post_data["results"])
-    else:
-        return JsonResponse({'alliswell': False,
-                             'saveds': False,
-                             'status': 'there\'s no post data'})
-
-    return JsonResponse({'alliswell': True,
-                         'saved': is_saved})
-
-
 def getTFIDF(request, session_id):
     """
     * @api {get} /getTFIDF/{session_id} TFIDF analysis of a specific session
