@@ -17,9 +17,6 @@ urlpatterns = [
     url(r'^setWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', setWorkingBodies),
     url(r'^setWorkingBodies/(?P<org_id>\d+)', setWorkingBodies),
 
-    url(r'^setPresenceThroughTime/(?P<party_id>\d+)/(?P<date_>[\w].+)', setPresenceThroughTime),
-    url(r'^setPresenceThroughTime/(?P<party_id>\d+)', setPresenceThroughTime),
-
     # getters
     url(r'^getBasicInfOfPG/(?P<pg_id>\d+)', getBasicInfOfPG),
 
