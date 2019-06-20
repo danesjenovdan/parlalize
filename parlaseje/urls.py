@@ -21,9 +21,6 @@ urlpatterns = [
 
     url(r'^setTFIDF/', setTFIDF),
 
-    url(r'^setMotionOfSessionGraph/(?P<session_id>\d+)', setMotionOfSessionGraph),
-    url(r'^setMotionOfSessionGraph/(?P<session_id>\d+)/(?P<date_>[\w].+)', setMotionOfSessionGraph),
-
     url(r'^setQuote/(?P<speech_id>\d+)/(?P<start_pos>\d+)/(?P<end_pos>\d+)', setQuote),
 
     # All getters
@@ -50,9 +47,6 @@ urlpatterns = [
 
     url(r'^getMotionOfSession/(?P<session_id>\d+)', getMotionOfSession),
     url(r'^getMotionOfSession/(?P<session_id>\d+)/(?P<date>[\w].+)', getMotionOfSession),
-
-    url(r'^getMotionGraph/(?P<id_mo>\d+)', getMotionGraph),
-    url(r'^getMotionGraph/(?P<id_mo>\d+)/(?P<date>[\w].+)', getMotionGraph),
 
     url(r'^getComparedVotes/', getComparedVotes),
 

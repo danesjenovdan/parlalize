@@ -16,8 +16,8 @@ from parlaskupine.models import (Organization, WorkingBodies,
                                  MPOfPg, PGStatic,
                                  VocabularySize as VocabularySizePG,
                                  StyleScores as StyleScoresPG, Compass)
-from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
-                              PresenceOfPG, AbsentMPs, VoteDetailed, Quote, Question)
+from parlaseje.models import (Session, Vote, Ballot, Speech, Tag,
+                              PresenceOfPG, AbsentMPs, Quote, Question)
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
                                 DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL, ALL_STATIC_CACHE_AGE, slack_token)
 from django.contrib.contenttypes.models import ContentType

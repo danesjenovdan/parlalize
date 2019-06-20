@@ -353,53 +353,6 @@ class Vote(Timestampable, models.Model):
         return self.session.name + ' | ' + self.motion
 
 
-class VoteDetailed(Timestampable, models.Model):
-    """Model of votes with data, how each MP and PG voted."""
-
-    motion = models.TextField(blank=True, null=True,
-                              help_text='The motion for which the vote took place')
-
-    session = models.ForeignKey('Session',
-                                blank=True, null=True,
-                                related_name='in_session_for_VG',
-                                help_text=_('Session '))
-
-    vote = models.ForeignKey('Vote',
-                             blank=True, null=True,
-                             related_name='vote_of_graph',
-                             help_text=_('Vote'))
-
-    created_for = models.DateField(_('date of vote'),
-                                   blank=True, null=True,
-                                   help_text=_('date of vote'))
-
-    votes_for = models.IntegerField(blank=True, null=True,
-                                    help_text='Number of votes for')
-
-    against = models.IntegerField(blank=True, null=True,
-                                  help_text='Number votes againt')
-
-    abstain = models.IntegerField(blank=True, null=True,
-                                  help_text='Number votes abstain')
-
-    not_present = models.IntegerField(blank=True, null=True,
-                                      help_text='Number of MPs that warent on the session')
-
-    result = models.NullBooleanField(blank=True, null=True,
-                                     default=False,
-                                     help_text='The result of the vote')
-
-    pgs_yes = JSONField(blank=True, null=True)
-    pgs_no = JSONField(blank=True, null=True)
-    pgs_np = JSONField(blank=True, null=True)
-    pgs_kvor = JSONField(blank=True, null=True)
-
-    mp_yes = JSONField(blank=True, null=True)
-    mp_no = JSONField(blank=True, null=True)
-    mp_np = JSONField(blank=True, null=True)
-    mp_kvor = JSONField(blank=True, null=True)
-
-
 class Vote_analysis(Timestampable, models.Model):
 
     session = models.ForeignKey('Session',
