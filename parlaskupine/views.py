@@ -4258,37 +4258,6 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
-@lockSetter
-def setPGMismatch(request, pg_id, date_=None):
-    """Setter for analysis mismatch of parlament group
-    """
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
-    else:
-        date_of = datetime.now().date()
-        date_ = ''
-    staticData = json.loads(getAllStaticData(None).content)
-    personsData = staticData['persons']
-
-    org = Organization.objects.get(id_parladata=pg_id)
-    url = API_URL + '/getMembersOfPGsOnDate/' + date_
-    memsOfPGs = tryHard(url).json()
-    data = []
-    for member in memsOfPGs[str(pg_id)]:
-        try:
-            mismatch = getPersonCardModelNew(MismatchOfPG, int(member), date_)
-        except:
-            pass
-        data.append({'id': member,
-                     'ratio': mismatch.data})
-
-    saved = saveOrAbortNew(model=PGMismatch,
-                           organization=org,
-                           created_for=date_of,
-                           data=data)
-    return JsonResponse({'alliswell': True})
-
-
 def getPGMismatch(request, pg_id, date_=None):
     """
     * @api {get} getPGMismatch/{pg_id}/{?date} Gets the all MPs of specific organization and returns the ratio of mismatch of PG
