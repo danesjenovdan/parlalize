@@ -3260,67 +3260,6 @@ def getSlugs(request):
     return JsonResponse(obj)
 
 
-@csrf_exempt
-@lockSetter
-def setAllMPsTFIDFsFromSearch(request):
-    """
-    API endpoint for saveing TFIDF. TFIDF is generated in parlasearch and sent
-    with a POST request.
-    """
-    if request.method == 'POST':
-        post_data = json.loads(request.body)
-        if post_data:
-            save_statuses = []
-            date_of = datetime.today()
-            for person_data in post_data:
-                person = Person.objects.get(id_parladata=person_data['person']['id'])
-                save_statuses.append(saveOrAbortNew(Tfidf,
-                                                    person=person,
-                                                    created_for=date_of,
-                                                    is_visible=False,
-                                                    data=person_data['results']))
-
-            return JsonResponse({'status': 'alliswell',
-                                 'saved': save_statuses})
-        else:
-            return JsonResponse({'status': 'There is not data'})
-    else:
-        return JsonResponse({'status': 'It wasnt POST'})
-
-
-@csrf_exempt
-@lockSetter
-def setAllMPsStyleScoresFromSearch(request):
-    """
-    API endpoint for saveing StyleScores. StyleScores is generated in parlasearch and sent
-    with a POST request.
-    """
-    if request.method == 'POST':
-        post_data = json.loads(request.body)
-        date_of = datetime.today()
-        print post_data
-        if post_data:
-            save_statuses = []
-            for score in post_data:
-                print score
-                status = saveOrAbortNew(StyleScores,
-                                        person=Person.objects.get(id_parladata=int(score["member"])),
-                                        created_for=date_of,
-                                        problematicno=float(score['problematicno']),
-                                        privzdignjeno=float(score['privzdignjeno']),
-                                        preprosto=float(score['preprosto']),
-                                        problematicno_average=float(score['problematicno_average']),
-                                        privzdignjeno_average=float(score['privzdignjeno_average']),
-                                        preprosto_average=float(score['preprosto_average'])
-                                        )
-                save_statuses.append(status)
-            return JsonResponse({"status": "alliswell", "saved": save_statuses})
-        else:
-            return JsonResponse({"status": "There's not data"})
-    else:
-        return JsonResponse({"status": "It wasnt POST"})
-
-
 @lockSetter
 def setPresenceThroughTime(request, person_id, date_=None):
     if date_:
