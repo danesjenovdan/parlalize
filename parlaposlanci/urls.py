@@ -13,9 +13,6 @@ urlpatterns = [
 
     url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
 
-    url(r'^setAverageNumberOfSpeechesPerSessionALL/(?P<date_>[\w].+)', setAverageNumberOfSpeechesPerSessionAll),
-    url(r'^setAverageNumberOfSpeechesPerSessionALL/', setAverageNumberOfSpeechesPerSessionAll),
-
     url(r'^setLastActivity/(?P<person_id>\d+)', setLastActivity),
 
     url(r'^setCompass/(?P<date_>[\w].+)', setCompass),

@@ -9,7 +9,7 @@ from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
 from itertools import groupby
 
-from parlaposlanci.views import setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setListOfMembersTickers, setPresenceThroughTime, setNumberOfQuestionsAll
+from parlaposlanci.views import setMembershipsOfMember, setLastActivity, setListOfMembersTickers, setPresenceThroughTime, setNumberOfQuestionsAll
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, MinisterStatic
 
 from parlaskupine.views import setWorkingBodies, getListOfPGs
