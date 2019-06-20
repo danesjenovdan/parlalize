@@ -17,9 +17,6 @@ urlpatterns = [
     url(r'^setWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', setWorkingBodies),
     url(r'^setWorkingBodies/(?P<org_id>\d+)', setWorkingBodies),
 
-    url(r'^setNumberOfQuestionsAll/(?P<date_>[\w].+)', setNumberOfQuestionsAll),
-    url(r'^setNumberOfQuestionsAll/', setNumberOfQuestionsAll),
-
     url(r'^setPresenceThroughTime/(?P<party_id>\d+)/(?P<date_>[\w].+)', setPresenceThroughTime),
     url(r'^setPresenceThroughTime/(?P<party_id>\d+)', setPresenceThroughTime),
 
