@@ -262,22 +262,22 @@ def morningCash():
         #     "method" : "clanice-in-clani-poslanske-skupine",
         #     "class" : "all"
         # },
-        # { 
+        # {
         #     "group" : "pg",
         #     "method" : "najlazje-pridruzili",
         #     "class" : "all"
         # },
-        # { 
+        # {
         #     "group" : "pg",
         #     "method" : "najtezje-pridruzili",
         #     "class" : "all"
         # },
-        # { 
+        # {
         #     "group" : "pg",
         #     "method" : "odstopanje-od-poslanske-skupine",
         #     "class" : "all"
         # },
-        # { 
+        # {
         #     "group" : "s",
         #     "method" : "prisotnost-po-poslanskih-skupinah",
         #     "class" : "DZ"
@@ -291,7 +291,7 @@ def morningCash():
         #     "group" : "ps",
         #     "method" : "seznam-poslanskih-skupin",
         #     "class": "all"
-        # }    
+        # }
     ]
 
     # allUrls = tryHard("https://glej.parlameter.si/api/cards/getUrls").json()
@@ -531,7 +531,6 @@ def runSettersPG(date_to=None):
         MostMatchingThem: setMostMatchingThem,
         PercentOFAttendedSession: setPercentOFAttendedSessionPG,
         MPOfPg: setMPsOfPG,
-        PGStatic: setBasicInfOfPG,
     }
 
     IDs = getPGIDs()

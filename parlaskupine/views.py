@@ -35,50 +35,6 @@ from kvalifikatorji.scripts import (countWords, getCountListPG, getScores,
                                     problematicno, privzdignjeno, preprosto)
 
 
-@lockSetter
-def setBasicInfOfPG(request, pg_id, date_=None):
-    """Set method for basic information for PGs.
-    """
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        url = API_URL + '/getBasicInfOfPG/' + str(pg_id) + '/' + date_
-        data = tryHard(url).json()
-    else:
-        date_of = datetime.now().date()
-        url = API_URL+'/getBasicInfOfPG/' + str(pg_id) + '/'
-        data = tryHard(url).json()
-
-    headOfPG = 0
-    viceOfPG = []
-    if data['HeadOfPG'] is not None:
-        headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG']))
-    else:
-        headOfPG = None
-
-    if data['ViceOfPG']:
-        for vice in data['ViceOfPG']:
-            if vice is not None:
-                viceOfPG.append(vice)
-            else:
-                viceOfPG.append(None)
-    else:
-                viceOfPG.append(None)
-    org = Organization.objects.get(id_parladata=int(pg_id))
-    result = saveOrAbortNew(model=PGStatic,
-                            created_for=date_of,
-                            organization=org,
-                            headOfPG=headOfPG,
-                            viceOfPG=viceOfPG,
-                            numberOfSeats=data['NumberOfSeats'],
-                            allVoters=data['AllVoters'],
-                            facebook=json.dumps(data['Facebook']),
-                            twitter=json.dumps(data['Twitter']),
-                            email=data['Mail']
-                            )
-
-    return JsonResponse({'alliswell': True})
-
-
 def getBasicInfOfPG(request, pg_id, date=None):
     """
     * @api {get} getBasicInfOfPG/{pg_id} Get basic info of a PG

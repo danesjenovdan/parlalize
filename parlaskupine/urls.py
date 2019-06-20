@@ -13,12 +13,9 @@ router.register(r'tfidfs', TFIDFView)
 urlpatterns = [
 #	url(r'^getMPsList/', getMPsList),
     # setters
-    url(r'^setBasicInfOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setBasicInfOfPG),
-    url(r'^setBasicInfOfPG/(?P<pg_id>\d+)', setBasicInfOfPG),
 
     url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setPercentOFAttendedSessionPG),
     url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
-    url(r'^setBasicInfOfPG/(?P<pg_id>\d+)', setBasicInfOfPG),
     url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
 
     url(r'^setMPsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setMPsOfPG),
