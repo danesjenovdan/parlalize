@@ -218,57 +218,6 @@ def getMPStaticPL(request, person_id, date_=None):
     return JsonResponse(data)
 
 
-# returns MP static data like PoliticalParty, age, ....
-@lockSetter
-def setMinsterStatic(request, person_id, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        m_data = tryHard(API_URL+'/getMinistrStatic/' + person_id + "/" + date_).json()
-    else:
-        date_of = datetime.now().date()
-        m_data = tryHard(API_URL+'/getMinistrStatic/' + person_id).json()
-
-    person = Person.objects.get(id_parladata=int(person_id))
-    if not m_data:
-        return JsonResponse({"status": 'Nothing iz well', "saved": False})
-
-    for data in m_data:
-        start_time = data['start_time'].split('T')[0]
-        if data['party']:
-            party = Organization.objects.get(id_parladata=data['party']['id'])
-        else:
-            party = None
-
-        if data['ministry']:
-            ministry = Organization.objects.get(id_parladata=data['ministry']['id'])
-        else:
-            ministry = None
-
-        ministry_static = MinisterStatic.objects.filter(person=person,
-                                                        ministry=ministry,
-                                                        created_for=start_time)
-        if ministry_static:
-            # TODO: edit?
-            pass
-        else:
-            MinisterStatic(created_for=start_time,
-                           person=person,
-                           age=data['age'],
-                           party=party,
-                           education=data['education'],
-                           previous_occupation=data['previous_occupation'],
-                           name=data['name'],
-                           district=data['district'],
-                           facebook=data['social']['facebook'],
-                           twitter=data['social']['twitter'],
-                           linkedin=data['social']['linkedin'],
-                           gov_id=data['gov_id'],
-                           gender=data['gender'],
-                           ministry=ministry).save()
-
-    return JsonResponse({"status":'All iz well'})
-
-
 # Saves to DB percent of attended sessions of MP and
 # maximum and average of attended sessions
 @lockSetter

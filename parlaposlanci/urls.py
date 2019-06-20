@@ -11,9 +11,6 @@ router.register(r'tfidfs', TFIDFView)
 urlpatterns = [
     # setters
 
-    url(r'^setMinsterStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMinsterStatic),
-    url(r'^setMinsterStatic/(?P<person_id>\d+)/', setMinsterStatic),
-
     url(r'^setPresence/(?P<person_id>\d+)/(?P<date_>[\w].+)', setPercentOFAttendedSession),
     url(r'^setPresence/(?P<person_id>\d+)', setPercentOFAttendedSession),
 

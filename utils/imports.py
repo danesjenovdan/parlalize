@@ -2,7 +2,6 @@ from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, 
 from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiGen
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
-from parlaposlanci.views import setMinsterStatic
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag, Legislation, AgendaItem, Debate
 from parlaseje.views import setMotionOfSession
 from django.test.client import RequestFactory
@@ -283,13 +282,6 @@ def setAllSessions():
                 session2.organizations.add(*orgs)
 
     return 1
-
-
-def updateMinistrers():
-    ministers = tryHard(API_URL + '/getIDsOfAllMinisters/').json()['ministers_ids']
-    for ministr in ministers:
-        print ministr
-        setMinsterStatic(request_with_key, str(ministr))
 
 
 def updateDistricts():
