@@ -1106,46 +1106,6 @@ def getMotionAnalize(request, motion_id):
     return JsonResponse(out, safe=False)
 
 
-@lockSetter
-def setPresenceOfPG(request, session_id):
-    """ Stores presence of PGs on specific session
-    """
-
-    url = API_URL + '/getAllPGsExt/'
-    PGs = tryHard(url).json().keys()
-
-    url = API_URL + '/getBallotsOfSession/' + str(session_id) + '/'
-    votes = getDataFromPagerApi(url)
-
-    counters_in = Counter([vote['pg_id'] for vote in votes if vote['option'] not in NOT_PRESENT])
-    counters_out = Counter([vote['pg_id'] for vote in votes if vote['option'] in NOT_PRESENT])
-
-
-    pgs = list(set(counters_in.keys() + counters_out.keys()))
-
-    results = {}
-
-    for pg in pgs:
-        if Organization.objects.get(id_parladata=pg).classification == 'unaligned MP':
-            continue
-        try:
-            results[pg] = counters_in[pg] * 100 / (counters_in[pg] + counters_out[pg])
-        except:
-            if pg in counters_in.keys():
-                results[pg] = 100
-            elif pg in counters_out.keys():
-                results[pg] = 0
-            else:
-                print('this dont work')
-    session = Session.objects.get(id_parladata=session_id)
-    result = saveOrAbortNew(model=PresenceOfPG,
-                            created_for=session.start_time,
-                            presence=[results],
-                            session=session)
-
-    return JsonResponse({'alliswell': True})
-
-
 def getPresenceOfPG(request, session_id, date=False):
     """
     * @api {get} /getPresenceOfPG/{session_id}/{?date} PGs' presence on a specific session

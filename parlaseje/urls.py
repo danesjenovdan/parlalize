@@ -16,9 +16,6 @@ urlpatterns = [
     url(r'^setMotionOfSession/(?P<session_id>\d+)', setMotionOfSession),
     url(r'^setMotionOfSession/(?P<session_id>\d+)/(?P<date_>[\w].+)', setMotionOfSession),
 
-    url(r'^setPresenceOfPG/(?P<session_id>\d+)', setPresenceOfPG),
-    url(r'^setPresenceOfPG/(?P<session_id>\d+)/(?P<date_>[\w].+)', setPresenceOfPG),
-
     url(r'^setTFIDF/', setTFIDF),
 
     url(r'^setQuote/(?P<speech_id>\d+)/(?P<start_pos>\d+)/(?P<end_pos>\d+)', setQuote),
