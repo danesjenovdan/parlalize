@@ -2168,33 +2168,6 @@ def getMPsIDs(request): # TODO document understand?
     return JsonResponse(output, safe=False)
 
 
-@lockSetter
-def setCompass(request, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
-
-    isNewVote = tryHard(API_URL +'/isVoteOnDay/'+date_).json()["isVote"]
-    print isNewVote
-    #if not isNewVote:
-    #    return JsonResponse({'alliswell': True, "status":'Ni glasovanja na ta dan', "saved": False})
-
-    data = getCompassData(date_of)
-    if data == []:
-        return JsonResponse({"status": "no data"})
-    #print data
-    existing_compas = Compass.objects.filter(created_for=date_of)
-    if existing_compas:
-        existing_compas[0].data = data
-        existing_compas[0].save()
-    else:
-        Compass(created_for=date_of,
-                data=data).save()
-
-    return JsonResponse({'alliswell': True, "status":'OK', "saved": True})
-
 def getCompass(request, org_id, date_=None): # TODO make proper setters and getters
     """
     * @api {get} /p/getCompass/{?date} Political compass
