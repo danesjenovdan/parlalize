@@ -2282,24 +2282,6 @@ def getCompass(request, org_id, date_=None): # TODO make proper setters and gett
                         safe=False)
 
 
-@lockSetter
-def setMembershipsOfMember(request, person_id, date=None):
-    if date:
-        #call parladata api with date, maybe you will need to fix parladata api call
-        data = tryHard(API_URL+'/getMembershipsOfMember/' + person_id + "/" + date).json()
-        #date_of is date for created_for which is atribute of model (you also need to add created_for in model)
-        date_of = datetime.strptime(date, API_DATE_FORMAT)
-    else:
-        data = tryHard(API_URL+'/getMembershipsOfMember/'+ person_id).json()
-        date_of = datetime.now().date()
-
-    person = Person.objects.get(id_parladata=int(person_id))
-
-    memberships = saveOrAbortNew(MembershipsOfMember, created_for=date_of, person=person, data=data)
-
-    return HttpResponse(memberships)
-
-
 def getMembershipsOfMember(request, person_id, date=None): # TODO refactor keys into snake_case
     """
     * @api {get} /p/getMembershipsOfMember/{?date} MP's memberships

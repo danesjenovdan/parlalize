@@ -9,7 +9,7 @@ from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
 from itertools import groupby
 
-from parlaposlanci.views import setMembershipsOfMember, setLastActivity, setListOfMembersTickers, setPresenceThroughTime, setNumberOfQuestionsAll
+from parlaposlanci.views import setLastActivity, setListOfMembersTickers, setPresenceThroughTime, setNumberOfQuestionsAll
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, MinisterStatic
 
 from parlaskupine.views import setWorkingBodies, getListOfPGs
@@ -111,7 +111,6 @@ def onMembershipChangePGRunner(data, date_=None):
     set_mismatch_of_pg(None)
 
     setters_mp = [
-        setMembershipsOfMember,
     ]
 
     for mp in mp_ids:
