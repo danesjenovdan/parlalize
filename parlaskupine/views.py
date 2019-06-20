@@ -2175,38 +2175,6 @@ def getPGsIDs(request):
     return JsonResponse(output, safe=False)
 
 
-@csrf_exempt
-@lockSetter
-def setAllPGsStyleScoresFromSearch(request):
-    """Setter for analysis style score.
-    """
-    if request.method == 'POST':
-        post_data = json.loads(request.body)
-        print post_data
-        if post_data:
-            save_statuses = []
-            for score in post_data:
-                org = Organization.objects.get(id_parladata=int(score['party']))
-                date_of = datetime.today()
-                save_statuses.append(saveOrAbortNew(
-                    model=StyleScores,
-                    created_for=date_of,
-                    organization=org,
-                    problematicno=float(score['problematicno']),
-                    privzdignjeno=float(score['privzdignjeno']),
-                    preprosto=float(score['preprosto']),
-                    problematicno_average=float(score['problematicno_average']),
-                    privzdignjeno_average=float(score['privzdignjeno_average']),
-                    preprosto_average=float(score['preprosto_average'])
-                ))
-            return JsonResponse({'status': 'alliswell',
-                                 'saved': save_statuses})
-        else:
-            return JsonResponse({'status': 'There\'s not data'})
-    else:
-        return JsonResponse({'status': 'It wasnt POST'})
-
-
 def getStyleScoresPG(request, pg_id, date_=None):
     """
     * @api {get} getStyleScores/{pg_id}/{?date} Gets all style socre for specific organization

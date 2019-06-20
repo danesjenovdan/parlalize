@@ -88,7 +88,7 @@ urlpatterns = [
 
     ####################################################################################
     #POST setters
-    url(r'^setAllPGsStyleScoresFromSearch/', setAllPGsStyleScoresFromSearch),
+
     url(r'^setAllPGsTFIDFsFromSearch/', setAllPGsTFIDFsFromSearch),
 
     ####################################################################################
