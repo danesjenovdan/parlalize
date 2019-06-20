@@ -11,9 +11,6 @@ router.register(r'tfidfs', TFIDFView)
 urlpatterns = [
     # setters
 
-    url(r'^setPresence/(?P<person_id>\d+)/(?P<date_>[\w].+)', setPercentOFAttendedSession),
-    url(r'^setPresence/(?P<person_id>\d+)', setPercentOFAttendedSession),
-
     url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
 
     url(r'^setAverageNumberOfSpeechesPerSessionALL/(?P<date_>[\w].+)', setAverageNumberOfSpeechesPerSessionAll),

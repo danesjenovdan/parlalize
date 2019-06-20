@@ -9,7 +9,7 @@ from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
 from itertools import groupby
 
-from parlaposlanci.views import setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setListOfMembersTickers, setPresenceThroughTime, setNumberOfQuestionsAll, setPercentOFAttendedSession
+from parlaposlanci.views import setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setListOfMembersTickers, setPresenceThroughTime, setNumberOfQuestionsAll
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, MinisterStatic
 
 from parlaskupine.views import setWorkingBodies, getListOfPGs
@@ -58,9 +58,6 @@ def onDateMPCardRunner(date_=None):
     votez.setAll()
     set_mismatch_of_pg(None, date_)
     setters = [
-        setMembershipsOfMember,
-        setPresenceThroughTime,
-        setPercentOFAttendedSession,
     ]
 
     memberships = tryHard(API_URL + '/getMPs/' + date_).json()

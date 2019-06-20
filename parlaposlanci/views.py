@@ -218,63 +218,6 @@ def getMPStaticPL(request, person_id, date_=None):
     return JsonResponse(data)
 
 
-# Saves to DB percent of attended sessions of MP and
-# maximum and average of attended sessions
-@lockSetter
-def setPercentOFAttendedSession(request, person_id, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
-
-    data = tryHard(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
-
-    if not data["votes"].values():
-        return JsonResponse({'alliswell': False})
-
-    if person_id in data["sessions"].keys():
-        thisMP = data["sessions"][person_id]
-    else:
-        # ta member se ni obstajal
-        thisMP = 0
-        return JsonResponse({'alliswell': False,
-                             'status': 'ta member se ni obstajal',
-                             'saved': False})
-
-    maximum = max(data["sessions"].values())
-    maximumMP = [pId for pId in data["sessions"]
-                 if data["sessions"][pId] == maximum]
-    average = sum(data["sessions"].values()) / len(data["sessions"])
-
-    if person_id in data["votes"].keys():
-        thisMPVotes = data["votes"][person_id]
-    else:
-        thisMPVotes = 0
-
-    maximumVotes = max(data["votes"].values())
-    maximumMPVotes = [pId for pId in data["votes"]
-                      if data["votes"][pId] == maximumVotes]
-
-    averageVotes = sum(data["votes"].values()) / len(data["votes"])
-
-    person = Person.objects.get(id_parladata=int(person_id))
-
-    result = saveOrAbortNew(model=Presence,
-                            created_for=date_of,
-                            person=person,
-                            person_value_sessions=thisMP,
-                            maxMP_sessions=maximumMP,
-                            average_sessions=average,
-                            maximum_sessions=maximum,
-                            person_value_votes=thisMPVotes,
-                            maxMP_votes=maximumMPVotes,
-                            average_votes=averageVotes,
-                            maximum_votes=maximumVotes)
-
-    return JsonResponse({'alliswell': True, "status": 'OK', "saved": result})
-
-
 def getPercentOFAttendedSession(request, person_id, date=None):
     """
     * @api {get} /p/getPresence/{id}/{?date} MP's presence

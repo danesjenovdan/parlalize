@@ -100,8 +100,6 @@ def runSettersMPMultiprocess(date_to):
         MembershipsOfMember: setMembershipsOfMember,
         LessEqualVoters: setLessEqualVoters,
         EqualVoters: setMostEqualVoters,
-        Presence: setPercentOFAttendedSession,
-
     }
 
     # Runner for setters ALL
@@ -381,8 +379,6 @@ def runSettersMP(date_to):
         MembershipsOfMember: setMembershipsOfMember,
         LessEqualVoters: setLessEqualVoters,
         EqualVoters: setMostEqualVoters,
-        Presence: setPercentOFAttendedSession,
-
     }
     memberships = tryHard(API_URL + '/getAllTimeMemberships').json()
 
@@ -488,7 +484,6 @@ def runSettersMPSinglePerson(date_to=None):
         MembershipsOfMember: setMembershipsOfMember,
         LessEqualVoters: setLessEqualVoters,
         EqualVoters: setMostEqualVoters,
-        Presence: setPercentOFAttendedSession,
     }
     for membership in memberships:
         doMembersRunner({'membership': membership,
