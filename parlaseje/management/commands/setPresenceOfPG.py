@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaseje.models import Session, PresenceOfPG
-from parlalize.utils_ import saveOrAbortNew, tryHard, getDataFromPagerApi, getOrganizationsWithVoters
+from parlalize.utils_ import saveOrAbortNew, tryHard, getDataFromPagerApi
+from utils.parladata_api import getOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import API_URL, NOT_PRESENT
 

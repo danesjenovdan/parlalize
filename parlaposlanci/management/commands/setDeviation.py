@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT
 from utils.votes_pg import set_mismatch_of_pg
-from parlalize.utils_ import getParentOrganizationsWithVoters
+from utils.parladata_api import getParentOrganizationsWithVoters
 
 class Command(BaseCommand):
     help = 'Updates deviation'

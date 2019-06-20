@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, MPOfPg
 from parlalize.settings import API_DATE_FORMAT, API_URL
-from parlalize.utils_ import saveOrAbortNew, tryHard, getOrganizationsWithVoters, getVotersPairsWithOrg
+from parlalize.utils_ import saveOrAbortNew, tryHard
+from utils.parladata_api import getOrganizationsWithVoters, getVotersPairsWithOrg
 from datetime import datetime
 
 def setMPsOfPG(commander, pg_id, date_=None):

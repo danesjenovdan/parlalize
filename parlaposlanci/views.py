@@ -17,7 +17,8 @@ from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 NOTIFICATIONS_API)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi,
-                              getPersonAmendmentsCount, getVotersIDs)
+                              getPersonAmendmentsCount)
+from utils.parladata_api import getVotersIDs
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
                                     preprosto, TFIDF, getCountList)
@@ -36,34 +37,6 @@ import copy
 
 def index(request):
     return JsonResponse({})
-
-# get List of MPs
-def getMPsList(request, date_=None):
-    output = []
-    data = None
-    if date_:
-        while data is None:
-            try:
-                data = tryHard(API_URL+'/getMPs/'+date_)
-            except:
-                pass
-    else:
-        while data is None:
-            try:
-                data = tryHard(API_URL+'/getMPs/')
-            except:
-                pass
-
-    data = data.json()
-
-    output = [{'id': i['id'],
-               'image': i['image'],
-               'name': i['name'],
-               'membership': i['membership'],
-               'acronym': i['acronym'],
-               'district': i['district']} for i in data]
-
-    return JsonResponse(output, safe=False)
 
 
 def getMPStaticPL(request, person_id, date_=None):
@@ -1807,235 +1780,6 @@ def getVocabularySize(request, person_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
-def getVocabolarySizeLanding(request, date_=None): # TODO refactor typo getVocabularySize
-    """
-    * @api {get} /p/getVocabularySizeLanding/{?date} Vocabulary sizes of all MPs
-    * @apiName getVocabularySizeLanding
-    * @apiGroup Other
-    * @apiDescription This function returns a list of objects representing
-      MPs and their vocabulary size scores. The function
-      returns the scores as it was calculated for a given date, if no date
-      is supplied it is assumed the date is today.
-    * @apiParam {date} date Optional date.
-
-    * @apiSuccess {date} created_at When was this data created?
-    * @apiSuccess {date} created_for What historic date does this data correspond with?
-
-    * @apiSuccess {Object[]} data list of MPs and their coordinates
-
-    * @apiSuccess {Object} data.person MP's person object (comes with most calls).
-    * @apiSuccess {Boolean} data.person.is_active Answer the question: Is this MP currently active?
-    * @apiSuccess {Integer[]} data.person.district List of Parladata ids for districts this person was elected in.
-    * @apiSuccess {String} data.person.name MP's full name.
-    * @apiSuccess {String} data.person.gov_id MP's id on www.dz-rs.si
-    * @apiSuccess {String} data.person.gender MP's gender (f/m) used for grammar
-    * @apiSuccess {Object} data.person.party This MP's standard party objects (comes with most calls).
-    * @apiSuccess {String} data.person.party.acronym The MP's party's acronym.
-    * @apiSuccess {Boolean} data.person.party.is_coalition Answers the question: Is this party in coalition with the government?
-    * @apiSuccess {Integer} data.person.party.id This party's Parladata (organization) id.
-    * @apiSuccess {String} data.person.party.name The party's name.
-    * @apiSuccess {String} data.person.type The person's parlalize type. Always "mp" for MPs.
-    * @apiSuccess {Integer} data.person.id The person's Parladata id.
-    * @apiSuccess {Boolean} data.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-
-    * @apiSucces {Float} data.score MP's vocabulary size
-
-    * @apiExample {curl} Example:
-        curl -i https://analize.parlameter.si/v1/p/getVocabularySizeLanding/
-    * @apiExample {curl} Example with date:
-        curl -i https://analize.parlameter.si/v1/p/getVocabularySizeLanding/12.12.2016
-
-    * @apiSuccessExample {json} Example response:
-    {
-        "created_at": "21.03.2017",
-        "created_for": "20.03.2017",
-        "data": [{
-            "person": {
-            "is_active": false,
-            "district": [71],
-            "name": "Janez Jan\u0161a",
-            "gov_id": "P025",
-            "gender": "m",
-            "party": {
-                "acronym": "SDS",
-                "is_coalition": false,
-                "id": 5,
-                "name": "PS Slovenska Demokratska Stranka"
-            },
-            "type": "mp",
-            "id": 36,
-            "has_function": false
-            },
-            "score": 81.0
-        }, {
-            "person": {
-            "is_active": false,
-            "district": [83],
-            "name": "Marko Ferluga",
-            "gov_id": "P250",
-            "gender": "m",
-            "party": {
-                "acronym": "SMC",
-                "is_coalition": true,
-                "id": 1,
-                "name": "PS Stranka modernega centra"
-            },
-            "type": "mp",
-            "id": 21,
-            "has_function": false
-            },
-            "score": 84.0
-        }, {
-            "person": {
-            "is_active": false,
-            "district": [40],
-            "name": "Ivan \u0160kodnik",
-            "gov_id": "P286",
-            "gender": "m",
-            "party": {
-                "acronym": "SMC",
-                "is_coalition": true,
-                "id": 1,
-                "name": "PS Stranka modernega centra"
-            },
-            "type": "mp",
-            "id": 76,
-            "has_function": false
-            },
-            "score": 87.0
-        }]
-    }
-    """
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        person_id=None
-        if not VocabularySize.objects.all():
-            raise Http404("Nismo našli kartice")
-        date_of = VocabularySize.objects.latest("created_for").created_for
-        date_ = date_of.strftime(API_DATE_FORMAT)
-    mps = tryHard(API_URL+'/getMPs/'+date_).json()
-    datas = []
-    for mp in mps:
-        try:
-            datas.append(getPersonCardModelNew(VocabularySize, mp["id"], date_))
-        except:
-            print "ni se goborila"
-    print datas
-    return JsonResponse({"created_for": date_,
-                         "created_at": datas[0].created_at.strftime(API_DATE_FORMAT) if datas else date_,
-                         "data": sorted([{"person": getPersonData(data.person.id_parladata, date_),
-                            "score": data.score} for data in datas if data.score > 0], key=lambda k: k['score'])},
-                         safe=False)
-
-
-def getVocabolarySizeUniqueWordsLanding(request, date_=None): # TODO refactor typo getVocabularySize
-    """
-    * @api {get} /p/getUniqueWordsLanding/{?date} [DEPRECATED] Number of unique words spoken by MPs
-    * @apiName getUniqueWordsLanding
-    * @apiGroup Other
-    * @apiDescription This function returns a list of objects representing
-      MPs and the number of unique words. The function
-      returns the scores as it was calculated for a given date, if no date
-      is supplied it is assumed the date is today.
-    * @apiParam {date} date Optional date.
-
-    * @apiSuccess {Object[]} / list of MPs and their scores
-
-    * @apiSuccess {Object} /.person MP's person object (comes with most calls).
-    * @apiSuccess {Boolean} /.person.is_active Answer the question: Is this MP currently active?
-    * @apiSuccess {Integer[]} /.person.district List of Parladata ids for districts this person was elected in.
-    * @apiSuccess {String} /.person.name MP's full name.
-    * @apiSuccess {String} /.person.gov_id MP's id on www.dz-rs.si
-    * @apiSuccess {String} /.person.gender MP's gender (f/m) used for grammar
-    * @apiSuccess {Object} /.person.party This MP's standard party objects (comes with most calls).
-    * @apiSuccess {String} /.person.party.acronym The MP's party's acronym.
-    * @apiSuccess {Boolean} /.person.party.is_coalition Answers the question: Is this party in coalition with the government?
-    * @apiSuccess {Integer} /.person.party.id This party's Parladata (organization) id.
-    * @apiSuccess {String} /.person.party.name The party's name.
-    * @apiSuccess {String} /.person.type The person's parlalize type. Always "mp" for MPs.
-    * @apiSuccess {Integer} /.person.id The person's Parladata id.
-    * @apiSuccess {Boolean} /.person.has_function Answers the question: Is this person the president or vice president of the national assembly (speaker of the house kind of thing).
-
-    * @apiSucces {Integer} /.score MP's number of unique spoken words.
-
-    * @apiExample {curl} Example:
-        curl -i https://analize.parlameter.si/v1/p/getUniqueWordsLanding/
-    * @apiExample {curl} Example with date:
-        curl -i https://analize.parlameter.si/v1/p/getUniqueWordsLanding/12.12.2016
-
-    * @apiSuccessExample {json} Example response:
-    [
-        {
-            "person": {
-            "is_active": false,
-            "district": [84],
-            "name": "Vlasta Po\u010dkaj",
-            "gov_id": "P303",
-            "gender": "f",
-            "party": {
-                "acronym": "SMC",
-                "is_coalition": true,
-                "id": 1,
-                "name": "PS Stranka modernega centra"
-            },
-            "type": "mp",
-            "id": 2934,
-            "has_function": false
-            },
-            "score": 263.0
-        }, {
-            "person": {
-            "is_active": false,
-            "district": [85],
-            "name": "Teja Ljubi\u010d",
-            "gov_id": "P304",
-            "gender": "f",
-            "party": {
-                "acronym": "SMC",
-                "is_coalition": true,
-                "id": 1,
-                "name": "PS Stranka modernega centra"
-            },
-            "type": "mp",
-            "id": 2933,
-            "has_function": false
-            },
-            "score": 310.0
-        }, {
-            "person": {
-            "is_active": false,
-            "district": [52],
-            "name": "Ivan Prelog",
-            "gov_id": "P279",
-            "gender": "m",
-            "party": {
-                "acronym": "SMC",
-                "is_coalition": true,
-                "id": 1,
-                "name": "PS Stranka modernega centra"
-            },
-            "type": "mp",
-            "id": 68,
-            "has_function": false
-            },
-            "score": 2007.0
-        }
-    ]
-    """
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        person_id=None
-        date_of = VocabularySizeUniqueWords.objects.all().order_by("-created_for")[0].created_for
-        date_ = date_of.strftime(API_DATE_FORMAT)
-    mps = tryHard(API_URL+'/getMPs/'+date_).json()
-    datas = [getPersonCardModelNew(VocabularySizeUniqueWords, mp["id"], date_) for mp in mps]
-    print datas
-    return JsonResponse(sorted([{"person": getPersonData(data.person.id_parladata, date_),
-                                 "score": data.score} for data in datas], key=lambda k: k['score']), safe=False)
-
-
 def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
     """
     * @api {get} /p/getAverageNumberOfSpeechesPerSession/{id}/{?date} MP's average number of speeches per session
@@ -2155,17 +1899,6 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
     }
 
     return JsonResponse(out, safe=False)
-
-
-# get MPs IDs
-def getMPsIDs(request): # TODO document understand?
-    output = []
-    data = tryHard(API_URL+'/getMPs/')
-    data = data.json()
-
-    output = {"list": [i['id'] for i in data], "lastDate": Session.objects.all().order_by("-start_time")[0].start_time.strftime(API_DATE_FORMAT)}
-
-    return JsonResponse(output, safe=False)
 
 
 def getCompass(request, org_id, date_=None): # TODO make proper setters and getters

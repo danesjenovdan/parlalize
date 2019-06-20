@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, StyleScores
-from parlalize.utils_ import (saveOrAbortNew, tryHard, getPersonData, getOrganizationsWithVoters,
-    getParentOrganizationsWithVoters)
+from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData
+from utils.parladata_api import getOrganizationsWithVoters, getParentOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
 from collections import Counter

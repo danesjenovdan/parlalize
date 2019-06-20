@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaposlanci.models import Person, Presence
-from parlalize.utils_ import saveOrAbortNew, getParentOrganizationsWithVoters, getVotersIDs
+from parlalize.utils_ import saveOrAbortNew
+from utils.parladata_api import getVotersIDs, getParentOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT
 

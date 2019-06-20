@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, AverageNumberOfSpeechesPerSession
-from parlalize.utils_ import saveOrAbortNew, tryHard, getVotersIDs, getParentOrganizationsWithVoters
+from parlalize.utils_ import saveOrAbortNew, tryHard
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT, API_URL
+from utils.parladata_api import getVotersIDs, getParentOrganizationsWithVoters
 
 
 class Command(BaseCommand):

@@ -3,7 +3,7 @@ from utils.compass import getData as getCompassData
 from parlaskupine.models import Compass, Organization
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT
-from parlalize.utils_ import getParentOrganizationsWithVoters
+from utils.parladata_api import getParentOrganizationsWithVoters
 
 
 class Command(BaseCommand):

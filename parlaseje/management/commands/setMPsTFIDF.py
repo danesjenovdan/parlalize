@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, Tfidf
-from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData, getVotersIDs
+from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData
+from utils.parladata_api import getVotersIDs
 from datetime import datetime
 from parlalize.settings import API_URL, ISCI_URL
 

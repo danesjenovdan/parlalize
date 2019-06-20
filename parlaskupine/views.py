@@ -21,8 +21,9 @@ import numpy as np
 from utils.speech import WordAnalysis
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getAllStaticData, setCardData, getPersonCardModelNew,
-                              getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi,
-                              getVotersPairsWithOrg, getParentOrganizationsWithVoters, getOrganizationsWithVoters)
+                              getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi)
+
+from utils.parladata_api import getVotersPairsWithOrg, getParentOrganizationsWithVoters, getOrganizationsWithVoters
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
                                 AGAINST, ABSTAIN, DZ)
@@ -30,7 +31,6 @@ from .models import *
 from .utils_ import getDisunionInOrgHelper, getAmendmentsCount
 from parlaseje.models import Activity, Session, Vote, Speech, Question
 from parlaposlanci.models import Person, MismatchOfPG
-from parlaposlanci.views import getMPsList
 from kvalifikatorji.scripts import (countWords, getCountListPG, getScores,
                                     problematicno, privzdignjeno, preprosto)
 

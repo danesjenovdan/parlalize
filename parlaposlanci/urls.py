@@ -39,10 +39,6 @@ urlpatterns = [
 
     url(r'^getVocabularySize/(?P<person_id>\d+)/(?P<date_>[\w].+)', getVocabularySize),
     url(r'^getVocabularySize/(?P<person_id>\d+)', getVocabularySize),
-    url(r'^getVocabularySizeLanding/(?P<date_>[\w].+)', getVocabolarySizeLanding),
-    url(r'^getVocabularySizeLanding', getVocabolarySizeLanding),
-    url(r'^getUniqueWordsLanding/(?P<date_>[\w].+)', getVocabolarySizeUniqueWordsLanding),
-    url(r'^getUniqueWordsLanding/', getVocabolarySizeUniqueWordsLanding),
 
     url(r'^getAllSpeeches/(?P<person_id>\d+)/(?P<date_>[\w].+)', getAllSpeeches),
     url(r'^getAllSpeeches/(?P<person_id>\d+)', getAllSpeeches),
@@ -55,8 +51,6 @@ urlpatterns = [
 
     url(r'^getListOfMembersTickers/(?P<date_>[\w].+)', getListOfMembersTickers, {'org_id': settings.DZ}),
     url(r'^getListOfMembersTickers/', getListOfMembersTickers, {'org_id': settings.DZ}),
-
-    url(r'^getMPsIDs', getMPsIDs),
 
     url(r'^getCompass/(?P<date_>[\w].+)', getCompass, {'org_id': settings.DZ}),
     url(r'^getCompass', getCompass, {'org_id': settings.DZ}),

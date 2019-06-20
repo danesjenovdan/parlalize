@@ -7,8 +7,8 @@ from collections import Counter
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization, NumberOfQuestions
-from parlalize.utils_ import (tryHard, saveOrAbortNew, getDataFromPagerApi, getPersonData,
-    getOrganizationsWithVoters, getVotersIDs, getParentOrganizationsWithVoters)
+from parlalize.utils_ import (tryHard, saveOrAbortNew, getDataFromPagerApi, getPersonData)
+from utils.parladata_api import getOrganizationsWithVoters, getVotersIDs, getParentOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT, API_URL, DZ
 

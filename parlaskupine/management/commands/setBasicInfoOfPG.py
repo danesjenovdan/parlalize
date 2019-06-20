@@ -3,7 +3,8 @@ import json
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization, PGStatic
-from parlalize.utils_ import tryHard, saveOrAbortNew, getOrganizationsWithVoters
+from parlalize.utils_ import tryHard, saveOrAbortNew
+from utils.parladata_api import getOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT, API_URL
 

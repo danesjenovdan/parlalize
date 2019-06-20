@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import MismatchOfPG
 from parlaskupine.models import Organization, PGMismatch
-from parlalize.utils_ import tryHard, saveOrAbortNew, getAllStaticData, getPersonCardModelNew, getOrganizationsWithVoters
+from parlalize.utils_ import tryHard, saveOrAbortNew, getAllStaticData, getPersonCardModelNew
+from utils.parladata_api import getOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT, API_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN, API_URL_V2
 

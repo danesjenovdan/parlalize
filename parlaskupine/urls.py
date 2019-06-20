@@ -11,7 +11,6 @@ router.register(r'tfidfs', TFIDFView)
 
 
 urlpatterns = [
-#	url(r'^getMPsList/', getMPsList),
     # setters
 
     url(r'^setWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', setWorkingBodies),

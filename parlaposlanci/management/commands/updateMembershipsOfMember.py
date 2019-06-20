@@ -2,9 +2,10 @@ from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaposlanci.models import Person, MembershipsOfMember
 from parlaskupine.models import Organization
-from parlalize.utils_ import saveOrAbortNew, getVotersIDs
+from parlalize.utils_ import saveOrAbortNew
 from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT
+from utils.parladata_api import getVotersIDs
 
 
 def setMembershipsOfMember(commander, person_id, date_=None):
