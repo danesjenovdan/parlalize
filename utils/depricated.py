@@ -529,7 +529,6 @@ def runSettersPG(date_to=None):
         DeviationInOrganization: setDeviationInOrg,
         LessMatchingThem: setLessMatchingThem,
         MostMatchingThem: setMostMatchingThem,
-        MPOfPg: setMPsOfPG,
     }
 
     IDs = getPGIDs()

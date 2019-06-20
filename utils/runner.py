@@ -12,7 +12,7 @@ from itertools import groupby
 from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll, setPercentOFAttendedSession
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, MinisterStatic
 
-from parlaskupine.views import setMPsOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
+from parlaskupine.views import setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
 from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, PGMismatch
 
 from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Question, Tag, AbsentMPs, Vote_analysis
@@ -136,7 +136,6 @@ def onMembershipChangePGRunner(data, date_=None):
                 print msg
 
     pg_setters = [
-        setMPsOfPG,
         setPGMismatch,
     ]
     for setter in pg_setters:
@@ -169,7 +168,6 @@ def onDatePGCardRunner(date_=None):
     votez = VotesAnalysis(date_of) # TODO
     votez.setAll()
     setters = [
-        setMPsOfPG,
         setPresenceThroughTimePG,
         setPGMismatch,
     ]

@@ -287,26 +287,6 @@ def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
     return JsonResponse(data)
 
 
-@lockSetter
-def setMPsOfPG(request, pg_id, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        date_of = datetime.now().date()
-        date_ = datetime.now().date()
-
-    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/' + date_).json()
-    org = Organization.objects.get(id_parladata=pg_id)
-    result = saveOrAbortNew(model=MPOfPg,
-                            organization=org,
-                            id_parladata=pg_id,
-                            MPs=membersOfPG[pg_id],
-                            created_for=date_of
-                            )
-
-    return JsonResponse({'alliswell': True})
-
-
 def getMPsOfPG(request, pg_id, date_=None):
     """
     * @api {get} getPercentOFAttendedSessionPG/{pg_id}/{?date} Get percentage of attended sessions

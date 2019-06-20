@@ -14,9 +14,6 @@ urlpatterns = [
 #	url(r'^getMPsList/', getMPsList),
     # setters
 
-    url(r'^setMPsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setMPsOfPG),
-    url(r'^setMPsOfPG/(?P<pg_id>\d+)', setMPsOfPG),
-
     url(r'^setWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', setWorkingBodies),
     url(r'^setWorkingBodies/(?P<org_id>\d+)', setWorkingBodies),
 
