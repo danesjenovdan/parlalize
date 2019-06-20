@@ -15,9 +15,6 @@ urlpatterns = [
 
     url(r'^setLastActivity/(?P<person_id>\d+)', setLastActivity),
 
-    url(r'^setNumberOfQuestionsAll/(?P<date_>[\w].+)', setNumberOfQuestionsAll),
-    url(r'^setNumberOfQuestionsAll/', setNumberOfQuestionsAll),
-
     ####################################################################################
 
     # getters

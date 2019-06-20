@@ -2566,48 +2566,6 @@ def getTaggedBallots(request, person_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
-@lockSetter
-def setNumberOfQuestionsAll(request, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
-    else:
-        date_of = datetime.now().date()
-
-    url = API_URL + '/getAllQuestions/' + date_of.strftime(API_DATE_FORMAT)
-    data = getDataFromPagerApi(url)
-    mps = tryHard(API_URL+'/getMPs/'+date_of.strftime(API_DATE_FORMAT)).json()
-    mps_ids = [mp['id'] for mp in mps]
-    authors = []
-    for question in data:
-        for author in question['author_id']:
-            if author in mps_ids:
-                authors.append(author)
-
-    avg = len(authors)/float(len(mps_ids))
-    question_count = Counter(authors)
-    max_value = 0
-    max_persons = []
-    for maxi in question_count.most_common(90):
-        if max_value == 0:
-            max_value = maxi[1]
-        if maxi[1] == max_value:
-            max_persons.append(maxi[0])
-        else:
-            break
-
-    for person_id in mps_ids:
-        person = Person.objects.get(id_parladata=person_id)
-        saveOrAbortNew(model=NumberOfQuestions,
-                       created_for=date_of,
-                       person=person,
-                       score=question_count[person_id],
-                       average=avg,
-                       maximum=max_value,
-                       maxMPs=max_persons)
-
-    return HttpResponse('All iz well')
-
-
 def getNumberOfQuestions(request, person_id, date_=None):
     """
     * @api {get} /p/getNumberOfQuestions/{id}/{?date} MP's number of questions
