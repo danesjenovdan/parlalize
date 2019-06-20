@@ -580,7 +580,6 @@ def runSettersPG(date_to=None):
 
     # Runner for setters ALL
     all_in_one_setters_models = {
-        VocabularySizePG: setVocabularySizeALL,
         StyleScoresPG: setStyleScoresPGsALL,
     }
 

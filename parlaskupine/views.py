@@ -2060,37 +2060,6 @@ def getTaggedBallots(request, pg_id, date_=None):
     return JsonResponse(result, safe=False)
 
 
-@lockSetter
-def setVocabularySizeALL(request, date_=None):
-    """Setter function for analysis of vocabulary size of PG.
-    """
-    sw = WordAnalysis(count_of='groups', date_=date_)
-
-    #if not sw.isNewSpeech:
-    #    return JsonResponse({'alliswell': True,
-    #                         'msg': 'Na ta dan ni bilo govorov'})
-
-    # Vocabolary size
-    all_score = sw.getVocabularySize()
-    max_score, maxPGid = sw.getMaxVocabularySize()
-    avg_score = sw.getAvgVocabularySize()
-    date_of = sw.getDate()
-    maxPG = Organization.objects.get(id_parladata=maxPGid)
-
-    print '[INFO] saving vocabulary size'
-    for p in all_score:
-        org = Organization.objects.get(id_parladata=int(p['counter_id']))
-        saveOrAbortNew(model=VocabularySize,
-                       organization=org,
-                       created_for=date_of,
-                       score=int(p['coef']),
-                       maxOrg=maxPG,
-                       average=avg_score,
-                       maximum=max_score)
-
-    return JsonResponse({'alliswell': True, 'msg': 'shranjeno'})
-
-
 def getVocabularySize(request, pg_id, date_=None):
     """
     * @api {get} getVocabularySize/{pg_id}/{?date} Gets data of analysis size of vocabulary for specific organization
