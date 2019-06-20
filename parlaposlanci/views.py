@@ -439,54 +439,6 @@ def getPercentOFAttendedSession(request, person_id, date=None):
     return JsonResponse(out)
 
 
-#Deprecated
-#Saves to DB number of spoken word of MP and maximum and average of spoken words
-@lockSetter
-def setNumberOfSpokenWordsALL(request, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-    else:
-        date_of = datetime.now().date()
-        date_=""
-    print '[INFO] Getting MPs'
-    mps = tryHard(API_URL+'/getMPs/'+date_).json()
-
-    mp_results = []
-
-    for mp in mps:
-        print '[INFO] Pasting speeches for MP ' + str(mp['id'])
-        speeches = tryHard(API_URL+'/getSpeeches/' + str(mp['id']) + "/" + date_).json()
-
-        text = ''.join([speech['content'] for speech in speeches])
-
-        mp_results.append({'person_id': mp['id'], 'wordcount': numberOfWords(text)})
-
-    print '[INFO] Sorting MPs'
-    mps_sorted = sorted(mp_results, key=lambda k: k['wordcount'])
-
-    print '[INFO] Getting all speeches'
-    url = API_URL+'/getAllSpeeches/' + date_
-    all_speeches = getDataFromPagerApi(url)
-    print '[INFO] Joining all speeches'
-    text = ''.join([speech['content'] for speech in all_speeches])
-
-    print '[INFO] Calculating total words'
-    total_words = numberOfWords(text)
-    print '[INFO] Calculating average words'
-    average_words = total_words/len(mps)
-
-    for result in mp_results:
-        print '[INFO] Saving or updating MP\'s results'
-        print saveOrAbortNew(model=SpokenWords,
-                             created_for=date_of,
-                             person=Person.objects.get(id_parladata=int(result['person_id'])),
-                             score=int(result['wordcount']),
-                             maxMP=Person.objects.get(id_parladata=int(mps_sorted[-1]['person_id'])),
-                             average=average_words,
-                             maximum=mps_sorted[-1]['wordcount'])
-
-    return HttpResponse('All iz well')
-
 def getNumberOfSpokenWords(request, person_id, date=None):
     """
     * @api {get} /p/getNumberOfSpokenWords/{id}/{?date} MP's number of spoken words
