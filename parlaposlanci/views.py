@@ -66,55 +66,6 @@ def getMPsList(request, date_=None):
     return JsonResponse(output, safe=False)
 
 
-# returns MP static data like PoliticalParty, age, ....
-@lockSetter
-def setMPStaticPL(request, person_id, date_=None):
-    print("MADAFAKA")
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        data = tryHard(API_URL + '/getMPStatic/' + person_id + "/" + date_).json()
-    else:
-        date_of = datetime.now().date()
-        data = tryHard(API_URL + '/getMPStatic/' + person_id).json()
-
-    person = Person.objects.get(id_parladata=int(person_id))
-    if not data:
-        return JsonResponse({"status": 'Nothing iz well', "saved": False})
-    dic = dict()
-
-    wbfs = data['working_bodies_functions']
-
-    result = saveOrAbortNew(model=MPStaticPL,
-                            created_for=date_of,
-                            person=person,
-                            voters=data['voters'],
-                            points=data['points'],
-                            age=data['age'],
-                            birth_date=dateparse.parse_datetime(data['birth_date']) if data['birth_date'] else None,
-                            mandates=data['mandates'],
-                            party=Organization.objects.get(id_parladata=int(data['party_id'])),
-                            education=data['education'],
-                            education_level=data['education_level'],
-                            previous_occupation=data['previous_occupation'],
-                            name=data['name'],
-                            district=data['district'],
-                            facebook=data['social']['facebook'],
-                            twitter=data['social']['twitter'],
-                            linkedin=data['social']['linkedin'],
-                            party_name=data['party'],
-                            acronym=data['acronym'],
-                            gov_id=data['gov_id'],
-                            gender=data['gender'],
-                            working_bodies_functions=wbfs)
-
-    if result:
-        for group in data['groups']:
-            new_group = MPStaticGroup(person=MPStaticPL.objects.filter(person__id_parladata=int(person_id)).latest('created_at'), groupid=int(group['id']), groupname=group['name'])
-            new_group.save()
-
-    return JsonResponse({"status":'All iz well', "saved":result})
-
-
 def getMPStaticPL(request, person_id, date_=None):
     """
     * @api {get} /p/getMPStatic/{id}/{?date} MP's static info

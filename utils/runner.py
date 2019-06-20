@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import requests
-from parlaposlanci.views import setMPStaticPL
+
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY, DZ
 from parlalize.utils_ import getPGIDs, findDatesFromLastCard
 from datetime import datetime, timedelta
@@ -9,7 +9,7 @@ from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
 from itertools import groupby
 
-from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll, setPercentOFAttendedSession
+from parlaposlanci.views import setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll, setPercentOFAttendedSession
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, MinisterStatic
 
 from parlaskupine.views import setWorkingBodies, getListOfPGs
@@ -61,7 +61,6 @@ def onDateMPCardRunner(date_=None):
         setMembershipsOfMember,
         setPresenceThroughTime,
         setPercentOFAttendedSession,
-        setMPStaticPL
     ]
 
     memberships = tryHard(API_URL + '/getMPs/' + date_).json()
@@ -119,7 +118,6 @@ def onMembershipChangePGRunner(data, date_=None):
 
     setters_mp = [
         setMembershipsOfMember,
-        setMPStaticPL
     ]
 
     for mp in mp_ids:

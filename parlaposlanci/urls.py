@@ -10,8 +10,6 @@ router.register(r'tfidfs', TFIDFView)
 
 urlpatterns = [
     # setters
-    url(r'^setMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMPStaticPL),
-    url(r'^setMPStatic/(?P<person_id>\d+)/', setMPStaticPL),
 
     url(r'^setMinsterStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMinsterStatic),
     url(r'^setMinsterStatic/(?P<person_id>\d+)/', setMinsterStatic),
