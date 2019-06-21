@@ -8,7 +8,8 @@ from collections import Counter
 from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from itertools import groupby
 
-from parlalize.utils_ import tryHard, getDataFromPagerApi, getVotersIDs, getOrganizationsWithVoters, getDataFromPagerApiDRFGen
+from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiDRFGen
+from utils.parladata_api import getVotersIDs, getOrganizationsWithVoters
 
 
 class WordAnalysis(object):
@@ -134,45 +135,45 @@ class WordAnalysis(object):
 
 class Utils(object):
 
-    def getSpeechesAnalyses(self):
+    def getSpeechesAnalyses(self, organization_id):
         with open('members_speech_score.csv', 'wb') as csvfile:
             csvwriter = csv.writer(csvfile,
                                    delimiter=',',
                                    quotechar='|',
                                    quoting=csv.QUOTE_MINIMAL)
 
-            date_ = '15.7.2016'
-            mps = tryHard(API_URL+'/getMPs/'+date_).json()
+            date_of = datetime.now().date()
+            mps = getVotersIDs(organization_id=organization_id, date_of)
 
             # NumberOfSpeechesPerSession
             mp_scores = {}
 
             for mp in mps:
-                url = ('' + API_URL + '/getSpeechesOfMP/' + str(mp['id']) + ''
+                url = ('' + API_URL + '/getSpeechesOfMP/' + str(mp) + ''
                        '' + ('/' + date_) if date_ else '')
                 mp_no_of_speeches = len(tryHard(url).json())
 
                 url = ('' + API_URL + '/getNumberOfPersonsSessions/' + ''
-                       '' + str(mp['id']) + ('/'+date_) if date_ else '')
+                       '' + str(mp) + ('/'+date_) if date_ else '')
                 mp_no_of_sessions = tryHard(url).json()['sessions_with_speech']
 
                 if mp_no_of_sessions > 0:
-                    mp_scores[mp['id']] = mp_no_of_speeches/mp_no_of_sessions
+                    mp_scores[mp] = mp_no_of_speeches/mp_no_of_sessions
                 else:
-                    mp_scores[mp['id']] = 0
+                    mp_scores[mp] = 0
             print 'NumberOfSpeechesPerSession done'
 
             # VocabularySize
             vocabulary_sizes = {}
 
             for mp in mps:
-                url = ('' + API_URL+'/getSpeeches/' + str(mp['id']) + ''
+                url = ('' + API_URL+'/getSpeeches/' + str(mp) + ''
                        '' + ('/'+date_) if date_ else '')
                 speeches = tryHard(url).json()
 
                 text = ''.join([speech['content'] for speech in speeches])
 
-                vocabulary_sizes[mp['id']] = len(countWords(text, Counter()))
+                vocabulary_sizes[mp] = len(countWords(text, Counter()))
 
             print 'VocabularySize done'
 
@@ -180,18 +181,18 @@ class Utils(object):
             mp_results = {}
 
             for mp in mps:
-                # print '[INFO] Pasting speeches for MP ' + str(mp['id'])
-                url = API_URL+'/getSpeeches/' + str(mp['id']) + '/' + date_
+                # print '[INFO] Pasting speeches for MP ' + str(mp)
+                url = API_URL+'/getSpeeches/' + str(mp) + '/' + date_
                 speeches = tryHard(url).json()
 
                 text = ''.join([speech['content'] for speech in speeches])
 
-                mp_results[mp['id']] = numberOfWords(text)
+                mp_results[mp] = numberOfWords(text)
 
             print 'spoken words done'
 
             for mp in mps:
-                csvwriter.writerow([mp['id'],
-                                   mp_results[mp['id']],
-                                   vocabulary_sizes[mp['id']],
-                                   mp_scores[mp['id']]])
+                csvwriter.writerow([mp,
+                                   mp_results[mp],
+                                   vocabulary_sizes[mp],
+                                   mp_scores[mp]])

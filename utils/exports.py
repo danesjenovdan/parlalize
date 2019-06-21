@@ -3,6 +3,8 @@ from parlaseje.models import Legislation
 from parlaposlanci.models import *
 from parlalize.utils_ import tryHard, getPersonCardModelNew
 
+from utils.parladata_api import getVotersIDs
+
 from django.conf import settings
 from django.utils.html import strip_tags
 
@@ -57,15 +59,15 @@ def data_to_csv():
               (VocabularySize, 'raznolikost besedisca'),
               (MPStaticPL, 'st_mandatov')]
 
-    mps = tryHard(settings.API_URL+'/getMPs/').json()
+    mps = getVotersIDs()
 
     data = []
 
     for mp in mps:
-        tmp = {'member_id': mp['id'], 'ime': mp['name'], 'PS': mp['acronym']}
+        tmp = {'member_id': mp}
         for model, column in models:
-            print mp['id'], model
-            model_data = getPersonCardModelNew(model, mp['id'])
+            print mp, model
+            model_data = getPersonCardModelNew(model, mp)
             if model == Presence:
                 tmp[column] = model_data.person_value_votes
             if model == NumberOfQuestions or model == SpokenWords or model == VocabularySize:
@@ -77,5 +79,7 @@ def data_to_csv():
             if model == MPStaticPL:
                 tmp[column] = model_data.mandates
                 tmp['izobrazba'] = model_data.education_level
+                tmp['ime'] = model_data.person.name
+                tmp['PS'] = model_data.party.acronym
         data.append(tmp)
     listToCSV(data, 'toski_export.csv')

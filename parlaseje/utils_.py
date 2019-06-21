@@ -60,23 +60,6 @@ def getSesCardModelNew(model, id, date=None):
     return modelObject
 
 
-def resultOfMotion(yes, no, kvorum, not_present, vote_id, date_=None):
-    result = tryHard(API_URL + '/getResultOfMotion/' + str(vote_id)).json()
-    allMPs = (int(len(tryHard(API_URL + '/getMPs/' +
-                              date_.strftime(API_DATE_FORMAT)).json())) * 2) / 3
-    if result['result'] == "1" or result['result'] == "1 ":
-        return True
-    elif result['result'] == "0" or result['result'] == "0 ":
-        return False
-    else:
-        if yes >= allMPs:
-            allMPs = 0
-            return True
-        else:
-            allMPs = 0
-            return False
-
-
 def getSessionDataAPI(requests, session_id):
     session = Session.objects.filter(id_parladata=session_id)
 
@@ -160,13 +143,13 @@ def hasLegislationLink(legislation):
         return False
 
 
-def getMotionClassification(motion): 
+def getMotionClassification(motion):
     classes = VOTE_INDICATORS
-    text = motion.lower() 
-    for cl, words in classes.items(): 
-        for word in words: 
-            if word.lower() in text.lower(): 
-                return cl 
+    text = motion.lower()
+    for cl, words in classes.items():
+        for word in words:
+            if word.lower() in text.lower():
+                return cl
 
     return '14' # others
 

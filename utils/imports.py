@@ -8,6 +8,7 @@ from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
 from raven.contrib.django.raven_compat.models import client
+from utils.parladata_api import getVotersIDs
 
 
 import requests
@@ -22,8 +23,7 @@ request_with_key = factory.get('?key=' + SETTER_KEY)
 def updatePeople():
     url = API_URL + '/getAllPeople/'
     data = getDataFromPagerApi(url)
-    mps = tryHard(API_URL + '/getMPs/').json()
-    mps_ids = [mp['id'] for mp in mps]
+    mps_ids = getVotersIDs()
     for mp in data:
         if Person.objects.filter(id_parladata=mp['id']):
             person = Person.objects.get(id_parladata=mp['id'])

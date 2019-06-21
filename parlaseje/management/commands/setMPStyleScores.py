@@ -99,7 +99,7 @@ class Command(BaseCommand):
             date_of = datetime.now().date()
             date_ = date_of.strftime(API_DATE_FORMAT)
 
-        self.stdout.write('About to try hard with %s/getMPS/%s' %
+        self.stdout.write('Getting voters' %
                           (API_URL, date_))
         for org in getParentOrganizationsWithVoters():
             self.stdout.write('Starting style score for organization %s' % (org))

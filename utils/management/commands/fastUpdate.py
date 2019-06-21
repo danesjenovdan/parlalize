@@ -14,6 +14,8 @@ from utils.runner import runSettersSessions
 
 from utils.delete_renders import delete_renders, deleteRendersOfSession, deleteRendersOfIDs, refetch
 
+from utils.parladata_api import getVotersIDs
+
 from datetime import datetime, timedelta
 from slackclient import SlackClient
 from time import time
@@ -104,8 +106,7 @@ class Command(BaseCommand):
         sdate = datetime.now().strftime(API_DATE_FORMAT)
 
         # Persons
-        mps = tryHard(API_URL + '/getMPs/' + sdate).json()
-        mps_ids = [mp['id'] for mp in mps]
+        mps_ids = getVotersIDs()
         for mp in data['persons']:
             if Person.objects.filter(id_parladata=mp['id']):
                 person = Person.objects.get(id_parladata=mp['id'])
