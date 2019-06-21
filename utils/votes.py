@@ -7,6 +7,8 @@ from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT, VOTE_MAP
 from parlalize.utils_ import tryHard, saveOrAbortNew, getDataFromPagerApi, getDataFromPagerApiGen
 
+from utils.parladata_api import getVotersIDs, getOrganizationsWithVotersList, getParentOrganizationsWithVoters
+
 from parlaseje.models import Session
 from parlaposlanci.models import Person, EqualVoters, LessEqualVoters, Presence
 from parlaskupine.models import (Organization, MostMatchingThem,
@@ -15,7 +17,7 @@ from parlaskupine.models import (Organization, MostMatchingThem,
 
 
 class VotesAnalysis(object):
-    def __init__(self, date_=None):
+    def __init__(self, organization_id, date_=None):
         self.debug = False
         if date_:
             self.date_ = date_.strftime(API_DATE_FORMAT)
@@ -26,6 +28,7 @@ class VotesAnalysis(object):
         self.api_url = None
         self.members = None
         self.data = None
+        self.organization_id = organization_id
 
         self.presenceOfPGsSignleSessions = None
         self.presenceMP_S = None
@@ -62,17 +65,11 @@ class VotesAnalysis(object):
             print url
             # before debug load data to backup_baze.pkl file (uncoment next line)
             # self.data.to_pickle('backup_baze.pkl')
-        url = API_URL + '/getMPs/' + self.date_
-        print url
-        mps = tryHard(url).json()
-        self.members = [mp['id'] for mp in mps]
-        url = API_URL + '/getMembersOfPGsOnDate/' + self.date_
-        print url
-        self.memsOfPGs = tryHard(url).json()
-        url = API_URL + '/getAllPGs/' + self.date_
-        print url
-        self.pgs = tryHard(url).json()
-        self.pgs = self.pgs.keys()
+
+        mps =
+        self.members = getVotersIDs(organization_id=self.organization_id, date_=date_of)
+        self.memsOfPGs = getOrganizationsWithVotersList(organization_id=self.organization_id, date_=date_of)
+        self.pgs = getOrganizationsWithVoters(organization_id=self.organization_id, date_=date_of)
 
         def toLogic(row):
             """
@@ -413,6 +410,7 @@ class VotesAnalysis(object):
 
 
 def setAllVotesCards():
-    votesObj = VotesAnalysis()
-    votesObj.setAll()
-    return 'All is well'
+    for org_id in getParentOrganizationsWithVoters():
+        votesObj = VotesAnalysis(organization_id=org_id)
+        votesObj.setAll()
+        return 'All is well'

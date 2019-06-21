@@ -4,6 +4,7 @@ from parlalize.utils_ import getDataFromPagerApiDRFGen
 from parlaskupine.models import Organization
 
 from datetime import datetime
+from collections import defaultdict
 
 import requests
 
@@ -52,6 +53,13 @@ def getVotersPairsWithOrg(date_=datetime.now(), organization_id=None):
                 if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
                     voters_ids[voter['person']] = voter['on_behalf_of']
     return voters_ids
+
+def getOrganizationsWithVotersList(date_=datetime.now(), organization_id=None):
+    voters = getVotersPairsWithOrg(date_=date_, organization_id=organization_id)
+    reversed_dict = defaultdict(list)
+    for key, value in voters.items():
+        reversed_dict[value].append(key)
+    return dict(reversed_dict)
 
 def getParentOrganizationsWithVoters():
     return Organization.objects.filter(has_voters=True).values_list('id_parladata', flat=True)
