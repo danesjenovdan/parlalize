@@ -61,5 +61,35 @@ def getOrganizationsWithVotersList(date_=datetime.now(), organization_id=None):
         reversed_dict[value].append(key)
     return dict(reversed_dict)
 
+def getLinks(*args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    links_url = settings.API_URL + '/links/'
+    if query_url:
+        links_url = links_url + '?' + query_url
+    out = []
+    for urls in getDataFromPagerApiDRFGen(links_url):
+        out += urls
+
+    return out
+
+def getMembershipsOfMember(person_id=None, date_=datetime.now()):
+    url = settings.API_URL + '/memberships/'
+    if person_id:
+        url += '?person='+str(person_id)
+    out_data = []
+    for memberships in getDataFromPagerApiDRFGen(url):
+        for membership in memberships:
+            if membership['start_time'] < date_.isoformat():
+                if membership['end_time'] == None or membership['end_time'] > date_.isoformat():
+                    out_data.append(membership)
+    return out_data
+
+def getOrganizations():
+    url = settings.API_URL + '/organizations/'
+    return [
+        organization
+        for organizations in getDataFromPagerApiDRFGen(url)
+        for organization in organizations]
+
 def getParentOrganizationsWithVoters():
     return Organization.objects.filter(has_voters=True).values_list('id_parladata', flat=True)

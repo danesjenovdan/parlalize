@@ -1,24 +1,43 @@
 from django.core.management.base import BaseCommand, CommandError
-from parlalize.utils_ import tryHard
 from parlaposlanci.models import Person, MembershipsOfMember
 from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew
 from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT
-from utils.parladata_api import getVotersIDs
+from utils.parladata_api import getVotersIDs, getOrganizations, getMembershipsOfMember, getLinks
+from collections import defaultdict
+
 
 
 def setMembershipsOfMember(commander, person_id, date_=None):
     if date_:
-        data = tryHard(API_URL+'/getMembershipsOfMember/' + person_id + "/" + date_).json()
         date_of = datetime.strptime(date_, API_DATE_FORMAT)
     else:
-        data = tryHard(API_URL+'/getMembershipsOfMember/'+ person_id).json()
         date_of = datetime.now().date()
+
+    organizations = {org['id']: org for org in getOrganizations()}
+    memberships = getMembershipsOfMember(person_id=person_id, date_=date_of)
+    data = defaultdict(list)
 
     person = Person.objects.get(id_parladata=int(person_id))
 
-    saveOrAbortNew(MembershipsOfMember, created_for=date_of, person=person, data=data)
+    for mem in memberships:
+        organization = organizations[mem['organization']]
+        org_links = getLinks(organization=organization['id'])
+        if org_links:
+            org_link = org_links[0]['url']
+        else:
+            org_link = None
+        data[organization['classification']].append(
+            {
+                'url': org_link,
+                'org_type': organization['classification'],
+                'org_id': organization['id'],
+                'name': organization['_name']
+            }
+        )
+
+    saveOrAbortNew(MembershipsOfMember, created_for=date_of, person=person, data=dict(data))
 
     commander.stdout.write('Set MembershipsOfMember for person id %s' % str(person_id))
 
