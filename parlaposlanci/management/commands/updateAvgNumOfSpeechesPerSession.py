@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, AverageNumberOfSpeechesPerSession
+from parlaseje.models import Activity
 from parlalize.utils_ import saveOrAbortNew, tryHard
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT, API_URL
@@ -40,8 +41,9 @@ class Command(BaseCommand):
                 # fix for "Dajem besedo"
                 #mp_no_of_speeches = mp_no_of_speeches - int(tryHard(API_URL + '/getNumberOfFormalSpeeches/' + str(mp) + ("/"+date_) if date_ else "").text)
 
-                self.stdout.write('Trying hard for %s/getNumberOfPersonsSessions/%s/%s' % (API_URL, str(mp), date_))
-                mp_no_of_sessions = tryHard(API_URL+ '/getNumberOfPersonsSessions/' + str(mp) + (("/"+date_) if date_ else "")).json()['sessions_with_speech']
+                mp_no_of_sessions = Activity.objects.filter(
+                    person__id_parladata=mp,
+                    speech__isnull=False).distinct("session").count()
 
                 if mp_no_of_sessions > 0:
                     mp_scores.append({'id': mp, 'score': mp_no_of_speeches / mp_no_of_sessions})

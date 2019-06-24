@@ -1,6 +1,6 @@
 import csv
 from datetime import datetime
-from parlaseje.models import Session
+from parlaseje.models import Session, Activity
 from parlaskupine.models import Organization
 from parlalize.settings import API_URL, API_DATE_FORMAT, ISCI_URL
 import requests
@@ -153,9 +153,9 @@ class Utils(object):
                        '' + ('/' + date_) if date_ else '')
                 mp_no_of_speeches = len(tryHard(url).json())
 
-                url = ('' + API_URL + '/getNumberOfPersonsSessions/' + ''
-                       '' + str(mp) + ('/'+date_) if date_ else '')
-                mp_no_of_sessions = tryHard(url).json()['sessions_with_speech']
+                mp_no_of_sessions = Activity.objects.filter(
+                    person__id_parladata=mp,
+                    speech__isnull=False).distinct("session").count()
 
                 if mp_no_of_sessions > 0:
                     mp_scores[mp] = mp_no_of_speeches/mp_no_of_sessions
