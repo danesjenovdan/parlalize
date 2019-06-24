@@ -5,7 +5,7 @@ from parlaposlanci.models import Person, NumberOfQuestions
 from parlalize.utils_ import (saveOrAbortNew, tryHard, getDataFromPagerApi)
 from parlalize.settings import API_DATE_FORMAT, API_URL
 
-from utils.parladata_api import getVotersIDs, getParentOrganizationsWithVoters
+from utils.parladata_api import getVotersIDs, getParentOrganizationsWithVoters, getQuestions
 
 from datetime import datetime
 from collections import Counter
@@ -33,16 +33,14 @@ class Command(BaseCommand):
             date_of = datetime.now().date()
             date_ = date_of.strftime(API_DATE_FORMAT)
 
-        self.stdout.write('Trying hard for %s/getAllQuestions/%s' % (API_URL, str(date_)))
-        url = API_URL + '/getAllQuestions/' + date_of.strftime(API_DATE_FORMAT)
-        data = getDataFromPagerApi(url)
+        data = getQuestions()
         self.stdout.write('Get voters')
         for org_id in getParentOrganizationsWithVoters():
             mps_ids = getVotersIDs(date_=date_of, organization_id=org_id)
             print(mps_ids)
             authors = []
             for question in data:
-                for author in question['author_id']:
+                for author in question['authors']:
                     if author in mps_ids:
                         authors.append(author)
 

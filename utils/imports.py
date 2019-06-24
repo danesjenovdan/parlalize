@@ -8,7 +8,7 @@ from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
 from raven.contrib.django.raven_compat.models import client
-from utils.parladata_api import getVotersIDs
+from utils.parladata_api import getVotersIDs, getQuestions, getLinks
 
 
 import requests
@@ -117,34 +117,34 @@ def updateSpeeches():
 
 
 def updateQuestions():
-    url = API_URL + '/getAllQuestions'
-    data = getDataFromPagerApi(url)
+    data = getQuestions()
     existingISs = list(Question.objects.all().values_list("id_parladata",
                                                           flat=True))
     for dic in data:
         if int(dic["id"]) not in existingISs:
             print "adding question"
-            if dic['session_id']:
-                session = Session.objects.get(id_parladata=int(dic['session_id']))
+            if dic['session']:
+                session = Session.objects.get(id_parladata=int(dic['session']))
             else:
                 session = None
-            link = dic['link'] if dic['link'] else None
+            links = getLinks(question=dic['id'])
+            link = links[0]['url'] if links else None
             person = []
-            for i in dic['author_id']:
+            for i in dic['authors']:
                 person.append(Person.objects.get(id_parladata=int(i)))
-            if dic['recipient_id']:
+            if dic['recipient_person']:
                 rec_p = list(Person.objects.filter(id_parladata__in=dic['recipient_id']))
             else:
                 rec_p = []
-            if dic['recipient_org_id']:
+            if dic['recipient_organization']:
                 rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
             else:
                 rec_org = []
             author_org = []
-            for i in dic['author_org_id']:
+            for i in dic['author_orgs']:
                 author_org.append(Organization.objects.get(id_parladata=i))
             rec_posts = []
-            for post in dic['recipient_posts']:
+            for post in dic['recipient_post']:
                 static = MinisterStatic.objects.filter(person__id=post['membership__person_id'],
                                                        ministry=post['organization_id'])
                 if static:

@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization, NumberOfQuestions
 from parlalize.utils_ import (tryHard, saveOrAbortNew, getDataFromPagerApi, getPersonData)
-from utils.parladata_api import getOrganizationsWithVoters, getVotersIDs, getParentOrganizationsWithVoters
+from utils.parladata_api import getOrganizationsWithVoters, getVotersIDs, getParentOrganizationsWithVoters, getQuestions
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT, API_URL, DZ
 
@@ -31,9 +31,7 @@ class Command(BaseCommand):
             date_ = datetime.now().date().strftime(API_DATE_FORMAT)
             date_of = datetime.now().date()
 
-        self.stdout.write('Trying hard for %s/getAllQuestions/%s' % (API_URL, date_))
-        url = API_URL + '/getAllQuestions/' + date_
-        data = getDataFromPagerApi(url)
+        data = getQuestions()
 
         for org_id in getParentOrganizationsWithVoters():
             pgs_on_date = getOrganizationsWithVoters(date_=date_of, organization_id=org_id)
@@ -51,11 +49,11 @@ class Command(BaseCommand):
             for question in data:
                 qDate = datetime.strptime(question['date'], '%Y-%m-%dT%X')
                 qDate = qDate.strftime(API_DATE_FORMAT)
-                for author in question['author_id']:
+                for author in question['authors']:
                     try:
                         person_data = mpStatic[str(author)]
                     except KeyError as e:
-                        print(str(question['author_id']))
+                        print(str(question['authors']))
                         person_data = getPersonData(str(author), date_)
                         mpStatic[str(author)] = person_data
                     if person_data and person_data['party'] and person_data['party']['id']:

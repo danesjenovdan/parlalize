@@ -72,6 +72,17 @@ def getLinks(*args, **kwargs):
 
     return out
 
+def getQuestions(*args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    questions_url = settings.API_URL + '/questions/'
+    if query_url:
+        questions_url = questions_url + '?' + query_url
+    out = []
+    for urls in getDataFromPagerApiDRFGen(questions_url):
+        out += urls
+
+    return out
+
 def getMembershipsOfMember(person_id=None, date_=datetime.now()):
     url = settings.API_URL + '/memberships/'
     if person_id:
