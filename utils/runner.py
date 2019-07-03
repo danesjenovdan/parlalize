@@ -2,7 +2,7 @@
 import requests
 
 from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY, DZ
-from parlalize.utils_ import getPGIDs, findDatesFromLastCard
+from parlalize.utils_ import findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
 from raven.contrib.django.raven_compat.models import client

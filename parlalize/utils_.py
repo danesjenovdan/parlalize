@@ -306,13 +306,6 @@ def getSCardModel(model, id_se, date=None):
     return modelObject
 
 
-# get all PG ID's
-def getPGIDs():
-    data = tryHard(API_URL+'/getAllPGsExt/').json()
-
-    return [pg for pg in data]
-
-
 def getMPGovId(id_parladata):
     person = Person.objects.filter(id_parladata=id_parladata)[0]
     out = {'id': person.id_parladata,

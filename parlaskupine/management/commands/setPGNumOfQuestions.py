@@ -41,9 +41,6 @@ class Command(BaseCommand):
             for mp in mps:
                 mpStatic[str(mp)] = getPersonData(str(mp), date_)
 
-            # self.stdout.write('Trying hard for %s/getAllPGsExt/%s' % (API_URL, date_))
-            # allPGs = tryHard(API_URL+'/getAllPGsExt/').json().keys()
-
             pg_ids = pgs_on_date
             authors = []
             for question in data:

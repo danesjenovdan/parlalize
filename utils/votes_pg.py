@@ -23,14 +23,6 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
     for page in getDataFromPagerApiGen(url):
         temp = pd.DataFrame(page)
         data = data.append(temp, ignore_index=True)
-    # members = [mp['id'] for mp in mps]
-    # url = settings.API_URL + '/getMembersOfPGsOnDate/' + date_
-    # memsOfPGs = requests.get(url).json()
-    # url = settings.API_URL + '/getAllPGs/' + date_
-    # pgs = requests.get(url).json()
-
-    # coalition = requests.get(settings.API_URL + '/getCoalitionPGs').json()['coalition']
-    # orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
 
     print 'Preparing pandas DataFrame'
     data['option_absent'] = 0
