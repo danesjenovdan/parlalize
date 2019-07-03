@@ -55,6 +55,7 @@ def updateOrganizations(dummy_arg=None):
             org.name = data[pg]['name']
             org.classification = data[pg]['classification']
             org.acronym = data[pg]['acronym']
+            org.name_parser = data[pg]['name_parser']
             org.is_coalition = data[pg]['is_coalition']
             print data[pg]['acronym']
             org.save()

@@ -1,7 +1,8 @@
 from django.conf import settings
 
-from parlalize.utils_ import getDataFromPagerApiDRFGen
+from parlalize.utils_ import getDataFromPagerApiDRFGen, tryHard
 from parlaskupine.models import Organization
+from parlaseje.models import Ballot
 
 from datetime import datetime
 from collections import defaultdict
@@ -102,5 +103,68 @@ def getOrganizations():
         for organizations in getDataFromPagerApiDRFGen(url)
         for organization in organizations]
 
+def getBallotsOfVote(vote_id):
+    url = settings.API_URL + '/ballots/?vote=' + str(vote_id)
+    out_data = []
+    for ballots in getDataFromPagerApiDRFGen(url):
+        out_data += ballots
+
+    return out_data
+
+def getBallotsForSession(session_id):
+    url = settings.API_URL + '/ballots/?vote__session=' + str(session_id)
+    out_data = []
+    for ballots in getDataFromPagerApiDRFGen(url):
+        out_data += ballots
+
+    return out_data
+
+def getVotesForSession(session_id):
+    url = settings.API_URL + '/votes/?session=' + str(session_id)
+    out_data = []
+    for votes in getDataFromPagerApiDRFGen(url):
+        out_data += votes
+
+    return out_data
+
+def getMotion(motion_id):
+    url = settings.API_URL + '/motions/' + str(motion_id)
+    out_data = tryHard(url)
+
+    return out_data.json()
+
+
+# Move this to other place
+
 def getParentOrganizationsWithVoters():
     return Organization.objects.filter(has_voters=True).values_list('id_parladata', flat=True)
+
+
+def getNumberOfAllMPAttendedSessions(date_, members_ids):
+    data = {"sessions": {}, "votes": {}}
+    for member in members_ids:
+
+        # list of all sessions of MP
+        allOfHimS = list(set(Ballot.objects.filter(person__id_parladata=member,
+                                                    vote__start_time__lte=date_).values_list("vote__session", flat=True)))
+        # list of all session that the opiton of Ballot was: kvorum, proti, za
+        votesOnS = list(set(Ballot.objects.filter(Q(option="abstain") |
+                                                    Q(option="against") |
+                                                    Q(option="for"),
+                                                    person__id_parladata=member,
+                                                    vote__start_time__lte=date_).values_list("vote__session", flat=True)))
+        # list of all votes of MP
+        allOfHimV = list(set(Ballot.objects.filter(person__id_parladata=member,
+                                                    vote__start_time__lte=date_).values_list("vote", flat=True)))
+        # list of all votes that the opiton of ballot was: kvorum, proti, za
+        votesOnV = list(set(Ballot.objects.filter(Q(option="abstain") |
+                                                    Q(option="against") |
+                                                    Q(option="for"),
+                                                    person__id_parladata=member,
+                                                    vote__start_time__lte=date_).values_list("vote", flat=True)))
+        try:
+            data["sessions"][member] = float(len(votesOnS)) / float(len(allOfHimS)) * 100
+            data["votes"][member] = float(len(votesOnV)) / float(len(allOfHimV)) * 100
+        except:
+            print member.id, " has no votes in this day"
+    return data
