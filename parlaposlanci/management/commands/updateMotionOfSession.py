@@ -1,153 +1,246 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.conf import settings
+from django.test.client import RequestFactory
+from django.db.models import Q
+
 from parlaposlanci.models import Person
-from parlaseje.models import Session, Legislation, Vote, AgendaItem, AmendmentOfOrg
 from parlaskupine.models import Organization
+from parlaseje.models import Session, Legislation, Vote, AgendaItem, AmendmentOfOrg
 from parlaseje.utils_ import getMotionClassification
 from parlalize.settings import API_URL, SETTER_KEY, YES, AGAINST, ABSTAIN, NOT_PRESENT
 from parlalize.utils_ import tryHard, saveOrAbortNew
+
 from utils.votes_outliers import setMotionAnalize
 from utils.delete_renders import deleteRendersOfSession
 from utils.legislations import finish_legislation_by_final_vote
-from django.test.client import RequestFactory
+from utils import parladata_api
+
+import operator
+import re
+
 
 factory = RequestFactory()
 request_with_key = factory.get('?key=' + SETTER_KEY)
 
+def hasNumbersOrPdfOrEndWord(inputString):
+    end_words = ['PZE', 'PZ', 'P.Z.E.']
+    has_number = any(char.isdigit() for char in inputString)
+    has_pdf = 'pdf' in inputString
+    is_end_word = inputString in end_words
+    return has_number or has_pdf or is_end_word
+
+def getOwnersOfAmendment(vote):
+    orgs_ids = []
+    people_ids = []
+    if settings.COUNTRY == 'SI':
+        if 'Amandma' in vote.motion:
+            acronyms = re.findall('\; \s*(\w+)|\[\s*(\w+)', vote.motion)
+            acronyms = [pg[0] + ',' if pg[0] else pg[1] + ',' for pg in acronyms]
+            if acronyms:
+                query = reduce(operator.or_, (Q(name_parser__icontains=item) for item in acronyms))
+                orgs = Organization.objects.filter(query)
+                s_time = vote.start_time
+                orgs = orgs.filter(Q(founding_date__lte=s_time) |
+                                   Q(founding_date=None),
+                                   Q(dissolution_date__gte=s_time) |
+                                   Q(dissolution_date=None))
+                org_ids = list(orgs.values_list('id_parladata', flat=True))
+            else:
+                org_ids = []
+        else:
+            org_ids = []
+        return {'orgs': org_ids, 'people': []}
+    elif settings.COUNTRY == 'HR':
+        amendment_words = ['AMANDMANI', 'AMANDMAN']
+        links = vote.document_url
+        org_ids = parladata_api.getOrganizationsWithVoters()
+        orgs = Organization.objects.filter(id_parladata__in = org_ids)
+        acronyms = {}
+        for org in orgs:
+            acronyms[' '.join(org.acronym.split(', '))]= org.id
+        vlada_id = Organization.objects.get(name='Vlada').id
+        acronyms['Vlada VladaRH']= vlada_id
+        for link in links:
+            tokens = link.name.replace(" ", '_').replace("-", '_').split('_')
+            print(link.name)
+            if 'AMANDMAN' in link.name:
+                for acronym, i in acronyms.items():
+                    # find orgs
+                    for splited_acr in acronym.split(' '):
+                        if splited_acr in link.name:
+                            orgs_ids.append(i)
+                            break
+                num_ids = [hasNumbersOrPdfOrEndWord(token) for token in tokens]
+                if True in num_ids:
+                    tokens = tokens[:num_ids.index(True)]
+                has_amendment = [token in amendment_words for token in tokens]
+                if True in has_amendment:
+                    tokens = tokens[has_amendment.index(True)+1:]
+                # find proposers
+                #if tokens[0].lower() == 'vlada' or tokens[0].lower() == 'vladarh':
+                    # vlada
+                elif tokens[0].lower() == 'klub':
+                    tokens = tokens[1:]
+
+                n_tokens = len(tokens)
+                for i in range(n_tokens):
+                    d_tokens = [[tokens[i]]]
+                    if i + 1 < n_tokens:
+                        d_tokens.append([tokens[i], tokens[i+1]])
+                    for d_token in d_tokens:
+                        n_tokens = len(tokens)
+                        for i in range(n_tokens):
+                            d_tokens = [[tokens[i]]]
+                            if i + 1 < n_tokens:
+                                d_tokens.append([tokens[i], tokens[i+1]])
+                            for d_token in d_tokens:
+                                person = Person.objects.filter(name_parser__icontains=' '.join(d_token))
+                                if person.count() == 1:
+                                    people_ids.append(person[0].id)
+                                    break
+                                if person.count() > 0:
+                                    names = person.values('id', 'name_parser')
+                                    for name in names:
+                                        if re.search("\\b" + ' '.join(d_token) + "\\b", name['name_parser']):
+                                            people_ids.append(name['id'])
+                                            break
+        print acronyms
+    return {'orgs': orgs_ids, 'people': list(set(people_ids))}
+
 def setMotionOfSession(commander, session_id):
     """Stores all motions with detiled data of specific sesison.
     """
-    commander.stdout.write('Beginning setMotionOfSession for session %s' % str(session_id))
-    commander.stdout.write('Trying hard for %s/motionOfSession/%s/' % (API_URL, str(session_id)))
-    motion = tryHard(API_URL + '/motionOfSession/' + str(session_id) + '/').json()
+    if commander:
+        commander.stdout.write('Beginning setMotionOfSession for session %s' % str(session_id))
+        commander.stdout.write('Getting for motion for session %s' % (str(session_id)))
+    votes = parladata_api.getVotesForSession(session_id)
     session = Session.objects.get(id_parladata=session_id)
-    yes = 0
-    no = 0
-    kvorum = 0
-    not_present = 0
+
     laws = []
-    for mot in motion:
-        commander.stdout.write('Handling motion %s' % str(mot['id']))
-        url = API_URL + '/getBallotsOfMotion/' + str(mot['vote_id']) + '/'
-        commander.stdout.write('Trying hard for %s' % url)
-        votes = tryHard(url).json()
-        for vote in votes:
-            if vote['option'] in YES:
-                yes += 1
-            if vote['option'] in AGAINST:
-                no += 1
-            if vote['option'] in ABSTAIN:
-                kvorum += 1
-            if vote['option']  in NOT_PRESENT:
-                not_present += 1
+    for vote in votes:
+        if commander:
+            commander.stdout.write('Handling vote %s' % str(vote['id']))
 
-        if mot['counter']:
+        motion = parladata_api.getMotion(vote['motion'])
+
+        if vote['results']:
+            votes_for = vote['results']['for']
+            votes_against = vote['results']['against']
+            votes_abstain = vote['results']['abstain']
+            votes_absent = vote['results']['absent']
+
+        if vote['counter']:
             # this is for votes without ballots
-            opts_set = set(mot['counter'].keys())
+            opts_set = set(vote['counter'].keys())
             if opts_set.intersection(YES):
-                yes = mot['counter']['for']
+                votes_for = vote['counter']['for']
             if opts_set.intersection(AGAINST):
-                no = mot['counter']['against']
+                votes_against = vote['counter']['against']
             if opts_set.intersection(ABSTAIN):
-                kvorum = mot['counter']['abstain']
+                votes_abstain = vote['counter']['abstain']
             # hardcoded croations number of member
-            not_present = 151 - sum([int(v) for v in mot['counter'].values()])
+            votes_absent = 151 - sum([int(v) for v in vote['counter'].values()])
 
-        result = mot['result']
-        if mot['amendment_of']:
-            a_orgs = list(Organization.objects.filter(id_parladata__in=mot['amendment_of']))
-        else:
-            a_orgs = []
+        result = motion['result']
 
-        if mot['amendment_of_people']:
-            a_people = Person.objects.filter(id_parladata__in=mot['amendment_of_people'])
-        else:
-            a_people = []
-
-        # TODO: replace try with: "if mot['epa']"
+        # TODO: replace try with: "if vote['epa']"
         try:
-            law = Legislation.objects.get(epa=mot['epa'])
+            law = Legislation.objects.get(epa=motion['epa'])
             laws.append(law)
         except:
             law = None
 
-        classification = getMotionClassification(mot['text'])
-        vote = Vote.objects.filter(id_parladata=mot['vote_id'])
+        classification = getMotionClassification(vote['name'])
+        vote = Vote.objects.filter(id_parladata=vote['vote_id'])
 
-        agendaItems = list(AgendaItem.objects.filter(id_parladata__in=mot['agenda_item_ids']))
+        agendaItems = list(AgendaItem.objects.filter(id_parladata__in=motion['agenda_item']))
 
         if vote:
-            commander.stdout.write('Updating vote %s' % str(mot['vote_id']))
-            commander.stdout.write('Updating data %s' % str(mot))
-            prev_result = vote[0].result
+            if commander:
+                commander.stdout.write('Updating vote %s' % str(vote['vote_id']))
+                commander.stdout.write('Updating data %s' % str(vote))
+            vote = vote[0]
+            prev_result = vote.result
             vote.update(created_for=session.start_time,
-                        start_time=mot['start_time'],
+                        start_time=vote['start_time'],
                         session=session,
-                        motion=mot['text'],
-                        tags=mot['tags'],
-                        votes_for=yes,
-                        against=no,
-                        abstain=kvorum,
-                        not_present=not_present,
+                        motion=vote['name'],
+                        tags=vote['tags'],
+                        votes_for=votes_for,
+                        against=votes_against,
+                        abstain=votes_abstain,
+                        not_present=votes_absent,
                         result=result,
-                        id_parladata=mot['vote_id'],
-                        document_url=mot['doc_url'],
-                        epa=mot['epa'],
+                        id_parladata=vote['id'],
+                        document_url=vote['document_url'],
+                        epa=motion['epa'],
                         law=law,
                         classification=classification,
                         )
-            vote[0].amendment_of.clear()
-            for org in  a_orgs:
-                AmendmentOfOrg(vote=vote[0], organization=org).save()
-            vote[0].amendment_of_person.add(*a_people)
-
-            vote[0].agenda_item.add(*agendaItems)
+            vote.agenda_item.add(*agendaItems)
 
             if prev_result != vote[0].result:
-                commander.stdout.write('Running finish_legislation_by_final_vote(vote[0])')
+                if commander:
+                    commander.stdout.write('Running finish_legislation_by_final_vote(vote[0])')
                 finish_legislation_by_final_vote(vote[0])
         else:
-            commander.stdout.write('Saving new vote %s' % str(mot['vote_id']))
+            if commander:
+                commander.stdout.write('Saving new vote %s' % str(vote['vote_id']))
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
-                                    start_time=mot['start_time'],
+                                    start_time=vote['start_time'],
                                     session=session,
-                                    motion=mot['text'],
-                                    tags=mot['tags'],
-                                    votes_for=yes,
-                                    against=no,
-                                    abstain=kvorum,
-                                    not_present=not_present,
+                                    motion=vote['name'],
+                                    tags=vote['tags'],
+                                    votes_for=votes_for,
+                                    against=votes_against,
+                                    abstain=votes_abstain,
+                                    not_present=votes_absent,
                                     result=result,
-                                    id_parladata=mot['vote_id'],
-                                    document_url=mot['doc_url'],
-                                    epa=mot['epa'],
+                                    id_parladata=vote['id'],
+                                    document_url=vote['document_url'],
+                                    epa=motion['epa'],
                                     law=law,
                                     classification=classification,
                                     )
-            if a_orgs:
-                vote = Vote.objects.filter(id_parladata=mot['vote_id'])
-                vote[0].amendment_of.clear()
-                for org in  a_orgs:
-                    AmendmentOfOrg(vote=vote[0], organization=org).save()
-                vote[0].amendment_of_person.add(*a_people)
-                vote[0].agenda_item.add(*agendaItems)
-                commander.stdout.write('Running finish_legislation_by_final_vote(vote[0])')
-                finish_legislation_by_final_vote(vote[0])
+            vote = Vote.objects.get(id_parladata=vote['id'])
+            commander.stdout.write('Running finish_legislation_by_final_vote(vote[0])')
+            finish_legislation_by_final_vote(vote)
 
-        yes = 0
-        no = 0
-        kvorum = 0
-        not_present = 0
+        owners = getOwnersOfAmendment(vote)
+        if owners['orgs']:
+            a_orgs = list(Organization.objects.filter(id_parladata__in=owners['orgs']))
+        else:
+            a_orgs = []
+
+        if owners['people']:
+            a_people = Person.objects.filter(id_parladata__in=owners['people'])
+        else:
+            a_people = []
+
+        if a_orgs:
+            vote.amendment_of.clear()
+            for org in  a_orgs:
+                AmendmentOfOrg(vote=vote[0], organization=org).save()
+            vote.amendment_of_person.add(*a_people)
+
+            vote.amendment_of.clear()
+
+            for org in  a_orgs:
+                AmendmentOfOrg(vote=vote, organization=org).save()
+            vote.amendment_of_person.add(*a_people)
 
     # set motion analize
-    commander.stdout.write('Running setMotionAnalize for %s' % str(session_id))
+    if commander:
+        commander.stdout.write('Running setMotionAnalize for %s' % str(session_id))
     setMotionAnalize(None, session_id)
 
     # TODO figure out what to do with this
     # if laws:
     #     recacheLegislationsOnSession(session_id)
 
-    commander.stdout.write('Running deleteRendersOfSessionVotes for %s' % str(session_id))
+    if commander:
+        commander.stdout.write('Running deleteRendersOfSessionVotes for %s' % str(session_id))
     deleteRendersOfSession([session_id])
 
     return 0
@@ -168,10 +261,10 @@ class Command(BaseCommand):
             session_ids = options['session_ids']
         else:
             session_ids = Session.objects.all().values_list('id_parladata', flat=True)
-        
+
         for s in session_ids:
             self.stdout.write('Updating session %s' % str(s))
             status = setMotionOfSession(self, str(s))
             self.stdout.write('setMotionOfSession returned %s' % str(status))
-        
+
         return 0
