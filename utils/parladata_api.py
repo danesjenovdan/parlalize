@@ -84,6 +84,41 @@ def getQuestions(*args, **kwargs):
 
     return out
 
+def getMemberships(*args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    memberships_url = settings.API_URL + '/memberships/'
+    if query_url:
+        memberships_url = memberships_url + '?' + query_url
+    out = []
+    for urls in getDataFromPagerApiDRFGen(memberships_url):
+        out += urls
+
+    return out
+
+def getPosts(date_=datetime.now(), *args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    posts_url = settings.API_URL + '/posts/'
+    if query_url:
+        posts_url = posts_url + '?' + query_url
+    out = []
+    for posts in getDataFromPagerApiDRFGen(posts_url):
+        for post in posts:
+            if post['start_time'] < date_.isoformat():
+                if post['end_time'] == None or post['end_time'] > date_.isoformat():
+                    out.append(post)
+    return out
+
+def getContactDetails(*args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    contact_detail_url = settings.API_URL + '/contact_detail/'
+    if query_url:
+        contact_detail_url = contact_detail_url + '?' + query_url
+    out = []
+    for urls in getDataFromPagerApiDRFGen(contact_detail_url):
+        out += urls
+
+    return out
+
 def getMembershipsOfMember(person_id=None, date_=datetime.now()):
     url = settings.API_URL + '/memberships/'
     if person_id:
@@ -96,12 +131,15 @@ def getMembershipsOfMember(person_id=None, date_=datetime.now()):
                     out_data.append(membership)
     return out_data
 
-def getOrganizations():
+def getOrganizations(id_=None):
     url = settings.API_URL + '/organizations/'
-    return [
-        organization
-        for organizations in getDataFromPagerApiDRFGen(url)
-        for organization in organizations]
+    if id_:
+        return requests.get(url + str(id_)).json()
+    else:
+        return [
+            organization
+            for organizations in getDataFromPagerApiDRFGen(url)
+            for organization in organizations]
 
 def getBallotsOfVote(vote_id):
     url = settings.API_URL + '/ballots/?vote=' + str(vote_id)

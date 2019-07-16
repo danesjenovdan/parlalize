@@ -4,9 +4,10 @@ from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization, PGStatic
 from parlalize.utils_ import tryHard, saveOrAbortNew
-from utils.parladata_api import getOrganizationsWithVoters
+from utils.parladata_api import getOrganizationsWithVoters, getOrganizations, getContactDetails, getVotersPairsWithOrg, getLinks, getPosts
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT, API_URL
+from collections import Counter
 
 def setBasicInfoOfPG(commander, pg, date):
     if date:
@@ -20,19 +21,35 @@ def setBasicInfoOfPG(commander, pg, date):
         commander.stdout.write('Trying hard for %s' % url)
         data = tryHard(url).json()
 
-    headOfPG = 0
+    org_data = getOrganizations(pg)
+    contacts = getContactDetails(organization=pg)
+
+    president = getPosts(date_of, organization=pg, role="president")
+    deputy = getPosts(date_of, organization=pg, role="deputy")
+
+    email = ''
+    for contact in contacts:
+        if contact['contact_type'] == 'EMAIL':
+            email = contact['value']
+
+    facebook = getLinks(organization=pg, tags__name='fb')
+    twitter = getLinks(organization=pg, tags__name='tw')
+
+    numberOfSeats = dict(Counter(getVotersPairsWithOrg(date_=date_of).values()))[int(pg)]
+
+    headOfPG = None
     viceOfPG = []
-    if data['HeadOfPG'] is not None:
+    if president:
         commander.stdout.write('Defiing head of PG')
-        headOfPG = Person.objects.get(id_parladata=int(data['HeadOfPG']))
+        headOfPG = Person.objects.get(id_parladata=int(president[0]['person']))
     else:
         commander.stdout.write('No head of PG')
         headOfPG = None
 
-    if data['ViceOfPG']:
-        for vice in data['ViceOfPG']:
-            if vice is not None:
-                viceOfPG.append(vice)
+    if deputy:
+        for vice in deputy:
+            if vice:
+                viceOfPG.append(vice['person'])
             else:
                 viceOfPG.append(None)
     else:
@@ -44,11 +61,11 @@ def setBasicInfoOfPG(commander, pg, date):
                   organization=org,
                   headOfPG=headOfPG,
                   viceOfPG=viceOfPG,
-                  numberOfSeats=data['NumberOfSeats'],
-                  allVoters=data['AllVoters'],
-                  facebook=json.dumps(data['Facebook']),
-                  twitter=json.dumps(data['Twitter']),
-                  email=data['Mail']
+                  numberOfSeats=numberOfSeats,
+                  allVoters=org_data['voters'],
+                  facebook=facebook['url'] if facebook else None,
+                  twitter=twitter['url'] if twitter else None,
+                  email=email
                   )
 
     return
