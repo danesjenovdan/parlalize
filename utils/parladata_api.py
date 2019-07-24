@@ -171,6 +171,39 @@ def getMotion(motion_id):
 
     return out_data.json()
 
+def getSessions(*args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    sessions_url = settings.API_URL + '/sessions/'
+    if query_url:
+        sessions_url = sessions_url + '?' + query_url
+    out = []
+    for urls in getDataFromPagerApiDRFGen(sessions_url):
+        out += urls
+    return out
+
+def getAllPGs(parent_org=None):
+    orgs = getOrganizationsWithVoters(organization_id=parent_org)
+    url = settings.API_URL + '/organizations/?ids=' + ','.join(map(str, orgs))
+    out = {}
+    for orgs in getDataFromPagerApiDRFGen(url):
+        for org in orgs:
+            out[org['id']] = org
+    return out
+
+def getCoalitionPGs(parent_org=None):
+    orgs = getOrganizationsWithVoters(organization_id=parent_org)
+    url = settings.API_URL + '/organizations/?ids=' + ','.join(map(str, orgs))
+    out_data = {
+        'coalition': [],
+        'opposition': []
+    }
+    for orgs in getDataFromPagerApiDRFGen(url):
+        for org in orgs:
+            if org['is_coalition']:
+                out_data['coalition'].append(org['id'])
+            else:
+                out_data['opposition'].append(org['id'])
+    return out_data
 
 # Move this to other place
 

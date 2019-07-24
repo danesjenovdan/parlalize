@@ -64,7 +64,8 @@ def updateOrganizations(dummy_arg=None):
                                classification=data[pg]['classification'],
                                id_parladata=pg,
                                acronym=data[pg]['acronym'],
-                               is_coalition=data[pg]['is_coalition'])
+                               is_coalition=data[pg]['is_coalition'],
+                               name_parser=data[pg]['name_parser'])
             org.save()
     return 1
 

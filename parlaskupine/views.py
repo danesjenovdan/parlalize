@@ -23,7 +23,8 @@ from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDat
                               getAllStaticData, setCardData, getPersonCardModelNew,
                               getPGCardModelNew, getPersonData, saveOrAbortNew, getDataFromPagerApi)
 
-from utils.parladata_api import getVotersPairsWithOrg, getParentOrganizationsWithVoters, getOrganizationsWithVoters
+from utils.parladata_api import (getVotersPairsWithOrg, getParentOrganizationsWithVoters, getOrganizationsWithVoters,
+   getOrganizationsWithVotersList, getOrganizationsWithVotersList, getCoalitionPGs, getSessions, getAllPGs)
 from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
                                 API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
                                 AGAINST, ABSTAIN, DZ)
@@ -1395,6 +1396,7 @@ def getDeviationInOrg(request, pg_id, date_=None):
     return JsonResponse(out, safe=False)
 
 
+# TODO need port to parladata DRF api
 def setWorkingBodies(request, org_id, date_=None):
     """The method for setting working bodies.
     """
@@ -1414,19 +1416,19 @@ def setWorkingBodies(request, org_id, date_=None):
     out = {}
     name = members.pop('name')
     all_members = [member for role in members.values() for member in role]
-    coalitionPGs = tryHard(API_URL+'/getCoalitionPGs/').json()
-    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
-    sessions = tryHard(API_URL+'/getSessionsOfOrg/'+org_id+(('/'+date_) if date_ else '')).json()
+    coalitionPGs = getCoalitionPGs(parent_org=DZ)
+    membersOfPG = getOrganizationsWithVotersList(date_=date_of, organization_id=DZ)
+    sessions = getSessions(organization=org_id)
     coal_pgs = {str(pg): [member
                           for member
-                          in membersOfPG[str(pg)]
+                          in membersOfPG[int(pg)]
                           if member
                           in all_members]
                 for pg
                 in coalitionPGs['coalition']}
     oppo_pgs = {str(pg): [member
                           for member
-                          in membersOfPG[str(pg)]
+                          in membersOfPG[int(pg)]
                           if member
                           in all_members]
                 for pg
@@ -1905,6 +1907,7 @@ def getWorkingBodies(request, org_id, date_=None):
                          'sessions': sessions})
 
 
+# TODO need port to parladata DRF api
 def getWorkingBodies_live(request, org_id, date_=None):
     if date_:
         date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
@@ -1915,9 +1918,9 @@ def getWorkingBodies_live(request, org_id, date_=None):
     out = {}
     name = members.pop('name')
     all_members = [member for role in members.values() for member in role]
-    coalitionPGs = tryHard(API_URL+'/getCoalitionPGs/').json()
-    membersOfPG = tryHard(API_URL+'/getMembersOfPGsOnDate/'+date_).json()
-    sessions = tryHard(API_URL+'/getSessionsOfOrg/'+org_id+(('/'+date_) if date_ else '')).json()
+    coalitionPGs = getCoalitionPGs(parent_org=DZ)
+    membersOfPG = getOrganizationsWithVotersList(date_=date_of, organization_id=DZ)
+    sessions = getSessions(organization=org_id)
     coal_pgs = {str(pg): [member
                           for member
                           in membersOfPG[str(pg)]
@@ -2166,7 +2169,7 @@ def getPGsIDs(request):
 }
     """
     output = []
-    data = tryHard(API_URL+'/getAllPGs/')
+    data = getAllPGs(parent_org=DZ)
     data = data.json()
     lastSession = Session.objects.all().order_by('-start_time')[0]
     output = {'list': [i for i in data],
@@ -4109,7 +4112,7 @@ def getDisunionOrg(request):
 ]
     """
     result = []
-    data = tryHard(API_URL + '/getAllPGs/').json()
+    data = getAllPGs(parent_org=DZ)
     for org in data:
         ids = IntraDisunion.objects.filter(organization__id_parladata=org)
         el = ids.values_list('maximum', flat=True)
@@ -4170,7 +4173,7 @@ def getDisunionOrgID(request, pg_id, date_=None):
 
     suma, ids = getDisunionInOrgHelper(pg_id, date_of)
     org_data = ids[0].organization.getOrganizationData() if ids else {}
-    orgs = tryHard(API_URL + '/getAllPGs/').json().keys()
+    orgs = getAllPGs()
 
     data = []
     for org in orgs:
@@ -4220,7 +4223,7 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    orgs = tryHard(API_URL + '/getAllPGs/').json().keys()
+    orgs = getAllPGs(parent_org=DZ)
     org = count = last_card_date = None
     data = []
     for org_id in orgs:

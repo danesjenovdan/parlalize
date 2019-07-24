@@ -12,7 +12,8 @@ from collections import Counter
 
 from parlaseje.models import Vote_analysis
 from parlaskupine.models import Organization, IntraDisunion
-from parlalize.utils_ import printProgressBar, getOrganizationsWithVoters
+from parlalize.utils_ import printProgressBar
+from utils.parladata_api import getCoalitionPGs, getOrganizationsWithVoters
 
 from django.conf import settings
 
@@ -51,13 +52,12 @@ def setMotionAnalize(request, session_id):
     data = pd.read_json(url)
     if data.empty:
         return
-    coalition = requests.get(settings.API_URL + '/getCoalitionPGs').json()['coalition']
+    coalition = getCoalitionPGs(parent_org=session.organization.id_parladata)['coalition']
     paries_ids = getOrganizationsWithVoters(organization_id=session.organization.id_parladata)
 
     # if coalition exist
     calc_sides = bool(len(set(coalition+paries_ids)) != len(coalition+paries_ids))
 
-    orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
     data['option_absent'] = 0
     data['option_for'] = 0
     data['option_against'] = 0
