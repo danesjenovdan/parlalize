@@ -143,7 +143,7 @@ class Utils(object):
                                    quoting=csv.QUOTE_MINIMAL)
 
             date_of = datetime.now().date()
-            mps = getVotersIDs(organization_id=organization_id, date_of)
+            mps = getVotersIDs(date_=date_of, organization_id=organization_id)
 
             # NumberOfSpeechesPerSession
             mp_scores = {}

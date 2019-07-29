@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaposlanci.models import Person, PresenceThroughTime
 from parlalize.utils_ import saveOrAbortNew
-from utils.parladata_api import getVotersIDs
+from utils.parladata_api import getVotersIDs, getBallotsCounterd
 from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
 
@@ -13,9 +13,12 @@ def setPresenceThroughTime(commander, person_id, date_=None):
     else:
         fdate = datetime.now().date()
 
-    url = API_URL + '/getBallotsCounterOfPerson/' + str(person_id) + '/' + fdate.strftime(API_DATE_FORMAT)
-    commander.stdout.write('Trying hard with %s' % str(url))
-    data = tryHard(url).json()
+    person = Person.objects.filter(id_parladata=person_id)
+    if not org:
+        commander.stdout.write('Person with id %s doesnt exist' % str(pg))
+        return
+
+    data = getBallotsCounter(person, fdate)
 
     data_for_save = []
 

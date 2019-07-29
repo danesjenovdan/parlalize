@@ -285,7 +285,8 @@ class Command(BaseCommand):
                                 vote=vote,
                                 start_time=vote.start_time,
                                 end_time=None,
-                                id_parladata=dic['id'])
+                                id_parladata=dic['id'],
+                                voter_party = Organization.objects.get(id_parladata=dic['voterparty']))
                 ballots.save()
                 ballots.person.add(person)
 

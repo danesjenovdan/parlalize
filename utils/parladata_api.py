@@ -1,8 +1,11 @@
 from django.conf import settings
+from django.db.models.functions import TruncMonth
+from django.db.models import Count
 
 from parlalize.utils_ import getDataFromPagerApiDRFGen, tryHard
+from parlaposlanci.models import Person
 from parlaskupine.models import Organization
-from parlaseje.models import Ballot
+from parlaseje.models import Ballot, Vote
 
 from datetime import datetime
 from collections import defaultdict
@@ -238,4 +241,65 @@ def getNumberOfAllMPAttendedSessions(date_, members_ids):
             data["votes"][member] = float(len(votesOnV)) / float(len(allOfHimV)) * 100
         except:
             print member.id, " has no votes in this day"
+    return data
+
+def getBallotsCounter(voter_obj, fdate=datetime.now().date()):
+    """
+    Returns monthly ballots count of voter/voter_org
+    """
+    fdate = fdate + timedelta(days=1)
+
+    data = []
+    organization = None
+
+    try:
+        if type(voter_obj) == Person:
+            ballots = Ballot.objects.filter(person=voter_obj,
+                                            vote__start_time__lt=fdate)
+            membership = getMemberships(person=voter_obj.id_parladata, role="voter")
+            if membership:
+                organization = Organization.objects.get(id_parladata=membership[0]['organization'])
+
+        elif type(voter_obj) == Organization:
+            ballots = Ballot.objects.filter(voter_party=voter_obj,
+                                            vote__start_time__lt=fdate)
+            membership = getMemberships(on_behalf_of=voter_obj.id_parladata, role="voter")
+            if membership:
+                organization = Organization.objects.get(id_parladata=membership[0]['organization'])
+    except:
+        raise
+
+    ballots = ballots.annotate(month=TruncMonth('vote__start_time')).values('month', 'option')
+
+    ballots = ballots.annotate(ballot_count=Count('option')).order_by('month')
+
+    votes_ids = Vote.objects.filter(
+        start_time__lt=fdate,
+        session__organization=organization,
+        vote__isnull=False).distinct("id").values_list("id_parladata", flat=True)
+
+    votes = Vote.objects.filter(id_parladata__in=votes_ids)
+
+    votes = votes.annotate(month=TruncMonth('start_time')).values('month')
+    votes = votes.annotate(total_votes=Count('id')).order_by("month")
+
+    for month in votes:
+        date_ = month['month']
+        total = month['total_votes']
+
+        temp_data = {'date': date_.strftime(settings.API_DATE_FORMAT),
+                     'date_ts': date_,
+                     'ni': 0,
+                     'kvorum': 0,
+                     'za': 0,
+                     'proti': 0,
+                     'total': total
+                     }
+
+        sums_of_month = ballots.filter(month=date_)
+        for sums in sums_of_month:
+            temp_data[sums['option']] = sums['ballot_count']
+
+        data.append(temp_data)
+
     return data
