@@ -249,6 +249,11 @@ class Ballot(Activity):
                               blank=True, null=True,
                               help_text='Yes, no, abstain')
 
+    voter_party = models.ForeignKey('parlaskupine.Organization',
+                                    blank=True, null=True,
+                                    related_name='ballotsOfVoters',
+                                    help_text=_('Party of voter'))
+
     org_voter = models.ForeignKey('parlaskupine.Organization',
                                   blank=True, null=True,
                                   related_name='OrganizationVoter',
