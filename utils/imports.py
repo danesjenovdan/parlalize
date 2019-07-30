@@ -8,7 +8,7 @@ from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
 from raven.contrib.django.raven_compat.models import client
-from utils.parladata_api import getVotersIDs, getQuestions, getLinks
+from utils.parladata_api import getVotersIDs, getQuestions, getLinks, getPeople, getVotersPairsWithOrg, getOrganizations, getSpeeches, getBallots
 
 
 import requests
@@ -19,103 +19,13 @@ import feedparser
 factory = RequestFactory()
 request_with_key = factory.get('?key=' + SETTER_KEY)
 
-
-def updatePeople():
-    url = API_URL + '/getAllPeople/'
-    data = getDataFromPagerApi(url)
-    mps_ids = getVotersIDs()
-    for mp in data:
-        if Person.objects.filter(id_parladata=mp['id']):
-            person = Person.objects.get(id_parladata=mp['id'])
-            person.name = mp['name']
-            person.pg = mp['membership']
-            person.id_parladata = int(mp['id'])
-            person.image = mp['image']
-            person.actived = True if int(mp['id']) in mps_ids else False
-            person.gov_id = mp['gov_id']
-            person.save()
-        else:
-            is_active = True if int(mp['id']) in mps_ids else False
-            person = Person(name=mp['name'],
-                            pg=mp['membership'],
-                            id_parladata=int(mp['id']),
-                            image=mp['image'],
-                            actived=is_active,
-                            gov_id=mp['gov_id'])
-            person.save()
-
-    return 1
-
-
-def updateOrganizations(dummy_arg=None):
-    data = tryHard(API_URL + '/getAllOrganizations').json()
-    for pg in data:
-        if Organization.objects.filter(id_parladata=pg):
-            org = Organization.objects.get(id_parladata=pg)
-            org.name = data[pg]['name']
-            org.classification = data[pg]['classification']
-            org.acronym = data[pg]['acronym']
-            org.name_parser = data[pg]['name_parser']
-            org.is_coalition = data[pg]['is_coalition']
-            print data[pg]['acronym']
-            org.save()
-        else:
-            org = Organization(name=data[pg]['name'],
-                               classification=data[pg]['classification'],
-                               id_parladata=pg,
-                               acronym=data[pg]['acronym'],
-                               is_coalition=data[pg]['is_coalition'],
-                               name_parser=data[pg]['name_parser'])
-            org.save()
-    return 1
-
-
+# TODO: do something with this method
 def deleteUnconnectedSpeeches():
     url = API_URL + '/getAllSpeeches'
     data = getDataFromPagerApi(url)
     idsInData = [speech['id'] for speech in data]
     blindSpeeches = Speech.objects.all().exclude(id_parladata__in=idsInData)
     blindSpeeches.delete()
-
-
-def updateSpeeches():
-    url = API_URL + '/getAllAllSpeeches'
-    existingISs = list(Speech.objects.all().values_list('id_parladata',
-                                                        flat=True))
-    orgs = {str(org.id_parladata): org.id for org in Organization.objects.all()}
-    for page in getDataFromPagerApiGen(url):
-        for dic in page:
-            if int(dic['id']) not in existingISs:
-                print 'adding speech'
-                print dic['valid_to']
-                person = Person.objects.get(id_parladata=int(dic['speaker']))
-                speech = Speech(organization=Organization.objects.get(
-                                    id_parladata=int(dic['party'])),
-                                content=dic['content'],
-                                order=dic['order'],
-                                agenda_item_order=dic['agenda_item_order'],
-                                session=Session.objects.get(
-                                    id_parladata=int(dic['session'])),
-                                start_time=dic['start_time'],
-                                end_time=dic['end_time'],
-                                valid_from=dic['valid_from'],
-                                valid_to=dic['valid_to'],
-                                id_parladata=dic['id'],
-                                debate=Debate.objects.get(id_parladata=dic['debate']))
-                speech.save()
-                speech.person.add(person)
-            else:
-                print 'update speech'
-                speech = Speech.objects.filter(id_parladata=dic['id'])
-                speech.update(valid_from=dic['valid_from'],
-                              valid_to=dic['valid_to'],
-                              agenda_item_order=dic['agenda_item_order'],
-                              organization_id=orgs[str(dic['party'])],
-                              debate=Debate.objects.get(id_parladata=dic['debate']))
-
-    # delete speeches which was deleted in parladata @dirty fix
-    #deleteUnconnectedSpeeches()
-    return 1
 
 
 def updateQuestions():
@@ -198,101 +108,12 @@ def updateQuestions():
     return 1
 
 # treba pofixsat
-
-
 def updateMotionOfSession():
     ses = Session.objects.all()
     for s in ses:
         print s.id_parladata
         resp =  setMotionOfSession(request_with_key, str(s.id_parladata))
         print resp.content
-        #tryHard(BASE_URL + '/s/setMotionOfSession/' + str(s.id_parladata) + '?key=' + SETTER_KEY )
-
-# treba pofixsat
-
-
-def updateBallots():
-    url = (API_URL + '/getAllBallots')
-    data = getDataFromPagerApi(url)
-    existingISs = Ballot.objects.all().values_list('id_parladata', flat=True)
-    i=0
-    for page in getDataFromPagerApiGen(url):
-        print(i)
-        i+=1
-        for dic in page:
-            # Ballot.objects.filter(id_parladata=dic['id']):
-            if int(dic['id']) not in existingISs:
-                print 'adding ballot ' + str(dic['vote'])
-                vote = Vote.objects.get(id_parladata=dic['vote'])
-                person = Person.objects.get(id_parladata=int(dic['voter']))
-                ballots = Ballot(option=dic['option'],
-                                 vote=vote,
-                                 start_time=vote.start_time,
-                                 end_time=None,
-                                 id_parladata=dic['id'],
-                                 voter_party = Organization.objects.get(id_parladata=dic['voterparty']))
-                ballots.save()
-                ballots.person.add(person)
-            else:
-                b = Ballot.objects.get(id_parladata=dic['id'])
-                b.voter_party = Organization.objects.get(id_parladata=dic['voterparty'])
-                b.save()
-    return 1
-
-
-def setAllSessions():
-    data = tryHard(API_URL + '/getSessions/').json()
-    session_ids = list(Session.objects.all().values_list('id_parladata',
-                                                         flat=True))
-    for session in data:
-        print session['id']
-        orgs = Organization.objects.filter(id_parladata__in=session['organizations_id'])
-        if not orgs:
-            orgs = Organization.objects.filter(id_parladata=session['organization_id'])
-        if session['id'] not in session_ids:
-            result = Session(name=session['name'],
-                             gov_id=session['gov_id'],
-                             start_time=session['start_time'],
-                             end_time=session['end_time'],
-                             classification=session['classification'],
-                             id_parladata=session['id'],
-                             in_review=session['is_in_review'],
-                             organization=orgs[0]
-                             )
-            result.save()
-            orgs = list(orgs)
-            result.organizations.add(*orgs)
-            if session['id'] == DZ:
-                if 'redna seja' in session['name'].lower():
-                    # call method for create new list of members
-                    # setListOfMembers(session['start_time'])
-                    pass
-        else:
-            ses = Session.objects.filter(name=session['name'],
-                                         gov_id=session['gov_id'],
-                                         start_time=session['start_time'],
-                                         end_time=session['end_time'],
-                                         classification=session['classification'],
-                                         id_parladata=session['id'],
-                                         in_review=session['is_in_review'],
-                                         organization=orgs[0])
-            ses = ses.exclude(organizations=None)
-            if not session:
-                # save changes
-                session2 = Session.objects.get(id_parladata=session['id'])
-                session2.name = session['name']
-                session2.gov_id = session['gov_id']
-                session2.start_time = session['start_time']
-                session2.end_time = session['end_time']
-                session2.classification = session['classification']
-                session2.in_review = session['is_in_review']
-                session2.organization = orgs[0]
-                session2.save()
-                orgs = list(orgs)
-                session2.organizations.add(*orgs)
-
-    return 1
-
 
 def updateDistricts():
     districts = tryHard(API_URL + '/getDistricts').json()

@@ -134,6 +134,18 @@ def getMembershipsOfMember(person_id=None, date_=datetime.now()):
                     out_data.append(membership)
     return out_data
 
+def getPeople(*args, **kwargs):
+    url = settings.API_URL + '/persons/'
+    print(args, kwargs.keys())
+    if 'id_' in kwargs.keys():
+        id_ = kwargs.pop('id_')
+        return requests.get(url + str(id_)).json()
+    else:
+        return [
+            person
+            for people in getDataFromPagerApiDRFGen(url)
+            for person in people]
+
 def getOrganizations(id_=None):
     url = settings.API_URL + '/organizations/'
     if id_:
@@ -183,6 +195,45 @@ def getSessions(*args, **kwargs):
     for urls in getDataFromPagerApiDRFGen(sessions_url):
         out += urls
     return out
+
+def getAreas(*args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    areas_url = settings.API_URL + '/areas/'
+    if query_url:
+        areas_url = areas_url + '?' + query_url
+    out = []
+    for urls in getDataFromPagerApiDRFGen(areas_url):
+        out += urls
+    return out
+
+def getTags():
+    tags_url = settings.API_URL + '/tags/'
+    out = []
+    for urls in getDataFromPagerApiDRFGen(tags_url):
+        out += urls
+    return out
+
+"""
+returns generator
+"""
+def getSpeeches(*args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    speeches_url = settings.API_URL + '/speechs/'
+    if query_url:
+        speeches_url = speeches_url + '?' + query_url
+    out = []
+    return getDataFromPagerApiDRFGen(speeches_url)
+
+"""
+returns generator
+"""
+def getBallots(*args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    ballots_url = settings.API_URL + '/ballots/'
+    if query_url:
+        ballots_url = ballots_url + '?' + query_url
+    out = []
+    return getDataFromPagerApiDRFGen(ballots_url)
 
 def getAllPGs(parent_org=None):
     orgs = getOrganizationsWithVoters(organization_id=parent_org)
