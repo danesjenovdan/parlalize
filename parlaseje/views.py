@@ -13,13 +13,12 @@ from django.core.paginator import Paginator
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification
-from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
+from parlalize.settings import (API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
                                 DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT, PS, WBS, UNALIGNED)
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 
 from utils.legislations import finish_legislation_by_final_vote
-from utils.votes_outliers import setMotionAnalize
 from utils import parladata_api
 
 import json

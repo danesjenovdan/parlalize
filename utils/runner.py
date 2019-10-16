@@ -19,7 +19,6 @@ from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Questio
 
 from parlaseje.views import getSessionsList, setMotionOfSession
 from parlaseje.utils_ import speech_the_order
-from utils.votes_outliers import setMotionAnalize, setOutliers
 from utils.votes_pg import set_mismatch_of_pg
 
 from .votes import VotesAnalysis

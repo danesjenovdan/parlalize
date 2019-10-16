@@ -13,7 +13,7 @@ from collections import Counter
 from parlaseje.models import Vote_analysis
 from parlaskupine.models import Organization, IntraDisunion
 from parlalize.utils_ import printProgressBar
-from utils.parladata_api import getCoalitionPGs, getOrganizationsWithVoters
+from utils.parladata_api import getCoalitionPGs, getOrganizationsWithVoters, getBallotTable
 
 from django.conf import settings
 
@@ -40,19 +40,19 @@ def setOutliers():
 
     return 'finished'
 
-# TODO remove request
-def setMotionAnalize(request, session_id):
+def setMotionAnalize(session_id):
     """
     request argument is here just because runner put 2 arguments in setter
     setMotionAnalyze
     setIntraDisunion
     """
     session = get_object_or_404(Session, id_parladata=session_id)
-    url = settings.API_URL + '/getVotesOfSessionTable/' + str(session_id) + '/'
 
-    getBallotTable(session=session_id)
+    data = pd.DataFrame()
+    for page in getBallotTable(session=session_id):
+        temp = pd.DataFrame(page)
+        data = data.append(temp, ignore_index=True)
 
-    data = pd.read_json(url)
     if data.empty:
         return
     coalition = getCoalitionPGs(parent_org=session.organization.id_parladata)['coalition']
@@ -74,19 +74,19 @@ def setMotionAnalize(request, session_id):
     data.loc[data['voterparty'].isin(coalition), 'is_coalition'] = 1
 
     #for against ni abstain
-    all_votes = data.groupby('vote_id').sum()
+    all_votes = data.groupby('vote').sum()
 
     all_votes['max_option_percent'] = all_votes.apply(lambda row: getPercent(row['option_for'], row['option_against'], row['option_abstain'], row['option_absent']), axis=1)
 
-    m_against = data[data.option_against == 1].groupby(['vote_id']).apply(lambda x: x["voter"])
-    m_for = data[data.option_for == 1].groupby(['vote_id']).apply(lambda x: x["voter"])
-    m_absent = data[data.option_absent == 1].groupby(['vote_id']).apply(lambda x: x["voter"])
-    m_abstain = data[data.option_abstain == 1].groupby(['vote_id']).apply(lambda x: x["voter"])
+    m_against = data[data.option_against == 1].groupby(['vote']).apply(lambda x: x["voter"])
+    m_for = data[data.option_for == 1].groupby(['vote']).apply(lambda x: x["voter"])
+    m_absent = data[data.option_absent == 1].groupby(['vote']).apply(lambda x: x["voter"])
+    m_abstain = data[data.option_abstain == 1].groupby(['vote']).apply(lambda x: x["voter"])
 
-    pg_against = data[data.option_against == 1].groupby(['vote_id']).apply(lambda x: x["voterparty"])
-    pg_for = data[data.option_for == 1].groupby(['vote_id']).apply(lambda x: x["voterparty"])
-    pg_absent = data[data.option_absent == 1].groupby(['vote_id']).apply(lambda x: x["voterparty"])
-    pg_abstain = data[data.option_abstain == 1].groupby(['vote_id']).apply(lambda x: x["voterparty"])
+    pg_against = data[data.option_against == 1].groupby(['vote']).apply(lambda x: x["voterparty"])
+    pg_for = data[data.option_for == 1].groupby(['vote']).apply(lambda x: x["voterparty"])
+    pg_absent = data[data.option_absent == 1].groupby(['vote']).apply(lambda x: x["voterparty"])
+    pg_abstain = data[data.option_abstain == 1].groupby(['vote']).apply(lambda x: x["voterparty"])
 
     all_votes['m_against'] = all_votes.apply(lambda row: getMPsList(row, m_against), axis=1)
     all_votes['m_for'] = all_votes.apply(lambda row: getMPsList(row, m_for), axis=1)
@@ -98,23 +98,23 @@ def setMotionAnalize(request, session_id):
     all_votes['pg_absent'] = all_votes.apply(lambda row: getPGsList(row, pg_absent), axis=1)
     all_votes['pg_abstain'] = all_votes.apply(lambda row: getPGsList(row, pg_abstain), axis=1)
     try:
-        all_votes['coal'] = data[data.is_coalition == 1].groupby(['vote_id']).sum().apply(lambda row: getOptions(row, 'coal'), axis=1)
+        all_votes['coal'] = data[data.is_coalition == 1].groupby(['vote']).sum().apply(lambda row: getOptions(row, 'coal'), axis=1)
     except:
         all_votes['coal'] = ""
-    all_votes['oppo'] = data[data.is_coalition == 0].groupby(['vote_id']).sum().apply(lambda row: getOptions(row, 'oppo'), axis=1)
+    all_votes['oppo'] = data[data.is_coalition == 0].groupby(['vote']).sum().apply(lambda row: getOptions(row, 'oppo'), axis=1)
 
-    parties = data.groupby(['vote_id',
+    parties = data.groupby(['vote',
                             'voterparty']).sum().apply(lambda row: getOptions(row,
-                                                                              'ps'), axis=1)
+                                                                                'ps'), axis=1)
 
-    partyBallots = data.groupby(['vote_id',
-                                 'voterparty']).sum().apply(lambda row: getPartyBallot(row), axis=1)
+    partyBallots = data.groupby(['vote',
+                                    'voterparty']).sum().apply(lambda row: getPartyBallot(row), axis=1)
 
-    partyIntryDisunion = data.groupby(['vote_id', 'voterparty']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
+    partyIntryDisunion = data.groupby(['vote', 'voterparty']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
     # TODO: create save-ing for coalInter, oppoInter
-    coalInterCalc = data[data.is_coalition == 1].groupby(['vote_id']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
-    oppoInterCalc = data[data.is_coalition == 0].groupby(['vote_id']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
-    allInter = data.groupby(['vote_id']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
+    coalInterCalc = data[data.is_coalition == 1].groupby(['vote']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
+    oppoInterCalc = data[data.is_coalition == 0].groupby(['vote']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
+    allInter = data.groupby(['vote']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
 
     if calc_sides:
         opozition = Organization.objects.get(name="Opozicija")
@@ -335,4 +335,4 @@ def updateMotionAnalizeOfAllSessions():
 
     for session_id in session_ids:
         printProgressBar(session_ids.index(session_id), len(session_ids), prefix='Sessions: ')
-        setMotionAnalize(None, str(session_id))
+        setMotionAnalize(str(session_id))

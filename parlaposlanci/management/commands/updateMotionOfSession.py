@@ -233,7 +233,7 @@ def setMotionOfSession(commander, session_id):
     # set motion analize
     if commander:
         commander.stdout.write('Running setMotionAnalize for %s' % str(session_id))
-    setMotionAnalize(None, session_id)
+    setMotionAnalize(session_id)
 
     # TODO figure out what to do with this
     # if laws:
