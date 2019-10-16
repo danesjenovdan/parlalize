@@ -3,7 +3,7 @@ from parlaposlanci.models import Person, StyleScores
 from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData
 from utils.parladata_api import getVotersIDs, getParentOrganizationsWithVoters
 from datetime import datetime
-from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
+from parlalize.settings import SOLR_URL, API_DATE_FORMAT
 from collections import Counter
 
 from kvalifikatorji.scripts import problematicno, privzdignjeno, preprosto
@@ -99,8 +99,7 @@ class Command(BaseCommand):
             date_of = datetime.now().date()
             date_ = date_of.strftime(API_DATE_FORMAT)
 
-        self.stdout.write('Getting voters' %
-                          (API_URL, date_))
+        self.stdout.write('Getting voters')
         for org in getParentOrganizationsWithVoters():
             self.stdout.write('Starting style score for organization %s' % (org))
             mps = getVotersIDs(organization_id=org, date_=date_of)

@@ -3,7 +3,7 @@ from datetime import datetime
 from django.http import Http404
 from parlaposlanci.models import LastActivity
 from parlaseje.models import *
-from parlalize.settings import API_URL, API_DATE_FORMAT, LEGISLATION_STATUS, LEGISLATION_RESULT, VOTE_INDICATORS, GLEJ_URL
+from parlalize.settings import API_DATE_FORMAT, LEGISLATION_STATUS, LEGISLATION_RESULT, VOTE_INDICATORS, GLEJ_URL
 from django.http import JsonResponse
 from parlalize.utils_ import tryHard
 
@@ -23,24 +23,6 @@ def getGraphCardModel(model, id, date=None):
         newModel.save()
         return True
     return False
-
-
-def getSesIDs(start_date, end_date):
-    result = []
-    data = tryHard(API_URL + '/getSessions/').json()
-    session = Session.objects.all()
-    for ids in session:
-        result.append(ids.id_parladata)
-    return result
-
-
-def getSesDates(end_date):
-    result = []
-    data = tryHard(API_URL + '/getSessions/').json()
-    session = Session.objects.filter(start_time__lte=end_date)
-    for ids in session:
-        result.append(ids.start_time)
-    return result
 
 
 def getSesCardModelNew(model, id, date=None):
@@ -70,16 +52,6 @@ def getSessionDataAPI(requests, session_id):
                              'date': 'unkonwn',
                              'id': 'unkonwn',
                              })
-
-
-def idsOfSession(model):
-    mod = model.objects.all().values_list('session__id_parladata', flat=True)
-    ses = tryHard(API_URL + '/getSessions/').json()
-    ids = [session['id'] for session in ses]
-    if len(mod) == 0:
-        return ids
-    else:
-        return list(set(ids) - set(mod))
 
 
 def set_status_of_laws():

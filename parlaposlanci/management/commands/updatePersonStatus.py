@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person
-from parlalize.settings import API_URL
 from parlalize.utils_ import tryHard
 from utils.parladata_api import getVotersIDs
 

@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard, getDataFromPagerApi
 from parlaposlanci.models import Person
-from parlalize.settings import API_URL
 from utils.parladata_api import getVotersPairsWithOrg, getPeople
 
 
@@ -9,7 +8,7 @@ class Command(BaseCommand):
     help = 'Updates people from Parladata'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from %s/getAllPeople/' % API_URL)
+        self.stdout.write('Fetching data from getVotersPairsWithOrg')
         mps_orgs = getVotersPairsWithOrg()
         data = getPeople()
         for mp in data:

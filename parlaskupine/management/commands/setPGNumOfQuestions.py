@@ -10,7 +10,7 @@ from parlaskupine.models import Organization, NumberOfQuestions
 from parlalize.utils_ import (tryHard, saveOrAbortNew, getDataFromPagerApi, getPersonData)
 from utils.parladata_api import getOrganizationsWithVoters, getVotersIDs, getParentOrganizationsWithVoters, getQuestions
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, API_URL, DZ
+from parlalize.settings import API_DATE_FORMAT, DZ
 
 
 class Command(BaseCommand):

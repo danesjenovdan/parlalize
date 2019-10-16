@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = 'Update districts.'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from %s/getDisctrics/' % API_URL)
+        self.stdout.write('Fetching data from %s/areas/' % API_URL)
         districts = getAreas(calssification="district")
         existing_districts = District.objects.all().values_list('id_parladata',
                                                                 flat=True)

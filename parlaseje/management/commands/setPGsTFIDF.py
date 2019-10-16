@@ -3,7 +3,7 @@ from parlaskupine.models import Organization, Tfidf
 from parlalize.utils_ import saveOrAbortNew, tryHard
 from utils.parladata_api import getOrganizationsWithVoters
 from datetime import datetime
-from parlalize.settings import API_URL, API_DATE_FORMAT, ISCI_URL
+from parlalize.settings import API_DATE_FORMAT, ISCI_URL
 
 import requests
 

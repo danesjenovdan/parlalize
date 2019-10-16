@@ -49,6 +49,9 @@ def setMotionAnalize(request, session_id):
     """
     session = get_object_or_404(Session, id_parladata=session_id)
     url = settings.API_URL + '/getVotesOfSessionTable/' + str(session_id) + '/'
+
+    getBallotTable(session=session_id)
+
     data = pd.read_json(url)
     if data.empty:
         return

@@ -7,7 +7,7 @@ from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew, getAllStaticData
 from utils.parladata_api import getOrganizationsWithVoters
 from datetime import datetime
-from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
+from parlalize.settings import SOLR_URL, API_DATE_FORMAT
 
 import requests
 import json

@@ -6,20 +6,14 @@ from parlaskupine.models import Organization, PGStatic
 from parlalize.utils_ import tryHard, saveOrAbortNew
 from utils.parladata_api import getOrganizationsWithVoters, getOrganizations, getContactDetails, getVotersPairsWithOrg, getLinks, getPosts
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, API_URL
+from parlalize.settings import API_DATE_FORMAT
 from collections import Counter
 
 def setBasicInfoOfPG(commander, pg, date):
     if date:
         date_of = datetime.strptime(date, API_DATE_FORMAT).date()
-        url = API_URL + '/getBasicInfOfPG/' + str(pg) + '/' + date
-        commander.stdout.write('Trying hard for %s' % url)
-        data = tryHard(url).json()
     else:
         date_of = datetime.now().date()
-        url = API_URL+'/getBasicInfOfPG/' + str(pg) + '/'
-        commander.stdout.write('Trying hard for %s' % url)
-        data = tryHard(url).json()
 
     org_data = getOrganizations(pg)
     contacts = getContactDetails(organization=pg)

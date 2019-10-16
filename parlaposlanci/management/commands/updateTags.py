@@ -1,13 +1,12 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Tag
-from parlalize.settings import API_URL
 from utils.parladata_api import getTags
 
 class Command(BaseCommand):
     help = 'Update districts.'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from %s/tags/' % API_URL)
+        self.stdout.write('Fetching data from getTags')
         tags = getTags()
         existing_tags = Tag.objects.all().values_list('id_parladata', flat=True)
         for tag in tags:

@@ -5,7 +5,7 @@ from parlalize.utils_ import tryHard, saveOrAbortNew, getDataFromPagerApiDRFGen
 from parlalize.settings import API_URL, API_DATE_FORMAT
 from parlaposlanci.models import Person, MPStaticPL, MPStaticGroup
 from parlaskupine.models import Organization
-from utils.parladata_api import getVotersPairsWithOrg
+from utils.parladata_api import getVotersPairsWithOrg, getPeople, getMemberships, getLinks
 
 from datetime import datetime
 
@@ -20,7 +20,7 @@ def setMPStaticPL(commander, person_id, date_=None):
 
     commander.stdout.write('Fetching data from %s/persons/%s with today' % (API_URL, str(person_id),))
 
-    data = tryHard(API_URL + '/persons/' + person_id).json()
+    data = getPeople(id_=person_id)
     try:
         org_id = getVotersPairsWithOrg(date_=date_of)[int(person_id)]
     except:
@@ -34,8 +34,7 @@ def setMPStaticPL(commander, person_id, date_=None):
     socials ={'fb': 'facebook', 'tw': 'twitter', 'linkedin': 'linkedin'}
     social_objs = {}
     for key, name in socials.items():
-        url = 'https://data.nov.parlameter.si/v1/links/?person=' + str(person_id) + '&tags__name=' + key
-        for resp_data in getDataFromPagerApiDRFGen(url):
+        for resp_data in getLinks(person=person_id, tags__name=key):
             if resp_data:
                 social_objs[name] = resp_data[0]['url']
             else:
@@ -77,21 +76,9 @@ class Command(BaseCommand):
     help = 'Updates MPs\' static data'
 
     def handle(self, *args, **options):
-        memberships = tryHard(API_URL + '/getMembersOfPGsRanges/').json()
+        memberships = getMemberships(role='voter')
         lastObject = {'members': {}}
         self.stdout.write('[info] update MP static')
-        for change in memberships:
-            # call setters for new pg
-            for pg in list(set(change['members'].keys()) - set(lastObject['members'].keys())):
-                for member in change['members'][pg]:
-                    self.stdout.write('About to run setMPStaticPL %s' % str(member))
-                    setMPStaticPL(self, str(member), change['start_date'])
-
+        for membership in membership:
             # call setters for members which have change in memberships
-            for pg in change['members'].keys():
-                if pg in lastObject['members'].keys():
-                    personsForUpdate = list(set(change['members'][pg]) - set(lastObject['members'][pg]))
-                    for member in personsForUpdate:
-                        self.stdout.write('About to run setMPStaticPL %s' % str(member))
-                        setMPStaticPL(self, str(member), change['start_date'])
-            lastObject = change
+            setMPStaticPL(self, str(membership['person']), datetime.strptime(membership['start_date'], '%Y-%m-%dT%H:%M:%S').strftime(API_DATE_FORMAT))

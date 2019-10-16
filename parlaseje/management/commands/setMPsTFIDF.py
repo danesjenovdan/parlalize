@@ -3,7 +3,7 @@ from parlaposlanci.models import Person, Tfidf
 from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData
 from utils.parladata_api import getVotersIDs
 from datetime import datetime
-from parlalize.settings import API_URL, ISCI_URL
+from parlalize.settings import ISCI_URL
 
 import requests
 

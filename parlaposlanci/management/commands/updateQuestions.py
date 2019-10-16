@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, MinisterStatic
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Question
-from parlalize.settings import API_URL
 from utils.parladata_api import getQuestions
 
 

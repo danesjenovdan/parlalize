@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Speech, Debate
-from parlalize.settings import API_URL
 from utils.parladata_api import getSpeeches
 
 # TODO MAKE ME INTERNATIONAL
@@ -16,7 +15,7 @@ class Command(BaseCommand):
         existingISs = list(Speech.objects.all().values_list('id_parladata',
                                                             flat=True))
         orgs = {str(org.id_parladata): org.id for org in Organization.objects.all()}
-        self.stdout.write('Fetching data from %s/getAllAllSpeeches' % API_URL)
+        self.stdout.write('Fetching data from allSpeeches')
         for page in getSpeeches():
             for dic in page:
                 if int(dic['id']) not in existingISs:

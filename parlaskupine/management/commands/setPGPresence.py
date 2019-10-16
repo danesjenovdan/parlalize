@@ -5,7 +5,7 @@ from parlalize.utils_ import saveOrAbortNew
 from utils.parladata_api import (getParentOrganizationsWithVoters,
     getVotersIDs, getVotersPairsWithOrg, getOrganizationsWithVoters, getNumberOfAllMPAttendedSessions)
 from datetime import datetime
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_DATE_FORMAT
 
 def setPercentOFAttendedSessionPG(pg_id, date_of, parenet_org):
 

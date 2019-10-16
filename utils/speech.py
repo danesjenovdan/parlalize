@@ -2,14 +2,14 @@ import csv
 from datetime import datetime
 from parlaseje.models import Session, Activity
 from parlaskupine.models import Organization
-from parlalize.settings import API_URL, API_DATE_FORMAT, ISCI_URL
+from parlalize.settings import API_DATE_FORMAT, ISCI_URL
 import requests
 from collections import Counter
 from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from itertools import groupby
 
 from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiDRFGen
-from utils.parladata_api import getVotersIDs, getOrganizationsWithVoters
+from utils.parladata_api import getVotersIDs, getOrganizationsWithVoters, getSpeechContentOfPerson
 
 
 class WordAnalysis(object):
@@ -49,7 +49,7 @@ class WordAnalysis(object):
             print '[INFO] [INFO] prepering data of members'
             for mp in self.members:
                 self.text[str(mp)] = ''
-                for speechs_chunk in getDataFromPagerApiDRFGen(API_URL + '/speechs/?speaker='+str(mp)):
+                for speechs_chunk in getSpeeches(speaker=mp, valid=True):
                     self.text[str(mp)] += ' '.join([speech['content'] for speech in speechs_chunk])
 
         # prepare data for groups
@@ -59,7 +59,7 @@ class WordAnalysis(object):
                 org = Organization.objects.filter(id_parladata=org_id).exclude(classification='unaligned MP')
                 if org:
                     self.text[org_id] = ''
-                    for speechs_chunk in getDataFromPagerApiDRFGen(API_URL + '/speechs/?party='+str(org_id)):
+                    for speechs_chunk in getSpeeches(party=org_id, valid=True):
                         self.text[org_id] += ' '.join([speech['content'] for speech in speechs_chunk])
 
     def wordCounter(self):
@@ -134,7 +134,6 @@ class WordAnalysis(object):
 
 
 class Utils(object):
-
     def getSpeechesAnalyses(self, organization_id):
         with open('members_speech_score.csv', 'wb') as csvfile:
             csvwriter = csv.writer(csvfile,
@@ -149,9 +148,7 @@ class Utils(object):
             mp_scores = {}
 
             for mp in mps:
-                url = ('' + API_URL + '/getSpeechesOfMP/' + str(mp) + ''
-                       '' + ('/' + date_) if date_ else '')
-                mp_no_of_speeches = len(tryHard(url).json())
+                mp_no_of_speeches = len(getSpeechContentOfPerson(person_id, fdate=date_of))
 
                 mp_no_of_sessions = Activity.objects.filter(
                     person__id_parladata=mp,
@@ -165,30 +162,15 @@ class Utils(object):
 
             # VocabularySize
             vocabulary_sizes = {}
-
-            for mp in mps:
-                url = ('' + API_URL+'/getSpeeches/' + str(mp) + ''
-                       '' + ('/'+date_) if date_ else '')
-                speeches = tryHard(url).json()
-
-                text = ''.join([speech['content'] for speech in speeches])
-
-                vocabulary_sizes[mp] = len(countWords(text, Counter()))
-
-            print 'VocabularySize done'
-
-            # spoken words
             mp_results = {}
 
             for mp in mps:
-                # print '[INFO] Pasting speeches for MP ' + str(mp)
-                url = API_URL+'/getSpeeches/' + str(mp) + '/' + date_
-                speeches = tryHard(url).json()
+                text =  ' '.join(getSpeechContentOfPerson(mp, fdate=date_of))
 
-                text = ''.join([speech['content'] for speech in speeches])
-
+                vocabulary_sizes[mp] = len(countWords(text, Counter()))
                 mp_results[mp] = numberOfWords(text)
 
+            print 'VocabularySize done'
             print 'spoken words done'
 
             for mp in mps:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY, DZ
+from parlalize.settings import API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY, DZ
 from parlalize.utils_ import findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
@@ -18,7 +18,7 @@ from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, P
 from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Question, Tag, AbsentMPs, Vote_analysis
 
 from parlaseje.views import getSessionsList, setMotionOfSession
-from parlaseje.utils_ import idsOfSession, getSesDates, speech_the_order
+from parlaseje.utils_ import speech_the_order
 from utils.votes_outliers import setMotionAnalize, setOutliers
 from utils.votes_pg import set_mismatch_of_pg
 
@@ -34,33 +34,6 @@ from time import time
 
 factory = RequestFactory()
 request_with_key = factory.get('?key=' + SETTER_KEY)
-
-
-def runSettersSessions(date_to=None, sessions_ids=None):
-    if not date_to:
-        date_to = datetime.today().strftime(API_DATE_FORMAT)
-
-    setters_models = {
-        Vote_analysis: setMotionAnalize,
-    }
-    # set outliers for all votes
-    # TODO remove next comment when algoritem for is_outlier will be fixed
-    #setOutliers()
-    for model, setter in setters_models.items():
-        # IDs = getSesIDs(dates[1],dates[-1])
-        if sessions_ids:
-            last = sessions_ids
-        else:
-            last = idsOfSession(model)
-        print last
-        print model
-        for ID in last:
-            print ID
-            try:
-                setter(request_with_key, str(ID))
-            except:
-                client.captureException()
-    return 'all is fine :D'
 
 
 def updateLastDay(date_=None):
@@ -111,23 +84,6 @@ def deleteAppModels(appName):
     for model in my_models:
         print 'delete model: ', model
         model.objects.all().delete()
-
-
-def updateWB():
-    organizations = tryHard(API_URL + '/getOrganizatonsByClassification').json()
-    for wb in organizations['working_bodies'] + organizations['council']:
-        print 'setting working_bodie: ', wb['name']
-        try:
-            setWorkingBodies(request_with_key,
-                             str(wb['id']),
-                             datetime.now().date().strftime(API_DATE_FORMAT))
-            requests.get(GLEJ_URL + '/wb/getWorkingBodies/' + str(wb['id']) + '?frame=true&altHeader=true&forceRender=true')
-            requests.get(GLEJ_URL + '/wb/getWorkingBodies/' + str(wb['id']) + '?embed=true&altHeader=true&forceRender=true')
-            requests.get(GLEJ_URL + '/wb/getWorkingBodies/' + str(wb['id']) + '?altHeader=true&forceRender=true')
-        except:
-            client.captureException()
-
-    return 'all is fine :D WB so settani'
 
 
 def setListOfMembers(date_time):

@@ -3,7 +3,7 @@ from parlaseje.models import Session, PresenceOfPG
 from parlalize.utils_ import saveOrAbortNew, tryHard, getDataFromPagerApi
 from utils.parladata_api import getOrganizationsWithVoters, getBallotsForSession
 from datetime import datetime
-from parlalize.settings import API_URL, NOT_PRESENT
+from parlalize.settings import NOT_PRESENT
 
 from collections import Counter
 

@@ -18,9 +18,9 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
         f_date = datetime.strptime(date_, '%d.%m.%Y')
     else:
         f_date = datetime.now()
-    url = settings.API_URL_V2 + '/getVotesTableExtended/'+ str(by_organization) + '/' + date_
+    #url = settings.API_URL_V2 + '/getVotesTableExtended/'+ str(by_organization) + '/' + date_
     data = pd.DataFrame()
-    for page in getDataFromPagerApiGen(url):
+    for page in for page in getBallotTable(organization=by_organization)::
         temp = pd.DataFrame(page)
         data = data.append(temp, ignore_index=True)
 

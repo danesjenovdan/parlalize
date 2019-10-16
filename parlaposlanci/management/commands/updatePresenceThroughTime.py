@@ -4,7 +4,7 @@ from parlaposlanci.models import Person, PresenceThroughTime
 from parlalize.utils_ import saveOrAbortNew
 from utils.parladata_api import getVotersIDs, getBallotsCounterd
 from datetime import datetime
-from parlalize.settings import API_URL, API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
+from parlalize.settings import API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
 
 
 def setPresenceThroughTime(commander, person_id, date_=None):

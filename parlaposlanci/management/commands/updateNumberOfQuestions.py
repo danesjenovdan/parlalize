@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from parlaposlanci.models import Person, NumberOfQuestions
 from parlalize.utils_ import (saveOrAbortNew, tryHard, getDataFromPagerApi)
-from parlalize.settings import API_DATE_FORMAT, API_URL
+from parlalize.settings import API_DATE_FORMAT
 
 from utils.parladata_api import getVotersIDs, getParentOrganizationsWithVoters, getQuestions
 

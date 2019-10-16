@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, MPOfPg
-from parlalize.settings import API_DATE_FORMAT, API_URL
+from parlalize.settings import API_DATE_FORMAT
 from parlalize.utils_ import saveOrAbortNew, tryHard
 from utils.parladata_api import getOrganizationsWithVoters, getVotersPairsWithOrg
 from datetime import datetime

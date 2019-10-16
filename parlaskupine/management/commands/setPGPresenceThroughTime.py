@@ -5,7 +5,7 @@ from parlaskupine.models import Organization, PresenceThroughTime
 from parlalize.utils_ import tryHard, saveOrAbortNew
 from utils.parladata_api import getOrganizationsWithVoters, getBallotsCounter
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, API_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN
+from parlalize.settings import API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
 
 def setPGPresenceThroughTime(commander, pg, date):
     if date:

@@ -136,7 +136,6 @@ def getMembershipsOfMember(person_id=None, date_=datetime.now()):
 
 def getPeople(*args, **kwargs):
     url = settings.API_URL + '/persons/'
-    print(args, kwargs.keys())
     if 'id_' in kwargs.keys():
         id_ = kwargs.pop('id_')
         return requests.get(url + str(id_)).json()
@@ -180,6 +179,7 @@ def getVotesForSession(session_id):
 
     return out_data
 
+
 def getMotion(motion_id):
     url = settings.API_URL + '/motions/' + str(motion_id)
     out_data = tryHard(url)
@@ -193,6 +193,17 @@ def getSessions(*args, **kwargs):
         sessions_url = sessions_url + '?' + query_url
     out = []
     for urls in getDataFromPagerApiDRFGen(sessions_url):
+        out += urls
+    return out
+
+def getLegislationa(*args, **kwargs):
+    query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
+    laws_url = settings.API_URL + '/law/'
+    if query_url:
+        laws_url = laws_url + '?' + query_url
+    out = []
+    print(laws_url)
+    for urls in getDataFromPagerApiDRFGen(laws_url):
         out += urls
     return out
 
@@ -213,6 +224,26 @@ def getTags():
         out += urls
     return out
 
+def getDebates():
+    tags_url = settings.API_URL + '/debates/'
+    out = []
+    for urls in getDataFromPagerApiDRFGen(tags_url):
+        out += urls
+    return out
+
+def getAgendaItems():
+    tags_url = settings.API_URL + '/agenda-items/'
+    out = []
+    for urls in getDataFromPagerApiDRFGen(tags_url):
+        out += urls
+    return out
+
+def getSpeechContentOfPerson(person_id, fdate=None):
+    url = settings.API_URL + '/speeches-of-mp/' + str(person_id)
+    if fdate:
+        url += ('/?date=' + fdate.strftime(settings.API_DATE_FORMAT))
+    return requests.get(url).json()
+
 """
 returns generator
 """
@@ -221,7 +252,6 @@ def getSpeeches(*args, **kwargs):
     speeches_url = settings.API_URL + '/speechs/'
     if query_url:
         speeches_url = speeches_url + '?' + query_url
-    out = []
     return getDataFromPagerApiDRFGen(speeches_url)
 
 """
@@ -232,8 +262,19 @@ def getBallots(*args, **kwargs):
     ballots_url = settings.API_URL + '/ballots/'
     if query_url:
         ballots_url = ballots_url + '?' + query_url
-    out = []
     return getDataFromPagerApiDRFGen(ballots_url)
+
+"""
+returns generator
+"""
+
+def getBallotTable(session=None, organization=None):
+    url = settings.API_URL + '/ballot_table/?limit=5000'
+    if session:
+        url = url + "&vote__session=" + str(session)
+    if organization:
+        url = url + "&vote__session__organization=" + str(organization)
+    return getDataFromPagerApiDRFGen(url)
 
 def getAllPGs(parent_org=None):
     orgs = getOrganizationsWithVoters(organization_id=parent_org)
