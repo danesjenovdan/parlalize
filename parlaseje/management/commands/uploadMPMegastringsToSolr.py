@@ -3,9 +3,10 @@ from django.utils.html import strip_tags
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Speech
 from parlaposlanci.models import Person
-from parlalize.utils_ import saveOrAbortNew, getAllStaticData, getVotersIDs
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData
+from utils.parladata_api import getVotersIDs
 from datetime import datetime
-from parlalize.settings import SOLR_URL, API_URL
+from parlalize.settings import SOLR_URL
 
 import requests
 import json

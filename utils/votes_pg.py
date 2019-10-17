@@ -1,7 +1,6 @@
 import pandas as pd
 import csv
 import json
-import requests
 from datetime import datetime
 import itertools
 from collections import Counter
@@ -18,19 +17,11 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
         f_date = datetime.strptime(date_, '%d.%m.%Y')
     else:
         f_date = datetime.now()
-    url = settings.API_URL_V2 + '/getVotesTableExtended/'+ str(by_organization) + '/' + date_
+    #url = settings.API_URL_V2 + '/getVotesTableExtended/'+ str(by_organization) + '/' + date_
     data = pd.DataFrame()
-    for page in getDataFromPagerApiGen(url):
+    for page in for page in getBallotTable(organization=by_organization)::
         temp = pd.DataFrame(page)
         data = data.append(temp, ignore_index=True)
-    # members = [mp['id'] for mp in mps]
-    # url = settings.API_URL + '/getMembersOfPGsOnDate/' + date_
-    # memsOfPGs = requests.get(url).json()
-    # url = settings.API_URL + '/getAllPGs/' + date_
-    # pgs = requests.get(url).json()
-
-    # coalition = requests.get(settings.API_URL + '/getCoalitionPGs').json()['coalition']
-    # orgs = requests.get(settings.API_URL + '/getAllPGsExt/')
 
     print 'Preparing pandas DataFrame'
     data['option_absent'] = 0

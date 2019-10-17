@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, VocabularySize, VocabularySizeUniqueWords, SpokenWords
-from parlalize.utils_ import saveOrAbortNew, getParentOrganizationsWithVoters
+from parlalize.utils_ import saveOrAbortNew
+from utils.parladata_api import getParentOrganizationsWithVoters
 from utils.speech import WordAnalysis
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT

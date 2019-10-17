@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.settings import SETTER_KEY, API_DATE_FORMAT
-from parlalize.utils_ import getParentOrganizationsWithVoters
+from utils.parladata_api import getParentOrganizationsWithVoters
 from django.test.client import RequestFactory
 
 from datetime import datetime, timedelta

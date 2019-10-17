@@ -16,8 +16,8 @@ from parlaskupine.models import (Organization, WorkingBodies,
                                  MPOfPg, PGStatic,
                                  VocabularySize as VocabularySizePG,
                                  StyleScores as StyleScoresPG, Compass)
-from parlaseje.models import (VoteDetailed, Session, Vote, Ballot, Speech, Tag,
-                              PresenceOfPG, AbsentMPs, VoteDetailed, Quote, Question)
+from parlaseje.models import (Session, Vote, Ballot, Speech, Tag,
+                              PresenceOfPG, AbsentMPs, Quote, Question)
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
                                 DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL, ALL_STATIC_CACHE_AGE, slack_token)
 from django.contrib.contenttypes.models import ContentType
@@ -306,13 +306,6 @@ def getSCardModel(model, id_se, date=None):
     return modelObject
 
 
-# get all PG ID's
-def getPGIDs():
-    data = tryHard(API_URL+'/getAllPGsExt/').json()
-
-    return [pg for pg in data]
-
-
 def getMPGovId(id_parladata):
     person = Person.objects.filter(id_parladata=id_parladata)[0]
     out = {'id': person.id_parladata,
@@ -326,7 +319,7 @@ def getPersonData(id_parladata, date_=None):
     try:
         data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
     except:
-        url = API_URL + '/getPersonData/' + str(id_parladata) + '/'
+        url = API_URL + '/persons/' + str(id_parladata) + '/'
         guest = tryHard(url).json()
         gov_id = None
         if guest and guest['gov_id']:
@@ -462,104 +455,6 @@ def getAllStaticData(request, force_render=False):
                     text='StaticDataDebug end: ' + str(out)[:100] + ' ' + str(force_render))
 
     return JsonResponse(out)
-
-
-def getPersonsCardDates(request, person_id):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = ('attachment; filename="'
-                                       '' + str(person_id) + ''
-                                       '.csv"')
-
-    mems = tryHard(API_URL + '/getAllTimeMemberships').json()
-    member_dates = [mem for mem in mems if str(mem['id']) == person_id]
-
-    dates = {}
-    dates['is_member'] = []
-    for d in member_dates:
-        if d['start_time']:
-            start = datetime.strptime(d['start_time'].split('T')[0],
-                                      '%Y-%m-%d')
-        else:
-            start = datetime(day=1, month=8, year=2014)
-        if d['end_time']:
-            end = datetime.strptime(d['end_time'].split('T')[0],
-                                    '%Y-%m-%d')
-        else:
-            end = datetime.today()
-        while end > start:
-            dates['is_member'].append(start.strftime(API_DATE_FORMAT))
-            start = start+timedelta(days=1)
-
-    models = {'spoken': SpokenWords,
-              'presence': Presence,
-              'style': StyleScores,
-              'equal': EqualVoters,
-              'less_equal': LessEqualVoters,
-              'static': MPStaticPL,
-              'number_of_speeches': AverageNumberOfSpeechesPerSession,
-              'memberships': MembershipsOfMember,
-              'last_activity': LastActivity,
-              'vocabolary_size': VocabularySize,
-              }
-
-    for key, model in models:
-        modelz = model.objects.filter(person__id_parladata=person_id)
-        datez = modelz.order_by('created_for').values_list('created_for',
-                                                           flat=True)
-        dates[key] = [day.strftime(API_DATE_FORMAT) for day in datez]
-
-    writer = csv.writer(response)
-    keys = dates.keys()
-    writer.writerow(['Date']+keys)
-    date = datetime(day=1, month=8, year=2014)
-    while date < datetime.today():
-        print date
-        strDate = date.strftime(API_DATE_FORMAT)
-        writer.writerow([strDate]+['Yes' if strDate in dates[key] else ''
-                                   for key in keys])
-        date = date + timedelta(days=1)
-
-    return response
-
-
-def getOrgsCardDates(request, org_id):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = ('attachment; filename="'
-                                       '' + str(org_id) + ''
-                                       '.csv"')
-
-    dates = {}
-
-    models = {'PGStatic': PGStatic,
-              'PercentOFAttendedSession': PercentOFAttendedSession,
-              'MPOfPg': MPOfPg,
-              'MostMatchingThem': MostMatchingThem,
-              'LessMatchingThem': LessMatchingThem,
-              'DeviationInOrganization': DeviationInOrganization,
-              'vocabulary_size': VocabularySizePG,
-              'style_scores': StyleScoresPG,
-              }
-    for key, model in models:
-        modelz = model.objects.filter(organization__id_parladata=org_id)
-        datez = modelz.order_by('created_for').values_list('created_for',
-                                                           flat=True)
-        dates[key] = [day.strftime(API_DATE_FORMAT) for day in datez]
-
-    datez = static.order_by('created_for').values_list('created_for',
-                                                       flat=True)
-
-    writer = csv.writer(response)
-    keys = dates.keys()
-    writer.writerow(['Date']+keys)
-    date = datetime(day=1, month=8, year=2014)
-    while date < datetime.today():
-        print date
-        strDate = date.strftime(API_DATE_FORMAT)
-        writer.writerow([strDate]+['Yes' if strDate in dates[key] else ''
-                                   for key in keys])
-        date = date + timedelta(days=1)
-
-    return response
 
 
 def monitorMe(request):
@@ -781,52 +676,3 @@ def getPersonAmendmentsCount(person_id, date_of):
     else:
         date = card.latest('created_for').created_for
     return person, count, date
-
-
-def getVotersIDs(date_=datetime.now(), organization_id=None,):
-    voters_url = settings.API_URL + '/memberships/?role=voter'
-    voters_ids = []
-    for voters in getDataFromPagerApiDRFGen(voters_url):
-        for voter in voters:
-            if organization_id:
-                # skip person if is not voter of required organization
-                if voter['organization'] != organization_id:
-                    continue
-            # check if person is voter on required date
-            if voter['start_time'] < date_.isoformat():
-                if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
-                    voters_ids.append(voter['person'])
-    return voters_ids
-
-def getOrganizationsWithVoters(date_=datetime.now(), organization_id=None):
-    voters_url = settings.API_URL + '/memberships/?role=voter'
-    organization_ids = []
-    for voters in getDataFromPagerApiDRFGen(voters_url):
-        for voter in voters:
-            if organization_id:
-                # skip person if is not voter of required organization
-                if voter['organization'] != organization_id:
-                    continue
-            if voter['start_time'] < date_.isoformat():
-                if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
-                    organization_ids.append(voter['on_behalf_of'])
-
-    return list(set(organization_ids))
-
-def getVotersPairsWithOrg(date_=datetime.now(), organization_id=None):
-    voters_url = settings.API_URL + '/memberships/?role=voter'
-    voters_ids = {}
-    for voters in getDataFromPagerApiDRFGen(voters_url):
-        for voter in voters:
-            if organization_id:
-                # skip person if is not voter of required organization
-                if voter['organization'] != int(organization_id):
-                    continue
-            # check if person is voter on required date
-            if voter['start_time'] < date_.isoformat():
-                if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
-                    voters_ids[voter['person']] = voter['on_behalf_of']
-    return voters_ids
-
-def getParentOrganizationsWithVoters():
-    return Organization.objects.filter(has_voters=True).values_list('id_parladata', flat=True)

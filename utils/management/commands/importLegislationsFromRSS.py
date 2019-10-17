@@ -3,7 +3,6 @@ from django.core.management.base import BaseCommand, CommandError
 from datetime import datetime
 from parlaseje.models import Legislation
 
-import requests
 import feedparser
 import re
 

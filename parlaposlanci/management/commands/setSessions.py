@@ -4,20 +4,21 @@ from parlalize.utils_ import tryHard
 from parlaskupine.models import Organization
 from parlaseje.models import Session
 from parlalize.settings import API_URL, DZ
+from utils.parladata_api import setSessions
 
 class Command(BaseCommand):
     help = 'Sets session data'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from %s/getSessions/' % API_URL)
-        data = tryHard(API_URL + '/getSessions/').json()
+        self.stdout.write('Fetching data from %s/sessions/' % API_URL)
+        data = getSessions()
         session_ids = list(Session.objects.all().values_list('id_parladata',
                                                             flat=True))
         for session in data:
             self.stdout.write('Setting session %s' % str(session['id']))
-            orgs = Organization.objects.filter(id_parladata__in=session['organizations_id'])
+            orgs = Organization.objects.filter(id_parladata__in=session['organizations'])
             if not orgs:
-                orgs = Organization.objects.filter(id_parladata=session['organization_id'])
+                orgs = Organization.objects.filter(id_parladata=session['organization'])
             if session['id'] not in session_ids:
                 self.stdout.write('New session %s' % str(session['id']))
                 result = Session(name=session['name'],
@@ -26,7 +27,7 @@ class Command(BaseCommand):
                                 end_time=session['end_time'],
                                 classification=session['classification'],
                                 id_parladata=session['id'],
-                                in_review=session['is_in_review'],
+                                in_review=session['in_review'],
                                 organization=orgs[0]
                                 )
                 result.save()
@@ -45,7 +46,7 @@ class Command(BaseCommand):
                                             end_time=session['end_time'],
                                             classification=session['classification'],
                                             id_parladata=session['id'],
-                                            in_review=session['is_in_review'],
+                                            in_review=session['in_review'],
                                             organization=orgs[0])
                 ses = ses.exclude(organizations=None)
                 if not session:
@@ -56,7 +57,7 @@ class Command(BaseCommand):
                     session2.start_time = session['start_time']
                     session2.end_time = session['end_time']
                     session2.classification = session['classification']
-                    session2.in_review = session['is_in_review']
+                    session2.in_review = session['in_review']
                     session2.organization = orgs[0]
                     session2.save()
                     orgs = list(orgs)

@@ -1,12 +1,12 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaseje.models import Session, PresenceOfPG
-from parlalize.utils_ import saveOrAbortNew, tryHard, getDataFromPagerApi, getOrganizationsWithVoters
+from parlalize.utils_ import saveOrAbortNew, tryHard, getDataFromPagerApi
+from utils.parladata_api import getOrganizationsWithVoters, getBallotsForSession
 from datetime import datetime
-from parlalize.settings import API_URL, NOT_PRESENT
+from parlalize.settings import NOT_PRESENT
 
 from collections import Counter
 
-import requests
 import json
 
 
@@ -15,14 +15,13 @@ def setPresenceOfPG(commander, session_id):
     """
     PGs = getOrganizationsWithVoters()
 
-    url = API_URL + '/getBallotsOfSession/' + str(session_id) + '/'
     commander.stdout.write(
-        'About to get data from pager API from %s' % str(url))
-    votes = getDataFromPagerApi(url)
+        'About to get ballots for session')
+    votes = getBallotsForSession(session_id)
 
-    counters_in = Counter([vote['pg_id']
+    counters_in = Counter([vote['voterparty']
                            for vote in votes if vote['option'] not in NOT_PRESENT])
-    counters_out = Counter([vote['pg_id']
+    counters_out = Counter([vote['voterparty']
                             for vote in votes if vote['option'] in NOT_PRESENT])
 
     pgs = list(set(counters_in.keys() + counters_out.keys()))

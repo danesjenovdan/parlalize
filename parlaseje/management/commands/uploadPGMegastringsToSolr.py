@@ -4,9 +4,10 @@ from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Speech
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
-from parlalize.utils_ import saveOrAbortNew, getAllStaticData, getOrganizationsWithVoters
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData
+from utils.parladata_api import getOrganizationsWithVoters
 from datetime import datetime
-from parlalize.settings import SOLR_URL, API_URL, API_DATE_FORMAT
+from parlalize.settings import SOLR_URL, API_DATE_FORMAT
 
 import requests
 import json

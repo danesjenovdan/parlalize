@@ -1,33 +1,38 @@
 from django.core.management.base import BaseCommand, CommandError
-from parlalize.utils_ import tryHard, getDataFromPagerApi, getVotersIDs
+from parlalize.utils_ import tryHard, getDataFromPagerApi
 from parlaposlanci.models import Person
-from parlalize.settings import API_URL
+from utils.parladata_api import getVotersPairsWithOrg, getPeople
+
 
 class Command(BaseCommand):
     help = 'Updates people from Parladata'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from %s/getAllPeople/' % API_URL)
-        url = API_URL + '/getAllPeople/'
-        data = getDataFromPagerApi(url)
-        self.stdout.write('Fetching data from %s/getMPs/' % API_URL)
-        mps_ids = getVotersIDs()
+        self.stdout.write('Fetching data from getVotersPairsWithOrg')
+        mps_orgs = getVotersPairsWithOrg()
+        data = getPeople()
         for mp in data:
+            if mp['id'] in mps_orgs.keys():
+                is_active = True
+                org = mps_orgs[mp['id']]
+            else:
+                is_active = False
+                org = ''
             if Person.objects.filter(id_parladata=mp['id']):
                 self.stdout.write('Updating person %d %s' % (mp['id'], mp['name']))
                 person = Person.objects.get(id_parladata=mp['id'])
                 person.name = mp['name']
-                person.pg = mp['membership']
+                person.pg = org
                 person.id_parladata = int(mp['id'])
                 person.image = mp['image']
-                person.actived = True if int(mp['id']) in mps_ids else False
+                person.actived = is_active
                 person.gov_id = mp['gov_id']
                 person.save()
             else:
                 self.stdout.write('Adding person %d %s' % (mp['id'], mp['name']))
-                is_active = True if int(mp['id']) in mps_ids else False
+                is_active = is_active
                 person = Person(name=mp['name'],
-                                pg=mp['membership'],
+                                pg=org,
                                 id_parladata=int(mp['id']),
                                 image=mp['image'],
                                 actived=is_active,

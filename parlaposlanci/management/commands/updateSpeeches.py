@@ -1,9 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
-from parlalize.utils_ import tryHard, getDataFromPagerApiGen
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Speech, Debate
-from parlalize.settings import API_URL
+from utils.parladata_api import getSpeeches
 
 # TODO MAKE ME INTERNATIONAL
 def get_the_order(speech_id):
@@ -13,12 +12,11 @@ class Command(BaseCommand):
     help = 'Updates people from Parladata'
 
     def handle(self, *args, **options):
-        url = API_URL + '/getAllAllSpeeches'
         existingISs = list(Speech.objects.all().values_list('id_parladata',
                                                             flat=True))
         orgs = {str(org.id_parladata): org.id for org in Organization.objects.all()}
-        self.stdout.write('Fetching data from %s/getAllAllSpeeches' % API_URL)
-        for page in getDataFromPagerApiGen(url):
+        self.stdout.write('Fetching data from allSpeeches')
+        for page in getSpeeches():
             for dic in page:
                 if int(dic['id']) not in existingISs:
                     self.stdout.write('Adding speech %s' % str(dic['id']))

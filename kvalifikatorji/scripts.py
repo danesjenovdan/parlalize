@@ -14,7 +14,6 @@ from itertools import repeat
 from parlalize.utils_ import tryHard
 from parlalize.settings import ISCI_URL, PROJECT_DIR
 
-import requests
 import csv
 
 def getWords(filename):
@@ -179,7 +178,7 @@ def lematize(filename_in, filename_out):
 
 def parseCSV(name, out_file, find_word):
     vulg_words = []
-    
+
     with open(name, 'rb') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in spamreader:
@@ -198,7 +197,7 @@ def parseCSV(name, out_file, find_word):
 
 def parseCSVoneLine(name, out_file, find_word):
     vulg_words = []
-    
+
     with open(name, 'rb') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
         for row in spamreader:

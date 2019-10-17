@@ -1,22 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Legislation
-from parlalize.settings import API_URL, PARSER_UN, PARSER_PASS, LEGISLATION_STATUS
+from parlalize.settings import PARSER_UN, PARSER_PASS, LEGISLATION_STATUS
 from datetime import datetime
 
-import requests
-
-def getDataFromPagerApiDRF(url):
-    # print(url)
-    data = []
-    end = False
-    page = 1
-    #url = url+'?limit=300'
-    while url:
-        response = requests.get(url, auth=requests.auth.HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
-        data += response['results']
-        url = response['next']
-    return data
 
 class Command(BaseCommand):
     help = 'Sets session data'
@@ -24,13 +11,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Updating legislation')
 
-        self.stdout.write('Getting data from %s/law/' % API_URL)
-        laws = getDataFromPagerApiDRF(API_URL + '/law/')
+        self.stdout.write('Getting data from /law/')
+        laws = getLegislationa()
         epas = list(set([law['epa'] for law in laws if law['epa']]))
         self.stdout.write('Iterating through EPAs')
         for epa in set(epas):
             self.stdout.write(str(epa))
-            laws = getDataFromPagerApiDRF(API_URL + '/law/?epa=' + str(epa))
+            laws = getLegislationa(epa=epa)
             last_obj = None
             sessions = []
             is_ended = False

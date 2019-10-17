@@ -1,9 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import MismatchOfPG
 from parlaskupine.models import Organization, PGMismatch
-from parlalize.utils_ import tryHard, saveOrAbortNew, getAllStaticData, getPersonCardModelNew, getOrganizationsWithVoters
+from parlalize.utils_ import tryHard, saveOrAbortNew, getAllStaticData, getPersonCardModelNew
+from utils.parladata_api import getOrganizationsWithVoters
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, API_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN, API_URL_V2
+from parlalize.settings import API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
 
 def setPGMismatch(commander, pg_id, date=None):
     """
@@ -16,11 +17,9 @@ def setPGMismatch(commander, pg_id, date=None):
         date = ''
 
     org = Organization.objects.get(id_parladata=pg_id)
-    url = API_URL_V2 + '/getVotersByOrganizations/' + date
-    commander.stdout.write('Trying hard with %s' % url)
-    memsOfPGs = tryHard(url).json()
+    memsOfPGs = getOrganizationsWithVotersList(date_=date_of)
     data = []
-    for member in memsOfPGs[str(pg_id)]:
+    for member in memsOfPGs[int(pg_id)]:
         try:
             mismatch = getPersonCardModelNew(MismatchOfPG, int(member), date)
             data.append({'id': member,
