@@ -11,30 +11,10 @@ router.register(r'tfidfs', TFIDFView)
 
 
 urlpatterns = [
-#	url(r'^getMPsList/', getMPsList),
     # setters
-    url(r'^setBasicInfOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setBasicInfOfPG),
-    url(r'^setBasicInfOfPG/(?P<pg_id>\d+)', setBasicInfOfPG),
-
-    url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setPercentOFAttendedSessionPG),
-    url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
-    url(r'^setBasicInfOfPG/(?P<pg_id>\d+)', setBasicInfOfPG),
-    url(r'^setPercentOFAttendedSessionPG/(?P<pg_id>\d+)', setPercentOFAttendedSessionPG),
-
-    url(r'^setMPsOfPG/(?P<pg_id>\d+)/(?P<date_>[\w].+)', setMPsOfPG),
-    url(r'^setMPsOfPG/(?P<pg_id>\d+)', setMPsOfPG),
 
     url(r'^setWorkingBodies/(?P<org_id>\d+)/(?P<date_>[\w].+)', setWorkingBodies),
     url(r'^setWorkingBodies/(?P<org_id>\d+)', setWorkingBodies),
-
-    url(r'^setVocabularySizeALL/(?P<date_>[\w].+)', setVocabularySizeALL),
-    url(r'^setVocabularySizeALL', setVocabularySizeALL),
-
-    url(r'^setNumberOfQuestionsAll/(?P<date_>[\w].+)', setNumberOfQuestionsAll),
-    url(r'^setNumberOfQuestionsAll/', setNumberOfQuestionsAll),
-
-    url(r'^setPresenceThroughTime/(?P<party_id>\d+)/(?P<date_>[\w].+)', setPresenceThroughTime),
-    url(r'^setPresenceThroughTime/(?P<party_id>\d+)', setPresenceThroughTime),
 
     # getters
     url(r'^getBasicInfOfPG/(?P<pg_id>\d+)', getBasicInfOfPG),
@@ -99,10 +79,6 @@ urlpatterns = [
     url(r'^getPGMismatch/(?P<pg_id>\d+)/(?P<date_>[\w].+)', getPGMismatch),
     url(r'^getPGMismatch/(?P<pg_id>\d+)/', getPGMismatch),
 
-    ####################################################################################
-    #POST setters
-    url(r'^setAllPGsStyleScoresFromSearch/', setAllPGsStyleScoresFromSearch),
-    url(r'^setAllPGsTFIDFsFromSearch/', setAllPGsTFIDFsFromSearch),
 
     ####################################################################################
 

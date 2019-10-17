@@ -2,7 +2,6 @@
 from datetime import datetime, timedelta
 from raven.contrib.django.raven_compat.models import client
 
-from parlaposlanci.views import getListOfMembers
 from parlaskupine.views import getListOfPGs, getIntraDisunionOrg
 from parlaseje.views import getSessionsList
 from parlaskupine.models import Organization
@@ -22,12 +21,11 @@ def updateCacheforList(date_=None):
             tomorrow = datetime.now() + timedelta(days=1)
             date_ = tomorrow.strftime(API_DATE_FORMAT)
         getAllStaticData(None, force_render=True)
-        getListOfMembers(None, date_, force_render=True)
         getListOfPGs(None, date_, force_render=True)
         getSessionsList(None, date_, force_render=True)
         updateCacheIntraDisunion()
         # store static data for search
-        
+
         sc.api_call("chat.postMessage",
                 channel="#parlalize_notif",
                 text='Zgeneriru sem cache za nasledn dan.')

@@ -9,37 +9,6 @@ router = routers.DefaultRouter()
 router.register(r'tfidfs', TFIDFView)
 
 urlpatterns = [
-    # setters
-    url(r'^setMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMPStaticPL),
-    url(r'^setMPStatic/(?P<person_id>\d+)/', setMPStaticPL),
-
-    url(r'^setMinsterStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', setMinsterStatic),
-    url(r'^setMinsterStatic/(?P<person_id>\d+)/', setMinsterStatic),
-
-    url(r'^setPresence/(?P<person_id>\d+)/(?P<date_>[\w].+)', setPercentOFAttendedSession),
-    url(r'^setPresence/(?P<person_id>\d+)', setPercentOFAttendedSession),
-
-    url(r'^setAverageNumberOfSpeechesPerSession/(?P<person_id>\d+)', setAverageNumberOfSpeechesPerSession),
-
-    url(r'^setAverageNumberOfSpeechesPerSessionALL/(?P<date_>[\w].+)', setAverageNumberOfSpeechesPerSessionAll),
-    url(r'^setAverageNumberOfSpeechesPerSessionALL/', setAverageNumberOfSpeechesPerSessionAll),
-
-    url(r'^setLastActivity/(?P<person_id>\d+)', setLastActivity),
-
-    url(r'^setCompass/(?P<date_>[\w].+)', setCompass),
-    url(r'^setCompass', setCompass),
-
-    url(r'^setMembershipsOfMember/(?P<person_id>\d+)/(?P<date>[\w].+)', setMembershipsOfMember),
-    url(r'^setMembershipsOfMember/(?P<person_id>\d+)', setMembershipsOfMember),
-
-    url(r'^setVocabularySizeAndSpokenWords/(?P<date_>[\w].+)', setVocabularySizeAndSpokenWords),
-    url(r'^setVocabularySizeAndSpokenWords/', setVocabularySizeAndSpokenWords),
-
-    url(r'^setNumberOfQuestionsAll/(?P<date_>[\w].+)', setNumberOfQuestionsAll),
-    url(r'^setNumberOfQuestionsAll/', setNumberOfQuestionsAll),
-
-    ####################################################################################
-
     # getters
     url(r'^getMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', getMPStaticPL),
     url(r'^getMPStatic/(?P<person_id>\d+)/', getMPStaticPL),
@@ -70,10 +39,6 @@ urlpatterns = [
 
     url(r'^getVocabularySize/(?P<person_id>\d+)/(?P<date_>[\w].+)', getVocabularySize),
     url(r'^getVocabularySize/(?P<person_id>\d+)', getVocabularySize),
-    url(r'^getVocabularySizeLanding/(?P<date_>[\w].+)', getVocabolarySizeLanding),
-    url(r'^getVocabularySizeLanding', getVocabolarySizeLanding),
-    url(r'^getUniqueWordsLanding/(?P<date_>[\w].+)', getVocabolarySizeUniqueWordsLanding),
-    url(r'^getUniqueWordsLanding/', getVocabolarySizeUniqueWordsLanding),
 
     url(r'^getAllSpeeches/(?P<person_id>\d+)/(?P<date_>[\w].+)', getAllSpeeches),
     url(r'^getAllSpeeches/(?P<person_id>\d+)', getAllSpeeches),
@@ -81,16 +46,11 @@ urlpatterns = [
     url(r'^getQuestions/(?P<person_id>\d+)/(?P<date_>[\w].+)', getQuestions),
     url(r'^getQuestions/(?P<person_id>\d+)', getQuestions),
 
-    url(r'^setPresenceThroughTime/(?P<person_id>\d+)/(?P<date_>[\w].+)', setPresenceThroughTime),
-    url(r'^setPresenceThroughTime/(?P<person_id>\d+)', setPresenceThroughTime),
-
     url(r'^getPresenceThroughTime/(?P<person_id>\d+)/(?P<date_>[\w].+)', getPresenceThroughTime),
     url(r'^getPresenceThroughTime/(?P<person_id>\d+)', getPresenceThroughTime),
 
     url(r'^getListOfMembersTickers/(?P<date_>[\w].+)', getListOfMembersTickers, {'org_id': settings.DZ}),
     url(r'^getListOfMembersTickers/', getListOfMembersTickers, {'org_id': settings.DZ}),
-
-    url(r'^getMPsIDs', getMPsIDs),
 
     url(r'^getCompass/(?P<date_>[\w].+)', getCompass, {'org_id': settings.DZ}),
     url(r'^getCompass', getCompass, {'org_id': settings.DZ}),
@@ -107,20 +67,12 @@ urlpatterns = [
     url(r'^getNumberOfAmendmetsOfMember/(?P<person_id>\d+)/(?P<date_>[\w].+)', getNumberOfAmendmetsOfMember),
     url(r'^getNumberOfAmendmetsOfMember/(?P<person_id>\d+)/', getNumberOfAmendmetsOfMember),
 
-    url(r'^getListOfMembers/(?P<date_>[\w].+)', getListOfMembers),
-    url(r'^getListOfMembers/', getListOfMembers),
-
     url(r'^getMismatchWithPG/(?P<person_id>\d+)/(?P<date_>[\w].+)', getMismatchWithPG),
     url(r'^getMismatchWithPG/(?P<person_id>\d+)/', getMismatchWithPG),
 
     url(r'^getAllActiveMembers/', getAllActiveMembers),
 
     url(r'^getSlugs/', getSlugs),
-
-    ###########################################################################
-    # POST setters
-    url(r'^setAllMPsTFIDFsFromSearch/', setAllMPsTFIDFsFromSearch),
-    url(r'^setAllMPsStyleScoresFromSearch/', setAllMPsStyleScoresFromSearch),
 
     ###########################################################################
 

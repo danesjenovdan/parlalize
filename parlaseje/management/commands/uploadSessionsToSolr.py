@@ -2,7 +2,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils.html import strip_tags
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Speech
-from parlalize.utils_ import saveOrAbortNew, getAllStaticData, getParentOrganizationsWithVoters
+from parlalize.utils_ import saveOrAbortNew, getAllStaticData
+from utils.parladata_api import getParentOrganizationsWithVoters
 from datetime import datetime
 from parlalize.settings import SOLR_URL
 

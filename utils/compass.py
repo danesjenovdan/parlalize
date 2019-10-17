@@ -1,10 +1,10 @@
-import requests
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL
-from parlalize.utils_ import tryHard, getDataFromPagerApi, getVotersIDs
+from parlalize.settings import API_DATE_FORMAT, BASE_URL
+from parlalize.utils_ import tryHard, getDataFromPagerApi
+from utils.parladata_api import getVotersIDs, getBallots
 from django.conf import settings
 
 
@@ -81,7 +81,7 @@ def getData(date_of, org_id):
     group balots for each person and calculate SVD
     """
     # getting all the necessary data
-    allballots = getDataFromPagerApi(API_URL+'/getAllBallots/'+date_of.strftime(API_DATE_FORMAT))
+    allballots = Ballot.objects.filter(vote__start_time__lte=date_of).values("person__id_parladata", "option", "vote")
 
     print(allballots, org_id, date_of)
     # sort people's ids
@@ -92,7 +92,7 @@ def getData(date_of, org_id):
     # group ballots by people
     people_ballots = []
     for voter in people_ids:
-        people_ballots.append([ballot for ballot in allballots if ballot['voter'] == voter])
+        people_ballots.append([ballot for ballot in allballots if ballot['person__id_parladata'] == voter])
         if people_ballots[-1]==[]:
             people_without_ballots.append(voter)
     lengths = [len(person) for person in people_ballots]
@@ -107,19 +107,21 @@ def getData(date_of, org_id):
     all_vote_ids = set(all_vote_ids)
 
     # pad votes and write in "ni obstajal" for people who didn't exist yet
+    print people_ballots
     for person in people_ballots:
         if len(person) < max(lengths):
             for vote_id in all_vote_ids:
                 if len(person) == 0:
                     if vote_id not in [ballot['vote'] for ballot in person]:
-                        person.append({'vote': vote_id, 'voter': people_without_ballots[0], 'option': 'ni obstajal', 'id': -1})
+                        person.append({'vote': vote_id, 'person__id_parladata': people_without_ballots[0], 'option': 'ni obstajal', 'id': -1})
                         people_without_ballots.remove(people_without_ballots[0])
                 else:
                     if vote_id not in [ballot['vote'] for ballot in person]:
-                        person.append({'vote': vote_id, 'voter': person[0]['id'], 'option': 'ni obstajal', 'id': -1})
+                        person.append({'vote': vote_id, 'person__id_parladata': person[0]['person__id_parladata'], 'option': 'ni obstajal', 'id': -1})
 
     # sort ballots
-    people_ballots_sorted = sorted([sorted(person, key=lambda k: k['vote']) for person in people_ballots], key=lambda j: j[0]['voter'])
+
+    people_ballots_sorted = sorted([sorted(person, key=lambda k: k['vote']) for person in people_ballots], key=lambda j: j[0]['person__id_parladata'])
     people_ballots_sorted_list = [person for person in people_ballots_sorted]
 
     hijene = []

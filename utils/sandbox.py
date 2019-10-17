@@ -3,7 +3,6 @@ import json
 import requests
 from datetime import datetime, timedelta
 import time
-import requests
 
 
 def createCompasData():

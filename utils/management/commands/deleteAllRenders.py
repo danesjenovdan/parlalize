@@ -1,11 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from parlalize.settings import API_URL, PARSER_UN, PARSER_PASS
 from utils.delete_renders import delete_renders, refetch
 
 from datetime import datetime
-
-import requests
 
 
 class Command(BaseCommand):

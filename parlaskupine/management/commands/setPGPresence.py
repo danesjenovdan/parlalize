@@ -1,10 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaskupine.models import Organization, PercentOFAttendedSession
-from parlalize.utils_ import (saveOrAbortNew, getParentOrganizationsWithVoters,
-    getVotersIDs, getVotersPairsWithOrg, getOrganizationsWithVoters)
+from parlalize.utils_ import saveOrAbortNew
+from utils.parladata_api import (getParentOrganizationsWithVoters,
+    getVotersIDs, getVotersPairsWithOrg, getOrganizationsWithVoters, getNumberOfAllMPAttendedSessions)
 from datetime import datetime
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from parlalize.settings import API_DATE_FORMAT
 
 def setPercentOFAttendedSessionPG(pg_id, date_of, parenet_org):
 
@@ -19,7 +20,7 @@ def setPercentOFAttendedSessionPG(pg_id, date_of, parenet_org):
     for i, value in sorted(voters.iteritems()):
         membersOfPG.setdefault(value, []).append(i)
 
-    data = tryHard(API_URL+'/getNumberOfAllMPAttendedSessions/'+date_).json()
+    data = getNumberOfAllMPAttendedSessions(date_of, getVotersIDs(date_=date_of, organization_id=parenet_org))
 
     sessions = {pg: [] for pg in membersOfPG if membersOfPG[pg]}
     votes = {pg: [] for pg in membersOfPG if membersOfPG[pg]}

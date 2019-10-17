@@ -47,6 +47,10 @@ class Organization(Timestampable, models.Model):
     is_coalition = models.BooleanField(_('coalition'),
                                       default=False)
 
+    name_parser = models.CharField(max_length=1024,
+                                   help_text='Name for parser.',
+                                   blank=True, null=True)
+
     def __str__(self):
         return unicode(self.name) + " " + str(self.id_parladata)
 

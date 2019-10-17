@@ -1,9 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
+
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization, PresenceThroughTime
-from parlalize.utils_ import tryHard, saveOrAbortNew, getOrganizationsWithVoters
+from parlalize.utils_ import tryHard, saveOrAbortNew
+from utils.parladata_api import getOrganizationsWithVoters, getBallotsCounter
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, API_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN
+from parlalize.settings import API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
 
 def setPGPresenceThroughTime(commander, pg, date):
     if date:
@@ -11,8 +13,12 @@ def setPGPresenceThroughTime(commander, pg, date):
     else:
         date_of = datetime.now().date()
 
-    url = API_URL + '/getBallotsCounterOfParty/' + str(pg) + '/' + date_of.strftime(API_DATE_FORMAT)
-    data = tryHard(url).json()
+    org = Organization.objects.filter(id_parladata=pg)
+    if not org:
+        commander.stdout.write('Organization with id %s doesnt exist' % str(pg))
+        return
+
+    data = getBallotsCounter(org, date_of)
 
     data_for_save = []
 

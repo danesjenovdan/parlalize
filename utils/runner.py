@@ -1,25 +1,22 @@
 # -*- coding: utf-8 -*-
-import requests
-from parlaposlanci.views import setMPStaticPL
-from parlalize.settings import API_URL, API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY, DZ
-from parlalize.utils_ import getPGIDs, findDatesFromLastCard
+from parlalize.settings import API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY, DZ
+from parlalize.utils_ import findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
 from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
 from itertools import groupby
 
-from parlaposlanci.views import setMPStaticPL, setMembershipsOfMember, setLastActivity, setAverageNumberOfSpeechesPerSessionAll, setVocabularySizeAndSpokenWords, setListOfMembersTickers, setPresenceThroughTime, setMinsterStatic, setNumberOfQuestionsAll, setPercentOFAttendedSession
+from parlaposlanci.views import setListOfMembersTickers
 from parlaposlanci.models import Person, MPStaticPL, MembershipsOfMember, AverageNumberOfSpeechesPerSession, MinisterStatic
 
-from parlaskupine.views import setMPsOfPG, setBasicInfOfPG, setWorkingBodies, setVocabularySizeALL, getListOfPGs, setPresenceThroughTime as setPresenceThroughTimePG, setPGMismatch
+from parlaskupine.views import setWorkingBodies, getListOfPGs
 from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, PGMismatch
 
-from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Question, Tag, PresenceOfPG, AbsentMPs, VoteDetailed, Vote_analysis
+from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Question, Tag, AbsentMPs, Vote_analysis
 
-from parlaseje.views import setPresenceOfPG, setMotionOfSessionGraph, getSessionsList, setMotionOfSession
-from parlaseje.utils_ import idsOfSession, getSesDates, speech_the_order
-from utils.votes_outliers import setMotionAnalize, setOutliers
+from parlaseje.views import getSessionsList, setMotionOfSession
+from parlaseje.utils_ import speech_the_order
 from utils.votes_pg import set_mismatch_of_pg
 
 from .votes import VotesAnalysis
@@ -34,205 +31,6 @@ from time import time
 
 factory = RequestFactory()
 request_with_key = factory.get('?key=' + SETTER_KEY)
-
-
-# parlaposlanci runner methods #
-
-
-def onDateMPCardRunner(date_=None):
-    """
-    Create all cards for data_ date. If date_ is None set for run setters
-    for today.
-    """
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-
-    if date_:
-        dateObj = datetime.strptime(date_, API_DATE_FORMAT)
-        date_of = (dateObj - timedelta(days=1)).date()
-    else:
-        date_of = (datetime.now() - timedelta(days=1)).date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
-
-    votez = VotesAnalysis(date_of)
-    votez.setAll()
-    set_mismatch_of_pg(None, date_)
-    setters = [
-        setMembershipsOfMember,
-        setPresenceThroughTime,
-        setPercentOFAttendedSession,
-        setMPStaticPL
-    ]
-
-    memberships = tryHard(API_URL + '/getMPs/' + date_).json()
-
-    for membership in memberships:
-        print(membership['id'])
-        for setter in setters:
-            print 'running:' + str(setter)
-            try:
-                setter(request_with_key, str(membership['id']), date_)
-            except:
-                msg = ('' + FAIL + ''
-                       'FAIL on: '
-                       '' + str(setter) + ''
-                       ' and with id: '
-                       '' + str(membership['id']) + ''
-                       '' + ENDC + '')
-                print msg
-
-    # Runner for setters ALL
-    all_in_one_setters = [
-        setAverageNumberOfSpeechesPerSessionAll,
-        setNumberOfQuestionsAll,
-        setVocabularySizeAndSpokenWords,
-    ]
-
-    zero = datetime(day=2, month=8, year=2014).date()
-    for setter in all_in_one_setters:
-        print 'running:' + str(setter)
-        try:
-            setter(request_with_key, date_)
-        except:
-            print 'FAIL on: ' + str(setter)
-
-"""
-    When are membersips changed, run this method for update data and page
-"""
-def onMembershipChangePGRunner(data, date_=None):
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-
-    if date_:
-        dateObj = datetime.strptime(date_, API_DATE_FORMAT)
-        date_of = dateObj.date()
-    else:
-        date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
-
-    pg_ids = data['pgs']
-    mp_ids = data['mps']
-
-    votez = VotesAnalysis(date_of)
-    votez.setAll()
-    set_mismatch_of_pg(None)
-
-    setters_mp = [
-        setMembershipsOfMember,
-        setMPStaticPL
-    ]
-
-    for mp in mp_ids:
-        for setter in setters_mp:
-            try:
-                setter(request_with_key, str(mp), date_)
-            except:
-                msg = ('' + FAIL + ''
-                       'FAIL on: '
-                       '' + str(setter) + ''
-                       ' and with id: '
-                       '' + str(membership['id']) + ''
-                       '' + ENDC + '')
-                print msg
-
-    pg_setters = [
-        setMPsOfPG,
-        setBasicInfOfPG,
-        setPGMismatch,
-    ]
-    for setter in pg_setters:
-        for pg_id in pg_ids:
-            try:
-                setter(request_with_key, str(pg_id), date_)
-            except:
-                text = ('' + FAIL + 'FAIL on: ' + str(setter) + ''
-                        ' and with id: ' + str(pg_id) + ENDC + '')
-                print text
-
-    getAllStaticData(None, force_render=True)
-    getListOfPGs(None, date_, force_render=True)
-    deleteMPandPGsRenders()
-
-
-
-def onDatePGCardRunner(date_=None):
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-
-    if date_:
-        dateObj = datetime.strptime(date_, API_DATE_FORMAT)
-        date_of = (dateObj - timedelta(days=1)).date()
-    else:
-        date_of = (datetime.now() - timedelta(days=1)).date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
-    print date_
-    set_mismatch_of_pg(None)
-    votez = VotesAnalysis(date_of) # TODO
-    votez.setAll()
-    setters = [
-        setMPsOfPG,
-        setBasicInfOfPG,
-        setPresenceThroughTimePG,
-        setPGMismatch,
-    ]
-
-    membersOfPGsRanges = tryHard(
-        API_URL + '/getMembersOfPGsRanges/' + date_).json()
-    IDs = [key for key, value in membersOfPGsRanges[-1]['members'].items()
-           if value]
-    curentId = 0
-
-    for setter in setters:
-        for ID in IDs:
-            print setter
-            try:
-                setter(request_with_key, str(ID), date_)
-            except:
-                text = ('' + FAIL + 'FAIL on: ' + str(setter) + ''
-                        ' and with id: ' + str(ID) + ENDC + '')
-                print text
-
-    # Runner for setters ALL
-    all_in_one_setters = [
-        setVocabularySizeALL,
-    ]
-
-    for setter in all_in_one_setters:
-        try:
-            setter(request_with_key, date_)
-        except:
-            print FAIL + 'FAIL on: ' + str(setter) + ENDC
-
-    # updateWB()
-
-
-def runSettersSessions(date_to=None, sessions_ids=None):
-    if not date_to:
-        date_to = datetime.today().strftime(API_DATE_FORMAT)
-
-    setters_models = {
-        PresenceOfPG: setPresenceOfPG,
-        VoteDetailed: setMotionOfSessionGraph,
-        Vote_analysis: setMotionAnalize,
-    }
-    # set outliers for all votes
-    # TODO remove next comment when algoritem for is_outlier will be fixed
-    #setOutliers()
-    for model, setter in setters_models.items():
-        # IDs = getSesIDs(dates[1],dates[-1])
-        if sessions_ids:
-            last = sessions_ids
-        else:
-            last = idsOfSession(model)
-        print last
-        print model
-        for ID in last:
-            print ID
-            try:
-                setter(request_with_key, str(ID))
-            except:
-                client.captureException()
-    return 'all is fine :D'
 
 
 def updateLastDay(date_=None):
@@ -283,23 +81,6 @@ def deleteAppModels(appName):
     for model in my_models:
         print 'delete model: ', model
         model.objects.all().delete()
-
-
-def updateWB():
-    organizations = tryHard(API_URL + '/getOrganizatonsByClassification').json()
-    for wb in organizations['working_bodies'] + organizations['council']:
-        print 'setting working_bodie: ', wb['name']
-        try:
-            setWorkingBodies(request_with_key,
-                             str(wb['id']),
-                             datetime.now().date().strftime(API_DATE_FORMAT))
-            requests.get(GLEJ_URL + '/wb/getWorkingBodies/' + str(wb['id']) + '?frame=true&altHeader=true&forceRender=true')
-            requests.get(GLEJ_URL + '/wb/getWorkingBodies/' + str(wb['id']) + '?embed=true&altHeader=true&forceRender=true')
-            requests.get(GLEJ_URL + '/wb/getWorkingBodies/' + str(wb['id']) + '?altHeader=true&forceRender=true')
-        except:
-            client.captureException()
-
-    return 'all is fine :D WB so settani'
 
 
 def setListOfMembers(date_time):

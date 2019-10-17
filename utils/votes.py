@@ -7,6 +7,8 @@ from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT, VOTE_MAP
 from parlalize.utils_ import tryHard, saveOrAbortNew, getDataFromPagerApi, getDataFromPagerApiGen
 
+from utils.parladata_api import getVotersIDs, getOrganizationsWithVotersList, getParentOrganizationsWithVoters, getBallotTable
+
 from parlaseje.models import Session
 from parlaposlanci.models import Person, EqualVoters, LessEqualVoters, Presence
 from parlaskupine.models import (Organization, MostMatchingThem,
@@ -15,7 +17,7 @@ from parlaskupine.models import (Organization, MostMatchingThem,
 
 
 class VotesAnalysis(object):
-    def __init__(self, date_=None):
+    def __init__(self, organization_id, date_=None):
         self.debug = False
         if date_:
             self.date_ = date_.strftime(API_DATE_FORMAT)
@@ -26,6 +28,7 @@ class VotesAnalysis(object):
         self.api_url = None
         self.members = None
         self.data = None
+        self.organization_id = organization_id
 
         self.presenceOfPGsSignleSessions = None
         self.presenceMP_S = None
@@ -51,28 +54,14 @@ class VotesAnalysis(object):
         if self.debug:
             self.data = pd.read_pickle('backup_baze.pkl')
         else:
-            url = API_URL + '/getVotesTable/' + self.date_
-            #data = getDataFromPagerApi(url)
-            #self.data = pd.DataFrame(data)
-
             self.data = pd.DataFrame()
-            for page in getDataFromPagerApiGen(url):
+            for page in getBallotTable(organization=self.organization_id):
                 temp = pd.DataFrame(page)
                 self.data = self.data.append(temp, ignore_index=True)
-            print url
-            # before debug load data to backup_baze.pkl file (uncoment next line)
-            # self.data.to_pickle('backup_baze.pkl')
-        url = API_URL + '/getMPs/' + self.date_
-        print url
-        mps = tryHard(url).json()
-        self.members = [mp['id'] for mp in mps]
-        url = API_URL + '/getMembersOfPGsOnDate/' + self.date_
-        print url
-        self.memsOfPGs = tryHard(url).json()
-        url = API_URL + '/getAllPGs/' + self.date_
-        print url
-        self.pgs = tryHard(url).json()
-        self.pgs = self.pgs.keys()
+
+        self.members = getVotersIDs(organization_id=self.organization_id, date_=self.date_of)
+        self.memsOfPGs = getOrganizationsWithVotersList(organization_id=self.organization_id, date_=self.date_of)
+        self.pgs = getOrganizationsWithVoters(organization_id=self.organization_id, date_=self.date_of)
 
         def toLogic(row):
             """
@@ -148,8 +137,8 @@ class VotesAnalysis(object):
         Analyse how equal are voters
         """
         data2 = self.data[['voter',
-                           'vote_id',
-                           'logic']].pivot('voter', 'vote_id')
+                           'vote',
+                           'logic']].pivot('voter', 'vote')
         data2 = data2.transpose().reset_index().iloc[:, 2:]
         zero_data = data2.fillna(0)
         distance = lambda column1, column2: pd.np.linalg.norm(column1 - column2)
@@ -161,15 +150,15 @@ class VotesAnalysis(object):
         Analyse how equal are voters to partys and deviation in party
         """
         averagePGs = self.data[['voterparty',
-                                'vote_id',
+                                'vote',
                                 'logic']].groupby(['voterparty',
-                                                   'vote_id']).mean()
+                                                   'vote']).mean()
         averagePGs = averagePGs.reset_index().pivot('voterparty',
-                                                    'vote_id').transpose()
+                                                    'vote').transpose()
         membersLogis = self.data[['voter',
-                                  'vote_id',
+                                  'vote',
                                   'logic']].pivot('voter',
-                                                  'vote_id').transpose()
+                                                  'vote').transpose()
 
         zero_data_pg = averagePGs.fillna(0)
         zero_data_mp = membersLogis.fillna(0)
@@ -413,6 +402,7 @@ class VotesAnalysis(object):
 
 
 def setAllVotesCards():
-    votesObj = VotesAnalysis()
-    votesObj.setAll()
-    return 'All is well'
+    for org_id in getParentOrganizationsWithVoters():
+        votesObj = VotesAnalysis(organization_id=org_id)
+        votesObj.setAll()
+        return 'All is well'
