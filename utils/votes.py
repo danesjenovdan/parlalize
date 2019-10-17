@@ -7,7 +7,7 @@ from datetime import datetime
 from parlalize.settings import API_URL, API_DATE_FORMAT, VOTE_MAP
 from parlalize.utils_ import tryHard, saveOrAbortNew, getDataFromPagerApi, getDataFromPagerApiGen
 
-from utils.parladata_api import getVotersIDs, getOrganizationsWithVotersList, getParentOrganizationsWithVoters, getBallotTable
+from utils.parladata_api import getVotersIDs, getOrganizationsWithVotersList, getParentOrganizationsWithVoters, getBallotTable, getOrganizationsWithVoters
 
 from parlaseje.models import Session
 from parlaposlanci.models import Person, EqualVoters, LessEqualVoters, Presence
@@ -242,8 +242,9 @@ class VotesAnalysis(object):
             org = Organization.objects.get(id_parladata=int(pg))
             r = results[pg]
             r = r.reset_index().sort_values(pg, ascending=False)
+            print(self.memsOfPGs)
             # TODO notify someone if this fails
-            thisPG = r[r.voter.isin(self.memsOfPGs[str(pg)])]
+            thisPG = r[r.voter.isin(self.memsOfPGs[int(pg)])]
             otherMembers = [m
                             for pg_key
                             in self.memsOfPGs.keys()
@@ -251,7 +252,7 @@ class VotesAnalysis(object):
                             for m
                             in self.memsOfPGs[pg_key]
                             ]
-            print 'pg', pg, len(self.memsOfPGs[str(pg)]), len(otherMembers)
+            print 'pg', pg, len(self.memsOfPGs[pg]), len(otherMembers)
             otherMems = r[r.voter.isin(otherMembers)]
 
             # most equal

@@ -20,7 +20,7 @@ class Command(BaseCommand):
         else:
             date_ = datetime.now().date().strftime(API_DATE_FORMAT)
         for org_id in getParentOrganizationsWithVoters():
-            votes = VotesAnalysis(organization_id=org_id, datetime.strptime(date_, API_DATE_FORMAT))
+            votes = VotesAnalysis(organization_id=org_id, date_=datetime.strptime(date_, API_DATE_FORMAT))
             self.stdout.write('About to begin VotesAnalysis for %s' % str(date_))
             votes.setAll()
             self.stdout.write('Done with VotesAnalysis for %s' % str(date_))

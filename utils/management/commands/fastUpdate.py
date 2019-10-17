@@ -5,13 +5,13 @@ from parlalize.settings import API_URL, slack_token, API_DATE_FORMAT, DZ, SETTER
 from parlalize.utils_ import tryHard
 
 from parlaseje.models import Ballot, Vote, Speech, Question, Legislation, Session
-from parlaseje.views import getSessionsList, setMotionOfSession
+from parlaseje.views import getSessionsList
 from parlaseje.utils_ import speech_the_order
 from parlaposlanci.models import Person, MinisterStatic
 from parlaskupine.models import Organization
-from utils.imports import updateDistricts, updateTags, updatePersonStatus, importDraftLegislationsFromFeed
-from utils.runner import runSettersSessions
-
+from utils.imports import importDraftLegislationsFromFeed
+#from utils.runner import runSettersSessions
+from parlaposlanci.management.commands.updateMotionOfSession import *
 from utils.delete_renders import delete_renders, deleteRendersOfSession, deleteRendersOfIDs, refetch
 
 from utils.parladata_api import getVotersIDs
@@ -69,7 +69,7 @@ class Command(BaseCommand):
             # get dates of last update
             dates.append(self.getModelStartTime(Person))
             dates.append(self.getModelStartTime(Session))
-            dates.append(lastSpeechTime)
+            dates.append(datetime.now()-timedelta(days=1))#lastSpeechTime)
             dates.append(lastBallotTime)
             dates.append(lastQustionTime)
 
@@ -268,7 +268,8 @@ class Command(BaseCommand):
                     text='Start update votes at: ' + str(datetime.now()))
         for session_id in data['sessions_of_updated_votes']:
             self.stdout.write('set motion of session ' + str(session_id))
-            setMotionOfSession(request_with_key, str(session_id))
+            c=Command()
+            setMotionOfSession(c, str(session_id))
 
         # update ballots
         sc.api_call("chat.postMessage",
@@ -340,9 +341,6 @@ class Command(BaseCommand):
         sc.api_call("chat.postMessage",
                     channel="#parlalize_notif",
                     text='Start update distircts and tags at: ' + str(datetime.now()))
-        updateDistricts()
-
-        updateTags()
 
         t_delta = time() - start_time
 
@@ -365,8 +363,8 @@ class Command(BaseCommand):
 
         p_update = list(ballots.values_list("person__id_parladata", flat=True))
 
-        if s_update:
-            runSettersSessions(sessions_ids=list(set(s_update)))
+        #if s_update:
+        #    runSettersSessions(sessions_ids=list(set(s_update)))
 
         t_delta = time() - start_time
 

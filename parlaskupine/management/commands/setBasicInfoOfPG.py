@@ -57,8 +57,8 @@ def setBasicInfoOfPG(commander, pg, date):
                   viceOfPG=viceOfPG,
                   numberOfSeats=numberOfSeats,
                   allVoters=org_data['voters'],
-                  facebook=facebook['url'] if facebook else None,
-                  twitter=twitter['url'] if twitter else None,
+                  facebook=facebook[0]['url'] if facebook else None,
+                  twitter=twitter[0]['url'] if twitter else None,
                   email=email
                   )
 

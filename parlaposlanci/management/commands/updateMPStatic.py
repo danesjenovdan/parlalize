@@ -79,6 +79,6 @@ class Command(BaseCommand):
         memberships = getMemberships(role='voter')
         lastObject = {'members': {}}
         self.stdout.write('[info] update MP static')
-        for membership in membership:
+        for membership in memberships:
             # call setters for members which have change in memberships
-            setMPStaticPL(self, str(membership['person']), datetime.strptime(membership['start_date'], '%Y-%m-%dT%H:%M:%S').strftime(API_DATE_FORMAT))
+            setMPStaticPL(self, str(membership['person']), datetime.strptime(membership['start_time'], '%Y-%m-%dT%H:%M:%S').strftime(API_DATE_FORMAT))

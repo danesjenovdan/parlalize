@@ -3,7 +3,6 @@ from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiGe
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, Tag, Legislation, AgendaItem, Debate
-from parlaseje.views import setMotionOfSession
 from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
