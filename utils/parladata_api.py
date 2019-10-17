@@ -1,12 +1,12 @@
 from django.conf import settings
 from django.db.models.functions import TruncMonth
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 from parlaseje.models import Ballot, Vote
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 import requests

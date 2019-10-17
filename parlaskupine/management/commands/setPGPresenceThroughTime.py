@@ -17,7 +17,8 @@ def setPGPresenceThroughTime(commander, pg, date):
     if not org:
         commander.stdout.write('Organization with id %s doesnt exist' % str(pg))
         return
-
+    else:
+        org = org[0]
     data = getBallotsCounter(org, date_of)
 
     data_for_save = []

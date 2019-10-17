@@ -8,7 +8,7 @@ from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScore
 from itertools import groupby
 
 from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiDRFGen
-from utils.parladata_api import getVotersIDs, getOrganizationsWithVoters, getSpeechContentOfPerson
+from utils.parladata_api import getVotersIDs, getOrganizationsWithVoters, getSpeechContentOfPerson, getSpeeches
 
 
 class WordAnalysis(object):

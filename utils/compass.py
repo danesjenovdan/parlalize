@@ -4,6 +4,7 @@ from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.manifold import MDS as sklearnMDS
 from parlalize.settings import API_DATE_FORMAT, BASE_URL
 from parlalize.utils_ import tryHard, getDataFromPagerApi
+from parlaseje.models import Ballot
 from utils.parladata_api import getVotersIDs, getBallots
 from django.conf import settings
 

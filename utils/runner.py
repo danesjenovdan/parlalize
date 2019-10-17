@@ -15,7 +15,7 @@ from parlaskupine.models import Organization, WorkingBodies, MPOfPg, PGStatic, P
 
 from parlaseje.models import Legislation, Session, Vote, Ballot, Speech, Question, Tag, AbsentMPs, Vote_analysis
 
-from parlaseje.views import getSessionsList, setMotionOfSession
+from parlaseje.views import getSessionsList
 from parlaseje.utils_ import speech_the_order
 from utils.votes_pg import set_mismatch_of_pg
 

@@ -6,7 +6,8 @@ import itertools
 from collections import Counter
 from parlaposlanci.models import MismatchOfPG, Person
 from parlaskupine.models import Organization
-from parlalize.utils_ import saveOrAbortNew, getDataFromPagerApi, getDataFromPagerApiGen, getVotersPairsWithOrg
+from parlalize.utils_ import saveOrAbortNew
+from utils.parladata_api import getVotersPairsWithOrg, getBallotTable
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -19,7 +20,7 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
         f_date = datetime.now()
     #url = settings.API_URL_V2 + '/getVotesTableExtended/'+ str(by_organization) + '/' + date_
     data = pd.DataFrame()
-    for page in for page in getBallotTable(organization=by_organization)::
+    for page in getBallotTable(organization=by_organization):
         temp = pd.DataFrame(page)
         data = data.append(temp, ignore_index=True)
 
@@ -37,7 +38,7 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
     print 'Prepared pandas DataFrame, about to start analyzing things.'
 
     #for against absent abstain
-    # all_votes = data.groupby('vote_id').sum()
+    # all_votes = data.groupby('vote').sum()
     m_to_p = getVotersPairsWithOrg(organization_id=by_organization)
     mppgs = pd.DataFrame(m_to_p.items(), columns=['voter', 'voterparty'])
 
@@ -65,12 +66,12 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
         #return max_ids[0]
         return ','.join(max_ids)
 
-    partyBallots = data.groupby(['vote_id',
+    partyBallots = data.groupby(['vote',
                                  'voterparty']).sum().apply(lambda row: getPartyBallot(row), axis=1)
     partys = partyBallots.reset_index()
     partys = partys.rename(columns = {0:'partyoption'})
 
-    result = pd.merge(data2, partys, on=['vote_id', 'voterparty'])
+    result = pd.merge(data2, partys, on=['vote', 'voterparty'])
     #remove absent option TURNED OFF
     # result = result[result.option != 'absent']
 

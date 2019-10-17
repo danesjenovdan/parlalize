@@ -12,10 +12,6 @@ router.register(r'sessions', SessionsView)
 
 
 urlpatterns = [
-    # All setters
-    url(r'^setMotionOfSession/(?P<session_id>\d+)', setMotionOfSession),
-    url(r'^setMotionOfSession/(?P<session_id>\d+)/(?P<date_>[\w].+)', setMotionOfSession),
-
     url(r'^setQuote/(?P<speech_id>\d+)/(?P<start_pos>\d+)/(?P<end_pos>\d+)', setQuote),
 
     # All getters

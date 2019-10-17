@@ -67,8 +67,11 @@ target/
 static/
 .vscode/.ropeproject/config.py
 .vscode/
+notes/
 
 # settings files
 parlalize/settings/stage.py
 parlalize/settings/prod.py
 parlalize/settings/__init__.py
+parlalize/settings/production.py
+guniconfig.py

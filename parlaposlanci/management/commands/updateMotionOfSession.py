@@ -121,6 +121,9 @@ def setMotionOfSession(commander, session_id):
         if commander:
             commander.stdout.write('Handling vote %s' % str(vote['id']))
 
+        if not vote['name']:
+            commander.stdout.write('Skipping vote because it has no name: %s' % str(vote['id']))
+
         motion = parladata_api.getMotion(vote['motion'])
 
         if vote['results']:
@@ -151,13 +154,13 @@ def setMotionOfSession(commander, session_id):
             law = None
 
         classification = getMotionClassification(vote['name'])
-        vote = Vote.objects.filter(id_parladata=vote['vote_id'])
+        vote = Vote.objects.filter(id_parladata=vote['id'])
 
         agendaItems = list(AgendaItem.objects.filter(id_parladata__in=motion['agenda_item']))
 
         if vote:
             if commander:
-                commander.stdout.write('Updating vote %s' % str(vote['vote_id']))
+                commander.stdout.write('Updating vote %s' % str(vote['id']))
                 commander.stdout.write('Updating data %s' % str(vote))
             vote = vote[0]
             prev_result = vote.result
@@ -185,7 +188,7 @@ def setMotionOfSession(commander, session_id):
                 finish_legislation_by_final_vote(vote[0])
         else:
             if commander:
-                commander.stdout.write('Saving new vote %s' % str(vote['vote_id']))
+                commander.stdout.write('Saving new vote %s' % str(vote['id']))
             result = saveOrAbortNew(model=Vote,
                                     created_for=session.start_time,
                                     start_time=vote['start_time'],
