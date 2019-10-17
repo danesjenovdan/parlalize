@@ -21,6 +21,7 @@ from parlaseje.models import (Session, Vote, Ballot, Speech, Tag,
 from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
                                 DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL, ALL_STATIC_CACHE_AGE, slack_token)
 from django.contrib.contenttypes.models import ContentType
+from utils.parladata_api import getOrganizationsWithVoters
 import requests
 import json
 import time

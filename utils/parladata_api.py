@@ -2,7 +2,6 @@ from django.conf import settings
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
 
-from parlalize.utils_ import getDataFromPagerApiDRFGen, tryHard
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 from parlaseje.models import Ballot, Vote
@@ -12,6 +11,33 @@ from collections import defaultdict
 
 import requests
 
+
+def getDataFromPagerApiDRFGen(url):
+    # print(url)
+    end = False
+    page = 1
+    while url:
+        response = requests.get(url, auth=requests.auth.HTTPBasicAuth(settings.PARSER_UN, settings.PARSER_PASS)).json()
+        yield response['results']
+        url = response['next']
+
+def tryHard(url):
+    data = None
+    counter = 0
+    while not data or data.status_code != 200:
+        try:
+            data = requests.get(url)
+        except:
+            pass
+        if counter > 5:
+            client.captureMessage(url + ' je zahinavu več ko 2x.')
+            print(url + ' je zahinavu več ko 2x.')
+            return None
+        counter += 1
+        if not data:
+            time.sleep(1)
+            print("sleep")
+    return data
 
 def getVotersIDs(date_=datetime.now(), organization_id=None,):
     voters_url = settings.API_URL + '/memberships/?role=voter'
