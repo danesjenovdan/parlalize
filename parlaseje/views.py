@@ -335,7 +335,7 @@ def getSpeechesOfSession(request, session_id):
     sessionData = session.getSessionData()
     session_time = session.start_time.strftime(API_DATE_FORMAT)
 
-    personsStatic = tryHard(BASE_URL + "/utils/getAllStaticData/").json()
+    personsStatic = json.loads(getAllStaticData(None).content)
 
     page = request.GET.get('page', 1)
     per_page = request.GET.get('per_page', 150)
@@ -2474,7 +2474,6 @@ def getComparedVotes(request):
 
     # ballots = Ballot.objects.raw(query)
     votes = Vote.objects.filter(id_parladata__in=[ballot.vote.id_parladata for ballot in Ballot.objects.raw(query)])
-    # sessionsData = requests.get('https://analize.parlameter.si/v1/utils/getAllStaticData').json()['sessions']
     sessionsData = json.loads(getAllStaticData(None).content)['sessions']
 
     # session_ids = set([b.vote.session.id for b in ballots])

@@ -3,19 +3,6 @@ from parlaseje.models import Debate, AgendaItem
 from parlalize.settings import API_URL, PARSER_UN, PARSER_PASS
 from utils.parladata_api import getDebates
 
-import requests
-
-def getDataFromPagerApiDRF(url):
-    # print(url)
-    data = []
-    end = False
-    page = 1
-    url = url+'?limit=300'
-    while url:
-        response = requests.get(url, auth=requests.auth.HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
-        data += response['results']
-        url = response['next']
-    return data
 
 class Command(BaseCommand):
     help = 'Sets session data'

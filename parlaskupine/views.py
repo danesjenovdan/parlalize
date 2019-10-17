@@ -13,7 +13,6 @@ from scipy.spatial.distance import euclidean
 from itertools import groupby
 from datetime import timedelta, datetime
 
-import requests
 import json
 import math
 import numpy as np
@@ -2894,7 +2893,7 @@ def getQuestionsOfPG(request, pg_id, date_=False):
     questions = Question.objects.filter(start_time__lt=end_of_day,
                                         author_orgs__id_parladata=pg_id)
 
-    staticData = tryHard(BASE_URL + '/utils/getAllStaticData/').json()
+    staticData = json.loads(getAllStaticData(None).content)
     personsStatic = staticData['persons']
     ministrStatic = staticData['ministrs']
 

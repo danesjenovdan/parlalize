@@ -7,7 +7,6 @@ from parlalize.settings import NOT_PRESENT
 
 from collections import Counter
 
-import requests
 import json
 
 

@@ -6,7 +6,6 @@ from sklearn.decomposition import PCA
 from numpy import argpartition
 
 import pandas as pd
-import requests
 import json
 from collections import Counter
 

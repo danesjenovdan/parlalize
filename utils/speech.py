@@ -3,7 +3,6 @@ from datetime import datetime
 from parlaseje.models import Session, Activity
 from parlaskupine.models import Organization
 from parlalize.settings import API_DATE_FORMAT, ISCI_URL
-import requests
 from collections import Counter
 from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
 from itertools import groupby

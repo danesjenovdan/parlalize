@@ -1,7 +1,6 @@
 import pandas as pd
 import csv
 import json
-import requests
 from datetime import datetime
 import itertools
 from collections import Counter

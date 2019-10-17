@@ -21,7 +21,6 @@ from slackclient import SlackClient
 from time import time
 from itertools import groupby
 
-import requests
 
 class Command(BaseCommand):
     help = 'Delete all card renders'

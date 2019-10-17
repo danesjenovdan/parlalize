@@ -4,19 +4,6 @@ from parlaseje.models import Session, Legislation
 from parlalize.settings import PARSER_UN, PARSER_PASS, LEGISLATION_STATUS
 from datetime import datetime
 
-import requests
-
-def getDataFromPagerApiDRF(url):
-    # print(url)
-    data = []
-    end = False
-    page = 1
-    #url = url+'?limit=300'
-    while url:
-        response = requests.get(url, auth=requests.auth.HTTPBasicAuth(PARSER_UN, PARSER_PASS)).json()
-        data += response['results']
-        url = response['next']
-    return data
 
 class Command(BaseCommand):
     help = 'Sets session data'

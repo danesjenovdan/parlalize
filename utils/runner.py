@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import requests
-
 from parlalize.settings import API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY, DZ
 from parlalize.utils_ import findDatesFromLastCard
 from datetime import datetime, timedelta

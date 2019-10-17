@@ -17,7 +17,7 @@ from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
                                 NOTIFICATIONS_API)
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi,
-                              getPersonAmendmentsCount)
+                              getPersonAmendmentsCount, getAllStaticData)
 from utils.parladata_api import getVotersIDs
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
@@ -731,7 +731,7 @@ def getLastActivity(request, person_id, date_=None):
         a = a.filter(person__id_parladata=person_id,
                     start_time__gte=dates[-limit]).order_by('-start_time')
 
-    staticData = requests.get(BASE_URL + '/utils/getAllStaticData/').json()
+    staticData = json.loads(getAllStaticData(None).content)
     result = []
     dates = list(set(list(a.values_list("start_time_date", flat=True))))
     dates.sort()
@@ -2536,7 +2536,8 @@ def getQuestions(request, person_id, date_=None):
     questions = Question.objects.filter(start_time__lt=end_of_day,
                                         person__id_parladata=person_id).order_by("-start_time")
 
-    staticData = tryHard(BASE_URL + "/utils/getAllStaticData/").json()
+    staticData = json.loads(getAllStaticData(None).content)
+
     personsStatic = staticData['persons']
     ministrStatic = staticData['ministrs']
 

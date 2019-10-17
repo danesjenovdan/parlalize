@@ -10,7 +10,6 @@ from django.utils.html import strip_tags
 
 from datetime import datetime
 
-import requests
 import json
 import csv
 

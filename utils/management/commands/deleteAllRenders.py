@@ -4,8 +4,6 @@ from utils.delete_renders import delete_renders, refetch
 
 from datetime import datetime
 
-import requests
-
 
 class Command(BaseCommand):
     help = 'Delete all card renders'

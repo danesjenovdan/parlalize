@@ -8,7 +8,6 @@ from collections import Counter
 
 from kvalifikatorji.scripts import problematicno, privzdignjeno, preprosto
 
-import requests
 import json
 
 
