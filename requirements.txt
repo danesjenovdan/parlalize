@@ -47,6 +47,6 @@ https://github.com/aljosa/django-tinymce/archive/master.zip
 django-autocomplete-light==3.2.10
 feedparser==5.2.1
 matplotlib==2.1.1
-djangorestframework==3.7.1
+djangorestframework==3.9.1
 django-filter==1.1.0
 django-oauth-toolkit==1.1.2
