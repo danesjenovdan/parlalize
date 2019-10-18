@@ -243,6 +243,9 @@ class VotesAnalysis(object):
             r = results[pg]
             r = r.reset_index().sort_values(pg, ascending=False)
             print(self.memsOfPGs)
+            if int(pg) not in self.memsOfPGs.keys():
+                "if this PG hasn't members on this time"
+                continue
             # TODO notify someone if this fails
             thisPG = r[r.voter.isin(self.memsOfPGs[int(pg)])]
             otherMembers = [m
