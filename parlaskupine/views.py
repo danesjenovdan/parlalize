@@ -4231,7 +4231,7 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
                      'org_obj': temp_org,
                      'org_id': org_id})
         print org_id, pg_id, type(org_id), type(pg_id)
-        if org_id == str(pg_id):
+        if org_id == int(pg_id):
             print("FOUND")
             org = temp_org
             count = temp_count
