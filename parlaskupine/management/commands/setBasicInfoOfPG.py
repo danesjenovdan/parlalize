@@ -26,8 +26,8 @@ def setBasicInfoOfPG(commander, pg, date):
         if contact['contact_type'] == 'EMAIL':
             email = contact['value']
 
-    facebook = getLinks(organization=pg, tags__name='fb')
-    twitter = getLinks(organization=pg, tags__name='tw')
+    facebook = [link['url'] for link in getLinks(organization=pg, tags__name='fb')]
+    twitter = [link['url'] for link in getLinks(organization=pg, tags__name='tw'))
 
     numberOfSeats = dict(Counter(getVotersPairsWithOrg(date_=date_of).values()))[int(pg)]
 
@@ -57,8 +57,8 @@ def setBasicInfoOfPG(commander, pg, date):
                   viceOfPG=viceOfPG,
                   numberOfSeats=numberOfSeats,
                   allVoters=org_data['voters'],
-                  facebook=facebook[0]['url'] if facebook else None,
-                  twitter=twitter[0]['url'] if twitter else None,
+                  facebook=json.dumps(facebook) if facebook else None,
+                  twitter=json.dumps(twitter) if twitter else None,
                   email=email
                   )
 
