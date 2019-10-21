@@ -180,8 +180,8 @@ def getBasicInfOfPG(request, pg_id, date=None):
             'numberOfSeats': card.numberOfSeats,
             'allVoters': card.allVoters,
             'social': {
-                'facebook': json.loads(card.facebook),
-                'twitter': json.loads(card.twitter),
+                'facebook': json.loads(card.facebook) if card.facebook else None,
+                'twitter': json.loads(card.twitter) if card.twitter else None,
                 'email': card.email
                 }
             }
