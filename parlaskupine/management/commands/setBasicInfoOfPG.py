@@ -27,7 +27,7 @@ def setBasicInfoOfPG(commander, pg, date):
             email = contact['value']
 
     facebook = [link['url'] for link in getLinks(organization=pg, tags__name='fb')]
-    twitter = [link['url'] for link in getLinks(organization=pg, tags__name='tw'))
+    twitter = [link['url'] for link in getLinks(organization=pg, tags__name='tw')]
 
     numberOfSeats = dict(Counter(getVotersPairsWithOrg(date_=date_of).values()))[int(pg)]
 
