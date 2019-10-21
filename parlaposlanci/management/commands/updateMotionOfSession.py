@@ -52,7 +52,7 @@ def getOwnersOfAmendment(vote):
         return {'orgs': org_ids, 'people': []}
     elif settings.COUNTRY == 'HR':
         amendment_words = ['AMANDMANI', 'AMANDMAN']
-        links = vote.document_url
+        links = vote.document_url if vote.document_url else []
         org_ids = parladata_api.getOrganizationsWithVoters()
         orgs = Organization.objects.filter(id_parladata__in = org_ids)
         acronyms = {}
