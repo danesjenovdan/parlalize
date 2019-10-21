@@ -154,17 +154,16 @@ def setMotionOfSession(commander, session_id):
             law = None
 
         classification = getMotionClassification(vote['name'])
-        vote = Vote.objects.filter(id_parladata=vote['id'])
+        vote_obj = Vote.objects.filter(id_parladata=vote['id'])
 
         agendaItems = list(AgendaItem.objects.filter(id_parladata__in=motion['agenda_item']))
 
-        if vote:
+        if vote_obj:
             if commander:
                 commander.stdout.write('Updating vote %s' % str(vote['id']))
                 commander.stdout.write('Updating data %s' % str(vote))
-            vote = vote[0]
-            prev_result = vote.result
-            vote.update(created_for=session.start_time,
+            prev_result = vote_obj[0].result
+            vote_obj.update(created_for=session.start_time,
                         start_time=vote['start_time'],
                         session=session,
                         motion=vote['name'],
@@ -180,12 +179,13 @@ def setMotionOfSession(commander, session_id):
                         law=law,
                         classification=classification,
                         )
-            vote.agenda_item.add(*agendaItems)
+            vote_obj = vote_obj[0]
+            vote_obj.agenda_item.add(*agendaItems)
 
-            if prev_result != vote[0].result:
+            if prev_result != vote_obj.result:
                 if commander:
                     commander.stdout.write('Running finish_legislation_by_final_vote(vote[0])')
-                finish_legislation_by_final_vote(vote[0])
+                finish_legislation_by_final_vote(vote_obj)
         else:
             if commander:
                 commander.stdout.write('Saving new vote %s' % str(vote['id']))
@@ -206,11 +206,11 @@ def setMotionOfSession(commander, session_id):
                                     law=law,
                                     classification=classification,
                                     )
-            vote = Vote.objects.get(id_parladata=vote['id'])
+            vote_obj = Vote.objects.get(id_parladata=vote['id'])
             commander.stdout.write('Running finish_legislation_by_final_vote(vote[0])')
-            finish_legislation_by_final_vote(vote)
+            finish_legislation_by_final_vote(vote_obj)
 
-        owners = getOwnersOfAmendment(vote)
+        owners = getOwnersOfAmendment(vote_obj)
         if owners['orgs']:
             a_orgs = list(Organization.objects.filter(id_parladata__in=owners['orgs']))
         else:
@@ -222,16 +222,10 @@ def setMotionOfSession(commander, session_id):
             a_people = []
 
         if a_orgs:
-            vote.amendment_of.clear()
+            vote_obj.amendment_of.clear()
             for org in  a_orgs:
-                AmendmentOfOrg(vote=vote[0], organization=org).save()
-            vote.amendment_of_person.add(*a_people)
-
-            vote.amendment_of.clear()
-
-            for org in  a_orgs:
-                AmendmentOfOrg(vote=vote, organization=org).save()
-            vote.amendment_of_person.add(*a_people)
+                AmendmentOfOrg(vote=vote_obj, organization=org).save()
+            vote_obj.amendment_of_person.add(*a_people)
 
     # set motion analize
     if commander:
