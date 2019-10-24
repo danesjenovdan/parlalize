@@ -17,6 +17,7 @@ from utils import parladata_api
 
 import operator
 import re
+import json
 
 
 factory = RequestFactory()
@@ -134,15 +135,16 @@ def setMotionOfSession(commander, session_id):
 
         if vote['counter']:
             # this is for votes without ballots
-            opts_set = set(vote['counter'].keys())
+            counter = json.loads(vote['counter'])
+            opts_set = set(counter.keys())
             if opts_set.intersection(YES):
-                votes_for = vote['counter']['for']
+                votes_for = counter['for']
             if opts_set.intersection(AGAINST):
-                votes_against = vote['counter']['against']
+                votes_against = counter['against']
             if opts_set.intersection(ABSTAIN):
-                votes_abstain = vote['counter']['abstain']
+                votes_abstain = counter['abstain']
             # hardcoded croations number of member
-            votes_absent = 151 - sum([int(v) for v in vote['counter'].values()])
+            votes_absent = 151 - sum([int(v) for v in counter.values()])
 
         result = motion['result']
 

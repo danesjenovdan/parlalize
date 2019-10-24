@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Legislation
 from parlalize.settings import PARSER_UN, PARSER_PASS, LEGISLATION_STATUS
+from utils.parladata_api import getLegislation
 from datetime import datetime
 
 
@@ -12,12 +13,12 @@ class Command(BaseCommand):
         self.stdout.write('Updating legislation')
 
         self.stdout.write('Getting data from /law/')
-        laws = getLegislationa()
+        laws = getLegislation()
         epas = list(set([law['epa'] for law in laws if law['epa']]))
         self.stdout.write('Iterating through EPAs')
         for epa in set(epas):
             self.stdout.write(str(epa))
-            laws = getLegislationa(epa=epa)
+            laws = getLegislation(epa=epa)
             last_obj = None
             sessions = []
             is_ended = False
