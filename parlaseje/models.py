@@ -495,7 +495,7 @@ class Legislation(Timestampable, models.Model):
                            help_text='EPA number')
 
     mdt = models.CharField(blank=True, null=True,
-                           max_length=255,
+                           max_length=1024,
                            help_text='Working body')
 
     mdt_fk = models.ForeignKey('parlaskupine.Organization',
