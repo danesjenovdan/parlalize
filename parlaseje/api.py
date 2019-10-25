@@ -21,6 +21,13 @@ class VoteNoteSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'id_parladata', 'session')
 
 
+class VoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vote
+        fields = ('id', 'id_parladata', 'session')
+        read_only_fields = ('id', 'id_parladata', 'session')
+
+
 class LegislationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Legislation
@@ -63,6 +70,13 @@ class VoteNoteView(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('id_parladata', 'session__id_parladata')
     ordering_fields = ('created_for',)
+
+
+class VoteView(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
+    lookup_field = 'parladata_id'
 
 
 class LegislationView(viewsets.ModelViewSet):
