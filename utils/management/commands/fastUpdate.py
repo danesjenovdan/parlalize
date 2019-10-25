@@ -228,7 +228,7 @@ class Command(BaseCommand):
             sessions = list(set(sessions))
             sessions = list(Session.objects.filter(id_parladata__in=sessions))
             result.sessions.add(*sessions)
-            self.stdout.write(epa)
+            #self.stdout.write(epa)
 
         # update speeches
         existingIDs = list(Speech.objects.all().values_list('id_parladata',

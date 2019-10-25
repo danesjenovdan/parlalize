@@ -223,7 +223,7 @@ def getSessions(*args, **kwargs):
         out += urls
     return out
 
-def getLegislationa(*args, **kwargs):
+def getLegislation(*args, **kwargs):
     query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
     laws_url = settings.API_URL + '/law/'
     if query_url:
