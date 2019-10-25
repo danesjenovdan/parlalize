@@ -26,16 +26,23 @@ class Command(BaseCommand):
             for law in laws:
                 sessions.append(law['session'])
                 law['date'] = datetime.strptime(law['date'], '%Y-%m-%dT%X')
-                if not is_ended:
-                    if law['procedure_ended']:
-                        is_ended = True
-                if last_obj:
-                    if law['date'] > last_obj['date']:
+                legislation_result = None
+                if settings.country = 'HR':
+                    legislation_result = law['result']
+
+                elif settings.country = 'SI':
+                    if not is_ended:
+                        if law['procedure_ended']:
+                            is_ended = True
+                    if last_obj:
+                        if law['date'] > last_obj['date']:
+                            last_obj = law
+                    else:
                         last_obj = law
-                else:
-                    last_obj = law
             result = Legislation.objects.filter(epa=epa)
 
+            if settings.country = 'HR':
+                legislation_result =
             # dont update Legislatin procedure_ended back to False
             if result:
                 result = result[0]
@@ -52,6 +59,8 @@ class Command(BaseCommand):
                 result.date = last_obj['date']
                 result.procedure_ended = is_ended
                 result.classification = last_obj['classification']
+                if legislation_result:
+                    result.result = legislation_result
                 result.save()
             else:
                 print 'adding'
@@ -66,7 +75,7 @@ class Command(BaseCommand):
                                     date=last_obj['date'],
                                     procedure_ended=is_ended,
                                     classification=last_obj['classification'],
-                                    result=LEGISLATION_STATUS[0][0]
+                                    result=legislation_result if legislation_result else LEGISLATION_STATUS[0][0]
                                     )
                 result.save()
             sessions = list(set(sessions))
