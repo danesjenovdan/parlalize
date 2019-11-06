@@ -76,7 +76,7 @@ class VoteView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
-    lookup_field = 'parladata_id'
+    lookup_field = 'id_parladata'
 
 
 class LegislationView(viewsets.ModelViewSet):
