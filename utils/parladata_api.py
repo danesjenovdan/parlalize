@@ -50,7 +50,7 @@ def getVotersIDs(date_=datetime.now(), organization_id=None,):
                 if voter['organization'] != organization_id:
                     continue
             # check if person is voter on required date
-            if voter['start_time'] < date_.isoformat():
+            if voter['start_time'] <= date_.isoformat():
                 if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
                     voters_ids.append(voter['person'])
     return voters_ids
@@ -64,7 +64,7 @@ def getOrganizationsWithVoters(date_=datetime.now(), organization_id=None):
                 # skip person if is not voter of required organization
                 if voter['organization'] != organization_id:
                     continue
-            if voter['start_time'] < date_.isoformat():
+            if voter['start_time'] <= date_.isoformat():
                 if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
                     organization_ids.append(voter['on_behalf_of'])
 
@@ -80,7 +80,7 @@ def getVotersPairsWithOrg(date_=datetime.now(), organization_id=None):
                 if voter['organization'] != int(organization_id):
                     continue
             # check if person is voter on required date
-            if voter['start_time'] < date_.isoformat():
+            if voter['start_time'] <= date_.isoformat():
                 if voter['end_time'] == None or voter['end_time'] > date_.isoformat():
                     voters_ids[voter['person']] = voter['on_behalf_of']
     return voters_ids
