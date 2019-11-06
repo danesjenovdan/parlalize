@@ -27,9 +27,7 @@ def num_years(begin, end=None):
 
 
 def setMPStaticPL(commander, person_id, date_=None):
-    if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
-    else:
+    if not date_:
         date_of = datetime.now()
 
     commander.stdout.write('Fetching data from %s/persons/%s with day %s' % (API_URL, str(person_id), date_of))
@@ -95,4 +93,4 @@ class Command(BaseCommand):
         self.stdout.write('[info] update MP static')
         for membership in memberships:
             # call setters for members which have change in memberships
-            setMPStaticPL(self, str(membership['person']), datetime.strptime(membership['start_time'], '%Y-%m-%dT%H:%M:%S').strftime(API_DATE_FORMAT))
+            setMPStaticPL(self, str(membership['person']), datetime.strptime(membership['start_time'], '%Y-%m-%dT%H:%M:%S'))
