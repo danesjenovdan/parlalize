@@ -27,7 +27,9 @@ def num_years(begin, end=None):
 
 
 def setMPStaticPL(commander, person_id, date_=None):
-    if not date_:
+    if date_:
+        date_of = date_
+    else:
         date_of = datetime.now()
 
     commander.stdout.write('Fetching data from %s/persons/%s with day %s' % (API_URL, str(person_id), date_of))
