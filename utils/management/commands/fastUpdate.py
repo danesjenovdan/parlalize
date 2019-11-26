@@ -269,7 +269,7 @@ class Command(BaseCommand):
         for session_id in data['sessions_of_updated_votes']:
             self.stdout.write('set motion of session ' + str(session_id))
             c=Command()
-            setMotionOfSession(c, str(session_id))
+            setMotionOfSession(self, str(session_id))
 
         # update ballots
         sc.api_call("chat.postMessage",

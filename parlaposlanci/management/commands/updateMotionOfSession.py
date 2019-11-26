@@ -40,10 +40,10 @@ def getOwnersOfAmendment(vote):
                 query = reduce(operator.or_, (Q(name_parser__icontains=item) for item in acronyms))
                 orgs = Organization.objects.filter(query)
                 s_time = vote.start_time
-                orgs = orgs.filter(Q(founding_date__lte=s_time) |
-                                   Q(founding_date=None),
-                                   Q(dissolution_date__gte=s_time) |
-                                   Q(dissolution_date=None))
+                #orgs = orgs.filter(Q(founding_date__lte=s_time) |
+                #                   Q(founding_date=None),
+                #                   Q(dissolution_date__gte=s_time) |
+                #                   Q(dissolution_date=None))
                 org_ids = list(orgs.values_list('id_parladata', flat=True))
             else:
                 org_ids = []
