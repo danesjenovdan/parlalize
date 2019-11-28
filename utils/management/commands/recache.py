@@ -21,7 +21,7 @@ class Command(BaseCommand):
         getAllStaticData(None, force_render=True)
         getSessionsList(None,force_render=True)
         for org in Organization.objects.filter(has_voters=True):
-            getListOfPGs(None, org.id_parladata, force_render=True)
+            getListOfPGs(None, str(org.id_parladata), force_render=True)
         requests.get(settings.FRONT_URL + '/api/data/refetch')
         requests.get(settings.GLEJ_URL + '/api/data/refetch')
         requests.get(settings.ISCI_URL + '/api/data/refetch')
