@@ -204,7 +204,7 @@ def setMotionOfSession(commander, session_id):
                                     not_present=votes_absent,
                                     result=result,
                                     id_parladata=vote['id'],
-                                    document_url=vote['document_url'],
+                                    document_url=documents,
                                     epa=motion['epa'],
                                     law=law,
                                     classification=classification,
