@@ -147,6 +147,7 @@ def setMotionOfSession(commander, session_id):
             votes_absent = 151 - sum([int(v) for v in counter.values()])
 
         result = motion['result']
+        documents = [{'url': link['url'], 'name': link['url']} for link in motion['links']]
 
         # TODO: replace try with: "if vote['epa']"
         try:
@@ -176,7 +177,7 @@ def setMotionOfSession(commander, session_id):
                         not_present=votes_absent,
                         result=result,
                         id_parladata=vote['id'],
-                        document_url=vote['document_url'],
+                        document_url=documents,
                         epa=motion['epa'],
                         law=law,
                         classification=classification,
