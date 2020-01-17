@@ -11,21 +11,21 @@ class Command(BaseCommand):
         self.stdout.write('Fetching data from %s/organizations/' % API_URL)
         data = getOrganizations()
         for pg in data:
-            if Organization.objects.filter(id_parladata=pg):
-                self.stdout.write('Updating organisation %s' % str(pg))
-                org = Organization.objects.get(id_parladata=pg)
-                org.name = data[pg]['name']
-                org.classification = data[pg]['classification']
-                org.acronym = data[pg]['acronym']
-                org.name_parser = data[pg]['name_parser']
-                org.is_coalition = True if data[pg]['is_coalition'] else False
+            if Organization.objects.filter(id_parladata=pg['id']):
+                self.stdout.write('Updating organisation %s' % str(pg['id']))
+                org = Organization.objects.get(id_parladata=pg['id'])
+                org.name = pg['name']
+                org.classification = pg['classification']
+                org.acronym = pg['acronym']
+                org.name_parser = pg['name_parser']
+                org.is_coalition = True if pg['is_coalition'] else False
                 org.save()
             else:
-                self.stdout.write('Adding organisation %s' % str(pg))
-                org = Organization(name=data[pg]['name'],
-                                  classification=data[pg]['classification'],
-                                  id_parladata=pg,
-                                  acronym=data[pg]['acronym'],
-                                  is_coalition=True if data[pg]['is_coalition'] else False)
+                self.stdout.write('Adding organisation %s' % str(pg['id']))
+                org = Organization(name=pg['name'],
+                                  classification=pg['classification'],
+                                  id_parladata=pg['id'],
+                                  acronym=pg['acronym'],
+                                  is_coalition=True if pg['is_coalition'] else False)
                 org.save()
         return 0

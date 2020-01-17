@@ -1,9 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaseje.models import Ballot, Vote
 from parlaposlanci.models import Person
+from parlaskupine.models import Organization
 from parlalize.settings import API_URL, SETTER_KEY
 from django.test.client import RequestFactory
 from parlalize.utils_ import getDataFromPagerApi, getDataFromPagerApiGen
+from utils.parladata_api import getBallots
 
 factory = RequestFactory()
 request_with_key = factory.get('?key=' + SETTER_KEY)
