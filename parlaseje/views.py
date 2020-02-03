@@ -895,6 +895,7 @@ def getMotionAnalize(request, motion_id):
         vote = Vote.objects.filter(id_parladata=motion_id)
         if vote:
             # if vote exist and Vote analysis not [empty state]
+            vote = vote[0]
             out = {
                 'id': motion_id,
                 'session': vote.session.getSessionData(),
