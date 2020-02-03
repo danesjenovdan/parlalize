@@ -889,7 +889,15 @@ def getMotionAnalize(request, motion_id):
         "created_at": "03.05.2017"
     }
     """
-    model = get_object_or_404(Vote_analysis, vote__id_parladata=motion_id)
+    try:
+        model = Vote_analysis.objects.get(vote__id_parladata=motion_id)
+    except:
+        if Vote.objects.filter(id_parladata=motion_id):
+            # if vote exist and Vote analysis not [empty state]
+            return JsonResponse(out, safe=False)
+        else:
+            # work around for correct status code and message
+            model = get_object_or_404(Vote_analysis, vote__id_parladata=motion_id)
     vote = model.vote
     docs = vote.document_url
 
