@@ -894,7 +894,7 @@ def getMotionAnalize(request, motion_id):
     except:
         if Vote.objects.filter(id_parladata=motion_id):
             # if vote exist and Vote analysis not [empty state]
-            return JsonResponse(out, safe=False)
+            return JsonResponse({}, safe=False)
         else:
             # work around for correct status code and message
             model = get_object_or_404(Vote_analysis, vote__id_parladata=motion_id)
