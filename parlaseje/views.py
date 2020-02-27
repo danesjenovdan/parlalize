@@ -895,9 +895,22 @@ def getMotionAnalize(request, motion_id):
         vote = Vote.objects.filter(id_parladata=motion_id)
         if vote:
             # if vote exist and Vote analysis not [empty state]
+            vote = vote[0]
             out = {
                 'id': motion_id,
                 'session': vote.session.getSessionData(),
+                'all': {
+                    'for': vote.votes_for,
+                    'against': vote.against,
+                    'abstain': vote.abstain,
+                    'absent': vote.not_present,
+                },
+                'result': {
+                    'accepted': vote.result,
+                    'value': None,
+                    'max_opt': None,
+                    'is_outlier': False,
+                },
                 'created_for': vote.created_for.strftime(API_DATE_FORMAT),
                 'created_at': vote.created_at.strftime(API_DATE_FORMAT),
                 'name': vote.motion
