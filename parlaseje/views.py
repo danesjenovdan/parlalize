@@ -2995,3 +2995,22 @@ def getAgendaItem(request, agenda_item_id, date_=None):
                              'result': data})
     else:
         JsonResponse({}, status=204)
+
+
+def getBuggyDataAnalyses(request):
+    data = cache.get('bauggy_data')
+    if not data:
+        votes = Vote.objects.filter(session__organization__id_parladata=199)
+        votes_count = votes.count()
+        hand_votes_count = votes.annotate(analysis_count=Count('analysis')).filter(analysis_count=0).count()
+
+        commitee_sessions = Sesssion.objects.all().exclude(organization__id_parladata=199)
+        data = {
+            'all_sabor_votes': votes_countm,
+            'all_hand_votes': hand_votes_count,
+            'commitee_sessions_count': commitee_sessions
+        }
+        cache.set('bauggy_data', data, 60 * 60 * 4)
+    return JsonResponse(data)
+
+
