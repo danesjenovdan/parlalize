@@ -63,6 +63,7 @@ urlpatterns = [
 
     url(r'^getAgendaItem/(?P<agenda_item_id>\d+)$', getAgendaItem),
     url(r'^getAgendaItem/(?P<agenda_item_id>\d+)/(?P<date_>[\w].+)$', getAgendaItem),
+    url(r'^getBuggyStats/$', , getBuggyDataAnalyses),
 
     url(r'^', include(router.urls)),
 ]

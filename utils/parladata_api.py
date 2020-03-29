@@ -190,6 +190,13 @@ def getBallotsOfVote(vote_id):
 
     return out_data
 
+def getBallots():
+    url = settings.API_URL + '/ballots/'
+    out_data = []
+    for ballots in getDataFromPagerApiDRFGen(url):
+        out_data += ballots
+    return out_data
+
 def getBallotsForSession(session_id):
     url = settings.API_URL + '/ballots/?vote__session=' + str(session_id)
     out_data = []
@@ -312,20 +319,18 @@ def getAllPGs(parent_org=None):
             out[org['id']] = org
     return out
 
-def getCoalitionPGs(parent_org=None):
-    orgs = getOrganizationsWithVoters(organization_id=parent_org)
-    url = settings.API_URL + '/organizations/?ids=' + ','.join(map(str, orgs))
-    out_data = {
-        'coalition': [],
-        'opposition': []
-    }
-    for orgs in getDataFromPagerApiDRFGen(url):
-        for org in orgs:
-            if org['is_coalition']:
-                out_data['coalition'].append(org['id'])
-            else:
-                out_data['opposition'].append(org['id'])
-    return out_data
+def getCoalitionPGs(parent_org=None, date_=datetime.now()):
+    url = settings.API_URL + '/organization_memberships'
+    out_dict = {}
+    for page in getDataFromPagerApiDRFGen(url):
+        for membership in page:
+            if membership['start_time'] <= date_.isoformat():
+                if membership['end_time'] == None or membership['end_time'] > date_.isoformat():
+                    if membership['parent'] in out_dict.keys():
+                        out_dict[membership['parent']].append(membership['organization'])
+                    else:
+                        out_dict[membership['parent']] = [membership['organization']]
+    return out_dict
 
 # Move this to other place
 

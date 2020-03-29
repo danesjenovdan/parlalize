@@ -889,7 +889,36 @@ def getMotionAnalize(request, motion_id):
         "created_at": "03.05.2017"
     }
     """
-    model = get_object_or_404(Vote_analysis, vote__id_parladata=motion_id)
+    try:
+        model = Vote_analysis.objects.get(vote__id_parladata=motion_id)
+    except:
+        vote = Vote.objects.filter(id_parladata=motion_id)
+        if vote:
+            # if vote exist and Vote analysis not [empty state]
+            vote = vote[0]
+            out = {
+                'id': motion_id,
+                'session': vote.session.getSessionData(),
+                'all': {
+                    'for': vote.votes_for,
+                    'against': vote.against,
+                    'abstain': vote.abstain,
+                    'absent': vote.not_present,
+                },
+                'result': {
+                    'accepted': vote.result,
+                    'value': None,
+                    'max_opt': None,
+                    'is_outlier': False,
+                },
+                'created_for': vote.created_for.strftime(API_DATE_FORMAT),
+                'created_at': vote.created_at.strftime(API_DATE_FORMAT),
+                'name': vote.motion
+            }
+            return JsonResponse(out, safe=False)
+        else:
+            # work around for correct status code and message
+            model = get_object_or_404(Vote_analysis, vote__id_parladata=motion_id)
     vote = model.vote
     docs = vote.document_url
 
@@ -2979,3 +3008,22 @@ def getAgendaItem(request, agenda_item_id, date_=None):
                              'result': data})
     else:
         JsonResponse({}, status=204)
+
+
+def getBuggyDataAnalyses(request):
+    data = cache.get('bauggy_data')
+    if not data:
+        votes = Vote.objects.filter(session__organization__id_parladata=199)
+        votes_count = votes.count()
+        hand_votes_count = votes.annotate(analysis_count=Count('analysis')).filter(analysis_count=0).count()
+
+        commitee_sessions = Sesssion.objects.all().exclude(organization__id_parladata=199)
+        data = {
+            'all_sabor_votes': votes_countm,
+            'all_hand_votes': hand_votes_count,
+            'commitee_sessions_count': commitee_sessions
+        }
+        cache.set('bauggy_data', data, 60 * 60 * 4)
+    return JsonResponse(data)
+
+
