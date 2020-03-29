@@ -54,8 +54,16 @@ def setMotionAnalize(session_id):
 
     if data.empty:
         return
-    coalition = getCoalitionPGs(parent_org=session.organization.id_parladata)['coalition']
+    gov_sides = getCoalitionPGs(parent_org=session.organization.id_parladata, session.start_time)['coalition']
     paries_ids = getOrganizationsWithVoters(organization_id=session.organization.id_parladata)
+
+    for key, value in gov_sides.items():
+        cur = Organization.objects.get(id_parladata=key)
+        if cur.classification = 'coalition':
+            coalition = value
+            coalition_org = cur
+        else:
+            opozition_org = cur
 
     # if coalition exist
     calc_sides = bool(len(set(coalition+paries_ids)) != len(coalition+paries_ids))
@@ -115,10 +123,6 @@ def setMotionAnalize(session_id):
     oppoInterCalc = data[data.is_coalition == 0].groupby(['vote']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
     allInter = data.groupby(['vote']).sum().apply(lambda row: getIntraDisunion(row), axis=1)
 
-    if calc_sides:
-        opozition = Organization.objects.get(name="Opozicija")
-        coalition = Organization.objects.get(name="Koalicija")
-
     for vote_id in all_votes.index.values:
         vote = Vote.objects.get(id_parladata=vote_id)
         vote_a = Vote_analysis.objects.filter(vote__id_parladata=vote_id)
@@ -156,20 +160,20 @@ def setMotionAnalize(session_id):
                                start_time=vote.start_time,
                                session=vote.session).save()
         if calc_sides:
-            opoIntra = IntraDisunion.objects.filter(organization=opozition,
+            opoIntra = IntraDisunion.objects.filter(organization=opozition_org,
                                                     vote=vote)
-            coalIntra = IntraDisunion.objects.filter(organization=coalition,
+            coalIntra = IntraDisunion.objects.filter(organization=coalition_org,
                                                     vote=vote)
 
             if opoIntra:
                 opoIntra.update(maximum=oppoInterCalc[vote_id])
             else:
-                IntraDisunion(organization=opozition,
+                IntraDisunion(organization=opozition_org,
                             vote=vote,
                             maximum=oppoInterCalc[vote_id]
                             ).save()
             if coalInterCalc.empty:
-                IntraDisunion(organization=coalition,
+                IntraDisunion(organization=coalition_org,
                             vote=vote,
                             maximum=0
                             ).save()
@@ -177,7 +181,7 @@ def setMotionAnalize(session_id):
                 if coalIntra:
                     coalIntra.update(maximum=coalInterCalc[vote_id])
                 else:
-                    IntraDisunion(organization=coalition,
+                    IntraDisunion(organization=coalition_org,
                                 vote=vote,
                                 maximum=coalInterCalc[vote_id]
                                 ).save()
