@@ -29,7 +29,7 @@ def setPresenceOfPG(commander, session_id):
     results = {}
 
     for pg in pgs:
-        if not str(pg) in PGs:
+        if not pg in PGs:
             continue
         try:
             results[pg] = counters_in[pg] * 100 / \

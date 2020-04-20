@@ -319,7 +319,7 @@ def getAllPGs(parent_org=None):
             out[org['id']] = org
     return out
 
-def getCoalitionPGs(parent_org=None, date_=datetime.now()):
+def getCoalitionPGs(date_=datetime.now(), parent_org=None):
     url = settings.API_URL + '/organization_memberships'
     out_dict = {}
     for page in getDataFromPagerApiDRFGen(url):

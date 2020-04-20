@@ -54,12 +54,12 @@ def setMotionAnalize(session_id):
 
     if data.empty:
         return
-    gov_sides = getCoalitionPGs(parent_org=session.organization.id_parladata, session.start_time)['coalition']
+    gov_sides = getCoalitionPGs(session.start_time, parent_org=session.organization.id_parladata)
     paries_ids = getOrganizationsWithVoters(organization_id=session.organization.id_parladata)
 
     for key, value in gov_sides.items():
         cur = Organization.objects.get(id_parladata=key)
-        if cur.classification = 'coalition':
+        if cur.classification == 'coalition':
             coalition = value
             coalition_org = cur
         else:
