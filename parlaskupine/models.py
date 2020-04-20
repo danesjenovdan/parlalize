@@ -6,7 +6,7 @@ from parlaposlanci.models import *
 from parlaseje.models import *
 from jsonfield import JSONField
 from behaviors.models import Timestampable
-
+from datetime import datetime
 # converting datetime to popolo
 class PopoloDateTimeField(models.DateTimeField):
 
@@ -54,12 +54,19 @@ class Organization(Timestampable, models.Model):
     def __str__(self):
         return unicode(self.name) + " " + str(self.id_parladata)
 
-    def getOrganizationData(self):
+    def getOrganizationData(self, date_=None):
+        if date_
+            dateObj = datetime.strptime(date_, '%d.%m.%Y')
+        else:
+            dateObj = datetime.now()
+        pg_statics = self.pg_statics.filter(created_for__lte=dateObj)
+        if pg_statics:
+            is_coalition = pg_statics.latest('created_for').is_coalition
         return {
                   'id': self.id_parladata,
                   'name': self.name,
                   'acronym': self.acronym,
-                  'is_coalition': self.is_coalition,
+                  'is_coalition': is_coalition,
                   'classification': self.classification,
                   'has_voters': self.has_voters
                }
@@ -67,7 +74,8 @@ class Organization(Timestampable, models.Model):
 
 class PGStatic(Timestampable, models.Model):
     organization = models.ForeignKey('Organization',
-                                     help_text=_('Organization foreign key relationship'))
+                                     help_text=_('Organization foreign key relationship'),
+                                     related_name='pg_statics')
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -102,6 +110,9 @@ class PGStatic(Timestampable, models.Model):
                              null=True,
                              default=None,
                              help_text=_('email profile URL'))
+
+    is_coalition = models.BooleanField(_('coalition'),
+                                      default=False)
 
 class PercentOFAttendedSession(Timestampable, models.Model): #Model for presence of PG on sessions
 
