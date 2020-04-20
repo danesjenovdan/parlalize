@@ -946,7 +946,7 @@ def getMotionAnalize(request, motion_id):
             continue
         # check i
         orgs_data[org] = json.loads(tmp_data[org])
-        orgs_data[org]['party'] = org_obj.getOrganizationData()
+        orgs_data[org]['party'] = org_obj.getOrganizationData(vote.created_for.strftime(API_DATE_FORMAT))
         if orgs_data[org]['outliers']:
             pg_outliers[int(org)] = orgs_data[org]['outliers']
 

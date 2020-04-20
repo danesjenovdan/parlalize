@@ -163,7 +163,7 @@ def getMPStaticPL(request, person_id, date_=None):
     for funct in card.working_bodies_functions:
         org = Organization.objects.filter(id_parladata=funct['org_id'])
         if org:
-            wbfs.append({'wb': org[0].getOrganizationData(),
+            wbfs.append({'wb': org[0].getOrganizationData(date_),
                          'role': funct['role']})
 
     data = {
