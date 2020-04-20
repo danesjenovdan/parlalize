@@ -48,6 +48,13 @@ def setBasicInfoOfPG(commander, pg, date):
                 viceOfPG.append(None)
     else:
                 viceOfPG.append(None)
+
+    gov_sides = getCoalitionPGs(date_of, parent_org=session.organization.id_parladata)
+    is_coalition = False
+    for gov_side, orgs in gov_sides.items():
+        if Organization.objects.get(id_parladata=gov_side).is_coalition:
+            is_coalition = pg.id_parladata in orgs
+
     org = Organization.objects.get(id_parladata=int(pg))
     commander.stdout.write('Saving organization %s' % str(pg))
     saveOrAbortNew(model=PGStatic,
@@ -59,7 +66,8 @@ def setBasicInfoOfPG(commander, pg, date):
                   allVoters=org_data['voters'],
                   facebook=json.dumps(facebook) if facebook else None,
                   twitter=json.dumps(twitter) if twitter else None,
-                  email=email
+                  email=email,
+                  is_coalition=is_coalition
                   )
 
     return
