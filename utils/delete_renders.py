@@ -60,6 +60,9 @@ def deleteRendersOfSession(session_ids, update_votes_details=False, update_speec
         # delete renders vote details
         if update_votes_details:
             votes = Vote.objects.filter(session_id__id_parladata=session_id)
+            if votes:
+                # delete legislations
+                delete_renders(group='c', method='zakonodaja', owner_id=str(session_id))
             for vote in votes:
                 delete_renders(group='s', method='glasovanje', owner_id=str(vote.id_parladata))
 

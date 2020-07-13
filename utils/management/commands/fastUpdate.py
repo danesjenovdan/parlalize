@@ -394,7 +394,7 @@ class Command(BaseCommand):
         if s_update:
             self.stdout.write('recache')
             speech_the_order()
-            deleteRendersOfSession(list(set(s_update)))
+            deleteRendersOfSession(list(set(s_update)), update_votes_details=True, update_speeches=True)
             refetch()
 
         p_update += list(speeches.values_list("person__id_parladata", flat=True))
