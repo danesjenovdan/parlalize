@@ -25,6 +25,33 @@ def commit_to_solr(commander, output):
                   data=data,
                   headers={'Content-Type': 'application/json'})
 
+def uploadSessionToSolr(commander, ses_ids):
+    static_data = json.loads(getAllStaticData(None).content)
+
+    self.stdout.write('Sessions for upload %s' % str(ses_ids))
+    for session_id in ses_ids:
+        self.stdout.write('About to begin with session %s' % str(session_id))
+        session = Session.objects.filter(id_parladata=session_id)
+        if not session:
+            self.stdout.write('Session with id %s does not exist' % str(session_id))
+            continue
+        else:
+            session = session[0]
+
+        output = [{
+            'term': 'VIII',
+            'type': 'session',
+            'id': 'session_' + str(session.id_parladata),
+            'session_id': session.id_parladata,
+            'session_json': json.dumps(static_data['sessions'][str(session.id_parladata)]),
+            'org_id': session.organization.id_parladata,
+            'start_time': session.start_time.isoformat(),
+            'content': getSessionMegastring(session),
+            'title': session.name,
+        }]
+
+        commit_to_solr(self, output)
+
 
 class Command(BaseCommand):
     help = 'Upload sessions to Solr'
@@ -56,30 +83,7 @@ class Command(BaseCommand):
 
         # get static data
         self.stdout.write('Getting all static data')
-        static_data = json.loads(getAllStaticData(None).content)
 
-        self.stdout.write('Sessions for upload %s' % str(ses_ids))
-        for session_id in ses_ids:
-            self.stdout.write('About to begin with session %s' % str(session_id))
-            session = Session.objects.filter(id_parladata=session_id)
-            if not session:
-                self.stdout.write('Session with id %s does not exist' % str(session_id))
-                continue
-            else:
-                session = session[0]
-
-            output = [{
-                'term': 'VIII',
-                'type': 'session',
-                'id': 'session_' + str(session.id_parladata),
-                'session_id': session.id_parladata,
-                'session_json': json.dumps(static_data['sessions'][str(session.id_parladata)]),
-                'org_id': session.organization.id_parladata,
-                'start_time': session.start_time.isoformat(),
-                'content': getSessionMegastring(session),
-                'title': session.name,
-            }]
-
-            commit_to_solr(self, output)
+        uploadSessionToSolr(self, ses_ids)
 
         return 0
