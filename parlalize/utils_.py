@@ -35,6 +35,9 @@ from requests.auth import HTTPBasicAuth
 
 from slackclient import SlackClient
 
+class Http204(Http404):
+    status = 204
+
 def lockSetter(function):
     def wrap(request, *args, **kwargs):
         if request:
@@ -205,9 +208,9 @@ def getPersonCardModelNew(model, id, date=None, is_visible=None):
         # if model == LastActivity:
             # return None
         if DEBUG:
-            raise Http404('Nismo našli kartice' + str(model)+str(id))
+            raise Http204('Nismo našli kartice' + str(model)+str(id))
         else:
-            raise Http404('Nismo našli kartice')
+            raise Http204('Nismo našli kartice')
     else:
         if model == LastActivity:
             latest_day = modelObject.latest('created_for').created_for
@@ -246,7 +249,7 @@ def getPersonCardModel(model, id, date=None):
     if not modelObject:
         if model == LastActivity:
             return None
-        raise Http404('Nismo našli kartice')
+        raise Http204('Nismo našli kartice')
     else:
         if model == LastActivity:
             modelObject = modelObject.latest('date')
@@ -264,7 +267,7 @@ def getPGCardModel(model, id, date=None):
         modelObject = model.objects.filter(organization__id_parladata=id,
                                            created_at__lte=datetime.now())
     if not modelObject:
-        raise Http404('Nismo našli kartice')
+        raise Http204('Nismo našli kartice')
     else:
         modelObject = modelObject.latest('created_at')
     return modelObject
@@ -285,7 +288,7 @@ def getPGCardModelNew(model, id, date=None, is_visible=None):
     if not modelObject:
         # if model == LastActivity:
             # return None
-        raise Http404('Nismo našli kartice')
+        raise Http204('Nismo našli kartice')
     else:
         date = modelObject.latest('created_for').created_for
         modelObject = modelObject.filter(created_for=date).latest('created_at')
@@ -301,7 +304,7 @@ def getSCardModel(model, id_se, date=None):
         modelObject = model.objects.filter(id_parladata=id_se,
                                            created_at__lte=datetime.now())
     if not modelObject:
-        raise Http404('Nismo našli kartice')
+        raise Http204('Nismo našli kartice')
     else:
         modelObject = modelObject.latest('created_at')
     return modelObject
