@@ -1,8 +1,6 @@
 from django.contrib import admin
 import sys
 from parlaposlanci.models import *
-reload(sys)
-sys.setdefaultencoding('utf-8')
 # Register your models here.
 
 class PersonAdmin(admin.ModelAdmin):
@@ -23,7 +21,6 @@ admin.site.register(VocabularySizeUniqueWords)
 admin.site.register(StyleScores)
 admin.site.register(Tfidf)
 admin.site.register(AverageNumberOfSpeechesPerSession)
-#admin.site.register(Compass)
 admin.site.register(TaggedBallots)
 admin.site.register(MembershipsOfMember)
 admin.site.register(District)

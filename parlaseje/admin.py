@@ -5,8 +5,8 @@ from .forms import LegislationForm
 import re
 
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 
 
 class SessionAdmin(admin.ModelAdmin):

@@ -17,7 +17,8 @@ from utils.delete_renders import delete_renders, deleteRendersOfSession, deleteR
 from utils.parladata_api import getVotersIDs
 
 from datetime import datetime, timedelta
-from slackclient import SlackClient
+from slack import WebClient
+slack_client = WebClient(token=slack_token)
 from time import time
 from itertools import groupby
 
@@ -45,7 +46,6 @@ class Command(BaseCommand):
 
         fast = False
         date_ = None
-        sc = SlackClient(slack_token)
         start_time = time()
         yesterday = (datetime.now()-timedelta(days=1)).date()
         yesterday = datetime.combine(yesterday, datetime.min.time())
@@ -53,9 +53,12 @@ class Command(BaseCommand):
         lockFile = open('parser.lock', 'w+')
         lockFile.write('LOCKED')
         lockFile.close()
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text='Start fast update at: ' + str(datetime.now()))
+        try:
+            slack_client.chat_postMessage(
+                channel="#parlalize_notif",
+                text='Start fast update at: ' + str(datetime.now()))
+        except:
+            pass
         dates = []
 
         lastBallotTime = self.getModelStartTime(Ballot)
@@ -98,9 +101,13 @@ class Command(BaseCommand):
                 'Questions: ' + str(len(data['questions'])) + '\n'
                 'Legislation: ' + str(len(data['laws'])) + '\n'
                 )
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text=text)
+
+        try:
+            slack_client.chat_postMessage(
+                channel="#parlalize_notif",
+                text=text)
+        except:
+            pass
 
         sdate = datetime.now().strftime(API_DATE_FORMAT)
 
@@ -208,6 +215,7 @@ class Command(BaseCommand):
                 result.date = last_obj['date']
                 result.procedure_ended = is_ended
                 result.classification = last_obj['classification']
+                result.result = last_obj['result']
                 result.save()
             else:
                 self.stdout.write('adding')
@@ -222,7 +230,7 @@ class Command(BaseCommand):
                                     date=last_obj['date'],
                                     procedure_ended=is_ended,
                                     classification=last_obj['classification'],
-                                    result=LEGISLATION_STATUS[0][0]
+                                    result=last_obj['result']
                                     )
                 result.save()
             sessions = list(set(sessions))
@@ -233,9 +241,13 @@ class Command(BaseCommand):
         # update speeches
         existingIDs = list(Speech.objects.all().values_list('id_parladata',
                                                             flat=True))
-        sc.api_call('chat.postMessage',
-                    channel='#parlalize_notif',
-                    text='Start update speeches at: ' + str(datetime.now()))
+        try:
+            slack_client.chat_postMessage(
+                channel='#parlalize_notif',
+                text='Start update speeches at: ' + str(datetime.now()))
+        except:
+            pass
+
         for dic in data['speeches']:
             if int(dic['id']) not in existingIDs:
                 self.stdout.write('adding speech')
@@ -263,18 +275,26 @@ class Command(BaseCommand):
                             valid_to=dic['valid_to'])
 
         # update Votes
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text='Start update votes at: ' + str(datetime.now()))
+        try:
+            slack_client.chat_postMessage(
+                channel="#parlalize_notif",
+                text='Start update votes at: ' + str(datetime.now()))
+        except:
+            pass
+
         for session_id in data['sessions_of_updated_votes']:
             self.stdout.write('set motion of session ' + str(session_id))
             c=Command()
             setMotionOfSession(self, str(session_id))
 
         # update ballots
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text='Start update ballots at: ' + str(datetime.now()))
+        try:
+            slack_client.chat_postMessage(
+                channel="#parlalize_notif",
+                text='Start update ballots at: ' + str(datetime.now()))
+        except:
+            pass
+
         existingISs = Ballot.objects.all().values_list('id_parladata', flat=True)
         for dic in data['ballots']:
             if int(dic['id']) not in existingISs:
@@ -291,9 +311,12 @@ class Command(BaseCommand):
                 ballots.person.add(person)
 
         # update questions
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text='Start update Questions at: ' + str(datetime.now()))
+        try:
+            slack_client.chat_postMessage(
+                channel="#parlalize_notif",
+                text='Start update Questions at: ' + str(datetime.now()))
+        except:
+            pass
         existingISs = list(Question.objects.all().values_list('id_parladata',
                                                             flat=True))
         for dic in data['questions']:
@@ -338,18 +361,24 @@ class Command(BaseCommand):
                 question.recipient_organizations.add(*rec_org)
                 question.recipient_persons_static.add(*rec_posts)
 
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text='Start update distircts and tags at: ' + str(datetime.now()))
+        try:
+            slack_client.chat_postMessage(
+                        channel="#parlalize_notif",
+                        text='Start update distircts and tags at: ' + str(datetime.now()))
+        except:
+            pass
 
         t_delta = time() - start_time
 
         text = ('End fast update (' + str(t_delta) + ' s) and start'
                 'update sessions cards at: ' + str(datetime.now()) + '')
 
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text=text)
+        try:
+            slack_client.chat_postMessage(
+                        channel="#parlalize_notif",
+                        text=text)
+        except:
+            pass
 
         self.stdout.write('sessions')
         s_update = []
@@ -370,9 +399,12 @@ class Command(BaseCommand):
 
         text = ('End creating cards (' + str(t_delta) + ' s) and start'
                 'creating recache: ' + str(datetime.now()) + '')
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text=text)
+        try:
+            slack_client.chat_postMessage(
+                        channel="#parlalize_notif",
+                        text=text)
+        except:
+            pass
 
         lockFile = open('parser.lock', 'w+')
         lockFile.write('UNLOCKED')
@@ -421,6 +453,9 @@ class Command(BaseCommand):
         text = ('End fastUpdate everything (' + str(t_delta) + ' s): '
                 '' + str(datetime.now()) + '')
 
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text=text)
+        try:
+            slack_client.chat_postMessage(
+                        channel="#parlalize_notif",
+                        text=text)
+        except:
+            pass

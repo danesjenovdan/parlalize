@@ -13,7 +13,7 @@ from django.conf import settings
 from django.http import JsonResponse
 
 def set_mismatch_of_pg(request, by_organization, date_=''):
-    print 'Preparing date'
+    print('Preparing date')
     if date_:
         f_date = datetime.strptime(date_, '%d.%m.%Y')
     else:
@@ -24,7 +24,7 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
         temp = pd.DataFrame(page)
         data = data.append(temp, ignore_index=True)
 
-    print 'Preparing pandas DataFrame'
+    print('Preparing pandas DataFrame')
     data['option_absent'] = 0
     data['option_for'] = 0
     data['option_against'] = 0
@@ -35,7 +35,7 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
     data.loc[data['option'] == 'abstain', 'option_abstain'] = 1
     data['voter_unit'] = 1
 
-    print 'Prepared pandas DataFrame, about to start analyzing things.'
+    print('Prepared pandas DataFrame, about to start analyzing things.')
 
     #for against absent abstain
     # all_votes = data.groupby('vote').sum()
@@ -60,7 +60,7 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
                  'absent': row['option_absent']}
         if max(stats.values()) == 0:
             return None
-        max_ids = [key for key, val in stats.iteritems() if val == max(stats.values())]
+        max_ids = [key for key, val in stats.items() if val == max(stats.values())]
         #if len(max_ids) > 1:
         #    return None
         #return max_ids[0]
@@ -94,10 +94,10 @@ def set_mismatch_of_pg(request, by_organization, date_=''):
     final = pd.concat([members_equal_count, members_vote_count], axis=1)
 
     final['percent'] = final.apply(lambda x: float(x['equal_vote'])/x['voter_unit']*100.0, axis=1)
-    print 'saving'
+    print('saving')
     data = []
     for member, row in final.iterrows():
-        print member
+        print(member)
         value = 100 - row['percent']
         person = Person.objects.get(id_parladata=member)
         party = person.static_data.latest('created_at').party

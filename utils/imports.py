@@ -57,33 +57,33 @@ def updatePersonFunctions():
 
 def update():
     call_command('updateOrgs')
-    print 'orgs done'
+    print('orgs done')
 
-    print 'start people'
+    print('start people')
     call_command('updatePeople')
-    print 'people done'
+    print('people done')
 
 
-    print 'start sessions'
+    print('start sessions')
     #setAllSessions()
     call_command('setSessions')
-    print 'Sessions done'
+    print('Sessions done')
 
-    print 'start speeches'
+    print('start speeches')
     updateSpeeches()
     call_command('my_command')
 
-    print 'speeches done'
+    print('speeches done')
 
-    print 'start votes'
+    print('start votes')
     call_command('updateMotionOfSession')
-    print 'votes done'
+    print('votes done')
 
-    print 'start ballots'
+    print('start ballots')
     call_command('updateBallots')
-    print 'ballots done'
+    print('ballots done')
 
-    print 'update districts and tags'
+    print('update districts and tags')
     call_command('updateDistricts')
     updateTags()
     call_command('updateTags')
@@ -93,7 +93,7 @@ def update():
 
 def importDraftLegislationsFromFeed():
     def split_epa_and_name(thing, date):
-        print thing, date
+        print(thing, date)
         epa_regex = re.compile(r'\d+-(IX|IV|V?I{0,3})')
         current_epa = epa_regex.match(thing).group(0)
         current_name = thing.split(current_epa)[1].strip()
@@ -138,11 +138,11 @@ def importDraftLegislationsFromFeed():
 
     update = False
     report = check_and_save_legislation(epas_and_names_tuple_zakoni, 'zakon')
-    print report, 'zakon'
+    print (report, 'zakon')
     if report['saved']:
         update = True
     report = check_and_save_legislation(epas_and_names_tuple_akti, 'akt')
-    print report, 'akti'
+    print(report, 'akti')
     if report['saved']:
         update = True
     # if update:
@@ -153,7 +153,7 @@ def parse_for_notes():
     from bs4 import BeautifulSoup
     out = {}
     for vote in Vote.objects.all():
-        print str(vote.id_parladata)
+        print(str(vote.id_parladata))
         url = 'https://glej.nov.parlameter.si/s/glasovanje/' + str(vote.id_parladata) + '?state=%7B%7D'
         soup = BeautifulSoup(requests.get(url).content)
         rich = soup.find("div", {"class": "rich-text"})

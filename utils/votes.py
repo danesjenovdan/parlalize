@@ -39,11 +39,11 @@ class VotesAnalysis(object):
         self.presencePGs = None
         self.pgs = None
 
-        print 'getData'
+        print('getData')
         self.prepareData()
 
         # analyse
-        print 'analyse'
+        print('analyse')
         self.presenceMPsSessions()
         self.presenceMPsVotes()
         self.presencePGsTogether()
@@ -172,12 +172,12 @@ class VotesAnalysis(object):
         set cards how equal are voters
         """
         for mp in self.members:
-            print '.:' + str(mp) + ':.'
+            print('.:' + str(mp) + ':.')
             person = Person.objects.get(id_parladata=int(mp))
             try:
                 r = self.equalVotersData[mp]
             except:
-                print mp, 'fail set equal voters'
+                print(mp, 'fail set equal voters')
                 continue
             mps_data = r.reset_index().sort_values(mp, ascending=False)
 
@@ -255,7 +255,7 @@ class VotesAnalysis(object):
                             for m
                             in self.memsOfPGs[pg_key]
                             ]
-            print 'pg', pg, len(self.memsOfPGs[pg]), len(otherMembers)
+            print('pg', pg, len(self.memsOfPGs[pg]), len(otherMembers))
             otherMems = r[r.voter.isin(otherMembers)]
 
             # most equal
@@ -310,7 +310,7 @@ class VotesAnalysis(object):
                                     person5=less_data[4]['member'],
                                     votes5=less_data[4]['score'])
             # deviation
-            print thisPG
+            print(thisPG)
             dev_data = []
             for idx in range(thisPG.count()['voter']):
                 dev_data.append({'id': thisPG.iloc[idx]['voter'],
@@ -345,7 +345,7 @@ class VotesAnalysis(object):
                 thisVotes = votes[votes.voter == mp].reset_index().at[0, 'attendance']
                 tempS = sessions[sessions.voter == mp].reset_index()
                 thisSession = tempS.at[0, 'attendance']
-                print mp
+                print(mp)
 
                 result = saveOrAbortNew(model=Presence,
                                         created_for=self.date_of,
@@ -359,7 +359,7 @@ class VotesAnalysis(object):
                                         average_votes=avgVote,
                                         maximum_votes=max_vote_value)
             except:
-                print mp, 'fail set presence'
+                print(mp, 'fail set presence')
 
     def setPresenceOfPGs(self):
         """

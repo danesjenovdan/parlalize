@@ -7,7 +7,6 @@ from .api import TFIDFView
 
 router = routers.DefaultRouter()
 router.register(r'tfidfs', TFIDFView)
-
 urlpatterns = [
     # getters
     url(r'^getMPStatic/(?P<person_id>\d+)/(?P<date_>[\w].+)', getMPStaticPL),

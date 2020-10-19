@@ -18,7 +18,8 @@ class GenericRelatable(models.Model):
     An abstract class that provides the possibility of generic relations
     """
     content_type = models.ForeignKey(ContentType,
-                                     related_name='%(app_label)s_%(class)s_related')
+                                     related_name='%(app_label)s_%(class)s_related',
+                                     on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
@@ -81,10 +82,10 @@ class Permalinkable(models.Model):
         kwargs.update(getattr(self, 'url_kwargs', {}))
         return kwargs
 
-    @models.permalink
     def get_absolute_url(self):
         url_kwargs = self.get_url_kwargs(slug=self.slug)
         return (self.url_name, (), url_kwargs)
+
 class Taggable(models.Model):
     tags = TaggableManager()
 

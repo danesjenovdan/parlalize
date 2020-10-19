@@ -3,12 +3,12 @@
 
 #import slopos, nltk
 from nltk.tokenize import word_tokenize
-from string import maketrans, punctuation
+from string import punctuation
 from collections import Counter
 import lemmagen.lemmatizer
 from lemmagen.lemmatizer import Lemmatizer
 from math import log
-import tfidf
+#import tfidf
 from itertools import repeat
 
 from parlalize.utils_ import tryHard
@@ -64,7 +64,8 @@ def getCountList(speaker_id, date_):
     data = None
     while data is None:
         try:
-            data = tryHard(ISCI_URL + '/tfidfALL/p/' + str(speaker_id) + "/" + date_)
+            #data = tryHard(ISCI_URL + '/tfidfALL/p/' + str(speaker_id) + "/" + date_)
+            pass
         except:
             pass
 
@@ -77,7 +78,7 @@ def getCountList(speaker_id, date_):
     return wordlist_new
 
 def getCountListPG(party_id, date_):
-    data = tryHard(ISCI_URL + '/tfidfALL/ps/' + str(party_id) + "/" + date_).json()
+    #data = tryHard(ISCI_URL + '/tfidfALL/ps/' + str(party_id) + "/" + date_).json()
 
     wordlist = data['results']
 
@@ -87,7 +88,7 @@ def getCountListPG(party_id, date_):
 
 def getScore(words, counter, total):
 
-    print 'Getting style scores'
+    print('Getting style scores')
 
     score = 0.0
 #    lemmatized_words = lemmatizeTokens(words)
@@ -101,7 +102,7 @@ def getScore(words, counter, total):
 
 def getScores(words_list, counter, total):
 
-    print 'Getting style scores'
+    print('Getting style scores')
 
     scores = {'problematicno': 0, 'privzdignjeno': 0, 'preprosto': 0}
 
@@ -119,7 +120,7 @@ def getScores(words_list, counter, total):
 
     return scores
 
-def TFIDF(speeches_grouped, person_id):
+#def TFIDF(speeches_grouped, person_id):
 
     # make documents
     documents = []
@@ -140,7 +141,7 @@ def TFIDF(speeches_grouped, person_id):
     corpus_tf = countWords(corpus, corpus_tf)
 
     # other implementation
-#    table = tfidf.tfidf()
+##    table = tfidf.tfidf()
 #    for document in document_frequencies:
 #        table.addDocument(str(document['person_id']), [x for item in document['frequencies'].keys() for x in repeat(item, document['frequencies'][item])])
 
@@ -157,11 +158,11 @@ def TFIDF(speeches_grouped, person_id):
 
         for term in document['frequencies']:
             idf = log(float(1 + len(documents)) / float(1 + corpus_tf[term]))
-            tfidf = float(document['frequencies'][term]) / float(max_frequency) * float(idf)
-            results[document['person_id']].append({'term': term, 'tfidf': tfidf})
+            #tfidf = float(document['frequencies'][term]) / float(max_frequency) * float(idf)
+            #results[document['person_id']].append({'term': term, 'tfidf': tfidf})
 
     # sort results
-    sorted_results = sorted(results[int(person_id)], key=lambda k: k['tfidf'], reverse=True)
+    #sorted_results = sorted(results[int(person_id)], key=lambda k: k['tfidf'], reverse=True)
 
     return sorted_results
 #    return table.similarities(['delfin', 'tovariš'])

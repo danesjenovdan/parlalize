@@ -4,7 +4,7 @@ from parlaseje.models import Session, Activity
 from parlaskupine.models import Organization
 from parlalize.settings import API_DATE_FORMAT, ISCI_URL
 from collections import Counter
-from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, TFIDF, getCountList
+from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, getCountList
 from itertools import groupby
 
 from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiDRFGen
@@ -45,7 +45,7 @@ class WordAnalysis(object):
     def prepereSpeeches(self):
         # prepare data for members
         if self.count_of == 'members':
-            print '[INFO] [INFO] prepering data of members'
+            print('[INFO] [INFO] prepering data of members')
             for mp in self.members:
                 self.text[str(mp)] = ''
                 for speechs_chunk in getSpeeches(speaker=mp, valid=True):
@@ -53,7 +53,7 @@ class WordAnalysis(object):
 
         # prepare data for groups
         elif self.count_of == 'groups':
-            print '[INFO] prepering data for groups: '
+            print('[INFO] prepering data for groups: ')
             for org_id in self.organizations:
                 org = Organization.objects.filter(id_parladata=org_id).exclude(classification='unaligned MP')
                 if org:
@@ -62,7 +62,7 @@ class WordAnalysis(object):
                         self.text[org_id] += ' '.join([speech['content'] for speech in speechs_chunk])
 
     def wordCounter(self):
-        print '[INFO] counting words'
+        print('[INFO] counting words')
         for counted_obj, words in self.text.items():
 
             # unique words
@@ -157,7 +157,7 @@ class Utils(object):
                     mp_scores[mp] = mp_no_of_speeches/mp_no_of_sessions
                 else:
                     mp_scores[mp] = 0
-            print 'NumberOfSpeechesPerSession done'
+            print('NumberOfSpeechesPerSession done')
 
             # VocabularySize
             vocabulary_sizes = {}
@@ -169,8 +169,8 @@ class Utils(object):
                 vocabulary_sizes[mp] = len(countWords(text, Counter()))
                 mp_results[mp] = numberOfWords(text)
 
-            print 'VocabularySize done'
-            print 'spoken words done'
+            print('VocabularySize done')
+            print('spoken words done')
 
             for mp in mps:
                 csvwriter.writerow([mp,

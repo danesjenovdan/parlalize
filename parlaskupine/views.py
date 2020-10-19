@@ -3185,7 +3185,7 @@ def getListOfPGs(request, organization_id, date_=None, force_render=False):
 
                 # load data from cards
                 for card in list_of_cards:
-                    print card
+                    print(card)
                     setCardData(pg_obj,
                                 card['method'],
                                 pg_id,
@@ -4230,7 +4230,7 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
         data.append({'value': temp_count,
                      'org_obj': temp_org,
                      'org_id': org_id})
-        print org_id, pg_id, type(org_id), type(pg_id)
+        print(org_id, pg_id, type(org_id), type(pg_id))
         if org_id == int(pg_id):
             print("FOUND")
             org = temp_org

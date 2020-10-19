@@ -50,7 +50,8 @@ class Session(Timestampable, models.Model):
     organization = models.ForeignKey('parlaskupine.Organization',
                                      blank=True, null=True,
                                      related_name='session',
-                                     help_text='The organization in session')
+                                     help_text='The organization in session',
+                                     on_delete=models.CASCADE)
 
     organizations = models.ManyToManyField('parlaskupine.Organization',
                                            related_name='sessions',
@@ -121,7 +122,8 @@ class Activity(Timestampable, models.Model):
     session = models.ForeignKey('Session',
                                 blank=True, null=True,
                                 related_name="%(app_label)s_%(class)s_related",
-                                help_text=_('Session '))
+                                help_text=_('Session '),
+                                on_delete=models.CASCADE)
 
     person = models.ManyToManyField('parlaposlanci.Person',
                                      blank=True,
@@ -160,12 +162,14 @@ class Speech(Versionable, Activity):
 
     organization = models.ForeignKey('parlaskupine.Organization',
                                      blank=True, null=True,
-                                     help_text='Organization')
+                                     help_text='Organization',
+                                     on_delete=models.CASCADE)
 
     debate = models.ForeignKey('Debate',
                                blank=True, null=True,
                                related_name='speeches',
-                               help_text=_('debate '))
+                               help_text=_('debate '),
+                               on_delete=models.CASCADE)
 
 
 
@@ -190,7 +194,8 @@ class Question(Activity):
     author_org = models.ForeignKey('parlaskupine.Organization',
                                    blank=True, null=True,
                                    related_name='AuthorOrg',
-                                   help_text=_('Author organization'))
+                                   help_text=_('Author organization'),
+                                   on_delete=models.CASCADE)
 
     author_orgs = models.ManyToManyField('parlaskupine.Organization',
                                          blank=True,
@@ -243,7 +248,8 @@ class Ballot(Activity):
     vote = models.ForeignKey('Vote',
                              blank=True, null=True,
                              related_name='vote',
-                             help_text=_('Vote'))
+                             help_text=_('Vote'),
+                             on_delete=models.CASCADE)
 
     option = models.CharField(max_length=128,
                               blank=True, null=True,
@@ -252,20 +258,22 @@ class Ballot(Activity):
     voter_party = models.ForeignKey('parlaskupine.Organization',
                                     blank=True, null=True,
                                     related_name='ballotsOfVoters',
-                                    help_text=_('Party of voter'))
+                                    help_text=_('Party of voter'),
+                                    on_delete=models.CASCADE)
 
     org_voter = models.ForeignKey('parlaskupine.Organization',
                                   blank=True, null=True,
                                   related_name='OrganizationVoter',
-                                  help_text=_('Organization voter'))
+                                  help_text=_('Organization voter'),
+                                  on_delete=models.CASCADE)
 
     def __init__(self, *args, **kwargs):
         super(Activity, self).__init__(*args, **kwargs)
 
 
 class AmendmentOfOrg(Timestampable, models.Model):
-    vote = models.ForeignKey('Vote')
-    organization = models.ForeignKey('parlaskupine.Organization')
+    vote = models.ForeignKey('Vote', on_delete=models.CASCADE)
+    organization = models.ForeignKey('parlaskupine.Organization', on_delete=models.CASCADE)
 
 
 class Vote(Timestampable, models.Model):
@@ -280,7 +288,8 @@ class Vote(Timestampable, models.Model):
     session = models.ForeignKey('Session',
                                 blank=True, null=True,
                                 related_name='in_session',
-                                help_text=_('Session '))
+                                help_text=_('Session '),
+                                on_delete=models.CASCADE)
 
     motion = models.TextField(blank=True, null=True,
                               help_text='The motion for which the vote took place')
@@ -355,6 +364,12 @@ class Vote(Timestampable, models.Model):
     agenda_item = models.ManyToManyField('AgendaItem', blank=True,
                                          help_text='Agenda item', related_name='votes')
 
+    coalition = models.ForeignKey('parlaskupine.Organization',
+                                  blank=True, null=True,
+                                  related_name='in_session',
+                                  help_text=_('Session '),
+                                  on_delete=models.CASCADE)
+
     def __str__(self):
         return self.session.name + ' | ' + self.motion
 
@@ -364,12 +379,14 @@ class Vote_analysis(Timestampable, models.Model):
     session = models.ForeignKey('Session',
                                blank=True, null=True,
                                related_name='in_session_for_VA',
-                               help_text=_('Session '))
+                               help_text=_('Session '),
+                               on_delete=models.CASCADE)
 
     vote = models.ForeignKey('Vote',
                                blank=True, null=True,
                                related_name='analysis',
-                               help_text=_('Vote'))
+                               help_text=_('Vote'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of vote'),
                                     blank=True,
@@ -405,7 +422,8 @@ class AbsentMPs(Timestampable, models.Model):
     session = models.ForeignKey('Session',
                                 blank=True, null=True,
                                 related_name='session_absent',
-                                help_text=_('Session '))
+                                help_text=_('Session '),
+                                on_delete=models.CASCADE)
 
     absentMPs = JSONField(blank=True, null=True)
 
@@ -422,7 +440,8 @@ class Quote(Timestampable, models.Model):
                                    help_text=_('text quoted in a speech'))
 
     speech = models.ForeignKey('Speech',
-                               help_text=_('the speech that is being quoted'))
+                               help_text=_('the speech that is being quoted'),
+                               on_delete=models.CASCADE)
 
     first_char = models.IntegerField(blank=True, null=True,
                                      help_text=_('index of first character of quote string'))
@@ -437,7 +456,8 @@ class PresenceOfPG(Timestampable, models.Model):
     session = models.ForeignKey('Session',
                                 blank=True, null=True,
                                 related_name='session_presence',
-                                help_text=_('Session '))
+                                help_text=_('Session '),
+                                on_delete=models.CASCADE)
 
     presence = JSONField(blank=True, null=True)
 
@@ -452,7 +472,8 @@ class Tfidf(Timestampable, models.Model):
     session = models.ForeignKey('Session',
                                 blank=True, null=True,
                                 related_name='tfidf',
-                                help_text=_('Session '))
+                                help_text=_('Session '),
+                                on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -502,7 +523,8 @@ class Legislation(Timestampable, models.Model):
                                related_name='laws',
                                blank=True, null=True,
                                max_length=255,
-                               help_text='MDT object')
+                               help_text='MDT object',
+                               on_delete=models.CASCADE)
 
     status = models.CharField(blank=True, null=True,
                               max_length=255,
@@ -572,7 +594,8 @@ class AgendaItem(Timestampable, models.Model):
     session = models.ForeignKey('Session',
                                 blank=True, null=True,
                                 related_name='agenda_items',
-                                help_text=_('Session '))
+                                help_text=_('Session '),
+                                on_delete=models.CASCADE)
 
     title = models.CharField(blank=True, null=True,
                              max_length=1024,

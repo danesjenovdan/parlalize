@@ -56,7 +56,7 @@ class Command(BaseCommand):
                     if person_data and person_data['party'] and person_data['party']['id']:
                         authors.append(person_data['party']['id'])
                     else:
-                        print 'person nima mpstatic: ', author
+                        print('person nima mpstatic: ', author)
 
             avg = len(authors)/float(len(pg_ids))
             question_count = Counter(authors)

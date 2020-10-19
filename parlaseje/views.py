@@ -1424,7 +1424,7 @@ def getLastSessionLanding(request, org_id, date_=None):
     presence = None
 
     while not ready:
-        print presence_index
+        print(presence_index)
         presence = presences[presence_index]
         motions = json.loads(getMotionOfSession(None, presence.session.id_parladata).content)
         if type(motions) == dict:
@@ -1706,8 +1706,8 @@ def getSessionsList(request, date_=None, force_render=False):
         sessions = Session.objects.filter(organizations__in=orgs)
         sessions = sessions.order_by("-start_time")
         out = {'sessions': [session.getSessionData() for session in sessions],
-               'created_for': datetime.now().strftime(API_DATE_FORMAT),
-               'created_at': datetime.now().strftime(API_DATE_FORMAT)}
+                'created_for': datetime.now().strftime(API_DATE_FORMAT),
+                'created_at': datetime.now().strftime(API_DATE_FORMAT)}
 
         newList = []
         sessionsIds = []
@@ -2403,14 +2403,14 @@ def getComparedVotes(request):
     q_selectors_list = [select_same_people, select_same_parties, select_different_people, select_different_parties]
     q_selectors_list_clean = [s for s in q_selectors_list if s != '']
     q_selectors = ', '.join(q_selectors_list_clean)
-    print 'q_selectors ' + q_selectors
+    print('q_selectors ' + q_selectors)
 
     query = query + ' ' + q_selectors + ' WHERE'
 
     q_match_ballots_list = [match_same_people_ballots, match_same_parties_ballots, match_different_people_ballots, match_different_parties_ballots]
     q_match_ballots_list_clean = [s for s in q_match_ballots_list if s != '']
     q_match_ballots = ' AND '.join(q_match_ballots_list_clean)
-    print 'q_match_ballots ' + q_match_ballots
+    print('q_match_ballots ' + q_match_ballots)
 
     # query = query + ' ' + q_match_ballots + ' AND'
 
@@ -2418,7 +2418,7 @@ def getComparedVotes(request):
     q_match_options_list_clean = [s for s in q_match_options_list if s != '']
     q_match_options = ' AND '.join(q_match_options_list_clean)
 
-    print 'q_match_options ' + q_match_options
+    print('q_match_options ' + q_match_options)
 
     # query = query + ' ' + q_match_options + ' AND'
 
@@ -2426,7 +2426,7 @@ def getComparedVotes(request):
     q_match_persons_list_clean = [s for s in q_match_persons_list if s != '']
     q_match_persons = ' AND '.join(q_match_persons_list_clean)
 
-    print 'q_match_persons ' + q_match_persons
+    print('q_match_persons ' + q_match_persons)
 
     # query = query + ' ' + q_match_persons + ' AND'
 
@@ -2434,7 +2434,7 @@ def getComparedVotes(request):
     q_match_organizations_list_clean = [s for s in q_match_organizations_list if s != '']
     q_match_organizations = ' AND '.join(q_match_organizations_list_clean)
 
-    print 'q_match_organizations ' + q_match_organizations
+    print('q_match_organizations ' + q_match_organizations)
 
     # query = query + ' ' + q_match_organizations
 
@@ -2481,25 +2481,25 @@ def getComparedVotes(request):
 
         query = query + ' AND ' + exclude_ni
     # return HttpResponse(query)
-    print query
+    print(query)
 
-    print 'STATEMENT PARTS:'
-    print 'select_same_people ' + select_same_people
-    print 'select_same_parties ' + select_same_parties
-    print 'match_same_people_ballots ' + match_same_people_ballots
-    print 'match_same_people_persons ' + match_same_people_persons
-    print 'match_same_people_options ' + match_same_people_options
-    print 'match_same_parties_ballots ' + match_same_parties_ballots
-    print 'match_same_parties_organizations ' + match_same_parties_organizations
-    print 'match_same_parties_options ' + match_same_parties_options
-    print 'select_different_people ' + select_different_people
-    print 'select_different_parties ' + select_different_parties
-    print 'match_different_people_ballots ' + match_different_people_ballots
-    print 'match_different_people_persons ' + match_different_people_persons
-    print 'match_different_people_options ' + match_different_people_options
-    print 'match_different_parties_ballots ' + match_different_parties_ballots
-    print 'match_different_parties_organizations ' + match_different_parties_organizations
-    print 'match_different_parties_options ' + match_different_parties_options
+    print('STATEMENT PARTS:')
+    print('select_same_people ' + select_same_people)
+    print('select_same_parties ' + select_same_parties)
+    print('match_same_people_ballots ' + match_same_people_ballots)
+    print('match_same_people_persons ' + match_same_people_persons)
+    print('match_same_people_options ' + match_same_people_options)
+    print('match_same_parties_ballots ' + match_same_parties_ballots)
+    print('match_same_parties_organizations ' + match_same_parties_organizations)
+    print('match_same_parties_options ' + match_same_parties_options)
+    print('select_different_people ' + select_different_people)
+    print('select_different_parties ' + select_different_parties)
+    print('match_different_people_ballots ' + match_different_people_ballots)
+    print('match_different_people_persons ' + match_different_people_persons)
+    print('match_different_people_options ' + match_different_people_options)
+    print('match_different_parties_ballots ' + match_different_parties_ballots)
+    print('match_different_parties_organizations ' + match_different_parties_organizations)
+    print('match_different_parties_options ' + match_different_parties_options)
 
     # ballots = Ballot.objects.raw(query)
     votes = Vote.objects.filter(id_parladata__in=[ballot.vote.id_parladata for ballot in Ballot.objects.raw(query)])
@@ -2800,7 +2800,7 @@ def getOtherVotes(request, session_id, date_=None):
     for vote in allVotes.order_by('start_time'):
         if vote.result == None:
             continue
-        print vote
+        print(vote)
         has_votes = bool(vote.vote.all())
         out.append({'results': {'motion_id': vote.id_parladata,
                                 'text': vote.motion,
@@ -2846,7 +2846,7 @@ def getAllVotes(request):
     for vote in allVotes.order_by('-start_time'):
         if vote.result == None:
             continue
-        print vote
+        print(vote)
         tags += vote.tags
         has_votes = bool(vote.vote.all())
         out.append({'results': {'motion_id': vote.id_parladata,

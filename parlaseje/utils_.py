@@ -38,7 +38,7 @@ def getSesCardModelNew(model, id, date=None):
         raise Http404("Nismo našli kartice")
     else:
         modelObject = modelObject.latest('created_for')
-        print "get object ", modelObject.created_for
+        print("get object ", modelObject.created_for)
     return modelObject
 
 
