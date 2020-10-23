@@ -8,14 +8,14 @@ from parlaskupine.models import Organization
 from parlalize.settings import API_DATE_FORMAT, slack_token, PS
 from parlalize.utils_ import getAllStaticData
 from django.db.models import Q
-from slackclient import SlackClient
+from slack import WebClient
+slack_client = WebClient(token=slack_token)
 
 def updateCacheforList(date_=None):
     """
     Method which runs once per day (cron job)
     for recache cache with short lifetime
     """
-    sc = SlackClient(slack_token)
     try:
         if not date_:
             tomorrow = datetime.now() + timedelta(days=1)
@@ -26,14 +26,17 @@ def updateCacheforList(date_=None):
         updateCacheIntraDisunion()
         # store static data for search
 
-        sc.api_call("chat.postMessage",
-                channel="#parlalize_notif",
-                text='Zgeneriru sem cache za nasledn dan.')
+        slack_client.chat_postMessage(
+            channel='#parlalize_notif',
+            text='Zgeneriru sem cache za nasledn dan.'
+        )
+
     except:
         client.captureException()
-        sc.api_call("chat.postMessage",
+        slack_client.chat_postMessage(
                 channel="#parlalize_notif",
-                text='Upss neki je šlo narobe. Nisem zgeneriru cache-a.')
+                text='Upss neki je šlo narobe. Nisem zgeneriru cache-a.'
+        )
 
     return 1
 
