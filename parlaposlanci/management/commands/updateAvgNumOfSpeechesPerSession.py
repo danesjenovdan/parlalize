@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, AverageNumberOfSpeechesPerSession
-from parlaseje.models import Activity
+from parlaseje.models import Activity, Speech
 from parlalize.utils_ import saveOrAbortNew, tryHard
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT
