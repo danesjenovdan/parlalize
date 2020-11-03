@@ -36,7 +36,8 @@ class Command(BaseCommand):
             for mp in mps:
                 self.stdout.write('Handling MP %s' % str(mp))
                 self.stdout.write('getSpeechContentOfPerson')
-                mp_no_of_speeches = len(getSpeechContentOfPerson(mp, fdate=date_of))
+                # mp_no_of_speeches = len(getSpeechContentOfPerson(mp, fdate=date_of))
+                mp_no_of_speeches =Speech.getValidSpeeches(date_of).filter(person__id_parladata=mp).count()
 
                 mp_no_of_sessions = Activity.objects.filter(
                     person__id_parladata=mp,
