@@ -1,6 +1,6 @@
 import csv
 from datetime import datetime
-from parlaseje.models import Session, Activity
+from parlaseje.models import Session, Activity, Speech
 from parlaskupine.models import Organization
 from parlalize.settings import API_DATE_FORMAT, ISCI_URL
 from collections import Counter
@@ -48,8 +48,9 @@ class WordAnalysis(object):
             print('[INFO] [INFO] prepering data of members')
             for mp in self.members:
                 self.text[str(mp)] = ''
-                for speechs_chunk in getSpeeches(speaker=mp, valid=True):
-                    self.text[str(mp)] += ' '.join([speech['content'] for speech in speechs_chunk])
+                #for speechs_chunk in getSpeeches(speaker=mp, valid=True):
+                #    self.text[str(mp)] += ' '.join([speech['content'] for speech in speechs_chunk])
+                self.text[str(mp)] = ' '.join(Speech.getValidSpeeches(self.date_of).filter(person__id_parladata=mp).values_list('content', flat=True))
 
         # prepare data for groups
         elif self.count_of == 'groups':
@@ -57,9 +58,10 @@ class WordAnalysis(object):
             for org_id in self.organizations:
                 org = Organization.objects.filter(id_parladata=org_id).exclude(classification='unaligned MP')
                 if org:
-                    self.text[org_id] = ''
-                    for speechs_chunk in getSpeeches(party=org_id, valid=True):
-                        self.text[org_id] += ' '.join([speech['content'] for speech in speechs_chunk])
+                    self.text[str(org_id)] = ''
+                    # for speechs_chunk in getSpeeches(party=org_id, valid=True):
+                    #    self.text[org_id] += ' '.join([speech['content'] for speech in speechs_chunk])
+                    self.text[str(org_id)] = ' '.join(Speech.getValidSpeeches(self.date_of).filter(organization__id_parladata=org_id).values_list('content', flat=True))
 
     def wordCounter(self):
         print('[INFO] counting words')
