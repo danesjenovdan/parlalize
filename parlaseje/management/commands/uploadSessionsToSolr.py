@@ -28,12 +28,12 @@ def commit_to_solr(commander, output):
 def uploadSessionToSolr(commander, ses_ids):
     static_data = json.loads(getAllStaticData(None).content)
 
-    self.stdout.write('Sessions for upload %s' % str(ses_ids))
+    commander.stdout.write('Sessions for upload %s' % str(ses_ids))
     for session_id in ses_ids:
-        self.stdout.write('About to begin with session %s' % str(session_id))
+        commander.stdout.write('About to begin with session %s' % str(session_id))
         session = Session.objects.filter(id_parladata=session_id)
         if not session:
-            self.stdout.write('Session with id %s does not exist' % str(session_id))
+            commander.stdout.write('Session with id %s does not exist' % str(session_id))
             continue
         else:
             session = session[0]
@@ -50,7 +50,7 @@ def uploadSessionToSolr(commander, ses_ids):
             'title': session.name,
         }]
 
-        commit_to_solr(self, output)
+        commit_to_solr(commander, output)
 
 
 class Command(BaseCommand):
