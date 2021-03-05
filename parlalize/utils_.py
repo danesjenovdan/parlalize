@@ -453,7 +453,7 @@ def getAllStaticData(request, force_render=False):
         out['wbs'] = [{'id': org.id_parladata,
                        'name': org.name} for org in orgs]
 
-        cache.set('all_statics', out, 60 * 60 * ALL_STATIC_CACHE_AGE)
+        cache.set('all_statics', out, ALL_STATIC_CACHE_AGE)
         sc.api_call("chat.postMessage",
                     channel="#parlalize_notif",
                     text='StaticDataDebug end: ' + str(out)[:100] + ' ' + str(force_render))

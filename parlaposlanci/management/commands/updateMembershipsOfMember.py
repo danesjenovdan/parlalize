@@ -22,6 +22,8 @@ def setMembershipsOfMember(commander, person_id, date_=None):
     person = Person.objects.get(id_parladata=int(person_id))
 
     for mem in memberships:
+        if mem['role'] != 'voter':
+            continue
         organization = organizations[mem['organization']]
         org_links = getLinks(organization=organization['id'])
         if org_links:

@@ -55,13 +55,15 @@ class Organization(Timestampable, models.Model):
         return unicode(self.name) + " " + str(self.id_parladata)
 
     def getOrganizationData(self, date_=None):
-        if date_
+        if date_:
             dateObj = datetime.strptime(date_, '%d.%m.%Y')
         else:
             dateObj = datetime.now()
         pg_statics = self.pg_statics.filter(created_for__lte=dateObj)
         if pg_statics:
             is_coalition = pg_statics.latest('created_for').is_coalition
+        else:
+            is_coalition = False
         return {
                   'id': self.id_parladata,
                   'name': self.name,
