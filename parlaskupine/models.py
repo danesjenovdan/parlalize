@@ -60,6 +60,8 @@ class Organization(Timestampable, models.Model):
         pg_statics = self.pg_statics.filter(created_for__lte=dateObj)
         if pg_statics:
             is_coalition = pg_statics.latest('created_for').is_coalition
+        else:
+            is_coalition = False
         return {
                   'id': self.id_parladata,
                   'name': self.name,

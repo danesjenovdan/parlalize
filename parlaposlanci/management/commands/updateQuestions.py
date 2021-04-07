@@ -57,26 +57,27 @@ class Command(BaseCommand):
             else:
                 print "update question"
                 person = []
-                for i in dic['author_id']:
+                for i in dic['authors']:
                     person.append(Person.objects.get(id_parladata=int(i)))
-                if dic['recipient_id']:
-                    rec_p = list(Person.objects.filter(id_parladata__in=dic['recipient_id']))
+                if dic['recipient_person']:
+                    rec_p = list(Person.objects.filter(id_parladata__in=dic['recipient_person']))
                 else:
                     rec_p = []
-                if dic['recipient_org_id']:
-                    rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_org_id']))
+                if dic['recipient_organization']:
+                    rec_org = list(Organization.objects.filter(id_parladata__in=dic['recipient_organization']))
                 else:
                     rec_org = []
                 author_org = []
-                for i in dic['author_org_id']:
+                for i in dic['author_orgs']:
                     author_org.append(Organization.objects.get(id_parladata=i))
                 rec_posts = []
-                for post in dic['recipient_posts']:
+                for post in dic['recipient_post']:
                     static = MinisterStatic.objects.filter(person__id_parladata=post['membership__person_id'],
                                                         ministry__id_parladata=post['organization_id']).order_by('-created_for')
                     if static:
                         rec_posts.append(static[0])
                 question = Question.objects.get(id_parladata=dic["id"])
+                question.answer_date=dic['date_of_answer']
                 question.save()
                 question.author_orgs.add(*author_org)
                 question.person.add(*person)

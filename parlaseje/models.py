@@ -216,10 +216,11 @@ class Question(Activity):
     recipient_text = models.TextField(blank=True,
                                       null=True,
                                       help_text='Recipient name as written on dz-rs.si')
-
     type_of_question = models.CharField(max_length=64,
                                         blank=True,
                                         null=True)
+    answer_date = PopoloDateTimeField(blank=True, null=True,
+                                      help_text='Answer date')
 
     def getQuestionData(self, ministerStatic = None):
         persons = []
@@ -239,7 +240,9 @@ class Question(Activity):
                 'id': self.id_parladata,
                 'session_name': self.session.name if self.session else None,
                 'session_id': self.session.id_parladata if self.session else None,
-                'type_of_question': self.type_of_question}
+                'type_of_question': self.type_of_question,
+                'answer_date': self.answer_date if self.answer_date else None,
+                'question_date': self.start_time if self.start_time else None}
 
 
 class Ballot(Activity):

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from parlaseje.models import AgendaItem
+from parlaseje.models import AgendaItem, Session
 from parlalize.settings import API_URL, PARSER_UN, PARSER_PASS
 from utils.parladata_api import getAgendaItems
 

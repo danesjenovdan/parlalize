@@ -456,7 +456,7 @@ def getAllStaticData(request, force_render=False):
         out['wbs'] = [{'id': org.id_parladata,
                        'name': org.name} for org in orgs]
 
-        cache.set('all_statics', out, 60 * 60 * ALL_STATIC_CACHE_AGE)
+        cache.set('all_statics', out, ALL_STATIC_CACHE_AGE)
 
         slack_client.chat_postMessage(
             channel="#parlalize_notif",
