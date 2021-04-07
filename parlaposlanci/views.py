@@ -8,7 +8,7 @@ from django.utils import dateparse
 from scipy.stats import rankdata
 from datetime import date, datetime, timedelta
 from collections import Counter
-from raven.contrib.django.raven_compat.models import client
+# from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
 
 from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,

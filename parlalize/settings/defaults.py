@@ -15,7 +15,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 import sys
 
-import raven
+# import raven
 from django.utils.translation import gettext as _
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -43,7 +43,7 @@ INSTALLED_APPS = (
     'parlaskupine',
     'parlaseje',
     'django_extensions',
-    'raven.contrib.django.raven_compat',
+    # 'raven.contrib.django.raven_compat',
     'corsheaders',
     'tinymce',
     'utils',

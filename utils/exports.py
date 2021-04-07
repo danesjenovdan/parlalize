@@ -65,7 +65,7 @@ def data_to_csv():
     for mp in mps:
         tmp = {'member_id': mp}
         for model, column in models:
-            print mp, model
+            print(mp, model)
             model_data = getPersonCardModelNew(model, mp)
             if model == Presence:
                 tmp[column] = model_data.person_value_votes

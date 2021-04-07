@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
-from raven.contrib.django.raven_compat.models import client
+# from raven.contrib.django.raven_compat.models import client
 
 from parlaskupine.views import getListOfPGs, getIntraDisunionOrg
 from parlaseje.views import getSessionsList
@@ -32,7 +32,7 @@ def updateCacheforList(date_=None):
         )
 
     except:
-        client.captureException()
+        # client.captureException()
         slack_client.chat_postMessage(
                 channel="#parlalize_notif",
                 text='Upss neki je šlo narobe. Nisem zgeneriru cache-a.'

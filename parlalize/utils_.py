@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime, timedelta
 from django.http import Http404, JsonResponse, HttpResponse
-from raven.contrib.django.raven_compat.models import client
+# from raven.contrib.django.raven_compat.models import client
 import requests
 from parlaposlanci.models import (Person, StyleScores, CutVotes, MPStaticPL,
                                   MembershipsOfMember, LessEqualVoters,
@@ -62,7 +62,7 @@ def tryHard(url):
         except:
             pass
         if counter > 5:
-            client.captureMessage(url + ' je zahinavu več ko 2x.')
+            # client.captureMessage(url + ' je zahinavu več ko 2x.')
             print(url + ' je zahinavu več ko 2x.')
             return None
         counter += 1

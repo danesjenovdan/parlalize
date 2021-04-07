@@ -14,7 +14,7 @@ def createCompasData():
     days = []
 
     for day in (START_DATE + timedelta(n) for n in range(DAY_COUNT)):
-        print API_ENDPOINT + datetime.strftime(day, DATE_FORMAT)
+        print(API_ENDPOINT + datetime.strftime(day, DATE_FORMAT))
         days.append(requests.get(API_ENDPOINT + datetime.strftime(day, DATE_FORMAT)).json())
 
     with open('data.json', 'w') as outfile:
@@ -73,15 +73,15 @@ def measureApiTimes():
     times['vote'] = tajmer('https://analize.parlameter.si/v1/s/',
                            SV,
                            6900)
-    print 'end SV'
+    print('end SV')
     times['person'] = tajmer('https://analize.parlameter.si/v1/p/',
                              P,
                              11)
-    print 'end P'
+    print('end P')
     times['org'] = tajmer('https://analize.parlameter.si/v1/pg/',
                           PG,
                           5)
-    print 'end PG'
+    print('end PG')
     times['session'] = tajmer('https://analize.parlameter.si/v1/s/',
                               S,
                               5583)

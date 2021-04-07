@@ -59,7 +59,7 @@ def getScores(words_list, counter, total):
     method returns dictionary with score for each classificator
     """
 
-    print 'Getting style scores'
+    print('Getting style scores')
 
     scores = {'problematicno': 0, 'privzdignjeno': 0, 'preprosto': 0}
 

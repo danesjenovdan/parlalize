@@ -1,7 +1,7 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA as sklearnPCA
-from sklearn.manifold import MDS as sklearnMDS
+# import matplotlib.pyplot as plt
+# from sklearn.decomposition import PCA as sklearnPCA
+# from sklearn.manifold import MDS as sklearnMDS
 from parlalize.settings import API_DATE_FORMAT, BASE_URL
 from parlalize.utils_ import tryHard, getDataFromPagerApi
 from parlaseje.models import Ballot
@@ -9,19 +9,19 @@ from utils.parladata_api import getVotersIDs, getBallots
 from django.conf import settings
 
 
-if __name__ == "__main__":
-    def showCompass():
-        """
-        Plot compass data
-        """
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
-        ax.scatter(ideology, zeros)
-        for i, txt in enumerate(people):
-            ax.annotate(str(txt), (ideology[i], zeros[i]))
-        plt.show()
+# if __name__ == "__main__":
+#     def showCompass():
+#         """
+#         Plot compass data
+#         """
+#         import matplotlib.pyplot as plt
+#         fig, ax = plt.subplots()
+#         ax.scatter(ideology, zeros)
+#         for i, txt in enumerate(people):
+#             ax.annotate(str(txt), (ideology[i], zeros[i]))
+#         plt.show()
 
-        return false
+#         return false
 
 
 def assignValueToOption(option):

@@ -6,7 +6,7 @@ from parlaseje.models import Session, Speech, Question, Ballot, Vote, Question, 
 from django.test.client import RequestFactory
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
-from raven.contrib.django.raven_compat.models import client
+# from raven.contrib.django.raven_compat.models import client
 from utils.parladata_api import getVotersIDs, getQuestions, getLinks, getPeople, getVotersPairsWithOrg, getOrganizations, getSpeeches, getBallots
 from django.core.management import call_command
 
@@ -138,7 +138,7 @@ def importDraftLegislationsFromFeed():
 
     update = False
     report = check_and_save_legislation(epas_and_names_tuple_zakoni, 'zakon')
-    print (report, 'zakon')
+    print(report, 'zakon')
     if report['saved']:
         update = True
     report = check_and_save_legislation(epas_and_names_tuple_akti, 'akt')

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #import slopos, nltk
-from nltk.tokenize import word_tokenize
+# from nltk.tokenize import word_tokenize
 from string import punctuation
 from collections import Counter
 import lemmagen.lemmatizer
@@ -36,7 +36,7 @@ def numberOfWords(text):
     exclude = set(punctuation)
     text_lower = text.lower()
     text_nopunct_lower = ''.join(ch for ch in text_lower if ch not in exclude)
-    return len(word_tokenize(text_nopunct_lower))
+    return len(text_nopunct_lower.split(' '))
 
 def lemmatizeTokens(tokens):
 
@@ -54,7 +54,7 @@ def countWords(text, counter):
     text_lower = text.lower()
     text_nopunct_lower = ''.join(ch for ch in text_lower if ch not in exclude)
 
-    tokens = lemmatizeTokens(word_tokenize(text_nopunct_lower))
+    tokens = lemmatizeTokens(text_nopunct_lower.split(' '))
     new_count = Counter(tokens)
     counter.update(new_count)
 

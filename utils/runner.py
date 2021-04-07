@@ -3,7 +3,7 @@ from parlalize.settings import API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token,
 from parlalize.utils_ import findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
-from raven.contrib.django.raven_compat.models import client
+# from raven.contrib.django.raven_compat.models import client
 from django.test.client import RequestFactory
 from itertools import groupby
 
@@ -54,22 +54,26 @@ def updateLastDay(date_=None):
     try:
         onDateMPCardRunner(lastVoteDay.strftime(API_DATE_FORMAT))
     except:
-        client.captureException()
+        # client.captureException()
+        print(f'Something went wrong with onDateMPCardRunner {lastVoteDay.strftime(API_DATE_FORMAT)}')
     try:
         onDatePGCardRunner(lastVoteDay.strftime(API_DATE_FORMAT))
     except:
-        client.captureException()
+        # client.captureException()
+        print(f'Something went wrong with onDatePGCardRunner {lastVoteDay.strftime(API_DATE_FORMAT)}')
 
     # if last vote and speech isn't in the same day
     if runForTwoDays:
         try:
             onDateMPCardRunner(lastSpeechDay.strftime(API_DATE_FORMAT))
         except:
-            client.captureException()
+            # client.captureException()
+            print(f'Something went wrong with onDatePGCardRunner {lastSpeechDay.strftime(API_DATE_FORMAT)}')
         try:
             onDatePGCardRunner(lastSpeechDay.strftime(API_DATE_FORMAT))
         except:
-            client.captureException()
+            # client.captureException()
+            print(f'Something went wrong with onDatePGCardRunner {lastSpeechDay.strftime(API_DATE_FORMAT)}')
 
     return 1
 
@@ -78,7 +82,7 @@ def deleteAppModels(appName):
     my_app = apps.get_app_config(appName)
     my_models = my_app.get_models()
     for model in my_models:
-        print 'delete model: ', model
+        print('delete model: ', model)
         model.objects.all().delete()
 
 

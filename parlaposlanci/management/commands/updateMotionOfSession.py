@@ -105,7 +105,7 @@ def getOwnersOfAmendment(vote):
                                         if re.search("\\b" + ' '.join(d_token) + "\\b", name['name_parser']):
                                             people_ids.append(name['id'])
                                             break
-        print acronyms
+        print(acronyms)
     return {'orgs': orgs_ids, 'people': list(set(people_ids))}
 
 def setMotionOfSession(commander, session_id):

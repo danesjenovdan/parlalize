@@ -13,10 +13,10 @@ DEBUG = DEVELOPMENT
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'NAME': 'parlalize',
-        'USER': 'parlauser',
-        'PASSWORD': 'parlapassword',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
     }
 }
 

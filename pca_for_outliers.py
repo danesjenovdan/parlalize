@@ -16,4 +16,4 @@ number_of_samples = len(all_votes_as_list)/4
 
 ind = argpartition(distances, number_of_samples)[:number_of_samples]
 
-for i in ind: print all_votes_as_vectors[i], all_votes[i].motion
+for i in ind: print(all_votes_as_vectors[i], all_votes[i].motion)

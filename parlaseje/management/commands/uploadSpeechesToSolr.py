@@ -32,7 +32,7 @@ def deleteUnvalidSpeeches(solr_ids, speeches):
                         data=json.dumps(data),
                         headers={'Content-Type': 'application/json'})
 
-    print r.text
+    print(r.text)
     return True
 
 

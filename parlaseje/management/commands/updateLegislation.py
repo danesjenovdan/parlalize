@@ -48,7 +48,7 @@ class Command(BaseCommand):
                 result = result[0]
                 if result.procedure_ended:
                     is_ended = True
-                print 'update'
+                print('update')
                 result.text = last_obj['text']
                 result.mdt = last_obj['mdt']
                 result.proposer_text = last_obj['proposer_text']
@@ -63,7 +63,7 @@ class Command(BaseCommand):
                     result.result = legislation_result
                 result.save()
             else:
-                print 'adding'
+                print('adding')
                 result = Legislation(text=last_obj['text'],
                                     epa=last_obj['epa'],
                                     mdt=last_obj['mdt'],

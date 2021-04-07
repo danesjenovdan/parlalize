@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  parlalize:
+    build: .
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    environment:
+      DJANGO_SETTINGS_MODULE: parlalize.settings.k8s
+      DATABASE_URL: postgres://postgres:postgres@db/parlalize
+    volumes:
+      - ./:/app
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: parlalize

@@ -8,8 +8,6 @@ from django.db.models.functions import Trunc
 from django.shortcuts import get_object_or_404
 
 from collections import Counter
-from scipy.stats.stats import pearsonr
-from scipy.spatial.distance import euclidean
 from itertools import groupby
 from datetime import timedelta, datetime
 
