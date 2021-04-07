@@ -6,12 +6,12 @@ from parlaskupine.models import Organization, PGStatic
 from parlalize.utils_ import tryHard, saveOrAbortNew
 from utils.parladata_api import getOrganizationsWithVoters, getOrganizations, getContactDetails, getVotersPairsWithOrg, getLinks, getPosts, getCoalitionPGs
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 from collections import Counter
 
 def setBasicInfoOfPG(commander, pg, date):
     if date:
-        date_of = datetime.strptime(date, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
 
@@ -96,7 +96,7 @@ class Command(BaseCommand):
         else:
             if options['date']:
                 date_ = options['date']
-                date_of = datetime.strptime(date_, API_DATE_FORMAT)
+                date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
             else:
                 date_of = datetime.now()
             pgs = getOrganizationsWithVoters(date_=date_of)

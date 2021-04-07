@@ -4,16 +4,16 @@ from parlaposlanci.models import Person, MinisterStatic
 from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew
 from datetime import datetime
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from django.conf import settings
 
 
 def setMinsterStatic(commander, person_id, date_=None):
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
-        m_data = tryHard(API_URL+'/getMinistrStatic/' + person_id + "/" + date_).json()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
+        m_data = tryHard(settings.API_URL+'/getMinistrStatic/' + person_id + "/" + date_).json()
     else:
         date_of = datetime.now().date()
-        m_data = tryHard(API_URL+'/getMinistrStatic/' + person_id).json()
+        m_data = tryHard(settings.API_URL+'/getMinistrStatic/' + person_id).json()
 
     if not m_data:
     	commander.stdout.write('Didn\'t get data of minsiter with id: %s' % str(person_id))
@@ -62,8 +62,8 @@ class Command(BaseCommand):
     help = 'Updates ministers from Parladata'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from %s/getIDsOfAllMinisters/' % API_URL)
-        ministers = tryHard(API_URL + '/getIDsOfAllMinisters/').json()['ministers_ids']
+        self.stdout.write('Fetching data from %s/getIDsOfAllMinisters/' % settings.API_URL)
+        ministers = tryHard(settings.API_URL + '/getIDsOfAllMinisters/').json()['ministers_ids']
         for ministr in ministers:
             self.stdout.write('Running setMinisterStatic on %s' % str(ministr))
             setMinsterStatic(self, str(ministr))

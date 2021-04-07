@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, District
-from parlalize.settings import API_URL, SETTER_KEY
 from parlalize.utils_ import tryHard
 from parlalize.utils_ import getDataFromPagerApi, getDataFromPagerApiGen
 from utils.parladata_api import getAreas
@@ -9,7 +8,7 @@ class Command(BaseCommand):
     help = 'Update districts.'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from %s/areas/' % API_URL)
+        self.stdout.write('Fetching data from %s/areas/' % settings.API_URL)
         districts = getAreas(calssification="district")
         existing_districts = District.objects.all().values_list('id_parladata',
                                                                 flat=True)

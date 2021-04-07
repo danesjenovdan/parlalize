@@ -1,4 +1,4 @@
-from parlalize.settings import API_URL, API_DATE_FORMAT, SETTER_KEY, PARSER_UN, PARSER_PASS, BASE_URL, DZ
+from django.conf import settings
 from parlalize.utils_ import tryHard, getDataFromPagerApi, getDataFromPagerApiGen
 from parlaposlanci.models import Person, District, MinisterStatic
 from parlaskupine.models import Organization
@@ -16,7 +16,7 @@ import feedparser
 # parlalize initial runner methods #
 
 factory = RequestFactory()
-request_with_key = factory.get('?key=' + SETTER_KEY)
+request_with_key = factory.get('?key=' + settings.SETTER_KEY)
 
 # TODO: do something with this method
 def deleteUnconnectedSpeeches():
@@ -27,7 +27,7 @@ def deleteUnconnectedSpeeches():
 
 # TODO check if is this necessary
 def updatePersonStatus():
-    mps = tryHard(API_URL + '/getMPs').json()
+    mps = tryHard(settings.API_URL + '/getMPs').json()
     mps_ids = [mp['id'] for mp in mps]
     for person in Person.objects.all():
         if person.actived == 'Yes':
@@ -42,7 +42,7 @@ def updatePersonStatus():
 
 # TODO check if is this necessary
 def updatePersonFunctions():
-    mps = tryHard(API_URL + '/getMembersWithFunction/').json()
+    mps = tryHard(settings.API_URL + '/getMembersWithFunction/').json()
 
     for person in Person.objects.all():
         if person.has_function:

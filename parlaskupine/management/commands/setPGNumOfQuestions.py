@@ -10,8 +10,7 @@ from parlaskupine.models import Organization, NumberOfQuestions
 from parlalize.utils_ import (tryHard, saveOrAbortNew, getDataFromPagerApi, getPersonData)
 from utils.parladata_api import getOrganizationsWithVoters, getVotersIDs, getParentOrganizationsWithVoters, getQuestions
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, DZ
-
+from django.conf import settings
 
 class Command(BaseCommand):
     help = 'Updates compas'
@@ -26,9 +25,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['date']:
             date_ = options['date']
-            date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+            date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
         else:
-            date_ = datetime.now().date().strftime(API_DATE_FORMAT)
+            date_ = datetime.now().date().strftime(settings.API_DATE_FORMAT)
             date_of = datetime.now().date()
 
         data = getQuestions()
@@ -45,7 +44,7 @@ class Command(BaseCommand):
             authors = []
             for question in data:
                 qDate = datetime.strptime(question['date'], '%Y-%m-%dT%X')
-                qDate = qDate.strftime(API_DATE_FORMAT)
+                qDate = qDate.strftime(settings.API_DATE_FORMAT)
                 for author in question['authors']:
                     try:
                         person_data = mpStatic[str(author)]

@@ -5,7 +5,7 @@ from parlaseje.models import Session, Speech
 from parlalize.utils_ import saveOrAbortNew, getAllStaticData
 from utils.parladata_api import getParentOrganizationsWithVoters
 from datetime import datetime
-from parlalize.settings import SOLR_URL
+from django.conf import settings
 
 import requests
 import json
@@ -18,7 +18,7 @@ def getSessionMegastring(session):
 
 
 def commit_to_solr(commander, output):
-    url = SOLR_URL + '/update?commit=true'
+    url = settings.SOLR_URL + '/update?commit=true'
     commander.stdout.write('About to commit %s sessions to %s' % (str(len(output)), url))
     data = json.dumps(output)
     requests.post(url,

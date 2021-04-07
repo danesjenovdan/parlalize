@@ -11,10 +11,7 @@ from collections import Counter
 # from raven.contrib.django.raven_compat.models import client
 from slugify import slugify
 
-from parlalize.settings import (API_URL, API_DATE_FORMAT, API_OUT_DATE_FORMAT,
-                                SETTER_KEY, LAST_ACTIVITY_COUNT, BASE_URL, FRONT_URL,
-                                ISCI_URL, GLEJ_URL, YES, NOT_PRESENT, AGAINST, ABSTAIN,
-                                NOTIFICATIONS_API)
+from django.conf import settings
 from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDatesFromLastCard,
                               getPersonData, getPersonCardModelNew, saveOrAbortNew, getDataFromPagerApi,
                               getPersonAmendmentsCount, getAllStaticData)
@@ -167,8 +164,8 @@ def getMPStaticPL(request, person_id, date_=None):
                          'role': funct['role']})
 
     data = {
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': {
             'voters': card.voters,
@@ -388,8 +385,8 @@ def getPercentOFAttendedSession(request, person_id, date=None):
 
     out  = {
         'person': getPersonData(person_id, date),
-        'created_at': equalVoters.created_at.strftime(API_DATE_FORMAT),
-        'created_for': equalVoters.created_for.strftime(API_DATE_FORMAT),
+        'created_at': equalVoters.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': equalVoters.created_for.strftime(settings.API_DATE_FORMAT),
         'results': {
             "sessions":{
                 "score": equalVoters.person_value_sessions,
@@ -517,8 +514,8 @@ def getNumberOfSpokenWords(request, person_id, date=None):
 
     results = {
         'person': getPersonData(person_id, date),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
         'results': {
             'score': card.score,
             'average': card.average,
@@ -718,7 +715,7 @@ def getLastActivity(request, person_id, date_=None):
                 'type_of_question': question.type_of_question,
                 }
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
     a = Activity.objects.filter(person__id_parladata=person_id)
@@ -745,14 +742,14 @@ def getLastActivity(request, person_id, date_=None):
         elif type(act_obj) == Question:
             data[activity.start_time_date].append(getQuestionData(act_obj, staticData['sessions']))
 
-    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+    out = [{'date': date.strftime(settings.API_OUT_DATE_FORMAT),
             'events': data[date]}
             for date in dates]
 
     if dates:
-        card_date = dates[-1].strftime(API_OUT_DATE_FORMAT)
+        card_date = dates[-1].strftime(settings.API_OUT_DATE_FORMAT)
     else:
-        card_date = datetime.now().strftime(API_OUT_DATE_FORMAT)
+        card_date = datetime.now().strftime(settings.API_OUT_DATE_FORMAT)
 
     result = {
         'created_at': card_date,
@@ -881,8 +878,8 @@ def getAllSpeeches(request, person_id, date_=None):
     lastDay = None
     created_at = []
     for day in speeches:
-        dayData = {"date": day[0].start_time.strftime(API_OUT_DATE_FORMAT), "speeches":[]}
-        lastDay = day[0].start_time.strftime(API_OUT_DATE_FORMAT)
+        dayData = {"date": day[0].start_time.strftime(settings.API_OUT_DATE_FORMAT), "speeches":[]}
+        lastDay = day[0].start_time.strftime(settings.API_OUT_DATE_FORMAT)
         for speech in day:
             created_at.append(speech.created_at)
             dayData["speeches"].append({
@@ -893,8 +890,8 @@ def getAllSpeeches(request, person_id, date_=None):
 
     result = {
         'person': getPersonData(person_id, date_),
-        'created_at': max(created_at).strftime(API_OUT_DATE_FORMAT) if created_at else datetime.today().strftime("API_DATE_FORMAT"),
-        'created_for': lastDay if lastDay else datetime.today().strftime("API_DATE_FORMAT"),
+        'created_at': max(created_at).strftime(settings.API_OUT_DATE_FORMAT) if created_at else datetime.today().strftime("settings.API_DATE_FORMAT"),
+        'created_for': lastDay if lastDay else datetime.today().strftime("settings.API_DATE_FORMAT"),
         'results': list(reversed(out))
         }
     return JsonResponse(result, safe=False)
@@ -1074,8 +1071,8 @@ def getMostEqualVoters(request, person_id, date_=None):
     print(equalVoters.person1.id_parladata)
 
     out = {
-        'created_at': equalVoters.created_at.strftime(API_DATE_FORMAT),
-        'created_for': equalVoters.created_for.strftime(API_DATE_FORMAT),
+        'created_at': equalVoters.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': equalVoters.created_for.strftime(settings.API_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -1273,8 +1270,8 @@ def getLessEqualVoters(request, person_id, date_=None): # TODO refactor rename
     """
     equalVoters = getPersonCardModelNew(LessEqualVoters, person_id, date_)
     out = {
-        'created_at': equalVoters.created_at.strftime(API_DATE_FORMAT),
-        'created_for': equalVoters.created_for.strftime(API_DATE_FORMAT),
+        'created_at': equalVoters.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': equalVoters.created_for.strftime(settings.API_DATE_FORMAT),
         'person': getPersonData(person_id, date_),
         'results': [
             {
@@ -1387,9 +1384,9 @@ def getStyleScores(request, person_id, date_=None):
         preprosto = card.preprosto/card.preprosto_average
 
     out = {
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
-        'person': getPersonData(person_id, card.created_for.strftime(API_DATE_FORMAT)),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
+        'person': getPersonData(person_id, card.created_for.strftime(settings.API_DATE_FORMAT)),
         'results': {
             'privzdignjeno': privzdignjeno,
             'problematicno': problematicno,
@@ -1646,15 +1643,15 @@ def getTFIDF(request, person_id, date_=None):
         return JsonResponse({
             'person': getPersonData(person_id, date_),
             'results': [],
-            "created_for": datetime.now().strftime(API_DATE_FORMAT),
-            "created_at": datetime.now().strftime(API_DATE_FORMAT)
+            "created_for": datetime.now().strftime(settings.API_DATE_FORMAT),
+            "created_at": datetime.now().strftime(settings.API_DATE_FORMAT)
             })
 
     out = {
         'person': getPersonData(person_id, date_),
         'results': card.data,
-        "created_for": card.created_for.strftime(API_DATE_FORMAT),
-        "created_at": card.created_at.strftime(API_DATE_FORMAT)
+        "created_for": card.created_for.strftime(settings.API_DATE_FORMAT),
+        "created_at": card.created_at.strftime(settings.API_DATE_FORMAT)
     }
 
     return JsonResponse(out)
@@ -1765,8 +1762,8 @@ def getVocabularySize(request, person_id, date_=None):
 
     out = {
         'person': getPersonData(person_id, date_),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -1886,8 +1883,8 @@ def getAverageNumberOfSpeechesPerSession(request, person_id, date=None):
 
     out = {
         'person': getPersonData(person_id, date),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -1992,7 +1989,7 @@ def getCompass(request, org_id, date_=None): # TODO make proper setters and gett
     }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
         date_=""
@@ -2005,11 +2002,11 @@ def getCompass(request, org_id, date_=None): # TODO make proper setters and gett
         raise Http404("Nismo našli kartice")
     data = compas.data
     for person in data:
-        person.update({"person": getPersonData(person["person_id"], compas.created_for.strftime(API_DATE_FORMAT))})
+        person.update({"person": getPersonData(person["person_id"], compas.created_for.strftime(settings.API_DATE_FORMAT))})
         person.pop('person_id', None)
 
-    return JsonResponse({"created_for": compas.created_for.strftime(API_DATE_FORMAT),
-                         "created_at": compas.created_at.strftime(API_DATE_FORMAT),
+    return JsonResponse({"created_for": compas.created_for.strftime(settings.API_DATE_FORMAT),
+                         "created_at": compas.created_at.strftime(settings.API_DATE_FORMAT),
                          "parent_org_id": int(org_id),
                          "data": data},
                         safe=False)
@@ -2149,8 +2146,8 @@ def getMembershipsOfMember(request, person_id, date=None): # TODO refactor keys 
 
     out = {
         'person': getPersonData(person_id, date),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
         'memberships': card.data
     }
 
@@ -2277,7 +2274,7 @@ def getTaggedBallots(request, person_id, date_=None):
     }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
 
@@ -2401,11 +2398,11 @@ def getNumberOfQuestions(request, person_id, date_=None):
     card = getPersonCardModelNew(NumberOfQuestions,
                                  person_id,
                                  date_)
-    card_date = card.created_for.strftime(API_DATE_FORMAT)
+    card_date = card.created_for.strftime(settings.API_DATE_FORMAT)
 
     out = {
         'person': getPersonData(person_id, card_date),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
         'created_for': card_date,
         'results': {
             'max': {
@@ -2527,10 +2524,10 @@ def getQuestions(request, person_id, date_=None):
     }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date() + timedelta(days=1)
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
     end_of_day = date_of + timedelta(days=1)
     questions = Question.objects.filter(start_time__lt=end_of_day,
@@ -2549,7 +2546,7 @@ def getQuestions(request, person_id, date_=None):
     for question in questions:
         data[question.start_time_date].append(question.getQuestionData(ministrStatic))
 
-    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+    out = [{'date': date.strftime(settings.API_OUT_DATE_FORMAT),
             'questions': data[date]}
            for date in dates]
 
@@ -2766,14 +2763,14 @@ def getSlugs(request):
                     "prisotnost": "/seja/prisotnost/",
                     "transkript": "/seja/transkript/"
                 },
-            "base": FRONT_URL,
+            "base": settings.FRONT_URL,
             "urls": {
-                "base": FRONT_URL,
-                "analize": BASE_URL,
-                "isci": ISCI_URL,
-                "data": API_URL,
-                "glej": GLEJ_URL,
-                "notifications_api": NOTIFICATIONS_API
+                "base": settings.FRONT_URL,
+                "analize": settings.BASE_URL,
+                "isci": settings.ISCI_URL,
+                "data": settings.API_URL,
+                "glej": settings.GLEJ_URL,
+                "notifications_api": settings.NOTIFICATIONS_API
                 }
             }
     return JsonResponse(obj)
@@ -2871,11 +2868,11 @@ def getPresenceThroughTime(request, person_id, date_=None):
     card = getPersonCardModelNew(PresenceThroughTime,
                                  person_id,
                                  date_)
-    card_date = card.created_for.strftime(API_DATE_FORMAT)
+    card_date = card.created_for.strftime(settings.API_DATE_FORMAT)
 
     out = {
         'person': getPersonData(person_id, card_date),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
         'created_for': card_date,
         'results': card.data
     }
@@ -2886,10 +2883,10 @@ def getPresenceThroughTime(request, person_id, date_=None):
 @lockSetter
 def setListOfMembersTickers(request, org_id, date_=None):
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
     # get start_time of previous session and find older card of this date
 
@@ -2902,7 +2899,7 @@ def setListOfMembersTickers(request, org_id, date_=None):
 
         month_ago = date_of-timedelta(days=30)
         print("mesc nazaj", month_ago)
-        prevCard = getListOfMembersTickers(request, month_ago.strftime(API_DATE_FORMAT)).content
+        prevCard = getListOfMembersTickers(request, month_ago.strftime(settings.API_DATE_FORMAT)).content
         print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
         prevData = json.loads(prevCard)['data']
     except Exception as exp:
@@ -2916,17 +2913,17 @@ def setListOfMembersTickers(request, org_id, date_=None):
 @lockSetter
 def setListOfMembersTickersMonthly(request, org_id, date_=None):
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
     # get start_time of previous session and find older card of this date
 
     try:
         previous_time = date_of - timedelta(days=28)
 
-        prevCard = getListOfMembersTickers(request, org_id, previous_time.strftime(API_DATE_FORMAT)).content
+        prevCard = getListOfMembersTickers(request, org_id, previous_time.strftime(settings.API_DATE_FORMAT)).content
         print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
         prevData = json.loads(prevCard)['data']
     except:
@@ -3391,10 +3388,10 @@ def getListOfMembersTickers(request, org_id, date_=None):
     }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
     lists = MembersList.objects.filter(organization__id_parladata=org_id, created_for__lte=date_of)
     if not lists:
         return JsonResponse({'created_at': date_,
@@ -3421,15 +3418,15 @@ def getListOfMembersTickers(request, org_id, date_=None):
 
 def getMismatchWithPG(request, person_id, date_=None):
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
     mismatch = getPersonCardModelNew(MismatchOfPG, int(person_id), date_)
 
     data = {'person': getPersonData(person_id),
-            'created_at': mismatch.created_at.strftime(API_DATE_FORMAT),
-            'created_for': mismatch.created_for.strftime(API_DATE_FORMAT),
+            'created_at': mismatch.created_at.strftime(settings.API_DATE_FORMAT),
+            'created_for': mismatch.created_for.strftime(settings.API_DATE_FORMAT),
             'result': {
                 'score': mismatch.data,
                 'max': {
@@ -3457,7 +3454,7 @@ def getNumberOfAmendmetsOfMember(request, person_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfMember/1/12.12.2015
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
@@ -3484,8 +3481,8 @@ def getNumberOfAmendmetsOfMember(request, person_id, date_=None):
         avg = 0
 
     out = {'person': getPersonData(person.id_parladata),
-           'created_at': datetime.now().strftime(API_DATE_FORMAT),
-           'created_for': last_card_date.strftime(API_DATE_FORMAT),
+           'created_at': datetime.now().strftime(settings.API_DATE_FORMAT),
+           'created_for': last_card_date.strftime(settings.API_DATE_FORMAT),
            'result': {
                'score': count,
                'max': {

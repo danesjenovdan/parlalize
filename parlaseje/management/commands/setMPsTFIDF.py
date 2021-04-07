@@ -3,13 +3,13 @@ from parlaposlanci.models import Person, Tfidf
 from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData
 from utils.parladata_api import getVotersIDs
 from datetime import datetime
-from parlalize.settings import ISCI_URL
+from django.conf import settings
 
 import requests
 
 
 def setTfidfOfMP(commander, mp_id):
-    url = '%s/tfidf/person?id=%s' % (ISCI_URL, mp_id)
+    url = '%s/tfidf/person?id=%s' % (settings.ISCI_URL, mp_id)
     commander.stdout.write('About to fetch %s' % url)
     r = requests.get(url)
     commander.stdout.write('Saving speaker %s' % str(mp_id))

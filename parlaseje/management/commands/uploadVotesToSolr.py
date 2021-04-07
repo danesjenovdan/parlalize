@@ -4,14 +4,14 @@ from parlalize.utils_ import tryHard
 from parlaseje.models import Vote
 from parlalize.utils_ import saveOrAbortNew, getAllStaticData
 from datetime import datetime
-from parlalize.settings import SOLR_URL
+from django.conf import settings
 
 import requests
 import json
 
 
 def commit_to_solr(commander, output):
-    url = SOLR_URL + '/update?commit=true'
+    url = settings.SOLR_URL + '/update?commit=true'
     commander.stdout.write('About to commit %s votes to %s' % (str(len(output)), url))
     data = json.dumps(output)
     requests.post(url,
@@ -72,7 +72,7 @@ class Command(BaseCommand):
 
 
 def delete_votes():
-    url = SOLR_URL + '/select?wt=json&q=type:vote&fl=id&rows=100000000'
+    url = settings.SOLR_URL + '/select?wt=json&q=type:vote&fl=id&rows=100000000'
     print('Getting all IDs from %s' % url)
     a = requests.get(url)
     docs = a.json()['response']['docs']
@@ -80,6 +80,6 @@ def delete_votes():
     data = {'delete': idsInSolr
             }
 
-    r = requests.post(SOLR_URL + '/update?commit=true',
+    r = requests.post(settings.SOLR_URL + '/update?commit=true',
                       data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})

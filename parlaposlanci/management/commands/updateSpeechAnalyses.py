@@ -4,7 +4,7 @@ from parlalize.utils_ import saveOrAbortNew
 from utils.parladata_api import getParentOrganizationsWithVoters
 from utils.speech import WordAnalysis
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 
 
 class Command(BaseCommand):
@@ -19,10 +19,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['date']:
-            date_of = datetime.strptime(options['date'], API_DATE_FORMAT)
+            date_of = datetime.strptime(options['date'], settings.API_DATE_FORMAT)
         else:
             date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
         for org_id in getParentOrganizationsWithVoters():
             sw = WordAnalysis(organization_id=org_id, count_of='members', date_=date_)
 

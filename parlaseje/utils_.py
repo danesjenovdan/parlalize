@@ -3,7 +3,7 @@ from datetime import datetime
 from django.http import Http404
 from parlaposlanci.models import LastActivity
 from parlaseje.models import *
-from parlalize.settings import API_DATE_FORMAT, LEGISLATION_STATUS, LEGISLATION_RESULT, VOTE_INDICATORS, GLEJ_URL
+from django.conf import settings
 from django.http import JsonResponse
 from parlalize.utils_ import tryHard
 
@@ -64,11 +64,11 @@ def set_status_of_laws():
                 print("FAIL")
                 continue
             vote = votes[0]
-            legislation.status = LEGISLATION_STATUS[1][0]
+            legislation.status = settings.LEGISLATION_STATUS[1][0]
             if vote.result:
-                legislation.result = LEGISLATION_RESULT[1][0]
+                legislation.result = settings.LEGISLATION_RESULT[1][0]
             else:
-                legislation.result = LEGISLATION_RESULT[2][0]
+                legislation.result = settings.LEGISLATION_RESULT[2][0]
             legislation.save()
 
 
@@ -86,19 +86,19 @@ def set_status_of_akts():
                 continue
             vote = votes[0]
             print(vote.motion)
-            legislation.status = LEGISLATION_STATUS[1][0]
+            legislation.status = settings.LEGISLATION_STATUS[1][0]
             if vote.result:
-                legislation.result = LEGISLATION_RESULT[1][0]
+                legislation.result = settings.LEGISLATION_RESULT[1][0]
             else:
                 # zakon zavrnjen
-                legislation.result = LEGISLATION_RESULT[2][0]
+                legislation.result = settings.LEGISLATION_RESULT[2][0]
             legislation.save()
 
 def set_accepted_laws():
     legislations = Legislation.objects.filter(procedure_phase__icontains='sprejet')
     for legislation in legislations:
-        legislation.result = LEGISLATION_RESULT[1][0]
-        legislation.status = LEGISLATION_STATUS[1][0]
+        legislation.result = settings.LEGISLATION_RESULT[1][0]
+        legislation.status = settings.LEGISLATION_STATUS[1][0]
         legislation.save()
 
 
@@ -116,7 +116,7 @@ def hasLegislationLink(legislation):
 
 
 def getMotionClassification(motion):
-    classes = VOTE_INDICATORS
+    classes = settings.VOTE_INDICATORS
     text = motion.lower()
     for cl, words in classes.items():
         for word in words:

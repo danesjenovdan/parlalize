@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from utils.compass import getData as getCompassData
 from parlaskupine.models import Compass, Organization
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 from utils.parladata_api import getParentOrganizationsWithVoters
 
 
@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['date']:
-            date_of = datetime.strptime(options['date'], API_DATE_FORMAT).date()
+            date_of = datetime.strptime(options['date'], settings.API_DATE_FORMAT).date()
         else:
             date_of = datetime.now().date()
 

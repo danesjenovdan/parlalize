@@ -2,19 +2,19 @@ from django.core.management.base import BaseCommand, CommandError
 from parlaseje.models import Ballot, Vote
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
-from parlalize.settings import API_URL, SETTER_KEY
+from django.conf import settings
 from django.test.client import RequestFactory
 from parlalize.utils_ import getDataFromPagerApi, getDataFromPagerApiGen
 from utils.parladata_api import getBallots
 
 factory = RequestFactory()
-request_with_key = factory.get('?key=' + SETTER_KEY)
+request_with_key = factory.get('?key=' + settings.SETTER_KEY)
 
 class Command(BaseCommand):
     help = 'Update motion of session - what?'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from  %s/ballots/' % API_URL)
+        self.stdout.write('Fetching data from  %s/ballots/' % settings.API_URL)
         existingISs = Ballot.objects.all().values_list('id_parladata', flat=True)
         for page in getBallots():
             for dic in page:

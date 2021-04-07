@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import dateparse
 
 from parlalize.utils_ import tryHard, saveOrAbortNew, getDataFromPagerApiDRFGen
-from parlalize.settings import API_URL, API_DATE_FORMAT
+from django.conf import settings
 from parlaposlanci.models import Person, MPStaticPL, MPStaticGroup, District
 from parlaskupine.models import Organization
 from utils.parladata_api import getVotersPairsWithOrg, getPeople, getMemberships, getLinks
@@ -32,7 +32,7 @@ def setMPStaticPL(commander, person_id, date_=None):
     else:
         date_of = datetime.now()
 
-    commander.stdout.write('Fetching data from %s/persons/%s with day %s' % (API_URL, str(person_id), date_of))
+    commander.stdout.write('Fetching data from %s/persons/%s with day %s' % (settings.API_URL, str(person_id), date_of))
 
     data = getPeople(id_=person_id)
     try:

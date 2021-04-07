@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from parlalize.settings import API_DATE_FORMAT, BASE_URL, GLEJ_URL, slack_token, SETTER_KEY, DZ
+from django.conf import settings
 from parlalize.utils_ import findDatesFromLastCard
 from datetime import datetime, timedelta
 from django.apps import apps
@@ -29,7 +29,7 @@ import json
 from time import time
 
 factory = RequestFactory()
-request_with_key = factory.get('?key=' + SETTER_KEY)
+request_with_key = factory.get('?key=' + settings.SETTER_KEY)
 
 
 def updateLastDay(date_=None):
@@ -52,28 +52,28 @@ def updateLastDay(date_=None):
         runForTwoDays = False
 
     try:
-        onDateMPCardRunner(lastVoteDay.strftime(API_DATE_FORMAT))
+        onDateMPCardRunner(lastVoteDay.strftime(settings.API_DATE_FORMAT))
     except:
         # client.captureException()
-        print(f'Something went wrong with onDateMPCardRunner {lastVoteDay.strftime(API_DATE_FORMAT)}')
+        print(f'Something went wrong with onDateMPCardRunner {lastVoteDay.strftime(settings.API_DATE_FORMAT)}')
     try:
-        onDatePGCardRunner(lastVoteDay.strftime(API_DATE_FORMAT))
+        onDatePGCardRunner(lastVoteDay.strftime(settings.API_DATE_FORMAT))
     except:
         # client.captureException()
-        print(f'Something went wrong with onDatePGCardRunner {lastVoteDay.strftime(API_DATE_FORMAT)}')
+        print(f'Something went wrong with onDatePGCardRunner {lastVoteDay.strftime(settings.API_DATE_FORMAT)}')
 
     # if last vote and speech isn't in the same day
     if runForTwoDays:
         try:
-            onDateMPCardRunner(lastSpeechDay.strftime(API_DATE_FORMAT))
+            onDateMPCardRunner(lastSpeechDay.strftime(settings.API_DATE_FORMAT))
         except:
             # client.captureException()
-            print(f'Something went wrong with onDatePGCardRunner {lastSpeechDay.strftime(API_DATE_FORMAT)}')
+            print(f'Something went wrong with onDatePGCardRunner {lastSpeechDay.strftime(settings.API_DATE_FORMAT)}')
         try:
-            onDatePGCardRunner(lastSpeechDay.strftime(API_DATE_FORMAT))
+            onDatePGCardRunner(lastSpeechDay.strftime(settings.API_DATE_FORMAT))
         except:
             # client.captureException()
-            print(f'Something went wrong with onDatePGCardRunner {lastSpeechDay.strftime(API_DATE_FORMAT)}')
+            print(f'Something went wrong with onDatePGCardRunner {lastSpeechDay.strftime(settings.API_DATE_FORMAT)}')
 
     return 1
 
@@ -93,4 +93,4 @@ def setListOfMembers(date_time):
     """
     start_date = datetime.strptime(date_time, '%Y-%m-%dT%X')
     start_date = start_date - timedelta(days=1)
-    setListOfMembersTickers(request_with_key, start_date.strftime(API_DATE_FORMAT))
+    setListOfMembersTickers(request_with_key, start_date.strftime(settings.API_DATE_FORMAT))

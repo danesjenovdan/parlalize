@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaseje.models import Session, Legislation
-from parlalize.settings import PARSER_UN, PARSER_PASS, LEGISLATION_STATUS
+from django.conf import settings
 from utils.parladata_api import getLegislation
 from datetime import datetime
 
@@ -75,7 +75,7 @@ class Command(BaseCommand):
                                     date=last_obj['date'],
                                     procedure_ended=is_ended,
                                     classification=last_obj['classification'],
-                                    result=legislation_result if legislation_result else LEGISLATION_STATUS[0][0]
+                                    result=legislation_result if legislation_result else settings.LEGISLATION_STATUS[0][0]
                                     )
                 result.save()
             sessions = list(set(sessions))

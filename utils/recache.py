@@ -5,11 +5,11 @@ from datetime import datetime, timedelta
 from parlaskupine.views import getListOfPGs, getIntraDisunionOrg
 from parlaseje.views import getSessionsList
 from parlaskupine.models import Organization
-from parlalize.settings import API_DATE_FORMAT, slack_token, PS
+from django.conf import settings
 from parlalize.utils_ import getAllStaticData
 from django.db.models import Q
 from slack import WebClient
-slack_client = WebClient(token=slack_token)
+slack_client = WebClient(token=settings.SLACK_TOKEN)
 
 def updateCacheforList(date_=None):
     """
@@ -19,7 +19,7 @@ def updateCacheforList(date_=None):
     try:
         if not date_:
             tomorrow = datetime.now() + timedelta(days=1)
-            date_ = tomorrow.strftime(API_DATE_FORMAT)
+            date_ = tomorrow.strftime(settings.API_DATE_FORMAT)
         getAllStaticData(None, force_render=True)
         getListOfPGs(None, date_, force_render=True)
         getSessionsList(None, date_, force_render=True)
@@ -42,7 +42,7 @@ def updateCacheforList(date_=None):
 
 
 def updateCacheIntraDisunion():
-    organizatons = Organization.objects.filter(Q(classification=PS) |
+    organizatons = Organization.objects.filter(Q(classification=settings.PS) |
                                                Q(classification='stran_vlade') |
                                                Q(name='Državni zbor')).values_list('id_parladata', flat=True)
     for org in organizatons:

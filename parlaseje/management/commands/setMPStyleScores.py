@@ -3,7 +3,7 @@ from parlaposlanci.models import Person, StyleScores
 from parlalize.utils_ import saveOrAbortNew, tryHard, getPersonData
 from utils.parladata_api import getVotersIDs, getParentOrganizationsWithVoters
 from datetime import datetime
-from parlalize.settings import SOLR_URL, API_DATE_FORMAT
+from django.conf import settings
 from collections import Counter
 
 from kvalifikatorji.scripts import problematicno, privzdignjeno, preprosto
@@ -21,7 +21,7 @@ def getCountList(commander, speaker_id, date_):
     data = None
 
     data = tryHard(
-        '%s/tvrh/?q=id:pms_%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content' % (SOLR_URL, str(speaker_id))).json()
+        '%s/tvrh/?q=id:pms_%s&tv.df=true&tv.tf=true&tv.tf_idf=true&wt=json&fl=id&tv.fl=content' % (settings.SOLR_URL, str(speaker_id))).json()
 
     results = []
 
@@ -93,10 +93,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['date']:
             date_ = options['date']
-            date_of = datetime.strptime(API_DATE_FORMAT).date()
+            date_of = datetime.strptime(settings.API_DATE_FORMAT).date()
         else:
             date_of = datetime.now().date()
-            date_ = date_of.strftime(API_DATE_FORMAT)
+            date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
         self.stdout.write('Getting voters')
         for org in getParentOrganizationsWithVoters():

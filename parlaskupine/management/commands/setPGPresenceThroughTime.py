@@ -5,11 +5,11 @@ from parlaskupine.models import Organization, PresenceThroughTime
 from parlalize.utils_ import tryHard, saveOrAbortNew
 from utils.parladata_api import getOrganizationsWithVoters, getBallotsCounter
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
+from django.conf import settings
 
 def setPGPresenceThroughTime(commander, pg, date):
     if date:
-        date_of = datetime.strptime(date, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
 
@@ -24,7 +24,7 @@ def setPGPresenceThroughTime(commander, pg, date):
     data_for_save = []
 
     for month in data:
-        options = YES + NOT_PRESENT + AGAINST + ABSTAIN
+        options = settings.YES + settings.NOT_PRESENT + settings.AGAINST + settings.ABSTAIN
         stats = sum([month[option] for option in options if option in month.keys()])
         presence = float(stats - sum([month[option] for option in NOT_PRESENT  if option in month.keys()])) / stats if stats else 0
         data_for_save.append({'date_ts': month['date_ts'],
@@ -63,7 +63,7 @@ class Command(BaseCommand):
             pgs = options['pgs']
         else:
             if options['date']:
-                date_ = datetime.strptime(options['date'], API_DATE_FORMAT)
+                date_ = datetime.strptime(options['date'], settings.API_DATE_FORMAT)
             else:
                 date_ = datetime.now()
             pgs = getOrganizationsWithVoters(date_=date_)

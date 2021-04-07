@@ -1,13 +1,13 @@
 from operator import itemgetter
 from .models import Organization, IntraDisunion
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 from django.http import JsonResponse
 
 
 def getPgDataAPI(request, id_parladata, date_=None):
     if not date_:
-        date_ = datetime.now().strftime(API_DATE_FORMAT)
+        date_ = datetime.now().strftime(settings.API_DATE_FORMAT)
     org = Organization.objects.filter(id_parladata=id_parladata)
     if org:
     	return JsonResponse(org[0].getOrganizationData())
@@ -20,7 +20,7 @@ def getPgDataAPI(request, id_parladata, date_=None):
 
 def getPgData(id_parladata, date_=None):
     if not date_:
-        date_ = datetime.now().strftime(API_DATE_FORMAT)
+        date_ = datetime.now().strftime(settings.API_DATE_FORMAT)
     org = Organization.objects.filter(id_parladata=id_parladata)
     if org:
     	return org[0].getOrganizationData()

@@ -7,7 +7,7 @@ from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 from parlaseje.models import Session, Legislation, Vote, AgendaItem, AmendmentOfOrg
 from parlaseje.utils_ import getMotionClassification
-from parlalize.settings import SETTER_KEY, YES, AGAINST, ABSTAIN, NOT_PRESENT
+from django.conf import settings
 from parlalize.utils_ import tryHard, saveOrAbortNew
 
 from utils.votes_outliers import setMotionAnalize
@@ -21,7 +21,7 @@ import json
 
 
 factory = RequestFactory()
-request_with_key = factory.get('?key=' + SETTER_KEY)
+request_with_key = factory.get('?key=' + settings.SETTER_KEY)
 
 def hasNumbersOrPdfOrEndWord(inputString):
     end_words = ['PZE', 'PZ', 'P.Z.E.']
@@ -137,11 +137,11 @@ def setMotionOfSession(commander, session_id):
             # this is for votes without ballots
             counter = json.loads(vote['counter'])
             opts_set = set(counter.keys())
-            if opts_set.intersection(YES):
+            if opts_set.intersection(settings.YES):
                 votes_for = counter['for']
-            if opts_set.intersection(AGAINST):
+            if opts_set.intersection(settings.AGAINST):
                 votes_against = counter['against']
-            if opts_set.intersection(ABSTAIN):
+            if opts_set.intersection(settings.ABSTAIN):
                 votes_abstain = counter['abstain']
             # hardcoded croations number of member
             votes_absent = 151 - sum([int(v) for v in counter.values()])

@@ -3,14 +3,14 @@ from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaskupine.models import Organization
 from parlaseje.models import Session
-from parlalize.settings import API_URL, DZ
+from django.conf import settings
 from utils.parladata_api import getSessions
 
 class Command(BaseCommand):
     help = 'Sets session data'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from %s/sessions/' % API_URL)
+        self.stdout.write('Fetching data from %s/sessions/' % settings.API_URL)
         data = getSessions()
         session_ids = list(Session.objects.all().values_list('id_parladata',
                                                             flat=True))
@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 result.save()
                 orgs = list(orgs)
                 result.organizations.add(*orgs)
-                if session['id'] == DZ:
+                if session['id'] == settings.DZ:
                     if 'redna seja' in session['name'].lower():
                         # call method for create new list of members
                         # setListOfMembers(session['start_time'])

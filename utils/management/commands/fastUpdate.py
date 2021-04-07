@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.test.client import RequestFactory
 
-from parlalize.settings import API_URL, slack_token, API_DATE_FORMAT, DZ, SETTER_KEY, LEGISLATION_STATUS
+from django.conf import settings
 from parlalize.utils_ import tryHard
 
 from parlaseje.models import Ballot, Vote, Speech, Question, Legislation, Session
@@ -18,7 +18,7 @@ from utils.parladata_api import getVotersIDs
 
 from datetime import datetime, timedelta
 from slack import WebClient
-slack_client = WebClient(token=slack_token)
+slack_client = WebClient(token=settings.SLACK_TOKEN)
 from time import time
 from itertools import groupby
 
@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         factory = RequestFactory()
-        request_with_key = factory.get('?key=' + SETTER_KEY)
+        request_with_key = factory.get('?key=' + settings.SETTER_KEY)
 
         fast = False
         date_ = None
@@ -80,9 +80,9 @@ class Command(BaseCommand):
             dates.append(lastLegislationTime)
 
         # prepare url
-        url = API_URL + '/getAllChangesAfter/'
+        url = settings.API_URL + '/getAllChangesAfter/'
         for sDate in dates:
-            url += sDate.strftime(API_DATE_FORMAT + '_%H:%M') + '/'
+            url += sDate.strftime(settings.API_DATE_FORMAT + '_%H:%M') + '/'
 
         self.stdout.write(url)
 
@@ -109,7 +109,7 @@ class Command(BaseCommand):
         except:
             pass
 
-        sdate = datetime.now().strftime(API_DATE_FORMAT)
+        sdate = datetime.now().strftime(settings.API_DATE_FORMAT)
 
         # Persons
         mps_ids = getVotersIDs()
@@ -154,7 +154,7 @@ class Command(BaseCommand):
                 result.save()
                 orgs = list(orgs)
                 result.organizations.add(*orgs)
-                if sessions['id'] == DZ:
+                if sessions['id'] == settings.DZ:
                     if 'redna seja' in sessions['name'].lower():
                         # call method for create new list of members
                         #new_redna_seja.append(sessions)
@@ -419,7 +419,7 @@ class Command(BaseCommand):
         s_update += list(speeches.values_list("session__id_parladata", flat=True))
         s_p_update = list(speeches.values_list("person__id_parladata", flat=True))
 
-        date_ = (datetime.now() + timedelta(days=1)).strftime(API_DATE_FORMAT)
+        date_ = (datetime.now() + timedelta(days=1)).strftime(settings.API_DATE_FORMAT)
         if s_update:
             getSessionsList(None, date_, force_render=True)
         self.stdout.write(str(s_update))

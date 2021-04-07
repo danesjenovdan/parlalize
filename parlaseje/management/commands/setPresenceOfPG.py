@@ -3,7 +3,7 @@ from parlaseje.models import Session, PresenceOfPG
 from parlalize.utils_ import saveOrAbortNew, tryHard, getDataFromPagerApi
 from utils.parladata_api import getOrganizationsWithVoters, getBallotsForSession
 from datetime import datetime
-from parlalize.settings import NOT_PRESENT
+from django.conf import settings
 
 from collections import Counter
 
@@ -20,9 +20,9 @@ def setPresenceOfPG(commander, session_id):
     votes = getBallotsForSession(session_id)
 
     counters_in = Counter([vote['voterparty']
-                           for vote in votes if vote['option'] not in NOT_PRESENT])
+                           for vote in votes if vote['option'] not in settings.NOT_PRESENT])
     counters_out = Counter([vote['voterparty']
-                            for vote in votes if vote['option'] in NOT_PRESENT])
+                            for vote in votes if vote['option'] in settings.NOT_PRESENT])
 
     pgs = list(set(counters_in.keys() + counters_out.keys()))
 

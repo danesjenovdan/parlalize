@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, VocabularySize
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 from parlalize.utils_ import saveOrAbortNew
 from utils.parladata_api import getParentOrganizationsWithVoters
 from datetime import datetime
@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
         for org_id in getParentOrganizationsWithVoters():
             sw = WordAnalysis(organization_id=org_id, count_of='groups', date_=date_)
 

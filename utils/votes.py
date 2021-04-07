@@ -4,7 +4,7 @@ import json
 
 from datetime import datetime
 
-from parlalize.settings import API_URL, API_DATE_FORMAT, VOTE_MAP
+from django.conf import settings
 from parlalize.utils_ import tryHard, saveOrAbortNew, getDataFromPagerApi, getDataFromPagerApiGen
 
 from utils.parladata_api import getVotersIDs, getOrganizationsWithVotersList, getParentOrganizationsWithVoters, getBallotTable, getOrganizationsWithVoters
@@ -20,7 +20,7 @@ class VotesAnalysis(object):
     def __init__(self, organization_id, date_=None):
         self.debug = False
         if date_:
-            self.date_ = date_.strftime(API_DATE_FORMAT)
+            self.date_ = date_.strftime(settings.API_DATE_FORMAT)
             self.date_of = date_
         else:
             self.date_ = ''
@@ -67,7 +67,7 @@ class VotesAnalysis(object):
             """
             voter option to logic value
             """
-            return VOTE_MAP[row['option']]
+            return settings.VOTE_MAP[row['option']]
 
         # prepere helper columns (logic, option_ni, voter_unit)
         self.data['logic'] = self.data.apply(lambda row: toLogic(row), axis=1)

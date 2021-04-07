@@ -1,14 +1,14 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlalize.utils_ import tryHard
 from parlaskupine.models import Organization
-from parlalize.settings import API_URL
+from django.conf import settings
 from utils.parladata_api import getOrganizations
 
 class Command(BaseCommand):
     help = 'Updates people from Parladata'
 
     def handle(self, *args, **options):
-        self.stdout.write('Fetching data from %s/organizations/' % API_URL)
+        self.stdout.write('Fetching data from %s/organizations/' % settings.API_URL)
         data = getOrganizations()
         for pg in data:
             if Organization.objects.filter(id_parladata=pg['id']):

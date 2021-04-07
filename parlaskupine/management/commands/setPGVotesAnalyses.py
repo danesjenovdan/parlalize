@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 from utils.votes import VotesAnalysis
 from utils.parladata_api import getParentOrganizationsWithVoters
 
@@ -18,9 +18,9 @@ class Command(BaseCommand):
         if options['date']:
             date_ = options['date']
         else:
-            date_ = datetime.now().date().strftime(API_DATE_FORMAT)
+            date_ = datetime.now().date().strftime(settings.API_DATE_FORMAT)
         for org_id in getParentOrganizationsWithVoters():
-            votes = VotesAnalysis(organization_id=org_id, date_=datetime.strptime(date_, API_DATE_FORMAT))
+            votes = VotesAnalysis(organization_id=org_id, date_=datetime.strptime(date_, settings.API_DATE_FORMAT))
             self.stdout.write('About to begin VotesAnalysis for %s' % str(date_))
             votes.setAll()
             self.stdout.write('Done with VotesAnalysis for %s' % str(date_))

@@ -7,7 +7,7 @@ from parlaskupine.models import Organization
 from parlalize.utils_ import saveOrAbortNew, getAllStaticData
 from utils.parladata_api import getOrganizationsWithVoters
 from datetime import datetime
-from parlalize.settings import SOLR_URL, API_DATE_FORMAT
+from django.conf import settings
 
 import requests
 import json
@@ -20,7 +20,7 @@ def getOrgMegastring(org):
 
 
 def commit_to_solr(commander, output):
-    url = SOLR_URL + '/update?commit=true'
+    url = settings.SOLR_URL + '/update?commit=true'
     commander.stdout.write('About to commit %s pg megastrings to %s' % (str(len(output)), url))
     data = json.dumps(output)
     requests.post(url,
@@ -45,7 +45,7 @@ class Command(BaseCommand):
             pg_ids = options['pg_ids']
         else:
             date_of = datetime.now().date()
-            date_ = date_of.strftime(API_DATE_FORMAT)
+            date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
             pg_ids = getOrganizationsWithVoters(date_=date_of)
 

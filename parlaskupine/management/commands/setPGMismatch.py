@@ -4,14 +4,14 @@ from parlaskupine.models import Organization, PGMismatch
 from parlalize.utils_ import tryHard, saveOrAbortNew, getAllStaticData, getPersonCardModelNew
 from utils.parladata_api import getOrganizationsWithVoters, getOrganizationsWithVotersList
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
+from django.conf import settings
 
 def setPGMismatch(commander, pg_id, date=None):
     """
     Setter for analysis mismatch of parlament group
     """
     if date:
-        date_of = datetime.strptime(date, API_DATE_FORMAT)
+        date_of = datetime.strptime(date, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date()
         date = ''
@@ -56,7 +56,7 @@ class Command(BaseCommand):
             pgs = options['pgs']
         else:
             if options['date']:
-                date_ = datetime.strptime(options['date'], API_DATE_FORMAT)
+                date_ = datetime.strptime(options['date'], settings.API_DATE_FORMAT)
             else:
                 date_ = datetime.now()
             pgs = getOrganizationsWithVoters(date_=date_)

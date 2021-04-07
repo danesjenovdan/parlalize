@@ -22,9 +22,7 @@ from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDat
 
 from utils.parladata_api import (getVotersPairsWithOrg, getParentOrganizationsWithVoters, getOrganizationsWithVoters,
    getOrganizationsWithVotersList, getOrganizationsWithVotersList, getCoalitionPGs, getSessions, getAllPGs)
-from parlalize.settings import (API_URL, API_DATE_FORMAT, BASE_URL,
-                                API_OUT_DATE_FORMAT, SETTER_KEY, VOTE_NAMES, YES, NOT_PRESENT,
-                                AGAINST, ABSTAIN, DZ)
+from django.conf import settings
 from .models import *
 from .utils_ import getDisunionInOrgHelper, getAmendmentsCount
 from parlaseje.models import Activity, Session, Vote, Speech, Question
@@ -171,8 +169,8 @@ def getBasicInfOfPG(request, pg_id, date=None):
             # viceOfPG.append(0)
 
     data = {'party': card.organization.getOrganizationData(),
-            'created_at': card.created_at.strftime(API_DATE_FORMAT),
-            'created_for': card.created_for.strftime(API_DATE_FORMAT),
+            'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+            'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
             'headOfPG': headOfPG,
             'viceOfPG': viceOfPG,
             'numberOfSeats': card.numberOfSeats,
@@ -266,8 +264,8 @@ def getPercentOFAttendedSessionPG(request, pg_id, date_=None):
 
     # uprasi ce isto kot pri personu razdelimo
     data = {'organization': card.organization.getOrganizationData(),
-            'created_at': card.created_at.strftime(API_DATE_FORMAT),
-            'created_for': card.created_for.strftime(API_DATE_FORMAT),
+            'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+            'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
             'sessions': {
                 'organization_value': card.organization_value_sessions,
                 'maxPG': max_s_orgs,
@@ -368,7 +366,7 @@ def getMPsOfPG(request, pg_id, date_=None):
     """
 
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
         date_ = ''
@@ -377,8 +375,8 @@ def getMPsOfPG(request, pg_id, date_=None):
     ids = card.MPs
     result = sorted([getPersonData(MP, date_)
                      for MP in ids], key=lambda k: k['name'])
-    created_at = card.created_at.strftime(API_DATE_FORMAT)
-    created_for = card.created_for.strftime(API_DATE_FORMAT)
+    created_at = card.created_at.strftime(settings.API_DATE_FORMAT)
+    created_for = card.created_for.strftime(settings.API_DATE_FORMAT)
     return JsonResponse({'results': result,
                          'party': card.organization.getOrganizationData(),
                          'created_at': created_at,
@@ -862,10 +860,10 @@ def getSpeechesOfPG(request, pg_id, date_=False):
     }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
     speeches_q = Speech.getValidSpeeches(date_of + timedelta(days=1))
     staticData = json.loads(getAllStaticData(None).content)
@@ -900,7 +898,7 @@ def getSpeechesOfPG(request, pg_id, date_=False):
                 session_obj['speakers'].append(person_obj)
             #out[day][sessions_id][person_id] = [s['id_parladata'] for s in inner_inner_group]
             day_objs.append(session_obj)
-        out.append({'date': day.strftime(API_OUT_DATE_FORMAT),
+        out.append({'date': day.strftime(settings.API_OUT_DATE_FORMAT),
                     'sessions': day_objs})
         #print len(out)
         if len(out) > 50:
@@ -1020,8 +1018,8 @@ def getMostMatchingThem(request, pg_id, date_=None):
     org = Organization.objects.get(id_parladata=int(pg_id))
     out = {
         'organization': org.getOrganizationData(),
-        'created_at': mostMatching.created_at.strftime(API_DATE_FORMAT),
-        'created_for': mostMatching.created_for.strftime(API_DATE_FORMAT),
+        'created_at': mostMatching.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': mostMatching.created_for.strftime(settings.API_DATE_FORMAT),
         'results': [
             {
                 'ratio': mostMatching.votes1,
@@ -1219,8 +1217,8 @@ def getLessMatchingThem(request, pg_id, date_=None):
     org = Organization.objects.get(id_parladata=int(pg_id))
     out = {
         'organization': org.getOrganizationData(),
-        'created_at': mostMatching.created_at.strftime(API_DATE_FORMAT),
-        'created_for': mostMatching.created_for.strftime(API_DATE_FORMAT),
+        'created_at': mostMatching.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': mostMatching.created_for.strftime(settings.API_DATE_FORMAT),
         'results': [
             {
                 'ratio': mostMatching.votes1,
@@ -1384,8 +1382,8 @@ def getDeviationInOrg(request, pg_id, date_=None):
     org = Organization.objects.get(id_parladata=int(pg_id))
     out = {
         'organization': org.getOrganizationData(),
-        'created_at': mostMatching.created_at.strftime(API_DATE_FORMAT),
-        'created_for': mostMatching.created_for.strftime(API_DATE_FORMAT),
+        'created_at': mostMatching.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': mostMatching.created_for.strftime(settings.API_DATE_FORMAT),
         'results': out_r
     }
     # remove None from list. If PG dont have 6 members.
@@ -1398,10 +1396,10 @@ def setWorkingBodies(request, org_id, date_=None):
     """The method for setting working bodies.
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-    url = API_URL + '/getOrganizationRolesAndMembers/' + org_id + (('/'+date_) if date_ else '')
+    url = settings.API_URL + '/getOrganizationRolesAndMembers/' + org_id + (('/'+date_) if date_ else '')
     members = tryHard(url).json()
     if not len(members['president']) or not len(members['members']) or not len(members['vice_president']):
         return JsonResponse({'alliswell': False,
@@ -1413,8 +1411,8 @@ def setWorkingBodies(request, org_id, date_=None):
     out = {}
     name = members.pop('name')
     all_members = [member for role in members.values() for member in role]
-    coalitionPGs = getCoalitionPGs(parent_org=DZ)
-    membersOfPG = getOrganizationsWithVotersList(date_=date_of, organization_id=DZ)
+    coalitionPGs = getCoalitionPGs(parent_org=settings.DZ)
+    membersOfPG = getOrganizationsWithVotersList(date_=date_of, organization_id=settings.DZ)
     sessions = getSessions(organization=org_id)
     coal_pgs = {str(pg): [member
                           for member
@@ -1870,7 +1868,7 @@ def getWorkingBodies(request, org_id, date_=None):
     """
     workingBodies = getPGCardModelNew(WorkingBodies, org_id, date_)
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
     sessions = [session.getSessionData()
@@ -1883,8 +1881,8 @@ def getWorkingBodies(request, org_id, date_=None):
                         'speeches': True if Speech.objects.filter(session__id_parladata=session['id']) else False})
 
     return JsonResponse({'organization': workingBodies.organization.getOrganizationData(),
-                         'created_at': workingBodies.created_at.strftime(API_DATE_FORMAT),
-                         'created_for': workingBodies.created_for.strftime(API_DATE_FORMAT),
+                         'created_at': workingBodies.created_at.strftime(settings.API_DATE_FORMAT),
+                         'created_for': workingBodies.created_for.strftime(settings.API_DATE_FORMAT),
                          'info': {'president': getPersonData(workingBodies.president.id_parladata),
                                   'vice_president': sorted([getPersonData(person)
                                                             for person
@@ -1907,16 +1905,16 @@ def getWorkingBodies(request, org_id, date_=None):
 # TODO need port to parladata DRF api
 def getWorkingBodies_live(request, org_id, date_=None):
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date()
-    url = API_URL+'/getOrganizationRolesAndMembers/'+org_id+(('/'+date_) if date_ else '')
+    url = settings.API_URL+'/getOrganizationRolesAndMembers/'+org_id+(('/'+date_) if date_ else '')
     members = tryHard(url).json()
     out = {}
     name = members.pop('name')
     all_members = [member for role in members.values() for member in role]
-    coalitionPGs = getCoalitionPGs(parent_org=DZ)
-    membersOfPG = getOrganizationsWithVotersList(date_=date_of, organization_id=DZ)
+    coalitionPGs = getCoalitionPGs(parent_org=settings.DZ)
+    membersOfPG = getOrganizationsWithVotersList(date_=date_of, organization_id=settings.DZ)
     sessions = getSessions(organization=org_id)
     coal_pgs = {str(pg): [member
                           for member
@@ -2042,7 +2040,7 @@ def getTaggedBallots(request, pg_id, date_=None):
 }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
@@ -2123,8 +2121,8 @@ def getVocabularySize(request, pg_id, date_=None):
     card = getPGCardModelNew(VocabularySize, pg_id, date_)
     out = {
         'party': card.organization.getOrganizationData(),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
         'results': {
             'max': {
                 'score': card.maximum,
@@ -2166,11 +2164,11 @@ def getPGsIDs(request):
 }
     """
     output = []
-    data = getAllPGs(parent_org=DZ)
+    data = getAllPGs(parent_org=settings.DZ)
     data = data.json()
     lastSession = Session.objects.all().order_by('-start_time')[0]
     output = {'list': [i for i in data],
-              'lastDate': lastSession.start_time.strftime(API_DATE_FORMAT)}
+              'lastDate': lastSession.start_time.strftime(settings.API_DATE_FORMAT)}
 
     return JsonResponse(output, safe=False)
 
@@ -2236,8 +2234,8 @@ def getStyleScoresPG(request, pg_id, date_=None):
         preprosto = card.preprosto/card.preprosto_average
 
     out = {
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
         'party': card.organization.getOrganizationData(),
         'results': {
             'privzdignjeno': privzdignjeno,
@@ -2315,15 +2313,15 @@ def getTFIDF(request, party_id, date_=None):
         return JsonResponse({
             'party': org.getOrganizationData(),
             'results': [],
-            'created_for': datetime.now().strftime(API_DATE_FORMAT),
-            'created_at': datetime.now().strftime(API_DATE_FORMAT)
+            'created_for': datetime.now().strftime(settings.API_DATE_FORMAT),
+            'created_at': datetime.now().strftime(settings.API_DATE_FORMAT)
         })
 
     out = {
         'party': card.organization.getOrganizationData(),
         'results': card.data,
-        'created_for': card.created_for.strftime(API_DATE_FORMAT),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT)
+        'created_for': card.created_for.strftime(settings.API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT)
     }
 
     return JsonResponse(out)
@@ -2392,7 +2390,7 @@ def getNumberOfQuestions(request, pg_id, date_=None):
     """
     card = getPGCardModelNew(NumberOfQuestions, pg_id, date_)
 
-    card_date = card.created_for.strftime(API_DATE_FORMAT)
+    card_date = card.created_for.strftime(settings.API_DATE_FORMAT)
 
     max_orgs = []
     for m_org in card.maxOrgs:
@@ -2401,7 +2399,7 @@ def getNumberOfQuestions(request, pg_id, date_=None):
 
     out = {
         'party': card.organization.getOrganizationData(),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
         'created_for': card_date,
         'results': {
             'max': {
@@ -2882,10 +2880,10 @@ def getQuestionsOfPG(request, pg_id, date_=False):
 }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         date_of = datetime.now().date() + timedelta(days=1)
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
     end_of_day = date_of + timedelta(days=1)
     questions = Question.objects.filter(start_time__lt=end_of_day,
@@ -2914,7 +2912,7 @@ def getQuestionsOfPG(request, pg_id, date_=False):
         temp_data.update({'authors': authors})
         data[question.start_time_date].append(temp_data)
 
-    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+    out = [{'date': date.strftime(settings.API_OUT_DATE_FORMAT),
             'questions': data[date]}
            for date in dates]
 
@@ -3128,11 +3126,11 @@ def getListOfPGs(request, organization_id, date_=None, force_render=False):
 
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
         key = organization_id + '_' + date_
     else:
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
         key = organization_id + '_' + date_
     c_data = cache.get('pg_list_' + key)
     if c_data and not force_render:
@@ -3386,11 +3384,11 @@ def getPresenceThroughTime(request, party_id, date_=None):
     card = getPGCardModelNew(PresenceThroughTime,
                              party_id,
                              date_)
-    card_date = card.created_for.strftime(API_DATE_FORMAT)
+    card_date = card.created_for.strftime(settings.API_DATE_FORMAT)
 
     out = {
         'party': card.organization.getOrganizationData(),
-        'created_at': card.created_at.strftime(API_DATE_FORMAT),
+        'created_at': card.created_at.strftime(settings.API_DATE_FORMAT),
         'created_for': card_date,
         'results': card.data
     }
@@ -3785,7 +3783,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                                    key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name',
                                                                  flat=True))
-            out["classifications"] = VOTE_NAMES
+            out["classifications"] = settings.VOTE_NAMES
             cache.set('pg_disunion' + org_id, out, 60 * 60 * 48)
         else:
             for vote in votes:
@@ -3802,7 +3800,7 @@ def getIntraDisunionOrg(request, org_id, force_render=False):
                                    key=lambda k: k['maximum'])
             out['all_tags'] = list(Tag.objects.all().values_list('name',
                                                                  flat=True))
-            out["classifications"] = VOTE_NAMES
+            out["classifications"] = settings.VOTE_NAMES
             cache.set('pg_disunion' + org_id, out, 60 * 60 * 48)
 
     return JsonResponse(out, safe=False)
@@ -3971,7 +3969,7 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
 }
 """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
@@ -3998,15 +3996,15 @@ def getAmendmentsOfPG(request, pg_id, date_=None):
         data[vote.start_time_date].append({'session': thisSession,
                                            'results': results
                                            })
-    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+    out = [{'date': date.strftime(settings.API_OUT_DATE_FORMAT),
             'votes': data[date]}
            for date in dates]
 
     tags = list(Tag.objects.all().values_list('name', flat=True))
     result = {
         'party': org.getOrganizationData(),
-        'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
-        'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'created_at': dates[-1].strftime(settings.API_DATE_FORMAT) if dates else None,
+        'created_for': dates[-1].strftime(settings.API_DATE_FORMAT) if dates else None,
         'all_tags': tags,
         'results': list(reversed(out))
         }
@@ -4109,7 +4107,7 @@ def getDisunionOrg(request):
 ]
     """
     result = []
-    data = getAllPGs(parent_org=DZ)
+    data = getAllPGs(parent_org=settings.DZ)
     for org in data:
         ids = IntraDisunion.objects.filter(organization__id_parladata=org)
         el = ids.values_list('maximum', flat=True)
@@ -4163,7 +4161,7 @@ def getDisunionOrgID(request, pg_id, date_=None):
    }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
@@ -4216,11 +4214,11 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
         curl -i https://analize.parlameter.si/v1/pg/getNumberOfAmendmetsOfPG/1/12.12.2015
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
-    orgs = getAllPGs(parent_org=DZ)
+    orgs = getAllPGs(parent_org=settings.DZ)
     org = count = last_card_date = None
     data = []
     for org_id in orgs:
@@ -4244,8 +4242,8 @@ def getNumberOfAmendmetsOfPG(request, pg_id, date_=None):
         avg = 0
 
     out = {'organization': org.getOrganizationData(),
-           'created_at': datetime.now().strftime(API_DATE_FORMAT),
-           'created_for': last_card_date.strftime(API_DATE_FORMAT),
+           'created_at': datetime.now().strftime(settings.API_DATE_FORMAT),
+           'created_for': last_card_date.strftime(settings.API_DATE_FORMAT),
            'result': {
                'score': count,
                'max': {
@@ -4363,7 +4361,7 @@ def getPGMismatch(request, pg_id, date_=None):
 }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT)
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT)
     else:
         date_of = datetime.now().date() + timedelta(days=1)
         date_ = ''
@@ -4378,8 +4376,8 @@ def getPGMismatch(request, pg_id, date_=None):
     data = sorted(data, key=lambda k: k['ratio'], reverse=True)
     out = {
         'organization': org.getOrganizationData(),
-        'created_at': mismatch.created_at.strftime(API_DATE_FORMAT),
-        'created_for': mismatch.created_for.strftime(API_DATE_FORMAT),
+        'created_at': mismatch.created_at.strftime(settings.API_DATE_FORMAT),
+        'created_for': mismatch.created_for.strftime(settings.API_DATE_FORMAT),
         'results': data
     }
     return JsonResponse(out, safe=False)

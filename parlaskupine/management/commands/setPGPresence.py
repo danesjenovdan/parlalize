@@ -5,11 +5,11 @@ from parlalize.utils_ import saveOrAbortNew
 from utils.parladata_api import (getParentOrganizationsWithVoters,
     getVotersIDs, getVotersPairsWithOrg, getOrganizationsWithVoters, getNumberOfAllMPAttendedSessions)
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 
 def setPercentOFAttendedSessionPG(pg_id, date_of, parenet_org):
 
-    date_ = date_of.strftime(API_DATE_FORMAT)
+    date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
     allSum = {}
     data = {}

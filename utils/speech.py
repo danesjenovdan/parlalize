@@ -2,7 +2,7 @@ import csv
 from datetime import datetime
 from parlaseje.models import Session, Activity, Speech
 from parlaskupine.models import Organization
-from parlalize.settings import API_DATE_FORMAT, ISCI_URL
+from django.conf import settings
 from collections import Counter
 from kvalifikatorji.scripts import numberOfWords, countWords, getScore, getScores, problematicno, privzdignjeno, preprosto, getCountList
 from itertools import groupby
@@ -26,7 +26,7 @@ class WordAnalysis(object):
         self.swizec_coef = []
         self.average_words = None
         if date_:
-            self.date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+            self.date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
             self.date_ = date_
         else:
             self.date_of = datetime.now().date()

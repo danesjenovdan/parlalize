@@ -4,7 +4,7 @@ from parlaposlanci.models import Person, Presence
 from parlalize.utils_ import saveOrAbortNew
 from utils.parladata_api import getVotersIDs, getParentOrganizationsWithVoters, getNumberOfAllMPAttendedSessions
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 
 def setPercentOFAttendedSession(commander, members, date_of=datetime.now().date()):
 
@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
         for org_id in getParentOrganizationsWithVoters():
             members = getVotersIDs(organization_id=org_id)

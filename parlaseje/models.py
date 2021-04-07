@@ -4,8 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from behaviors.models import Timestampable, Versionable
-from parlalize.settings import (API_OUT_DATE_FORMAT, API_DATE_FORMAT,
-                                LEGISLATION_STATUS, LEGISLATION_RESULT)
+from django.conf import settings
 from datetime import datetime
 from tinymce.models import HTMLField
 
@@ -86,7 +85,7 @@ class Session(Timestampable, models.Model):
                      for org
                      in self.organizations.all()]
         return {'name': self.name,
-                'date': self.start_time.strftime(API_OUT_DATE_FORMAT),
+                'date': self.start_time.strftime(settings.API_OUT_DATE_FORMAT),
                 'date_ts': self.start_time,
                 'id': self.id_parladata,
                 'orgs': orgs_data,
@@ -98,11 +97,11 @@ class Session(Timestampable, models.Model):
                      in self.organizations.all()]
         activity = Activity.objects.filter(session=self)
         if activity:
-            last_day = activity.latest('updated_at').updated_at.strftime(API_OUT_DATE_FORMAT)
+            last_day = activity.latest('updated_at').updated_at.strftime(settings.API_OUT_DATE_FORMAT)
         else:
-            last_day = self.start_time.strftime(API_OUT_DATE_FORMAT),
+            last_day = self.start_time.strftime(settings.API_OUT_DATE_FORMAT),
         return {'name': self.name,
-                'date': self.start_time.strftime(API_OUT_DATE_FORMAT),
+                'date': self.start_time.strftime(settings.API_OUT_DATE_FORMAT),
                 'updated_at': last_day,
                 'date_ts': self.start_time,
                 'id': self.id_parladata,
@@ -532,13 +531,13 @@ class Legislation(Timestampable, models.Model):
     status = models.CharField(blank=True, null=True,
                               max_length=255,
                               help_text='result of law',
-                              default=LEGISLATION_STATUS[0][0],
-                              choices=LEGISLATION_STATUS)
+                              default=settings.LEGISLATION_STATUS[0][0],
+                              choices=settings.LEGISLATION_STATUS)
 
     result = models.CharField(blank=True, null=True,
                               max_length=255,
                               help_text='result of law',
-                              choices=LEGISLATION_RESULT)
+                              choices=settings.LEGISLATION_RESULT)
 
     id_parladata = models.IntegerField(_('parladata id'),
                                        blank=True,

@@ -18,8 +18,6 @@ from parlaskupine.models import (Organization, WorkingBodies,
                                  StyleScores as StyleScoresPG, Compass)
 from parlaseje.models import (Session, Vote, Ballot, Speech, Tag,
                               PresenceOfPG, AbsentMPs, Quote, Question)
-from parlalize.settings import (VOTE_MAP, API_URL, BASE_URL, API_DATE_FORMAT,
-                                DEBUG, API_OUT_DATE_FORMAT, GLEJ_URL, ALL_STATIC_CACHE_AGE, slack_token)
 from django.contrib.contenttypes.models import ContentType
 from utils.parladata_api import getOrganizationsWithVoters
 import requests
@@ -30,12 +28,13 @@ import itertools
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from parlalize.settings import SETTER_KEY, VOTE_NAMES
 from requests.auth import HTTPBasicAuth
+
+from django.conf import settings
 
 #from slackclient import SlackClient
 from slack import WebClient
-slack_client = WebClient(token=slack_token)
+slack_client = WebClient(token=settings.SLACK_TOKEN)
 
 class Http204(Http404):
     status = 204
@@ -44,7 +43,7 @@ def lockSetter(function):
     def wrap(request, *args, **kwargs):
         if request:
             setterKey = request.GET.get('key')
-            if str(setterKey) == str(SETTER_KEY):
+            if str(setterKey) == str(settings.SETTER_KEY):
                 return function(request, *args, **kwargs)
             else:
                 raise PermissionDenied
@@ -209,7 +208,7 @@ def getPersonCardModelNew(model, id, date=None, is_visible=None):
     if not modelObject:
         # if model == LastActivity:
             # return None
-        if DEBUG:
+        if settings.DEBUG:
             raise Http204('Nismo našli kartice' + str(model)+str(id))
         else:
             raise Http204('Nismo našli kartice')
@@ -321,11 +320,11 @@ def getMPGovId(id_parladata):
 
 def getPersonData(id_parladata, date_=None):
     if not date_:
-        date_ = datetime.now().strftime(API_DATE_FORMAT)
+        date_ = datetime.now().strftime(settings.API_DATE_FORMAT)
     try:
         data = getPersonCardModelNew(MPStaticPL, id_parladata, date_)
     except:
-        url = API_URL + '/persons/' + str(id_parladata) + '/'
+        url = settings.API_URL + '/persons/' + str(id_parladata) + '/'
         guest = tryHard(url).json()
         gov_id = None
         if guest and guest['gov_id']:
@@ -383,7 +382,7 @@ def getPersonData(id_parladata, date_=None):
 
 def getMinistryData(id_parladata, date_=None):
     if not date_:
-        date_ = datetime.now().strftime(API_DATE_FORMAT)
+        date_ = datetime.now().strftime(settings.API_DATE_FORMAT)
     try:
         data = getPersonCardModelNew(MinisterStatic, id_parladata, date_)
         return {
@@ -421,7 +420,7 @@ def modelsData(request):
 def getAllStaticData(request, force_render=False):
     #sc = SlackClient(slack_token)
     date_of = datetime.now().date()
-    date_ = date_of.strftime(API_DATE_FORMAT)
+    date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
     c_data = cache.get('all_statics')
     if c_data and not force_render:
@@ -432,7 +431,7 @@ def getAllStaticData(request, force_render=False):
             text='StaticDataDebug start: ' + str(c_data)[:100] + ' ' + str(force_render)
         )
 
-        date_ = datetime.now().strftime(API_DATE_FORMAT)
+        date_ = datetime.now().strftime(settings.API_DATE_FORMAT)
         print("asdasdasd")
         out = {'persons': {}, 'partys': {}, 'wbs': {}, 'sessions': {}, 'ministrs': {}}
         for person in Person.objects.all():
@@ -456,7 +455,7 @@ def getAllStaticData(request, force_render=False):
         out['wbs'] = [{'id': org.id_parladata,
                        'name': org.name} for org in orgs]
 
-        cache.set('all_statics', out, ALL_STATIC_CACHE_AGE)
+        cache.set('all_statics', out, settings.ALL_STATIC_CACHE_AGE)
 
         slack_client.chat_postMessage(
             channel="#parlalize_notif",
@@ -468,7 +467,7 @@ def getAllStaticData(request, force_render=False):
 
 def monitorMe(request):
 
-    r = requests.get(BASE_URL + '/p/getMPStatic/2/')
+    r = requests.get(settings.BASE_URL + '/p/getMPStatic/2/')
     if r.status_code == 200:
         return HttpResponse('All iz well.')
     else:
@@ -571,15 +570,15 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
         except:
             print('Ni vota ' + str(vote.id))
 
-    out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
+    out = [{'date': date.strftime(settings.API_OUT_DATE_FORMAT),
             'ballots': data[date]}
            for date in dates]
 
     tags = list(Tag.objects.all().values_list('name', flat=True))
-    filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
+    filter_cats = {cat: settings.VOTE_NAMES[cat] for cat in list(set(cats))}
     result = {
-        'created_at': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
-        'created_for': dates[-1].strftime(API_DATE_FORMAT) if dates else None,
+        'created_at': dates[-1].strftime(settings.API_DATE_FORMAT) if dates else None,
+        'created_for': dates[-1].strftime(settings.API_DATE_FORMAT) if dates else None,
         'all_tags': tags,
         "classifications": filter_cats,
         'results': list(reversed(out))
@@ -590,12 +589,12 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
 
 @lockSetter
 def recacheLastSession(request):
-    requests.get(GLEJ_URL + '/c/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
-    requests.get(GLEJ_URL + '/c/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
-    requests.get(GLEJ_URL + '/c/zadnja-seja/?forceRender=true')
-    requests.get(GLEJ_URL + '/sta/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
-    requests.get(GLEJ_URL + '/sta/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
-    requests.get(GLEJ_URL + '/sta/zadnja-seja/?forceRender=true')
+    requests.get(settings.GLEJ_URL + '/c/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(settings.GLEJ_URL + '/c/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(settings.GLEJ_URL + '/c/zadnja-seja/?forceRender=true')
+    requests.get(settings.GLEJ_URL + '/sta/zadnja-seja/?frame=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(settings.GLEJ_URL + '/sta/zadnja-seja/?embed=true&altHeader=true&state=%7B%7D&forceRender=true')
+    requests.get(settings.GLEJ_URL + '/sta/zadnja-seja/?forceRender=true')
 
     return HttpResponse('check it out')
 

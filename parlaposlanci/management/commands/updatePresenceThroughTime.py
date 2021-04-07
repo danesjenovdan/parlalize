@@ -4,7 +4,7 @@ from parlaposlanci.models import Person, PresenceThroughTime
 from parlalize.utils_ import saveOrAbortNew
 from utils.parladata_api import getVotersIDs, getBallotsCounter
 from datetime import datetime, timedelta
-from parlalize.settings import API_DATE_FORMAT, YES, NOT_PRESENT, AGAINST, ABSTAIN
+from django.conf import settings
 
 
 def setPresenceThroughTime(commander, person_id, date_=None):
@@ -24,7 +24,7 @@ def setPresenceThroughTime(commander, person_id, date_=None):
 
     commander.stdout.write('Iterating through months for person %s' % str(person_id))
     for month in data:
-        options = YES + NOT_PRESENT + AGAINST + ABSTAIN
+        options = settings.YES + settings.NOT_PRESENT + settings.AGAINST + settings.ABSTAIN
         stats = sum([month[option] for option in options if option in month.keys()])
         not_member = month['total'] - stats
         not_member = float(not_member) / month['total'] if not_member else 0
@@ -54,13 +54,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['date']:
-            date_of = datetime.strptime(options['date'], API_DATE_FORMAT).date()
+            date_of = datetime.strptime(options['date'], settings.API_DATE_FORMAT).date()
             date_ = options['date']
         else:
             # dirty work around, TODO: fix findDatesFromLastCard for input without person_id
-            #date_of = findDatesFromLastCard(Presence, '11', datetime.now().strftime(API_DATE_FORMAT))[0]
+            #date_of = findDatesFromLastCard(Presence, '11', datetime.now().strftime(settings.API_DATE_FORMAT))[0]
             date_of = datetime.now().date()
-            date_ = date_of.strftime(API_DATE_FORMAT)
+            date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
         self.stdout.write('Get voters')
         mps = getVotersIDs(date_=date_of)

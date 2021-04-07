@@ -1,5 +1,5 @@
 from parlaseje.models import Legislation, Vote
-from parlalize.settings import LEGISLATION_STATUS, LEGISLATION_RESULT
+from django.conf import settings
 from parlalize.utils_ import lockSetter
 
 from django.http import JsonResponse
@@ -8,11 +8,11 @@ from django.http import JsonResponse
 # LEGISLATION_STATUS = [('v obravnavi', 'v obravnavi'), ('konec obravnave', 'konec obravnave')]
 # LEGISLATION_RESULT = [(None, 'Prazno'), ('sprejet', 'sprejet'), ('zavrnjen', 'zavrnjen')]
 
-IN_PROCESS = LEGISLATION_STATUS[0][0]
-FINISHED = LEGISLATION_STATUS[1][0]
+IN_PROCESS = settings.LEGISLATION_STATUS[0][0]
+FINISHED = settings.LEGISLATION_STATUS[1][0]
 
-ACCEPTED = LEGISLATION_RESULT[0][0]
-REJECTED = LEGISLATION_RESULT[2][0]
+ACCEPTED = settings.LEGISLATION_RESULT[0][0]
+REJECTED = settings.LEGISLATION_RESULT[2][0]
 
 
 @lockSetter

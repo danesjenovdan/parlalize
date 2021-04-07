@@ -1,17 +1,17 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaskupine.models import Organization, MPOfPg
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 from parlalize.utils_ import saveOrAbortNew, tryHard
 from utils.parladata_api import getOrganizationsWithVoters, getVotersPairsWithOrg
 from datetime import datetime
 
 def setMPsOfPG(commander, pg_id, date_=None):
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
         commander.stdout.write('Setting for date %s' % str(date_of))
     else:
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
         commander.stdout.write('Setting for today (%s)' % str(date_of))
 
     pairs = getVotersPairsWithOrg()
@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
         pgs = []
 

@@ -3,7 +3,7 @@ from parlaposlanci.models import Person, AverageNumberOfSpeechesPerSession
 from parlaseje.models import Activity, Speech
 from parlalize.utils_ import saveOrAbortNew, tryHard
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 from utils.parladata_api import getVotersIDs, getParentOrganizationsWithVoters, getSpeechContentOfPerson
 
 
@@ -21,13 +21,13 @@ class Command(BaseCommand):
         date_ = ''
 
         if options['date']:
-            date_of = datetime.strptime(options['date'], API_DATE_FORMAT).date()
+            date_of = datetime.strptime(options['date'], settings.API_DATE_FORMAT).date()
             date_ = options['date']
         else:
             # dirty work around, TODO: fix findDatesFromLastCard for input without person_id
-            #date_of = findDatesFromLastCard(Presence, '11', datetime.now().strftime(API_DATE_FORMAT))[0]
+            #date_of = findDatesFromLastCard(Presence, '11', datetime.now().strftime(settings.API_DATE_FORMAT))[0]
             date_of = datetime.now().date()
-            date_ = date_of.strftime(API_DATE_FORMAT)
+            date_ = date_of.strftime(settings.API_DATE_FORMAT)
 
         for org_id in getParentOrganizationsWithVoters():
             mps = getVotersIDs(organization_id=org_id)

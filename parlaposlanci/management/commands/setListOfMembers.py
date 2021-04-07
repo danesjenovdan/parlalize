@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from parlalize.settings import SETTER_KEY, API_DATE_FORMAT
+from django.conf import settings
 from utils.parladata_api import getParentOrganizationsWithVoters
 from django.test.client import RequestFactory
 
@@ -8,7 +8,7 @@ from parlaposlanci.views import setListOfMembersTickers
 
 # TODO refactor setListOfMembersTickers into this file
 factory = RequestFactory()
-request_with_key = factory.get('?key=' + SETTER_KEY)
+request_with_key = factory.get('?key=' + settings.SETTER_KEY)
 
 
 class Command(BaseCommand):
@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['date']:
-            start_date = datetime.strptime(options['date'], API_DATE_FORMAT)
+            start_date = datetime.strptime(options['date'], settings.API_DATE_FORMAT)
         else:
             start_date = datetime.now().date()
 
@@ -32,5 +32,5 @@ class Command(BaseCommand):
             setListOfMembersTickers(
                 request_with_key,
                 org_id,
-                start_date.strftime(API_DATE_FORMAT),
+                start_date.strftime(settings.API_DATE_FORMAT),
             )

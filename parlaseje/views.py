@@ -13,8 +13,7 @@ from django.core.paginator import Paginator
 from parlalize.utils_ import tryHard, lockSetter, getAllStaticData, getPersonData, saveOrAbortNew, getDataFromPagerApi
 from parlaseje.models import *
 from parlaseje.utils_ import hasLegislationLink, getMotionClassification
-from parlalize.settings import (API_DATE_FORMAT, BASE_URL, SETTER_KEY, ISCI_URL, VOTE_NAMES,
-                                DZ, COUNCIL_ID, YES, AGAINST, ABSTAIN, NOT_PRESENT, PS, WBS, UNALIGNED)
+from django.conf import settings
 from parlaposlanci.models import Person
 from parlaskupine.models import Organization
 
@@ -137,9 +136,9 @@ def getSpeech(request, speech_id):
 
     result = {
         'person': getPersonData(speech.person.first().id_parladata,
-                                speech.session.start_time.strftime(API_DATE_FORMAT)),
-        'created_for': speech.start_time.strftime(API_DATE_FORMAT),
-        'created_at': speech.created_at.strftime(API_DATE_FORMAT),
+                                speech.session.start_time.strftime(settings.API_DATE_FORMAT)),
+        'created_for': speech.start_time.strftime(settings.API_DATE_FORMAT),
+        'created_at': speech.created_at.strftime(settings.API_DATE_FORMAT),
         'results': out
     }
     return JsonResponse(result)
@@ -333,7 +332,7 @@ def getSpeechesOfSession(request, session_id):
     speeches = speeches_queryset.filter(session=session).order_by("the_order")
 
     sessionData = session.getSessionData()
-    session_time = session.start_time.strftime(API_DATE_FORMAT)
+    session_time = session.start_time.strftime(settings.API_DATE_FORMAT)
 
     personsStatic = json.loads(getAllStaticData(None).content)
 
@@ -370,7 +369,7 @@ def getSpeechesOfSession(request, session_id):
                          "page": page,
                          "session": sessionData,
                          "created_for": session_time,
-                         "created_at": datetime.today().strftime(API_DATE_FORMAT),
+                         "created_at": datetime.today().strftime(settings.API_DATE_FORMAT),
                          "results": data})
 
 
@@ -437,8 +436,8 @@ def getSpeechesIDsOfSession(request, session_id):
                                                          "order")
     speeches_ids = list(speeches.values_list("id_parladata", flat=True))
 
-    created_for = session.start_time.strftime(API_DATE_FORMAT)
-    created_at = datetime.today().strftime(API_DATE_FORMAT)
+    created_for = session.start_time.strftime(settings.API_DATE_FORMAT)
+    created_at = datetime.today().strftime(settings.API_DATE_FORMAT)
 
     return JsonResponse({"session": session.getSessionData(),
                          "created_for": created_for,
@@ -590,15 +589,15 @@ def getMotionOfSession(request, session_id, date=False):
                     continue
             if len(dates) > 0:
                 # TODO this if was added because dates is sometimes an empty list which breaks max()I
-                created_at = max(dates).strftime(API_DATE_FORMAT)
+                created_at = max(dates).strftime(settings.API_DATE_FORMAT)
             else:
-                created_at = datetime.now().date().strftime(API_DATE_FORMAT)
+                created_at = datetime.now().date().strftime(settings.API_DATE_FORMAT)
         else:
             out = []
-        ses_date = session.start_time.strftime(API_DATE_FORMAT)
+        ses_date = session.start_time.strftime(settings.API_DATE_FORMAT)
         tags = list(Tag.objects.all().values_list('name', flat=True))
 
-        filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
+        filter_cats = {cat: settings.VOTE_NAMES[cat] for cat in list(set(cats))}
 
         return JsonResponse({"results": out,
                              "session": session.getSessionData(),
@@ -911,8 +910,8 @@ def getMotionAnalize(request, motion_id):
                     'max_opt': None,
                     'is_outlier': False,
                 },
-                'created_for': vote.created_for.strftime(API_DATE_FORMAT),
-                'created_at': vote.created_at.strftime(API_DATE_FORMAT),
+                'created_for': vote.created_for.strftime(settings.API_DATE_FORMAT),
+                'created_at': vote.created_at.strftime(settings.API_DATE_FORMAT),
                 'name': vote.motion
             }
             return JsonResponse(out, safe=False)
@@ -942,11 +941,11 @@ def getMotionAnalize(request, motion_id):
     pg_outliers = {}
     for org in tmp_data:
         org_obj = Organization.objects.get(id_parladata=int(org))
-        if org_obj.classification == UNALIGNED:
+        if org_obj.classification == settings.UNALIGNED:
             continue
         # check i
         orgs_data[org] = json.loads(tmp_data[org])
-        orgs_data[org]['party'] = org_obj.getOrganizationData(vote.created_for.strftime(API_DATE_FORMAT))
+        orgs_data[org]['party'] = org_obj.getOrganizationData(vote.created_for.strftime(settings.API_DATE_FORMAT))
         if orgs_data[org]['outliers']:
             pg_outliers[int(org)] = orgs_data[org]['outliers']
 
@@ -958,7 +957,7 @@ def getMotionAnalize(request, motion_id):
                             ('absent', json.loads(model.mp_np)),
                             ('abstain', json.loads(model.mp_kvor))]:
         for mp in members_ids:
-            personData = getPersonData(mp, vote.start_time.strftime(API_DATE_FORMAT))
+            personData = getPersonData(mp, vote.start_time.strftime(settings.API_DATE_FORMAT))
             # set if person is outlier
             outlier = False
             if personData['party']['id'] in pg_outliers.keys():
@@ -990,8 +989,8 @@ def getMotionAnalize(request, motion_id):
 
     out = {'id': motion_id,
            'session': model.session.getSessionData(),
-           'created_for': vote.created_for.strftime(API_DATE_FORMAT),
-           'created_at': model.created_at.strftime(API_DATE_FORMAT),
+           'created_for': vote.created_for.strftime(settings.API_DATE_FORMAT),
+           'created_at': model.created_at.strftime(settings.API_DATE_FORMAT),
            'name': vote.motion,
            'legislation': leg_data,
            'result': {'accepted': vote.result,
@@ -1096,8 +1095,8 @@ def getPresenceOfPG(request, session_id, date=False):
     except ObjectDoesNotExist:
         raise Http404("Nismo našli kartice")
     return JsonResponse({"results": results,
-                         "created_for": presence.created_for.strftime(API_DATE_FORMAT),
-                         "created_at": presence.created_at.strftime(API_DATE_FORMAT),
+                         "created_for": presence.created_for.strftime(settings.API_DATE_FORMAT),
+                         "created_at": presence.created_at.strftime(settings.API_DATE_FORMAT),
                          "session": presence.session.getSessionData()},
                         safe=False)
 
@@ -1215,9 +1214,9 @@ def getQuote(request, quote_id):
     }
     """
     quote = get_object_or_404(Quote, id=quote_id)
-    return JsonResponse({"person": getPersonData(quote.speech.person.first().id_parladata, quote.speech.session.start_time.strftime(API_DATE_FORMAT)),
-                         "created_for": quote.created_at.strftime(API_DATE_FORMAT),
-                         "created_at": quote.created_at.strftime(API_DATE_FORMAT),
+    return JsonResponse({"person": getPersonData(quote.speech.person.first().id_parladata, quote.speech.session.start_time.strftime(settings.API_DATE_FORMAT)),
+                         "created_for": quote.created_at.strftime(settings.API_DATE_FORMAT),
+                         "created_at": quote.created_at.strftime(settings.API_DATE_FORMAT),
                          "results": {"quoted_text": quote.quoted_text,
                                      "start_idx": quote.first_char,
                                      "end_idx": quote.last_char,
@@ -1409,7 +1408,7 @@ def getLastSessionLanding(request, org_id, date_=None):
     }
     """
     if date_:
-        fdate = datetime.strptime(date_, API_DATE_FORMAT).date()
+        fdate = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
     else:
         fdate = datetime.now().today()
     ready = False
@@ -1442,8 +1441,8 @@ def getLastSessionLanding(request, org_id, date_=None):
     result = sorted(results, key=lambda k: k['percent'], reverse=True)
     session = Session.objects.get(id_parladata=int(presence.session.id_parladata))
     return JsonResponse({'session': session.getSessionData(),
-                         'created_for': session.start_time.strftime(API_DATE_FORMAT),
-                         'created_at': datetime.today().strftime(API_DATE_FORMAT),
+                         'created_for': session.start_time.strftime(settings.API_DATE_FORMAT),
+                         'created_at': datetime.today().strftime(settings.API_DATE_FORMAT),
                          'presence': result,
                          'parent_org_id': int(org_id),
                          'motions': motions['results'],
@@ -1576,9 +1575,9 @@ def getSessionsByClassification(request):
     }
     """
     sessions = json.loads(getAllStaticData(None).content)['sessions']
-    out = {"kolegij": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=COUNCIL_ID).order_by("-start_time")],
-           "dz": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=DZ).order_by("-start_time")],
-           "dt": [org.getOrganizationData() for org in Organization.objects.filter(classification__in=WBS)]}
+    out = {"kolegij": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=settings.COUNCIL_ID).order_by("-start_time")],
+           "dz": [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=settings.DZ).order_by("-start_time")],
+           "dt": [org.getOrganizationData() for org in Organization.objects.filter(classification__in=settings.WBS)]}
 
     for dt in out["dt"]:
         dt["sessions"] = [sessions[str(session.id_parladata)] for session in Session.objects.filter(organizations__id_parladata=dt["id"]).order_by("-start_time")]
@@ -1687,11 +1686,11 @@ def getSessionsList(request, date_=None, force_render=False):
     }
     """
     if date_:
-        date_of = datetime.strptime(date_, API_DATE_FORMAT).date()
+        date_of = datetime.strptime(date_, settings.API_DATE_FORMAT).date()
         key = date_
     else:
         date_of = datetime.now().date()
-        date_ = date_of.strftime(API_DATE_FORMAT)
+        date_ = date_of.strftime(settings.API_DATE_FORMAT)
         key = date_
 
     out = cache.get("sessions_list_" + key)
@@ -1699,15 +1698,15 @@ def getSessionsList(request, date_=None, force_render=False):
         data = out
         print("wup wup")
     else:
-        orgs = Organization.objects.filter(Q(id_parladata=COUNCIL_ID) |
-                                           Q(classification__in=WBS) |
+        orgs = Organization.objects.filter(Q(id_parladata=settings.COUNCIL_ID) |
+                                           Q(classification__in=settings.WBS) |
                                            Q(has_voters=True))
         print(orgs)
         sessions = Session.objects.filter(organizations__in=orgs)
         sessions = sessions.order_by("-start_time")
         out = {'sessions': [session.getSessionData() for session in sessions],
-                'created_for': datetime.now().strftime(API_DATE_FORMAT),
-                'created_at': datetime.now().strftime(API_DATE_FORMAT)}
+                'created_for': datetime.now().strftime(settings.API_DATE_FORMAT),
+                'created_at': datetime.now().strftime(settings.API_DATE_FORMAT)}
 
         newList = []
         sessionsIds = []
@@ -1719,7 +1718,7 @@ def getSessionsList(request, date_=None, force_render=False):
                 last_day = session['date_ts']
                 # TODO zbrisi ta umazn fix ko se dodajo empty state-si
                 # continue
-            session.update({"updated_at": last_day.strftime(API_DATE_FORMAT),
+            session.update({"updated_at": last_day.strftime(settings.API_DATE_FORMAT),
                             "updated_at_ts": last_day})
             if Vote.objects.filter(session__id_parladata=session["id"]):
                 is_vote = True
@@ -1829,8 +1828,8 @@ def getTFIDF(request, session_id):
         out = {
             'session': card.session.getSessionData(),
             'results': card.data,
-            "created_for": card.created_for.strftime(API_DATE_FORMAT),
-            "created_at": card.created_at.strftime(API_DATE_FORMAT)
+            "created_for": card.created_for.strftime(settings.API_DATE_FORMAT),
+            "created_at": card.created_at.strftime(settings.API_DATE_FORMAT)
         }
     else:
         date_of = datetime.now().date()
@@ -1838,15 +1837,15 @@ def getTFIDF(request, session_id):
             out = {
                 'session': Session.objects.get(id_parladata=session_id).getSessionData(),
                 'results': [],
-                "created_for": date_of.strftime(API_DATE_FORMAT),
-                "created_at": date_of.strftime(API_DATE_FORMAT)
+                "created_for": date_of.strftime(settings.API_DATE_FORMAT),
+                "created_at": date_of.strftime(settings.API_DATE_FORMAT)
             }
         else:
             out = {
                 'session': None,
                 'results': [],
-                "created_for": date_of.strftime(API_DATE_FORMAT),
-                "created_at": date_of.strftime(API_DATE_FORMAT)
+                "created_for": date_of.strftime(settings.API_DATE_FORMAT),
+                "created_at": date_of.strftime(settings.API_DATE_FORMAT)
             }
 
     return JsonResponse(out)
@@ -1879,7 +1878,7 @@ def getWorkingBodies(request):
     ]
     """
 
-    orgs = Organization.objects.filter(classification__in=WBS)
+    orgs = Organization.objects.filter(classification__in=settings.WBS)
     data = []
     for org in orgs:
         data.append({'id': org.id_parladata, 'name': org.name})
@@ -2453,27 +2452,27 @@ def getComparedVotes(request):
 
         for i, e in enumerate(people_same_list):
             if i < len(people_same_list) - 1:
-                exclude_ni_people_same = '%s b%s.option != \'%s\' AND ' % (exclude_ni_people_same, i, NOT_PRESENT[0])
+                exclude_ni_people_same = '%s b%s.option != \'%s\' AND ' % (exclude_ni_people_same, i, settings.NOT_PRESENT[0])
             else:
-                exclude_ni_people_same = '%s b%s.option != \'%s\'' % (exclude_ni_people_same, i, NOT_PRESENT[0])
+                exclude_ni_people_same = '%s b%s.option != \'%s\'' % (exclude_ni_people_same, i, settings.NOT_PRESENT[0])
 
         for i, e in enumerate(parties_same_list):
             if i < len(parties_same_list) - 1:
-                exclude_ni_parties_same = '%s pb%s.option != \'%s\' AND ' % (exclude_ni_parties_same, i, NOT_PRESENT[0])
+                exclude_ni_parties_same = '%s pb%s.option != \'%s\' AND ' % (exclude_ni_parties_same, i, settings.NOT_PRESENT[0])
             else:
-                exclude_ni_parties_same = '%s pb%s.option != \'%s\'' % (exclude_ni_parties_same, i, NOT_PRESENT[0])
+                exclude_ni_parties_same = '%s pb%s.option != \'%s\'' % (exclude_ni_parties_same, i, settings.NOT_PRESENT[0])
 
         for i, e in enumerate(people_different_list):
             if i < len(people_different_list) - 1:
-                exclude_ni_people_different = '%s db%s.option != \'%s\' AND ' % (exclude_ni_people_different, i, NOT_PRESENT[0])
+                exclude_ni_people_different = '%s db%s.option != \'%s\' AND ' % (exclude_ni_people_different, i, settings.NOT_PRESENT[0])
             else:
-                exclude_ni_people_different = '%s db%s.option != \'%s\'' % (exclude_ni_people_different, i, NOT_PRESENT[0])
+                exclude_ni_people_different = '%s db%s.option != \'%s\'' % (exclude_ni_people_different, i, settings.NOT_PRESENT[0])
 
         for i, e in enumerate(parties_different_list):
             if i < len(parties_different_list) - 1:
-                exclude_ni_parties_different = '%s dpb%s.option != \'%s\' AND ' % (exclude_ni_parties_different, i, NOT_PRESENT[0])
+                exclude_ni_parties_different = '%s dpb%s.option != \'%s\' AND ' % (exclude_ni_parties_different, i, settings.NOT_PRESENT[0])
             else:
-                exclude_ni_parties_different = '%s dpb%s.option != \'%s\'' % (exclude_ni_parties_different, i, NOT_PRESENT[0])
+                exclude_ni_parties_different = '%s dpb%s.option != \'%s\'' % (exclude_ni_parties_different, i, settings.NOT_PRESENT[0])
 
         exclude_ni_list = [exclude_ni_people_same, exclude_ni_parties_same, exclude_ni_people_different, exclude_ni_parties_different]
         exclude_ni_list_clean = [s for s in exclude_ni_list if s != '']
@@ -2531,7 +2530,7 @@ def getComparedVotes(request):
                 'is_outlier': False,# TODO: remove hardcoded 'False' when algoritem for is_outlier will be fixed. vote.is_outlier,
                 'has_outliers': vote.has_outlier_voters,
                 'tags': vote.tags,
-                'date': vote.start_time.strftime(API_DATE_FORMAT),
+                'date': vote.start_time.strftime(settings.API_DATE_FORMAT),
                 'agenda_items': [ai.title for ai in vote.agenda_item.all()],
             }
         })
@@ -2549,7 +2548,7 @@ def getComparedVotes(request):
     #             'result': ballot.vote.result,
     #             'is_outlier': ballot.vote.is_outlier,
     #             'tags': ballot.vote.tags,
-    #             'date': ballot.start_time.strftime(API_DATE_FORMAT)
+    #             'date': ballot.start_time.strftime(settings.API_DATE_FORMAT)
     #         }
     #     })
 
@@ -2685,7 +2684,7 @@ def legislationList(request, session_id):
     out = []
     session = Session.objects.get(id_parladata=int(session_id))
     epas=session.in_session.exclude(epa='').distinct('epa').values_list('epa', flat=True)
-    ses_date = session.start_time.strftime(API_DATE_FORMAT)
+    ses_date = session.start_time.strftime(settings.API_DATE_FORMAT)
     laws = Legislation.objects.filter(epa__in=epas)
     if legislation_type == 'zakon':
         laws = laws.filter(classification='zakon')
@@ -2696,12 +2695,12 @@ def legislationList(request, session_id):
         return JsonResponse({'results': [],
                              'session': session.getSessionData(),
                              'created_for': ses_date,
-                             'created_at': datetime.now().strftime(API_DATE_FORMAT)}, safe=False)
-    created_at = laws.latest('created_at').created_at.strftime(API_DATE_FORMAT)
+                             'created_at': datetime.now().strftime(settings.API_DATE_FORMAT)}, safe=False)
+    created_at = laws.latest('created_at').created_at.strftime(settings.API_DATE_FORMAT)
     for law in laws:
         out.append({'epa': law.epa,
                     'text': law.text,
-                    'date': law.date.strftime(API_DATE_FORMAT) if law.date else '',
+                    'date': law.date.strftime(settings.API_DATE_FORMAT) if law.date else '',
                     'mdt_text': law.mdt,
                     'mdt': wbs[str(law.mdt_fk.id_parladata)] if law.mdt_fk else {'name': '',
                                                                                  'id': None},
@@ -2763,12 +2762,12 @@ def legislation(request, epa):
         dates.append(vote.created_at)
     if dates:
         max_date = max(dates)
-        created_at = max_date.strftime(API_DATE_FORMAT)
+        created_at = max_date.strftime(settings.API_DATE_FORMAT)
     else:
-        created_at = law.created_at.strftime(API_DATE_FORMAT)
+        created_at = law.created_at.strftime(settings.API_DATE_FORMAT)
 
 
-    ses_date = start_time.strftime(API_DATE_FORMAT)
+    ses_date = start_time.strftime(settings.API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
     return JsonResponse({'votes': out,
                          'session': session_data,
@@ -2821,13 +2820,13 @@ def getOtherVotes(request, session_id, date_=None):
         cats.append(vote.classification)
         dates.append(vote.created_at)
     if dates:
-        created_at = max(dates).strftime(API_DATE_FORMAT)
+        created_at = max(dates).strftime(settings.API_DATE_FORMAT)
     else:
-        created_at = datetime.now().strftime(API_DATE_FORMAT)
+        created_at = datetime.now().strftime(settings.API_DATE_FORMAT)
 
-    ses_date = session.start_time.strftime(API_DATE_FORMAT)
+    ses_date = session.start_time.strftime(settings.API_DATE_FORMAT)
     tags = list(Tag.objects.all().values_list('name', flat=True))
-    filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
+    filter_cats = {cat: settings.VOTE_NAMES[cat] for cat in list(set(cats))}
     return JsonResponse({'results': out,
                          'session': session.getSessionData(),
                          'tags': tags,
@@ -2869,16 +2868,16 @@ def getAllVotes(request):
         cats.append(vote.classification)
         dates.append(vote.created_at)
     if dates:
-        created_at = max(dates).strftime(API_DATE_FORMAT)
+        created_at = max(dates).strftime(settings.API_DATE_FORMAT)
     else:
-        created_at = datetime.now().strftime(API_DATE_FORMAT)
+        created_at = datetime.now().strftime(settings.API_DATE_FORMAT)
 
-    filter_cats = {cat: VOTE_NAMES[cat] for cat in list(set(cats))}
+    filter_cats = {cat: settings.VOTE_NAMES[cat] for cat in list(set(cats))}
 
     return JsonResponse({'results': out,
                          'tags': list(set(tags)),
                          'classifications': filter_cats,
-                         'created_for': datetime.now().strftime(API_DATE_FORMAT),
+                         'created_for': datetime.now().strftime(settings.API_DATE_FORMAT),
                          'created_at': created_at}, safe=False)
 
 
@@ -2886,17 +2885,17 @@ def getExposedLegislation(request):
     legislations = Legislation.objects.filter(is_exposed=True)
     accepted = legislations.filter(result='enacted').order_by('-updated_at')[:6]
     under_consideration = legislations.filter(result='in_procedure').order_by('-updated_at')[:6]
-    return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
-                         'created_at': datetime.now().strftime(API_DATE_FORMAT),
+    return JsonResponse({'created_for': datetime.now().strftime(settings.API_DATE_FORMAT),
+                         'created_at': datetime.now().strftime(settings.API_DATE_FORMAT),
                          'accepted': [{'epa': legislation.epa,
                                        'icon': legislation.icon,
                                        'text': legislation.text,
-                                       'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
+                                       'date': legislation.date.strftime(settings.API_DATE_FORMAT) if legislation.date else '',
                                       }for legislation in accepted],
                          'under_consideration': [{'epa': legislation.epa,
                                                   'icon': legislation.icon,
                                                   'text': legislation.text,
-                                                  'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
+                                                  'date': legislation.date.strftime(settings.API_DATE_FORMAT) if legislation.date else '',
                                                  }for legislation in under_consideration],
                         })
 
@@ -2907,11 +2906,11 @@ def getAllLegislation(request):
     wbs = {}
     for wb in wbs_data:
         wbs[str(wb['id'])] = wb
-    return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
-                         'created_at': datetime.now().strftime(API_DATE_FORMAT),
+    return JsonResponse({'created_for': datetime.now().strftime(settings.API_DATE_FORMAT),
+                         'created_at': datetime.now().strftime(settings.API_DATE_FORMAT),
                          'results': [{'epa': legislation.epa,
                                       'text': legislation.text,
-                                      'date': legislation.date.strftime(API_DATE_FORMAT) if legislation.date else '',
+                                      'date': legislation.date.strftime(settings.API_DATE_FORMAT) if legislation.date else '',
                                       'mdt_text': legislation.mdt,
                                       'mdt': wbs[str(legislation.mdt_fk.id_parladata)] if legislation.mdt_fk and legislation.mdt_fk in wbs.keys() else {'name': '',
                                                                                                                    'id': None},
@@ -2990,8 +2989,8 @@ def getAgendaItems(request, session_id, date_=None):
     for item in agenda_items:
         data.append(get_agenda_item_data(item, session_data))
 
-    return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
-                         'created_at': datetime.now().strftime(API_DATE_FORMAT),
+    return JsonResponse({'created_for': datetime.now().strftime(settings.API_DATE_FORMAT),
+                         'created_at': datetime.now().strftime(settings.API_DATE_FORMAT),
                          'session': session_data,
                          'results': data})
 
@@ -3002,8 +3001,8 @@ def getAgendaItem(request, agenda_item_id, date_=None):
     if agenda_item:
         session_data = agenda_item[0].session.getSessionData()
         data = get_agenda_item_data(agenda_item[0], session_data)
-        return JsonResponse({'created_for': datetime.now().strftime(API_DATE_FORMAT),
-                             'created_at': datetime.now().strftime(API_DATE_FORMAT),
+        return JsonResponse({'created_for': datetime.now().strftime(settings.API_DATE_FORMAT),
+                             'created_at': datetime.now().strftime(settings.API_DATE_FORMAT),
                              'session': session_data,
                              'result': data})
     else:

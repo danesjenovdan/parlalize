@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from datetime import datetime
-from parlalize.settings import API_DATE_FORMAT
+from django.conf import settings
 from utils.votes_pg import set_mismatch_of_pg
 from utils.parladata_api import getParentOrganizationsWithVoters
 
@@ -18,7 +18,7 @@ class Command(BaseCommand):
         if options['date']:
             date_ = options['date']
         else:
-            date_ = datetime.now().date().strftime(API_DATE_FORMAT)
+            date_ = datetime.now().date().strftime(settings.API_DATE_FORMAT)
 
         # TODO refactor votes_pg.py to stop accepting request as an argument
         for org_id in getParentOrganizationsWithVoters():
