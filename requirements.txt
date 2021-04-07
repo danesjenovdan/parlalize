@@ -20,3 +20,6 @@ aiohttp # this is required by slack_sdk
 python-memcached
 slugify
 dj-database-url
+
+# dev dependencies
+pytest
