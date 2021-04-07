@@ -22,4 +22,4 @@ slugify
 dj-database-url
 
 # dev dependencies
-pytest
+pytest-django
