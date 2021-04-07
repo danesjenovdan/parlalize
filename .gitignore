@@ -75,3 +75,6 @@ parlalize/settings/prod.py
 parlalize/settings/__init__.py
 parlalize/settings/production.py
 guniconfig.py
+
+# db
+*.sqlite*
