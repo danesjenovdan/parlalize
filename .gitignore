@@ -78,3 +78,6 @@ guniconfig.py
 
 # db
 *.sqlite*
+
+# pytest
+.pytest_cache

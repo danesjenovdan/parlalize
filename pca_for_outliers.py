@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from parlaseje.models import *
 from sklearn.decomposition import PCA
 from numpy import argpartition
