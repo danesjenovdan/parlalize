@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator

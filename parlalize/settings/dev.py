@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .defaults import *
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'hashhashhashhashashwkopaskfpjoivanijfdsf2332fdw'

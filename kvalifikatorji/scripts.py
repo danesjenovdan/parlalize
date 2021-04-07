@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 #import slopos, nltk
 # from nltk.tokenize import word_tokenize

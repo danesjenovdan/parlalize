@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .defaults import *
 import dj_database_url
 

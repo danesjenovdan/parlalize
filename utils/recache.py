@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 # from raven.contrib.django.raven_compat.models import client
 

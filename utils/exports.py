@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from parlaseje.models import Legislation
 from parlaposlanci.models import *
 from parlalize.utils_ import tryHard, getPersonCardModelNew

@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 from django.conf import settings
 from django.db.models.functions import TruncMonth
 from django.db.models import Count, Q

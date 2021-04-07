@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 from datetime import datetime
 from django.http import Http404
 from parlaposlanci.models import LastActivity

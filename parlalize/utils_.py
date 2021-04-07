@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 from datetime import datetime, timedelta
 from django.http import Http404, JsonResponse, HttpResponse
 # from raven.contrib.django.raven_compat.models import client

@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 from datetime import datetime
 from collections import defaultdict, Counter
 
