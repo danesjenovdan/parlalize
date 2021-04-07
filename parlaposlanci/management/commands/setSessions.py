@@ -5,7 +5,6 @@ from parlaskupine.models import Organization
 from parlaseje.models import Session
 from parlalize.settings import API_URL, DZ
 from utils.parladata_api import getSessions
-#from utils.parladata_api import setSessions
 
 class Command(BaseCommand):
     help = 'Sets session data'

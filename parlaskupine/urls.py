@@ -1,7 +1,6 @@
 from django.conf.urls import include, url
 from django.conf import settings
 from .views import *
-from .admin import WBAutocomplete
 
 from rest_framework import routers
 from .api import TFIDFView
@@ -89,10 +88,6 @@ urlpatterns = [
     url(r'^getListOfPGs/', getListOfPGs, {'organization_id': str(settings.DZ)}),
 
     url(r'^getWorkingBodiesLive/(?P<org_id>\d+)/(?P<date_>[\w].+)', getWorkingBodies_live),
-
-
-    # autocomplete urls
-    url(r'^wb-autocomplete/$', WBAutocomplete.as_view(), name='wb-autocomplete'),
 
     # drf
     url(r'^', include(router.urls)),

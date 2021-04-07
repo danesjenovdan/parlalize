@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from parlaposlanci.models import Person, AverageNumberOfSpeechesPerSession
-from parlaseje.models import Activity
+from parlaseje.models import Activity, Speech
 from parlalize.utils_ import saveOrAbortNew, tryHard
 from datetime import datetime
 from parlalize.settings import API_DATE_FORMAT
@@ -36,7 +36,8 @@ class Command(BaseCommand):
             for mp in mps:
                 self.stdout.write('Handling MP %s' % str(mp))
                 self.stdout.write('getSpeechContentOfPerson')
-                mp_no_of_speeches = len(getSpeechContentOfPerson(mp, fdate=date_of))
+                # mp_no_of_speeches = len(getSpeechContentOfPerson(mp, fdate=date_of))
+                mp_no_of_speeches =Speech.getValidSpeeches(date_of).filter(person__id_parladata=mp).count()
 
                 mp_no_of_sessions = Activity.objects.filter(
                     person__id_parladata=mp,

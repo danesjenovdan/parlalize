@@ -18,9 +18,13 @@ def getDataFromPagerApiDRFGen(url):
     end = False
     page = 1
     while url:
-        response = requests.get(url, auth=requests.auth.HTTPBasicAuth(settings.PARSER_UN, settings.PARSER_PASS)).json()
-        yield response['results']
-        url = response['next']
+        response = requests.get(url, auth=requests.auth.HTTPBasicAuth(settings.PARSER_UN, settings.PARSER_PASS))
+        if response.status_code != 200:
+            print(response)
+
+        data = response.json()
+        yield data['results']
+        url = data['next']
 
 def tryHard(url):
     data = None
@@ -295,6 +299,7 @@ def getBallots(*args, **kwargs):
     query_url = '&'.join([str(i) +'=' + str(j) for i, j in kwargs.items()])
     ballots_url = settings.API_URL + '/ballots/'
     if query_url:
+        print(query_url)
         ballots_url = ballots_url + '?' + query_url
     return getDataFromPagerApiDRFGen(ballots_url)
 
@@ -363,8 +368,8 @@ def getNumberOfAllMPAttendedSessions(date_, members_ids):
         try:
             data["sessions"][member] = float(len(votesOnS)) / float(len(allOfHimS)) * 100
             data["votes"][member] = float(len(votesOnV)) / float(len(allOfHimV)) * 100
-        except:
-            print member.id, " has no votes in this day"
+        except Exception as e:
+            print(member, " has no votes in this day",e)
     return data
 
 def getBallotsCounter(voter_obj, fdate=datetime.now().date()):

@@ -18,7 +18,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-	if options['date']:
+        if options['date']:
             date_of = datetime.strptime(options['date'], API_DATE_FORMAT)
         else:
             date_of = datetime.now().date()

@@ -189,7 +189,7 @@ def setMotionAnalize(session_id):
         vote.has_outlier_voters = has_outliers
         vote.intra_disunion = allInter[vote_id]
         vote.save()
-        print all_votes.loc[vote_id, 'pg_for']
+        print(all_votes.loc[vote_id, 'pg_for'])
         if vote_a:
             vote_a.update(votes_for=all_votes.loc[vote_id, 'option_for'],
                           against=all_votes.loc[vote_id, 'option_against'],
@@ -269,7 +269,7 @@ def getPartyBallot(row):
              'absent': row['option_absent']}
     if max(stats.values()) == 0:
         return '[]'
-    max_ids = [key for key, val in stats.iteritems() if val == max(stats.values())]
+    max_ids = [key for key, val in stats.items() if val == max(stats.values())]
     return json.dumps(max_ids)
 
 
@@ -292,7 +292,7 @@ def getOptions(row, side):
              'abstain': row['option_abstain'],
              'absent': row['option_absent']}
     max_opt = max(stats, key=stats.get)
-    max_ids = [key for key, val in stats.iteritems() if val == max(stats.values())]
+    max_ids = [key for key, val in stats.items() if val == max(stats.values())]
 
     if len(max_ids) > 1:
         if 'absent' in max_ids:
@@ -319,11 +319,23 @@ def getOptions(row, side):
         if opt in outliers:
             outliers.remove(opt)
 
+    print({
+        'votes': {
+            'for': row['option_for'],
+            'against': row['option_against'],
+            'abstain': row['option_abstain'],
+            'absent': row['option_absent'],
+        },
+        'max': {
+            'max_opt': max_vote,
+            'maxOptPerc': maxOptionPercent
+        },
+        'outliers': outliers})
     return json.dumps({'votes': {
-                                 'for': row['option_for'],
-                                 'against': row['option_against'],
-                                 'abstain': row['option_abstain'],
-                                 'absent': row['option_absent'],
+                                 'for': int(row['option_for']),
+                                 'against': int(row['option_against']),
+                                 'abstain': int(row['option_abstain']),
+                                 'absent': int(row['option_absent']),
                                  },
                        'max': {
                                'max_opt': max_vote,

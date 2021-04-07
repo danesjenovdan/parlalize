@@ -1,7 +1,6 @@
 from django.conf.urls import include, url
 from django.conf import settings
 from .views import *
-from .admin import WBAutocomplete
 
 from rest_framework import routers
 from .api import TFIDFView

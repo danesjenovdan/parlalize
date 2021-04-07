@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from parlaposlanci.models import *
 from parlaseje.models import *
@@ -20,7 +19,6 @@ class PopoloDateTimeField(models.DateTimeField):
         return str(datetime.strftime(value, '%Y-%m-%d'))
 
 
-@python_2_unicode_compatible
 # poslanec, minister, predsednik dz etc.
 class Person(Timestampable, models.Model):
     name = models.CharField(_('name'),
@@ -64,7 +62,8 @@ class Presence(Timestampable, models.Model):  # Card for presence of MP on sessi
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='children',
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -107,7 +106,8 @@ class SpokenWords(Timestampable, models.Model):  # Card for spoken words of MP o
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='childrenSW',
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -121,7 +121,8 @@ class SpokenWords(Timestampable, models.Model):  # Card for spoken words of MP o
     maxMP = models.ForeignKey('Person',
                               blank=True, null=True,
                               related_name='childrenSW_1',
-                              help_text=_('Person who has max spoken words'))
+                              help_text=_('Person who has max spoken words'),
+                              on_delete=models.CASCADE)
 
     average = models.IntegerField(_('average'),
                                   blank=True, null=True,
@@ -135,7 +136,8 @@ class SpokenWords(Timestampable, models.Model):  # Card for spoken words of MP o
 class SpeakingStyle(Timestampable, models.Model):  # card for privzdignjeno besedje
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     problematicno_score = models.IntegerField(
         help_text=_('Problematicno besedje score.'))
@@ -157,7 +159,7 @@ class CutVotes(Timestampable, models.Model):
                                    blank=True,
                                    null=True,
                                    help_text=_('date of analize'))
-    person = models.ForeignKey("Person")
+    person = models.ForeignKey("Person", on_delete=models.CASCADE)
     this_for = models.FloatField()
     this_against = models.FloatField()
     this_abstain = models.FloatField()
@@ -193,7 +195,7 @@ class LastActivity(Timestampable, models.Model):  # TODO
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='childrenLA',
-                               help_text=_('MP'))
+                               help_text=_('MP'), on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -235,7 +237,8 @@ class EqualVoters(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='childrenEWT',
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of actanalizeivity'),
                                    blank=True,
@@ -245,7 +248,8 @@ class EqualVoters(Timestampable, models.Model):
     person1 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenEW1',
-                                help_text=_('MP1'))
+                                help_text=_('MP1'),
+                                on_delete=models.CASCADE)
 
     votes1 = models.FloatField(_('EqualVoters1'),
                                blank=True, null=True,
@@ -254,7 +258,8 @@ class EqualVoters(Timestampable, models.Model):
     person2 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenEW2',
-                                help_text=_('MP2'))
+                                help_text=_('MP2'),
+                                on_delete=models.CASCADE)
 
     votes2 = models.FloatField(_('EqualVoters2'),
                                blank=True, null=True,
@@ -263,7 +268,8 @@ class EqualVoters(Timestampable, models.Model):
     person3 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenEW3',
-                                help_text=_('MP3'))
+                                help_text=_('MP3'),
+                                on_delete=models.CASCADE)
 
     votes3 = models.FloatField(_('EqualVoters3'),
                                blank=True, null=True,
@@ -272,7 +278,8 @@ class EqualVoters(Timestampable, models.Model):
     person4 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenEW4',
-                                help_text=_('MP4'))
+                                help_text=_('MP4'),
+                                on_delete=models.CASCADE)
 
     votes4 = models.FloatField(_('EqualVoters4'),
                                blank=True, null=True,
@@ -281,7 +288,8 @@ class EqualVoters(Timestampable, models.Model):
     person5 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenEW5',
-                                help_text=_('MP5'))
+                                help_text=_('MP5'),
+                                on_delete=models.CASCADE)
 
     votes5 = models.FloatField(_('EqualVoters5'),
                                blank=True, null=True,
@@ -293,7 +301,8 @@ class LessEqualVoters(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='childrenLEWT',
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of analize'),
                                    blank=True,
@@ -303,7 +312,8 @@ class LessEqualVoters(Timestampable, models.Model):
     person1 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenLEW1',
-                                help_text=_('MP1'))
+                                help_text=_('MP1'),
+                                on_delete=models.CASCADE)
 
     votes1 = models.FloatField(_('EqualVoters1'),
                                blank=True, null=True,
@@ -312,7 +322,8 @@ class LessEqualVoters(Timestampable, models.Model):
     person2 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenLEW2',
-                                help_text=_('MP2'))
+                                help_text=_('MP2'),
+                                on_delete=models.CASCADE)
 
     votes2 = models.FloatField(_('EqualVoters2'),
                                blank=True, null=True,
@@ -321,7 +332,8 @@ class LessEqualVoters(Timestampable, models.Model):
     person3 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenLEW3',
-                                help_text=_('MP3'))
+                                help_text=_('MP3'),
+                                on_delete=models.CASCADE)
 
     votes3 = models.FloatField(_('EqualVoters3'),
                                blank=True, null=True,
@@ -330,7 +342,8 @@ class LessEqualVoters(Timestampable, models.Model):
     person4 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenLEW4',
-                                help_text=_('MP4'))
+                                help_text=_('MP4'),
+                                on_delete=models.CASCADE)
 
     votes4 = models.FloatField(_('EqualVoters4'),
                                blank=True, null=True,
@@ -339,7 +352,8 @@ class LessEqualVoters(Timestampable, models.Model):
     person5 = models.ForeignKey('Person',
                                 blank=True, null=True,
                                 related_name='childrenLEW5',
-                                help_text=_('MP5'))
+                                help_text=_('MP5'),
+                                on_delete=models.CASCADE)
 
     votes5 = models.FloatField(_('EqualVoters5'),
                                blank=True, null=True,
@@ -351,13 +365,15 @@ class MPsWhichFitsToPG(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='childrenMPWPG',
-                               help_text=_('MP1'))
+                               help_text=_('MP1'),
+                               on_delete=models.CASCADE)
 
 
 class MPStaticPL(Timestampable, models.Model):
     person = models.ForeignKey('Person', help_text=_(
                                'Person foreign key relationship'),
-                               related_name='static_data')
+                               related_name='static_data',
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -383,7 +399,8 @@ class MPStaticPL(Timestampable, models.Model):
 
     party = models.ForeignKey('parlaskupine.Organization',
                               help_text=_('Parladata party id'),
-                              related_name='static_party', null=True)
+                              related_name='static_party', null=True,
+                              on_delete=models.CASCADE)
 
     acronym = models.TextField(
         blank=True, null=True, help_text=_('Parliament group\'s acronym'))
@@ -426,7 +443,8 @@ class MPStaticPL(Timestampable, models.Model):
 
 class MinisterStatic(Timestampable, models.Model):
     person = models.ForeignKey('Person', help_text=_(
-        'Person foreign key relationship'))
+        'Person foreign key relationship'),
+        on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -440,13 +458,15 @@ class MinisterStatic(Timestampable, models.Model):
                                  blank=True,
                                  null=True,
                                  help_text=_('Parladata party id'),
-                                 related_name='ministry_ministers')
+                                 related_name='ministry_ministers',
+                                 on_delete=models.CASCADE)
 
     party = models.ForeignKey('parlaskupine.Organization',
                               blank=True,
                               null=True,
                               help_text=_('Parladata party id'),
-                              related_name='party_ministers')
+                              related_name='party_ministers',
+                              on_delete=models.CASCADE)
 
     acronym = models.TextField(blank=True,
                                null=True,
@@ -510,7 +530,8 @@ class MinisterStatic(Timestampable, models.Model):
 class MPStaticGroup(Timestampable, models.Model):
 
     person = models.ForeignKey('MPStaticPL', help_text=_(
-        'Person foreign key to MPStaticPL'))
+        'Person foreign key to MPStaticPL'),
+        on_delete=models.CASCADE)
 
     groupid = models.IntegerField()
     groupname = models.TextField()
@@ -522,7 +543,8 @@ class NumberOfSpeechesPerSession(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='speaker',
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -536,7 +558,8 @@ class NumberOfSpeechesPerSession(Timestampable, models.Model):
     maxMP = models.ForeignKey('Person',
                               blank=True, null=True,
                               related_name='childrenNOSPS',
-                              help_text=_('Person who has max speeches per session'))
+                              help_text=_('Person who has max speeches per session'),
+                              on_delete=models.CASCADE)
 
     average = models.FloatField(_('average'),
                                 blank=True, null=True,
@@ -551,7 +574,8 @@ class VocabularySize(Timestampable, models.Model):  # Card for Vacabularty size 
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='VocabularySizes',
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -565,7 +589,8 @@ class VocabularySize(Timestampable, models.Model):  # Card for Vacabularty size 
     maxMP = models.ForeignKey('Person',
                               blank=True, null=True,
                               related_name='maxVocabulary',
-                              help_text=_('Person who has max vacabularty size'))
+                              help_text=_('Person who has max vacabularty size'),
+                              on_delete=models.CASCADE)
 
     average = models.FloatField(_('average'),
                                 blank=True, null=True,
@@ -581,7 +606,8 @@ class VocabularySizeUniqueWords(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='uniqueWords',
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -595,7 +621,8 @@ class VocabularySizeUniqueWords(Timestampable, models.Model):
     maxMP = models.ForeignKey('Person',
                               blank=True, null=True,
                               related_name='maxUniqueWords',
-                              help_text=_('Person who has max vacabularty size'))
+                              help_text=_('Person who has max vacabularty size'),
+                              on_delete=models.CASCADE)
 
     average = models.FloatField(_('average'),
                                 blank=True, null=True,
@@ -610,7 +637,8 @@ class StyleScores(Timestampable, models.Model):  # Card for Style Scores of MP
     person = models.ForeignKey('Person',
                                blank=True, null=True,
                                related_name='childrenStSc',
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
                                    null=True,
@@ -638,7 +666,8 @@ class StyleScores(Timestampable, models.Model):  # Card for Style Scores of MP
 class Tfidf(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -658,7 +687,8 @@ class AverageNumberOfSpeechesPerSession(Timestampable, models.Model):
 
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of analize'),
                                    blank=True,
@@ -673,15 +703,21 @@ class AverageNumberOfSpeechesPerSession(Timestampable, models.Model):
     maximum = models.FloatField(
         blank=True, null=True, help_text=_('Maximum score'))
 
-    maxMP = models.ForeignKey('Person', blank=True, null=True, help_text=_(
-        'Maximum MP'), related_name='max_person')
+    maxMP = models.ForeignKey(
+        'Person',
+        blank=True,
+        null=True,
+        help_text=_('Maximum MP'),
+        related_name='max_person',
+        on_delete=models.CASCADE)
 
 
 class TaggedBallots(Timestampable, models.Model):
 
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     data = JSONField(blank=True, null=True)
 
@@ -689,7 +725,8 @@ class TaggedBallots(Timestampable, models.Model):
 class MembershipsOfMember(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -714,7 +751,8 @@ class District(models.Model):
 class NumberOfQuestions(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
 
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
@@ -739,7 +777,8 @@ class NumberOfQuestions(Timestampable, models.Model):
 class PresenceThroughTime(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
                                    null=True,
@@ -757,7 +796,8 @@ class MembersList(Timestampable, models.Model):
                                      help_text=_('organization'),
                                      related_name='members_list',
                                      null=True,
-                                     blank=True)
+                                     blank=True,
+                                     on_delete=models.CASCADE)
 
     data = JSONField(blank=True, null=True)
 
@@ -765,7 +805,8 @@ class MembersList(Timestampable, models.Model):
 class MismatchOfPG(Timestampable, models.Model):
     person = models.ForeignKey('Person',
                                blank=True, null=True,
-                               help_text=_('MP'))
+                               help_text=_('MP'),
+                               on_delete=models.CASCADE)
     created_for = models.DateField(_('date of activity'),
                                    blank=True,
                                    null=True,
@@ -785,4 +826,5 @@ class MismatchOfPG(Timestampable, models.Model):
     maxMP = models.ForeignKey('Person',
                               blank=True, null=True,
                               related_name='mismatches',
-                              help_text=_('Person who has max mismatch of PG'))
+                              help_text=_('Person who has max mismatch of PG'),
+                              on_delete=models.CASCADE)

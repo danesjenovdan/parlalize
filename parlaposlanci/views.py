@@ -21,7 +21,7 @@ from parlalize.utils_ import (tryHard, lockSetter, prepareTaggedBallots, findDat
 from utils.parladata_api import getVotersIDs
 from kvalifikatorji.scripts import (numberOfWords, countWords, getScore,
                                     getScores, problematicno, privzdignjeno,
-                                    preprosto, TFIDF, getCountList)
+                                    preprosto, getCountList)
 from parlaseje.models import Session, Tag, Question
 from utils.speech import WordAnalysis
 from utils.compass import getData as getCompassData
@@ -157,7 +157,7 @@ def getMPStaticPL(request, person_id, date_=None):
     card = getPersonCardModelNew(MPStaticPL, person_id, date_)
 
     if card.twitter == 'False':
-        print card.twitter
+        print(card.twitter)
 
     wbfs = []
     for funct in card.working_bodies_functions:
@@ -1071,7 +1071,7 @@ def getMostEqualVoters(request, person_id, date_=None):
     """
     equalVoters = getPersonCardModelNew(EqualVoters, person_id, date_)
 
-    print equalVoters.person1.id_parladata
+    print(equalVoters.person1.id_parladata)
 
     out = {
         'created_at': equalVoters.created_at.strftime(API_DATE_FORMAT),
@@ -2906,7 +2906,7 @@ def setListOfMembersTickers(request, org_id, date_=None):
         print(json.loads(prevCard)['created_for'], json.loads(prevCard)['created_at'])
         prevData = json.loads(prevCard)['data']
     except Exception as exp:
-        print exp
+        print(exp)
         prevData = []
 
     data = setListOfMembersTickersCore(org_id, date_, date_of, prevData)
@@ -3144,9 +3144,9 @@ def setListOfMembersTickersCore(org_id, date_, date_of, prevData):
     key_without_data = []
     for key, diff in diffs.items():
         if not sum(diff):
-            print key, sum(diff)
+            print(key, sum(diff))
             key_without_data.append(key)
-    print prevData
+    print(prevData)
     # TODO BRING THIS BACK
     # if key_without_data and prevData:
     #     return {'status': 'failed', 'cards_without_new_data': key_without_data}

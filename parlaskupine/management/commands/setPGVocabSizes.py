@@ -27,7 +27,7 @@ class Command(BaseCommand):
             date_of = sw.getDate()
             maxPG = Organization.objects.get(id_parladata=maxPGid)
 
-            print '[INFO] saving vocabulary size'
+            print('[INFO] saving vocabulary size')
             for p in all_score:
                 self.stdout.write('Settings organisation %s' % str(p['counter_id']))
                 org = Organization.objects.get(id_parladata=int(p['counter_id']))

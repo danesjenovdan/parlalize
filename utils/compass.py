@@ -108,7 +108,7 @@ def getData(date_of, org_id):
     all_vote_ids = set(all_vote_ids)
 
     # pad votes and write in "ni obstajal" for people who didn't exist yet
-    print people_ballots
+    print(people_ballots)
     for person in people_ballots:
         if len(person) < max(lengths):
             for vote_id in all_vote_ids:
@@ -133,18 +133,18 @@ def getData(date_of, org_id):
             people_ballots_sorted_list[i][j] = assignValueToOption(ballot['option'])
         if (len(people_ballots_sorted_list[i]) - people_ballots_sorted_list[i].count(4)) < 5:
             hijene.append(i)
-            print "brisem", i
+            print("brisem", i)
 
-    print people_ids
+    print(people_ids)
     hijene.sort()
     for i in reversed(hijene):
-        print "delete ", people_ids[i], i
+        print("delete ", people_ids[i], i)
         del people_ballots_sorted_list[i]
         del people_ids[i]
     # transform numerical ballot values to numpy array
     thearray = np.array(people_ballots_sorted_list)
 
-    print len(people_ballots_sorted_list)
+    print(len(people_ballots_sorted_list))
     # generate similarity matrix by adding +1 each time two people's ballots match
     similarities = makeSimilarities(people_ballots_sorted_list)
     u, s, vT = np.linalg.svd(similarities)

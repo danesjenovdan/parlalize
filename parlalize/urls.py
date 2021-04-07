@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.urls import path
 
 from django.contrib import admin
 
@@ -11,7 +12,7 @@ from parlaposlanci.views import index
 
 urlpatterns = [
     url(r'^$', index),
-    url(r'^admin/', include(admin.site.urls)),
+    path('admin/', admin.site.urls),
     url(r'^v1/p/', include('parlaposlanci.urls')),
     url(r'^v1/pg/', include('parlaskupine.urls')),
     url(r'^v1/s/', include('parlaseje.urls')),

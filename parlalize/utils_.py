@@ -33,7 +33,9 @@ from django.core.exceptions import PermissionDenied
 from parlalize.settings import SETTER_KEY, VOTE_NAMES
 from requests.auth import HTTPBasicAuth
 
-from slackclient import SlackClient
+#from slackclient import SlackClient
+from slack import WebClient
+slack_client = WebClient(token=slack_token)
 
 class Http204(Http404):
     status = 204
@@ -161,7 +163,7 @@ def saveOrAbortNew(model, **kwargs):
 def findDatesFromLastCard(model, id, lastParsedDate, minDate=None):
     toDate = datetime.strptime(lastParsedDate, '%d.%m.%Y').date()
 
-    print model._meta.app_label
+    print(model._meta.app_label)
     try:
         if model._meta.app_label == 'parlaposlanci':
             models = model.objects.filter(person__id_parladata=id)
@@ -214,7 +216,7 @@ def getPersonCardModelNew(model, id, date=None, is_visible=None):
     else:
         if model == LastActivity:
             latest_day = modelObject.latest('created_for').created_for
-            print latest_day
+            print(latest_day)
             if len(modelObject.filter(created_for=latest_day)) > 1:
                 models = modelObject.filter(created_for=latest_day)
                 modelObject = models.latest('created_at')
@@ -358,9 +360,9 @@ def getPersonData(id_parladata, date_=None):
                     'has_function': False,
                     }
     try:
-        partyData = data.party.getOrganizationData()
+        partyData = data.party.getOrganizationData(date_)
     except:
-        print 'Nima org', data.person.name
+        print('Nima org', data.person.name)
         partyData = {'acronym': None,
                      'id': None,
                      'name': None,
@@ -389,8 +391,8 @@ def getMinistryData(id_parladata, date_=None):
                 'name': data.person.name,
                 'id': int(data.person.id_parladata),
                 'gov_id': data.gov_id,
-                'party': data.party.getOrganizationData() if data.party else None,
-                'ministry': data.ministry.getOrganizationData() if data.ministry else None,
+                'party': data.party.getOrganizationData(date_) if data.party else None,
+                'ministry': data.ministry.getOrganizationData(date_) if data.ministry else None,
                 'gender': data.gender,
                 'district': data.district,
                 'is_active': True if data.person.actived == "True" else False,
@@ -417,7 +419,7 @@ def modelsData(request):
 
 
 def getAllStaticData(request, force_render=False):
-    sc = SlackClient(slack_token)
+    #sc = SlackClient(slack_token)
     date_of = datetime.now().date()
     date_ = date_of.strftime(API_DATE_FORMAT)
 
@@ -425,9 +427,10 @@ def getAllStaticData(request, force_render=False):
     if c_data and not force_render:
         out = c_data
     else:
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text='StaticDataDebug start: ' + str(c_data)[:100] + ' ' + str(force_render))
+        slack_client.chat_postMessage(
+            channel='#parlalize_notif',
+            text='StaticDataDebug start: ' + str(c_data)[:100] + ' ' + str(force_render)
+        )
 
         date_ = datetime.now().strftime(API_DATE_FORMAT)
         print("asdasdasd")
@@ -439,7 +442,7 @@ def getAllStaticData(request, force_render=False):
         print("asdasdasd")
         parliamentary_group = Organization.objects.filter(id_parladata__in=getOrganizationsWithVoters())
         for party in parliamentary_group:
-            out['partys'][party.id_parladata] = party.getOrganizationData()
+            out['partys'][party.id_parladata] = party.getOrganizationData(date_)
 
         sessions = Session.objects.all()
         for session in sessions:
@@ -454,9 +457,11 @@ def getAllStaticData(request, force_render=False):
                        'name': org.name} for org in orgs]
 
         cache.set('all_statics', out, ALL_STATIC_CACHE_AGE)
-        sc.api_call("chat.postMessage",
-                    channel="#parlalize_notif",
-                    text='StaticDataDebug end: ' + str(out)[:100] + ' ' + str(force_render))
+
+        slack_client.chat_postMessage(
+            channel="#parlalize_notif",
+                    text='StaticDataDebug end: ' + str(out)[:100] + ' ' + str(force_render)
+        )
 
     return JsonResponse(out)
 
@@ -500,30 +505,30 @@ def printProgressBar(iteration,
 def setQuoteSourceSpeeachToLatestValid(session_id):
     quotes = Quote.objects.filter(speech__session__id_parladata=session_id)
     for quote in quotes:
-        print quote.id
+        print(quote.id)
         speech = quote.speech
         lastSpeech = Speech.getValidSpeeches(datetime.now()).filter(person=speech.person,
                                                                     order=speech.order,
                                                                     session__id_parladata=session_id,
                                                                     start_time=speech.start_time)
         if lastSpeech:
-            print speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata
-            print (lastSpeech[0].content[0:100], lastSpeech[0].id_parladata)
-            print lastSpeech.count()
+            print(speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata)
+            print(lastSpeech[0].content[0:100], lastSpeech[0].id_parladata)
+            print(lastSpeech.count())
             quote.speech = lastSpeech[0]
             quote.save()
         else:
-            print "fejl"
-            print speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata
+            print("fejl")
+            print(speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata)
             lastSpeech = Speech.getValidSpeeches(datetime.now()).filter(person=speech.person,
                                                                         order=speech.order-20,
                                                                         session__id_parladata=session_id,
                                                                         start_time=speech.start_time)
             if lastSpeech:
-                print "Juhej debug"
-                print speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata
-                print (lastSpeech[0].content[0:100], lastSpeech[0].id_parladata)
-                print lastSpeech.count()
+                print("Juhej debug")
+                print(speech.content[0:100], speech.person, speech.order, speech.start_time, speech.id_parladata)
+                print(lastSpeech[0].content[0:100], lastSpeech[0].id_parladata)
+                print(lastSpeech.count())
                 quote.speech = lastSpeech[0]
                 quote.save()
 
@@ -564,7 +569,7 @@ def prepareTaggedBallots(datetime_obj, ballots, card_owner_data):
                 temp_data['ballot_id'] = ballots[vote.id][0]
             data[vote.start_time_date].append(temp_data)
         except:
-            print 'Ni vota ' + str(vote.id)
+            print('Ni vota ' + str(vote.id))
 
     out = [{'date': date.strftime(API_OUT_DATE_FORMAT),
             'ballots': data[date]}
@@ -600,7 +605,7 @@ def checkIfQuestionRecipinetsDuplication():
         recpt = list(q.recipient_persons_static.all())
         for a, b in itertools.combinations(recpt, 2):
             if a.getJsonData() == b.getJsonData():
-                print q.id
+                print(q.id)
 
 
 def removeMinistrStaticDuplications():

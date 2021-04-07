@@ -25,7 +25,6 @@ from .delete_renders import deleteMPandPGsRenders, deleteRendersOfSession, delet
 from parlalize.utils_ import tryHard, datesGenerator, printProgressBar, getPersonData, getAllStaticData
 
 import json
-from slackclient import SlackClient
 
 from time import time
 
